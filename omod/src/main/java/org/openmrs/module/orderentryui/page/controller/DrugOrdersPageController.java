@@ -7,7 +7,6 @@ import org.openmrs.EncounterRole;
 import org.openmrs.Patient;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.OrderService;
-import org.openmrs.module.appui.UiSessionContext;
 import org.openmrs.module.webservices.rest.web.ConversionUtil;
 import org.openmrs.module.webservices.rest.web.representation.NamedRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.Representation;
@@ -28,7 +27,7 @@ public class DrugOrdersPageController {
                     @RequestParam(value = "careSetting", required = false) CareSetting careSetting,
                     @SpringBean("encounterService") EncounterService encounterService,
                     @SpringBean("orderService") OrderService orderService,
-                    UiSessionContext sessionContext,
+                    /*UiSessionContext sessionContext,*/
                     UiUtils ui,
                     PageModel model) {
 
