@@ -3,7 +3,7 @@ package org.openmrs.module.orderentryui;
 import org.apache.commons.lang.StringUtils;
 import org.openmrs.CareSetting;
 import org.openmrs.api.OrderService;
-import org.openmrs.ui.framework.converter.util.ConversionUtil;
+import org.openmrs.module.orderentryui.util.ConversionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.converter.Converter;

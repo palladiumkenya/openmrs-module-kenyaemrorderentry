@@ -46,7 +46,7 @@ public class DrugOrdersPageController {
 
         Map<String, Object> jsonConfig = new LinkedHashMap<String, Object>();
         jsonConfig.put("patient", convertToFull(patient));
-        jsonConfig.put("provider", convertToFull(sessionContext.getCurrentProvider()));
+        //jsonConfig.put("provider", convertToFull(sessionContext.getCurrentProvider()));
 		jsonConfig.put("encounterRole", convertToFull(encounterRoles));
         jsonConfig.put("drugOrderEncounterType", convertToFull(drugOrderEncounterType));
         jsonConfig.put("careSettings", convertToFull(careSettings));
