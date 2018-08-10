@@ -1,5 +1,5 @@
 <%
-    ui.decorateWith("appui", "standardEmrPage")
+    ui.decorateWith("kenyaemr", "standardEmrPage")
 
     ui.includeJavascript("uicommons", "angular.min.js")
     ui.includeJavascript("uicommons", "angular-app.js")
@@ -14,6 +14,7 @@
     ui.includeJavascript("uicommons", "services/encounterService.js")
     ui.includeJavascript("uicommons", "services/orderService.js")
     ui.includeJavascript("uicommons", "services/session.js")
+    ui.includeJavascript("uicommons", "emr.js")
     ui.includeJavascript("uicommons", "directives/select-concept-from-list.js")
     ui.includeJavascript("uicommons", "directives/select-order-frequency.js")
     ui.includeJavascript("uicommons", "directives/select-drug.js")
@@ -25,22 +26,15 @@
     ui.includeCss("orderentryui", "drugOrders.css")
 %>
 <script type="text/javascript">
-    var breadcrumbs = [
-        { icon: "icon-home", link: '/' + OPENMRS_CONTEXT_PATH + '/index.htm' },
-        { label: "${ ui.format(patient.familyName) }, ${ ui.format(patient.givenName) }" ,
-            link: '${ui.pageLink("coreapps", "clinicianfacing/patient", [patientId: patient.id])}'},
-        { label: "Drug Orders" }
-    ]
+
     window.OpenMRS = window.OpenMRS || {};
     window.OpenMRS.drugOrdersConfig = ${ jsonConfig };
 </script>
 
-${ ui.includeFragment("appui", "messages", [ codes: [
+%{--${ ui.includeFragment("appui", "messages", [ codes: [
         "orderentryui.pastAction.REVISE",
         "orderentryui.pastAction.DISCONTINUE"
-] ])}
-
-${ ui.includeFragment("coreapps", "patientHeader", [ patient: patient ]) }
+] ])}--}%
 
 <div id="drug-orders-app" ng-controller="DrugOrdersCtrl" ng-init='init()'>
     <div class="ui-tabs">
@@ -150,6 +144,10 @@ ${ ui.includeFragment("coreapps", "patientHeader", [ patient: patient ]) }
                 </div>
             </div>
 
+            <h3>Active Drug Orders (gsp)</h3>
+            <div>
+                ${ ui.includeFragment("orderentryui", "patientdashboard/activeDrugOrders", ["patient": patient]) }
+            </div>
             <h3>Active Drug Orders</h3>
             <span ng-show="activeDrugOrders.loading">${ ui.message("uicommons.loading.placeholder") }</span>
             <span ng-hide="activeDrugOrders.loading || activeDrugOrders.length > 0">None</span>
