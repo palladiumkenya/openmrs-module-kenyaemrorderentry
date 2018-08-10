@@ -30,10 +30,10 @@
     window.OpenMRS.drugOrdersConfig = ${ jsonConfig };
 </script>
 
-%{--${ ui.includeFragment("appui", "messages", [ codes: [
+${ ui.includeFragment("appui", "messages", [ codes: [
         "orderentryui.pastAction.REVISE",
         "orderentryui.pastAction.DISCONTINUE"
-] ])}--}%
+] ])}
 
 <div id="drug-orders-app" ng-controller="DrugOrdersCtrl" ng-init='init()'>
     <div class="ui-tabs">

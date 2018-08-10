@@ -38,10 +38,10 @@
             <type>gem</type>
         </dependency>
 
-<!--        <dependency>
+        <dependency>
             <groupId>org.openmrs.module</groupId>
             <artifactId>appui-omod</artifactId>
-        </dependency>-->
+        </dependency>
 
         <dependency>
             <groupId>org.openmrs.module</groupId>

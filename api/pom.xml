@@ -52,10 +52,10 @@
 			<groupId>org.openmrs.module</groupId>
 			<artifactId>uiframework-api</artifactId>
 		</dependency>
-<!--		<dependency>
+		<dependency>
 			<groupId>org.openmrs.module</groupId>
 			<artifactId>appui-api</artifactId>
-		</dependency>-->
+		</dependency>
 	</dependencies>
 
 	<build>
