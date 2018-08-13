@@ -34,7 +34,12 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
         "orderentryui.pastAction.REVISE",
         "orderentryui.pastAction.DISCONTINUE"
 ] ])}
-
+<div class="ke-page-sidebar">
+    <div class="ke-panel-frame">
+        ${ ui.includeFragment("kenyaui", "widget/panelMenuItem", [ iconProvider: "kenyaui", icon: "buttons/back.png", label: "Back", href: "" ]) }
+    </div>
+</div>
+<div class="ke-page-content">
 <div id="drug-orders-app" ng-controller="DrugOrdersCtrl" ng-init='init()'>
     <div class="ui-tabs">
         <ul class="ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header">
@@ -192,7 +197,7 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
     </div>
 
 </div>
-
+</div>
 <script type="text/javascript">
     // manually bootstrap angular app, in case there are multiple angular apps on a page
     angular.bootstrap('#drug-orders-app', ['drugOrders']);
