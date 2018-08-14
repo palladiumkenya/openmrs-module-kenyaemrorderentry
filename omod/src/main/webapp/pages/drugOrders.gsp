@@ -24,6 +24,8 @@
 
     ui.includeCss("uicommons", "ngDialog/ngDialog.min.css")
     ui.includeCss("orderentryui", "drugOrders.css")
+    ui.includeCss("uicommons", "styleguide/jquery-ui-1.9.2.custom.min.css")
+    ui.includeCss("orderentryui", "index.css")
 %>
 <script type="text/javascript">
 
