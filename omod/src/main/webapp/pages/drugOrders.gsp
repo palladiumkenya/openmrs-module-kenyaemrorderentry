@@ -1,5 +1,6 @@
 <%
     ui.decorateWith("kenyaemr", "standardPage", [ patient: currentPatient, layout: "sidebar" ])
+    ui.includeJavascript("uicommons", "emr.js")
     ui.includeJavascript("uicommons", "angular.min.js")
     ui.includeJavascript("uicommons", "angular-app.js")
     ui.includeJavascript("uicommons", "angular-resource.min.js")
@@ -13,7 +14,7 @@
     ui.includeJavascript("uicommons", "services/encounterService.js")
     ui.includeJavascript("uicommons", "services/orderService.js")
     ui.includeJavascript("uicommons", "services/session.js")
-    ui.includeJavascript("uicommons", "emr.js")
+
     ui.includeJavascript("uicommons", "directives/select-concept-from-list.js")
     ui.includeJavascript("uicommons", "directives/select-order-frequency.js")
     ui.includeJavascript("uicommons", "directives/select-drug.js")
@@ -28,6 +29,7 @@
 
     window.OpenMRS = window.OpenMRS || {};
     window.OpenMRS.drugOrdersConfig = ${ jsonConfig };
+    window.sessionContext = {'locale':'en_GB'}
 </script>
 
 ${ ui.includeFragment("appui", "messages", [ codes: [
