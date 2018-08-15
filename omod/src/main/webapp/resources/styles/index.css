@@ -315,14 +315,6 @@ textarea {
   vertical-align: top;
   /* 2 */
 }
-
-/* ==========================================================================
-   Tables
-   ========================================================================== */
-/*
- * Remove most spacing between table cells.
- */
-/* line 364, ../../../../../../../scss/src/main/resources/sass/reference/vendor/_normalize.scss */
 table {
   border-collapse: collapse;
   border-spacing: 0;
@@ -405,7 +397,7 @@ hr {
 
 /* line 88, ../../../../../../../scss/src/main/resources/sass/reference/fragments/_base.scss */
 h1, h2, h3, h4, h5, h6 {
-  color: #00463f;
+  color: black;
   clear: both;
   margin: 10px 0;
   font-weight: normal;
@@ -437,7 +429,7 @@ h3 {
 /* line 116, ../../../../../../../scss/src/main/resources/sass/reference/fragments/_base.scss */
 h4 {
   font-size: 1.2em;
-  color: #009384;
+  color: black;
 }
 
 /* line 121, ../../../../../../../scss/src/main/resources/sass/reference/fragments/_base.scss */
@@ -673,48 +665,7 @@ ul.select li.selected {
 table {
   width: 100%;
 }
-/* line 317, ../../../../../../../scss/src/main/resources/sass/reference/fragments/_base.scss */
-table th, table td {
-  padding: 5px 10px;
-  border: 1px solid #DDD;
-}
-/* line 322, ../../../../../../../scss/src/main/resources/sass/reference/fragments/_base.scss */
-table tr {
-  border: 1px solid #eeeeee;
-}
-/* line 326, ../../../../../../../scss/src/main/resources/sass/reference/fragments/_base.scss */
-table tr:nth-child(even) {
-  background: #fffdf7;
-}
-/* line 330, ../../../../../../../scss/src/main/resources/sass/reference/fragments/_base.scss */
-table tr:nth-child(odd) {
-  background: white;
-}
-/* line 334, ../../../../../../../scss/src/main/resources/sass/reference/fragments/_base.scss */
-table tr.hover {
-  background: #75b2f0;
-  color: white;
-  cursor: pointer;
-}
-/* line 340, ../../../../../../../scss/src/main/resources/sass/reference/fragments/_base.scss */
-table tr.selected {
-  background: #007fff;
-  color: white;
-}
-/* line 344, ../../../../../../../scss/src/main/resources/sass/reference/fragments/_base.scss */
-table tr.selected a {
-  color: white;
-}
-/* line 349, ../../../../../../../scss/src/main/resources/sass/reference/fragments/_base.scss */
-table thead th {
-  border-bottom: 1px solid #DDD;
-  background: #f3f3f3;
-  width: auto;
-  text-align: left;
-  word-break: normal;
-  font-weight: normal;
-  font-family: "OpenSansBold";
-}
+
 
 /* line 360, ../../../../../../../scss/src/main/resources/sass/reference/fragments/_base.scss */
 .title {

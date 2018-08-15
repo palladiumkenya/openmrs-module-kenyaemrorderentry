@@ -27,6 +27,14 @@
     ui.includeCss("uicommons", "styleguide/jquery-ui-1.9.2.custom.min.css")
     ui.includeCss("orderentryui", "index.css")
 %>
+<style type="text/css">
+#new-order input {
+  margin:5px;
+}
+th,td{
+ text-align:left;
+}
+</style>
 <script type="text/javascript">
 
     window.OpenMRS = window.OpenMRS || {};
@@ -93,7 +101,7 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                         <br/>
 
                         <label ng-class="{ disabled: !newDraftDrugOrder.duration }">For</label>
-                        <input ng-model="newDraftDrugOrder.duration" type="number" min="0" placeholder="Duration" />
+                        <input ng-model="newDraftDrugOrder.duration" type="number" min="0" placeholder="Duration" size="20"/>
                         <select-concept-from-list ng-model="newDraftDrugOrder.durationUnits" concepts="durationUnits" placeholder="Units" size="8" required-if="newDraftDrugOrder.duration"></select-concept-from-list>
                         <label ng-class="{ disabled: !newDraftDrugOrder.duration }">total</label>
                         <br/>
@@ -113,14 +121,14 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                 </p>
 
                 <p ng-show="newDraftDrugOrder.drug">
-                    <button type="submit" class="confirm right" ng-disabled="newOrderForm.\$invalid" ng-click="addNewDraftOrder()">Add</button>
+                    <button type="submit" class="confirm" ng-disabled="newOrderForm.\$invalid" ng-click="addNewDraftOrder()">Add</button>
                     <button class="cancel" ng-click="cancelNewDraftOrder()">Cancel</button>
                 </p>
             </form>
 
             <div id="draft-orders" ng-show="draftDrugOrders.length > 0">
                 <h3>Unsaved Draft Orders ({{ draftDrugOrders.length }})</h3>
-                <table>
+                <table class="ke-table-vertical">
                     <tr class="draft-order" ng-repeat="order in draftDrugOrders">
                         <td>
                             {{ order.action }}
@@ -151,15 +159,21 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                     </button>
                 </div>
             </div>
-
+            <!--
             <h3>Active Drug Orders (gsp)</h3>
             <div>
                 ${ ui.includeFragment("orderentryui", "patientdashboard/activeDrugOrders", ["patient": patient]) }
             </div>
+            -->
             <h3>Active Drug Orders</h3>
             <span ng-show="activeDrugOrders.loading">${ ui.message("uicommons.loading.placeholder") }</span>
             <span ng-hide="activeDrugOrders.loading || activeDrugOrders.length > 0">None</span>
-            <table ng-hide="activeDrugOrders.loading">
+            <table ng-hide="activeDrugOrders.loading" class="ke-table-vertical">
+                <tr>
+                 <th width="30%">Dates</th>
+                 <th width="50%">Instructions</th>
+                 <th width="20%">Action</th>
+                </tr>
                 <tr ng-repeat="order in activeDrugOrders">
                     <td ng-class="{ 'will-replace': replacementFor(order) }">
                         {{ order | dates }}
@@ -167,12 +181,12 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                     <td ng-class="{ 'will-replace': replacementFor(order) }">
                         {{ order | instructions }}
                     </td>
-                    <td class="actions">
+                    <td>
                         <a ng-show="!replacementFor(order)" ng-click="reviseOrder(order)">
-                            <i class="icon-pencil edit-action"></i>
+                            <button><img src="${ ui.resourceLink("kenyaui", "images/glyphs/edit.png") }" /> Edit</button>
                         </a>
                         <a ng-show="!replacementFor(order)" ng-click="discontinueOrder(order)">
-                            <i class="icon-remove delete-action"></i>
+                            <button><img src="${ ui.resourceLink("kenyaui", "images/glyphs/cancel.png") }" /> Cancel</button>
                         </a>
                         <span ng-show="replacementFor(order)">
                             will {{ replacementFor(order).action }}
@@ -184,7 +198,12 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
             <h3>Past Drug Orders</h3>
             <span ng-show="pastDrugOrders.loading">${ ui.message("uicommons.loading.placeholder") }</span>
             <span ng-hide="pastDrugOrders.loading || pastDrugOrders.length > 0">None</span>
-            <table id="past-drug-orders" ng-hide="pastDrugOrders.loading">
+            <table id="past-drug-orders" ng-hide="pastDrugOrders.loading" class="ke-table-vertical">
+            <tr>
+             <th width="10%">Replacement</th>
+             <th width="20%">Dates</th>
+             <th>Instructions</th>
+            </tr>
                 <tr ng-repeat="order in pastDrugOrders">
                     <td>
                         {{ replacementForPastOrder(order) | replacement }}
