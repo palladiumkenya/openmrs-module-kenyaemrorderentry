@@ -160,7 +160,15 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                     </button>
                 </div>
             </div>
-            <!--
+
+
+            <h3> Drug Orders Dispensation</h3>
+            <div>
+            ${ ui.includeFragment("orderentryui", "patientdashboard/regimenDispensation", ["patient": patient]) }
+
+
+            </div>
+
             <h3>Active Drug Orders (gsp)</h3>
             <div>
                 ${ ui.includeFragment("orderentryui", "patientdashboard/activeDrugOrders", ["patient": patient]) }
