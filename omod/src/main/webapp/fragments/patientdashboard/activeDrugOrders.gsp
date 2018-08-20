@@ -10,6 +10,9 @@
         margin-top: 0px;
     }
 </style>
+<script type="text/javascript">
+${orderSetJson}
+</script>
 
 <div class="info-section">
 

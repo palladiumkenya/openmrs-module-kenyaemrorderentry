@@ -20,12 +20,16 @@
 			<groupId>org.openmrs.api</groupId>
 			<artifactId>openmrs-api</artifactId>
 			<type>jar</type>
+			<version>1.12.0</version>
+			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.openmrs.web</groupId>
 			<artifactId>openmrs-web</artifactId>
 			<type>jar</type>
+			<version>1.12.0</version>
+			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
