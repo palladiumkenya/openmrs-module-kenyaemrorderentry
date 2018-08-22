@@ -1,10 +1,9 @@
 package org.openmrs.module.orderentryui.fragment.controller.patientdashboard;
 
 import org.apache.commons.beanutils.PropertyUtils;
-import org.openmrs.Order;
-import org.openmrs.OrderSet;
-import org.openmrs.OrderType;
-import org.openmrs.Patient;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.openmrs.*;
 import org.openmrs.api.OrderService;
 import org.openmrs.api.OrderSetService;
 import org.openmrs.api.PatientService;
@@ -13,6 +12,7 @@ import org.openmrs.ui.framework.annotation.SpringBean;
 import org.openmrs.ui.framework.fragment.FragmentConfiguration;
 import org.openmrs.ui.framework.fragment.FragmentModel;
 
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,10 +44,31 @@ public class ActiveDrugOrdersFragmentController {
         model.addAttribute("patient", patient);
         model.addAttribute("activeDrugOrders", activeDrugOrders);
 
-        List<OrderSet> orderSetList=orderSetService.getOrderSets(false);
-        Map<String,List<OrderSet>> orderSets=new LinkedHashMap<String,List<OrderSet>>();
-        orderSets.put("orderSet",orderSetList);
-        model.put("orderSetJson",ui.toJson(orderSets));
+        List<OrderSet> orderSetsList=orderSetService.getOrderSets(false);
+        JSONObject orderSetObj,orderSetMember;
+        JSONArray orderSetArray=new JSONArray();
+        for(OrderSet orderSet:orderSetsList){
+            orderSetObj=new JSONObject();
+            orderSetObj.put("name", orderSet.getName());
+            orderSetObj.put("regimen_line", orderSet.getDescription());
+            JSONArray membersArray=new JSONArray();
+            for(OrderSetMember member:orderSet.getOrderSetMembers()){
+                orderSetMember=new JSONObject();
+                if(member !=null){
+                    String[] template=member.getOrderTemplate().split(",");
+                    orderSetMember.put("name",template[0]);
+                    orderSetMember.put("dose",template[1]);
+                    orderSetMember.put("units",template[2]);
+                    orderSetMember.put("frequency",template[3]);
+                    membersArray.add(orderSetMember);
+                }
+            }
+            orderSetObj.put("components", membersArray);
+            orderSetArray.add(orderSetObj);
+        }
+        JSONObject response=new JSONObject();
+        response.put("orderSets",orderSetArray);
+        model.put("orderSetJson",response.toString());
     }
 
 }

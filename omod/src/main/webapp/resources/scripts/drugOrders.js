@@ -233,6 +233,5 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                 $timeout(function() {
                     angular.element('#draft-orders input.dc-reason').last().focus();
                 });
-            })
-
+            });
         }]);
