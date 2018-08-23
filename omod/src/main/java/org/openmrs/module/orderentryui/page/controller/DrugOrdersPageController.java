@@ -1,12 +1,11 @@
 package org.openmrs.module.orderentryui.page.controller;
 
-import org.openmrs.CareSetting;
-import org.openmrs.Concept;
-import org.openmrs.EncounterRole;
-import org.openmrs.EncounterType;
-import org.openmrs.Patient;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.openmrs.*;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.OrderService;
+import org.openmrs.api.OrderSetService;
 import org.openmrs.module.appui.UiSessionContext;
 import org.openmrs.module.webservices.rest.web.ConversionUtil;
 import org.openmrs.module.webservices.rest.web.representation.NamedRepresentation;
@@ -30,7 +29,8 @@ public class DrugOrdersPageController {
                     @SpringBean("orderService") OrderService orderService,
                     UiSessionContext sessionContext,
                     UiUtils ui,
-                    PageModel model) {
+                    PageModel model,
+                    @SpringBean("orderSetService") OrderSetService orderSetService) {
 
         // HACK
         EncounterType drugOrderEncounterType = encounterService.getAllEncounterTypes(false).get(0);
@@ -43,6 +43,33 @@ public class DrugOrdersPageController {
         Set<Concept> quantityUnits = new LinkedHashSet<Concept>();
         quantityUnits.addAll(dosingUnits);
         quantityUnits.addAll(dispensingUnits);
+
+        List<OrderSet> orderSetsList=orderSetService.getOrderSets(false);
+        JSONObject orderSetObj,orderSetMember;
+        JSONArray orderSetArray=new JSONArray();
+
+        for(OrderSet orderSet:orderSetsList){
+            orderSetObj=new JSONObject();
+            orderSetObj.put("name", orderSet.getName());
+            orderSetObj.put("regimen_line", orderSet.getDescription());
+            JSONArray membersArray=new JSONArray();
+            for(OrderSetMember member:orderSet.getOrderSetMembers()){
+                orderSetMember=new JSONObject();
+                if(member !=null){
+                    String[] template=member.getOrderTemplate().split(",");
+                    orderSetMember.put("name",template[0]);
+                    orderSetMember.put("dose",template[1]);
+                    orderSetMember.put("units",template[2]);
+                    orderSetMember.put("frequency",template[3]);
+                    membersArray.add(orderSetMember);
+                }
+            }
+            orderSetObj.put("components", membersArray);
+            orderSetArray.add(orderSetObj);
+        }
+        JSONObject response=new JSONObject();
+        response.put("orderSets",orderSetArray);
+        model.put("orderSetJson",response.toString());
 
         Map<String, Object> jsonConfig = new LinkedHashMap<String, Object>();
         jsonConfig.put("patient", convertToFull(patient));

@@ -22,9 +22,7 @@ public class ActiveDrugOrdersFragmentController {
     public void controller(FragmentConfiguration config,
                            @SpringBean("patientService") PatientService patientService,
                            @SpringBean("orderService") OrderService orderService,
-                           FragmentModel model,
-                           @SpringBean("orderSetService") OrderSetService orderSetService,
-                           UiUtils ui) throws Exception {
+                           FragmentModel model) throws Exception {
         // unfortunately in OpenMRS 2.1 the coreapps patient page only gives us a patientId for this extension point
         // (not a patient) but I assume we'll fix this to pass patient, so I'll code defensively
         config.require("patient|patientId");
@@ -44,31 +42,6 @@ public class ActiveDrugOrdersFragmentController {
         model.addAttribute("patient", patient);
         model.addAttribute("activeDrugOrders", activeDrugOrders);
 
-        List<OrderSet> orderSetsList=orderSetService.getOrderSets(false);
-        JSONObject orderSetObj,orderSetMember;
-        JSONArray orderSetArray=new JSONArray();
-        for(OrderSet orderSet:orderSetsList){
-            orderSetObj=new JSONObject();
-            orderSetObj.put("name", orderSet.getName());
-            orderSetObj.put("regimen_line", orderSet.getDescription());
-            JSONArray membersArray=new JSONArray();
-            for(OrderSetMember member:orderSet.getOrderSetMembers()){
-                orderSetMember=new JSONObject();
-                if(member !=null){
-                    String[] template=member.getOrderTemplate().split(",");
-                    orderSetMember.put("name",template[0]);
-                    orderSetMember.put("dose",template[1]);
-                    orderSetMember.put("units",template[2]);
-                    orderSetMember.put("frequency",template[3]);
-                    membersArray.add(orderSetMember);
-                }
-            }
-            orderSetObj.put("components", membersArray);
-            orderSetArray.add(orderSetObj);
-        }
-        JSONObject response=new JSONObject();
-        response.put("orderSets",orderSetArray);
-        model.put("orderSetJson",response.toString());
     }
 
 }
