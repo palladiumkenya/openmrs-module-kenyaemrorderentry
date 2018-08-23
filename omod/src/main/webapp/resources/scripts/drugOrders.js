@@ -109,6 +109,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
             $scope.dosingTypes = OpenMRS.dosingTypes;
 
             var config = OpenMRS.drugOrdersConfig;
+            var activeOrderSet=OpenMRS.orderSet;
             $scope.init = function() {
                 $scope.routes = config.routes;
                 $scope.doseUnits = config.doseUnits;
@@ -127,6 +128,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                 $timeout(function() {
                     angular.element('#new-order input[type=text]').first().focus();
                 });
+                $scope.orderSet=activeOrderSet;
             }
 
 
@@ -233,6 +235,6 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                 $timeout(function() {
                     angular.element('#draft-orders input.dc-reason').last().focus();
                 });
-            })
+            });
 
         }]);

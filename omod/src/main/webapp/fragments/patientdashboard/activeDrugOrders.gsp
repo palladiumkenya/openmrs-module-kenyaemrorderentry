@@ -10,9 +10,7 @@
         margin-top: 0px;
     }
 </style>
-
 <div class="info-section">
-
     <div class="info-header">
         <i class="icon-medicine"></i>
         <h3>${ ui.message("orderentryui.patientdashboard.activeDrugOrders").toUpperCase() }</h3>

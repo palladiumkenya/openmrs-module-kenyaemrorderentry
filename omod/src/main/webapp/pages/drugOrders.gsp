@@ -40,6 +40,7 @@ th,td{
     window.OpenMRS = window.OpenMRS || {};
     window.OpenMRS.drugOrdersConfig = ${ jsonConfig };
     window.sessionContext = {'locale':'en_GB'}
+    window.OpenMRS.orderSet=${orderSetJson}
 </script>
 
 ${ ui.includeFragment("appui", "messages", [ codes: [

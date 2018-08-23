@@ -1,16 +1,21 @@
 package org.openmrs.module.orderentryui.fragment.controller.patientdashboard;
 
 import org.apache.commons.beanutils.PropertyUtils;
-import org.openmrs.Order;
-import org.openmrs.OrderType;
-import org.openmrs.Patient;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.openmrs.*;
 import org.openmrs.api.OrderService;
+import org.openmrs.api.OrderSetService;
 import org.openmrs.api.PatientService;
+import org.openmrs.ui.framework.UiUtils;
 import org.openmrs.ui.framework.annotation.SpringBean;
 import org.openmrs.ui.framework.fragment.FragmentConfiguration;
 import org.openmrs.ui.framework.fragment.FragmentModel;
 
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ActiveDrugOrdersFragmentController {
 
@@ -36,6 +41,7 @@ public class ActiveDrugOrdersFragmentController {
 
         model.addAttribute("patient", patient);
         model.addAttribute("activeDrugOrders", activeDrugOrders);
+
     }
 
 }
