@@ -30,6 +30,7 @@ ui.includeJavascript("orderentryui", "regimenDispensation.js")
 
 
     <script type="text/javascript">
+
         console.log('OpenMRS.drugOrdersConfig', OpenMRS.drugOrdersConfig.provider);
         console.log('patient', OpenMRS.drugOrdersConfig.patient);
         var patient = OpenMRS.drugOrdersConfig.patient.uuid;
@@ -39,7 +40,7 @@ ui.includeJavascript("orderentryui", "regimenDispensation.js")
             jq("#cancelButton").hide();
 
     //Build an array containing e regimen records.
-     regimen = [{
+     regimenTest = [{
                        "name":"TDF + 3TC + NVP (300mg OD/150mg BD/200mg BD)",
                        "components": [
                 {
@@ -99,11 +100,17 @@ ui.includeJavascript("orderentryui", "regimenDispensation.js")
                    ]
 
                    }];
+
+    console.log("elly ordersets ++++++++++++++++++++++"+JSON.stringify(OpenMRS.orderSet));
+    //Build an array containing e regimen records.
+     regimen = OpenMRS.orderSet.orderSets;
      regimen.unshift({"name": "Select regimen"});
+
 
     var ddlRegimen = jq("#ddlRegimen");
     jq(regimen).each(function () {
         var option = jq("<option />");
+        option.html("select regimens");
 
         option.html(this.name);
         option.val(this.name);
