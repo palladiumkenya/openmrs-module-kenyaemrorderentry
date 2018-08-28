@@ -160,12 +160,21 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                     </button>
                 </div>
             </div>
-            <!--
+
+
+            <h3> Drug Orders Dispensation</h3>
+            <div>
+            ${ ui.includeFragment("orderentryui", "patientdashboard/regimenDispensation", ["patient": patient]) }
+
+
+
+            </div>
+
             <h3>Active Drug Orders (gsp)</h3>
             <div>
                 ${ ui.includeFragment("orderentryui", "patientdashboard/activeDrugOrders", ["patient": patient]) }
             </div>
-            -->
+
             <h3>Active Drug Orders</h3>
             <span ng-show="activeDrugOrders.loading">${ ui.message("uicommons.loading.placeholder") }</span>
             <span ng-hide="activeDrugOrders.loading || activeDrugOrders.length > 0">None</span>
