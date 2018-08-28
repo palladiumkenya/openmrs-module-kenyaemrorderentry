@@ -266,7 +266,7 @@ jq(function() {
         console.log('payload=======', payload);
 
 
-        jq.getJSON('${ ui.actionLink("orderentryui", "drugOrders", "saveOrderGroup") }',
+        jq.getJSON('${ ui.actionLink("orderentryui", "patientdashboard/regimenDispensation", "saveOrderGroup") }',
             {
                 'payload': payload
             })
@@ -275,14 +275,11 @@ jq(function() {
 
             })
             .error(function(xhr, status, err) {
-                alert('AJAX error ' + err);
+                console.log('AJAX error ' + JSON.stringify(xhr));
+                console.log("status: "+JSON.stringify(err));
             })
 
     });
 });
 </script>
 </body>
-
-
-
-
