@@ -8,7 +8,7 @@ ui.includeJavascript("orderentryui", "regimenDispensation.js")
 
 
 <body>
-        <input type="button" id="btnGenerate" value="Populate DropDownList" onclick="populateDropDownList()" />
+
         <hr />
         Regimen: <select id="ddlRegimen" class="regComponents">
         </select>
@@ -16,18 +16,27 @@ ui.includeJavascript("orderentryui", "regimenDispensation.js")
         <div>
 
        </div>
-       <div class="box-body" id="share">
+       <div class="box-body" id="share" style="padding-top: 10px">
 
 
        </div>
-<div id="saveButton">
-    <button><img src="${ ui.resourceLink("kenyaui", "images/glyphs/ok.png") }" /> Save</button>
+<div>
+<div style="padding-top: 10px">
+    <button id="saveButton" ><img src="${ ui.resourceLink("kenyaui", "images/glyphs/ok.png") }" /> Save</button>
+    <button id="cancelButton"><img src="${ ui.resourceLink("kenyaui", "images/glyphs/cancel.png") }" /> Cancel</button>
+</div>
 </div>
 
 
 
     <script type="text/javascript">
-function populateDropDownList() {
+        console.log('OpenMRS.drugOrdersConfig', OpenMRS.drugOrdersConfig.provider);
+        console.log('patient', OpenMRS.drugOrdersConfig.patient);
+        var patient = OpenMRS.drugOrdersConfig.patient.uuid;
+        var provider = OpenMRS.drugOrdersConfig.provider.uuid;
+        jq(document).ready(function(){
+            jq("#saveButton").hide();
+            jq("#cancelButton").hide();
 
     //Build an array containing e regimen records.
      regimen = [{
@@ -36,22 +45,25 @@ function populateDropDownList() {
                 {
                     "name":"TDF",
                     "dose":"300",
-                    "drug_concept_id":"1",
+                    "drug_id":"1",
                     "units":"mg",
+                    "units_uuid": '',
                     "frequency":"5"
                 },
                 {
                     "name":"3TC",
                     "dose":"150",
-                    "drug_concept_id":"2",
+                    "drug_id":"2",
                     "units":"mg",
+                    "units_uuid": '',
                     "frequency":"3"
                 },
                 {
                     "name":"NVP",
                     "dose":"200",
-                    "drug_concept_id":"4",
+                    "drug_id":"4",
                     "units":"mg",
+                    "units_uuid": '',
                     "frequency":"3"
                 }
                    ]
@@ -62,23 +74,26 @@ function populateDropDownList() {
                        "components": [
                            {
                                "name":"TDF",
-                               "drug_concept_id":"1",
+                               "drug_id":"1",
                                "dose":"300",
                                "units":"mg",
+                               "units_uuid": '',
                                "frequency":"5"
                            },
                            {
                                "name":"3TC",
-                               "drug_concept_id":"2",
+                               "drug_id":"2",
                                "dose":"150",
                                "units":"mg",
+                               "units_uuid": '',
                                "frequency":"3"
                            },
                            {
                                "name":"EFV",
-                               "drug_concept_id":"3",
+                               "drug_id":"3",
                                "dose":"600",
                                "units":"mg",
+                               "units_uuid": '',
                                "frequency":"5"
                            }
                    ]
@@ -94,16 +109,27 @@ function populateDropDownList() {
         option.val(this.name);
         ddlRegimen.append(option);
     });
-}
+});
 
 jq(document).ready(function(){
     items = { '5' : 'Once daily', '4' : 'Once daily, at bedtime',
     '1' : 'Once daily, in the evening', '2' : 'Once daily, in the morning',
 '3' : 'Twice daily','TDS' : 'Thrice daily'};
+    var units = { '161553' : 'mg',
+        '162263' : 'ml'};
+    var quantityUnits = { '1513' : 'tab'};
 
 jq("select.regComponents").change(function(){
+    jq("#saveButton").show();
+    jq("#cancelButton").show();
 
-        selectedRegComponents = jq(".regComponents option:selected").val();
+
+        var selectedRegComponents = jq(".regComponents option:selected").val();
+        if(selectedRegComponents == 'Select regimen') {
+            jq("#saveButton").hide();
+            jq("#cancelButton").hide();
+
+        }
 
         jq('#share').html("");
          console.log("this is selected value: " + selectedRegComponents);
@@ -123,8 +149,22 @@ jq("select.regComponents").change(function(){
     jq('#share').append(
     jq('<label />', { class: 'appm', text: 'Drugs:' }),
     jq('<input />', { id: 'drugs_'+nextRowID, name: 'drugs', placeholder: 'Name', type: 'text',readonly:'readonly' }).val ( item.name ),
-    jq('<label />', { class: 'appm', text: 'Doses:' }),
-    jq('<input />', { id: 'doses_'+nextRowID, name: 'doses', placeholder: 'doses', type: 'text' }).val ( item.dose ),
+    jq('<label /> ', { class: 'appm', text: 'Dosage:' }),
+    jq('<input />', { id: 'doses_'+nextRowID, name: 'doses', placeholder: 'doses', type: 'number' }).val ( item.dose ),
+
+    //    jq('<label />', { class: 'appm', text: 'Units:' }),
+
+        ddlUnits =jq('<select />', { id: 'units_'+nextRowID, name: 'units', placeholder: 'units', type: 'text' }),
+        jq.each(units, function(text, key) {
+            option = new Option(key, text);
+            if(text == item.units) {
+                option.setAttribute('selected', true) ;
+
+            }
+            ddlUnits.append(jq(option));
+
+        }),
+
     jq('<label />', { class: 'appm', text: 'Frequency:' }),
 
     ddlFrequency =jq('<select />', { id: 'frequency_'+nextRowID, name: 'frequency', placeholder: 'frequency', type: 'text' }),
@@ -137,7 +177,17 @@ jq("select.regComponents").change(function(){
     ddlFrequency.append(jq(option));
 
     }),
-    jq('<br />')
+        jq('<label /> ', { class: 'appm', text: 'Quantity:' }),
+        jq('<input />', { id: 'quantity_'+nextRowID, name: 'quantity', placeholder: 'quantity', type: 'number' }),
+
+        ddlQuantityUnits =jq('<select />', { id: 'quantityUnits_'+nextRowID, name: 'units', placeholder: 'units', type: 'text' }),
+        jq.each(quantityUnits, function(text, key) {
+            option = new Option(key, text);
+            ddlQuantityUnits.append(jq(option));
+
+        }),
+
+        jq('<br />')
     )
 
     });
@@ -153,12 +203,16 @@ jq("select.regComponents").change(function(){
 var doses;
 var frequency;
 var drugs;
-var payload = [];
-
+var drugPayload = [];
+var payload = {};
+var quantities;
+var dose_units;
+var quantity_units;
 
 jq(function() {
     jq('#saveButton').click(function() {
-        payload = [];
+     //   actionLink("yourmoduleid", "encountersToday", "getEncounters");
+        drugPayload = [];
         var rowID = 0;
          var   selectedRegComponents = jq(".regComponents option:selected").val();
          var obj;
@@ -171,28 +225,51 @@ jq(function() {
                             rowID = rowID + 1;
 
                             doses = jq("#doses_"+rowID).val();
-                            drugs = item.drug_concept_id;
-                            console.log('item concept'+ item.drug_concept_id);
+                            dose_units = jq("#units_"+rowID).val();
+                            drugs = item.drug_id;
                             frequency = jq("#frequency_"+rowID).val();
+
+                            quantities = jq("#quantity_"+rowID).val();
+                            quantity_units = jq("#quantityUnits_"+rowID).val();
                             obj = {
                                 "frequency" :frequency,
                                 "drug" :drugs,
-                                "dose" :doses
+                                "dose" :doses,
+                                "dose_unit":dose_units,
+                                "quantity":quantities,
+                                "quantity_unit":quantity_units
 
 
                             };
 
-                        payload.push(obj);
-                        console.log('payload=======', payload);
+                        drugPayload.push(obj);
+
 
                     });
 
 
                 }
             }
+        payload = {
+            "patient": patient,
+            "provider":provider,
+            "drugs":drugPayload
+
+        };
+        console.log('payload=======', payload);
 
 
+        jq.getJSON('${ ui.actionLink("orderentryui", "drugOrders", "saveOrderGroup") }',
+            {
+                'payload': payload
+            })
+            .success(function(data) {
+                console.log('payload submitted successfully');
 
+            })
+            .error(function(xhr, status, err) {
+                alert('AJAX error ' + err);
+            })
 
     });
 });
