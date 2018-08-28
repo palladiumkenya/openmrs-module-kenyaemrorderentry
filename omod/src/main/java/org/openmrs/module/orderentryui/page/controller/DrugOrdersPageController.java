@@ -6,6 +6,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.openmrs.*;
 import org.openmrs.api.*;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.appui.UiSessionContext;
 import org.openmrs.module.webservices.rest.web.ConversionUtil;
 import org.openmrs.module.webservices.rest.web.representation.NamedRepresentation;
@@ -57,8 +58,10 @@ public class DrugOrdersPageController {
                 if(member !=null){
                     String[] template=member.getOrderTemplate().split(",");
                     orderSetMember.put("name",template[0]);
+                    orderSetMember.put("drug_id",template[4]);
                     orderSetMember.put("dose",template[1]);
                     orderSetMember.put("units",template[2]);
+                    orderSetMember.put("units_uuid",template[5]);
                     orderSetMember.put("frequency",template[3]);
                     membersArray.add(orderSetMember);
                 }
@@ -101,34 +104,57 @@ public class DrugOrdersPageController {
                                @SpringBean("encounterService") EncounterService encounterService,
                                @SpringBean("conceptService") ConceptService conceptService,
                                @SpringBean("providerService") ProviderService providerService,
-                               @SpringBean("orderSetService") OrderSetService orderSetService){
+                               @SpringBean("orderSetService") OrderSetService orderSetService,
+                               @RequestParam("payload") String payload) throws ParseException {
         OrderGroup orderGroup=new OrderGroup();
-        DrugOrder drugOrder=new DrugOrder();
-        Patient patient=patientService.getPatientByUuid("b03f8c93-ffb1-4c0a-bbae-0e8e27ffbc2b");
-        drugOrder.setPatient(patient);
-        Encounter encounter=encounterService.getEncounterByUuid("0a9971ef-1d64-47a1-bdd6-1a5578caeb8f");
-        drugOrder.setEncounter(encounter);
-        Drug drug=conceptService.getDrugByNameOrId("12");
-        drugOrder.setDrug(drug);
-        Provider provider=providerService.getProvider(32);
-        drugOrder.setOrderer(provider);
-        drugOrder.setDose(2.0);
-        Concept orderUnit=conceptService.getConcept(1513);
-        drugOrder.setDoseUnits(orderUnit);
-        drugOrder.setDosingType(SimpleDosingInstructions.class);
-        Concept route=conceptService.getConcept(160240);
-        drugOrder.setRoute(route);
-        OrderFrequency orderFrequency=orderService.getOrderFrequency(6);
-        drugOrder.setFrequency(orderFrequency);
-        CareSetting careSetting=orderService.getCareSetting(1);
-        drugOrder.setCareSetting(careSetting);
-        drugOrder.setQuantity(10.0);
-        Concept quantityUnits=conceptService.getConcept(1513);
-        drugOrder.setQuantityUnits(quantityUnits);
-        drugOrder.setNumRefills(0);
+        JSONParser parser=new JSONParser();
+        Object object=parser.parse(payload);
+        JSONObject orderContext=(JSONObject)object;
+        String patientUuid=orderContext.get("patient").toString();
+        String providerId=orderContext.get("provider").toString();
+        JSONArray drugGroupOrder=(JSONArray)orderContext.get("drugs");
+        Patient patient = patientService.getPatientByUuid(patientUuid);
+
+        Encounter encounter = new Encounter();
+        EncounterType encounterType=encounterService.getEncounterTypeByUuid("7df67b83-1b84-4fe2-b1b7-794b4e9bfcc3");
+        encounter.setEncounterType(encounterType);
+        encounter.setPatient(patient);
+        Date today=new Date();
+        encounter.setEncounterDatetime(today);
+        Provider provider = providerService.getProvider(Integer.valueOf(providerId));
         ArrayList<Order> orderList=new ArrayList<Order>();
-        drugOrder.setOrderGroup(orderGroup);
-        orderList.add(drugOrder);
+        for(int i=0; i<drugGroupOrder.size();i++) {
+            DrugOrder drugOrder = new DrugOrder();
+            JSONObject drugOrderJson=(JSONObject)drugGroupOrder.get(i);
+            String drugId=drugOrderJson.get("drug").toString();
+            Double dose=Double.parseDouble(drugOrderJson.get("dose").toString());
+            int doseUnitConceptId=Integer.valueOf(drugOrderJson.get("dose_unit").toString());
+            int frequencyId=Integer.valueOf(drugOrderJson.get("frequency").toString());
+            Double quantity=Double.parseDouble(drugOrderJson.get("quantity").toString());
+            int quantityUnitConceptId=Integer.valueOf(drugOrderJson.get("quantity_units").toString());
+
+            drugOrder.setPatient(patient);
+            drugOrder.setEncounter(encounter);
+            Drug drug = conceptService.getDrugByNameOrId(drugId);
+            drugOrder.setDrug(drug);
+            drugOrder.setOrderer(provider);
+            drugOrder.setDose(dose);
+            Concept doseUnitConcept = conceptService.getConcept(doseUnitConceptId);
+            drugOrder.setDoseUnits(doseUnitConcept);
+            drugOrder.setDosingType(SimpleDosingInstructions.class);
+            Concept route = conceptService.getConcept(160240);
+            drugOrder.setRoute(route);
+            OrderFrequency orderFrequency = orderService.getOrderFrequency(frequencyId);
+            drugOrder.setFrequency(orderFrequency);
+            CareSetting careSetting = orderService.getCareSetting(1);
+            drugOrder.setCareSetting(careSetting);
+            drugOrder.setQuantity(quantity);
+            Concept quantityUnits = conceptService.getConcept(quantityUnitConceptId);
+            drugOrder.setQuantityUnits(quantityUnits);
+            drugOrder.setNumRefills(0);
+            drugOrder.setOrderGroup(orderGroup);
+            orderList.add(drugOrder);
+        }
 
         orderGroup.setEncounter(encounter);
         orderGroup.setPatient(patient);
