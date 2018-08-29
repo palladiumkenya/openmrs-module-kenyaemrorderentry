@@ -106,6 +106,7 @@ public class DrugOrdersPageController {
                                @SpringBean("providerService") ProviderService providerService,
                                @SpringBean("orderSetService") OrderSetService orderSetService,
                                @RequestParam("payload") String payload) throws ParseException {
+        System.out.println("payload++++++++++++++++++++++++++++++++++++++++++++++++++++"+payload);
         OrderGroup orderGroup=new OrderGroup();
         JSONParser parser=new JSONParser();
         Object object=parser.parse(payload);

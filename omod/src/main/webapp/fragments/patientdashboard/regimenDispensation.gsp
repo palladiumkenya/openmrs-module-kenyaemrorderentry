@@ -263,12 +263,12 @@ jq(function() {
             "drugs":drugPayload
 
         };
-        console.log('payload=======', payload);
+        console.log('payload=======', JSON.stringify(payload));
 
 
         jq.getJSON('${ ui.actionLink("orderentryui", "patientdashboard/regimenDispensation", "saveOrderGroup") }',
             {
-                'payload': payload
+                'payload': JSON.stringify(payload)
             })
             .success(function(data) {
                 console.log('payload submitted successfully');
