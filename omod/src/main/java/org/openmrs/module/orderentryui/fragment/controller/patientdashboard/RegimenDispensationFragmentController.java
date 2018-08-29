@@ -36,7 +36,7 @@ public class RegimenDispensationFragmentController {
         Object object=parser.parse(payload);
         JSONObject orderContext=(JSONObject)object;
         String patientUuid=orderContext.get("patient").toString();
-        String providerId=orderContext.get("provider").toString();
+        String providerUuid=orderContext.get("provider").toString();
         JSONArray drugGroupOrder=(JSONArray)orderContext.get("drugs");
         Patient patient = patientService.getPatientByUuid(patientUuid);
 
@@ -46,7 +46,8 @@ public class RegimenDispensationFragmentController {
         encounter.setPatient(patient);
         Date today=new Date();
         encounter.setEncounterDatetime(today);
-        Provider provider = providerService.getProvider(Integer.valueOf(providerId));
+        encounterService.saveEncounter(encounter);
+        Provider provider = providerService.getProviderByUuid(providerUuid);
         ArrayList<Order> orderList=new ArrayList<Order>();
         for(int i=0; i<drugGroupOrder.size();i++) {
             DrugOrder drugOrder = new DrugOrder();
@@ -56,7 +57,7 @@ public class RegimenDispensationFragmentController {
             int doseUnitConceptId=Integer.valueOf(drugOrderJson.get("dose_unit").toString());
             int frequencyId=Integer.valueOf(drugOrderJson.get("frequency").toString());
             Double quantity=Double.parseDouble(drugOrderJson.get("quantity").toString());
-            int quantityUnitConceptId=Integer.valueOf(drugOrderJson.get("quantity_units").toString());
+            int quantityUnitConceptId=Integer.valueOf(drugOrderJson.get("quantity_unit").toString());
 
             drugOrder.setPatient(patient);
             drugOrder.setEncounter(encounter);
