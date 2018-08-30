@@ -65,6 +65,9 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
         </ul>
 
         <div class="ui-tabs-panel ui-widget-content">
+            <label  class="ke-field-label">Which Order</label>
+
+            
 
             <form id="new-order" class="sized-inputs css-form" name="newOrderForm" novalidate>
                 <p>
@@ -170,10 +173,7 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
 
             </div>
 
-            <h3>Active Drug Orders (gsp)</h3>
-            <div>
-                ${ ui.includeFragment("orderentryui", "patientdashboard/activeDrugOrders", ["patient": patient]) }
-            </div>
+            
 
             <h3>Active Drug Orders</h3>
             <span ng-show="activeDrugOrders.loading">${ ui.message("uicommons.loading.placeholder") }</span>

@@ -31,8 +31,6 @@ ui.includeJavascript("orderentryui", "regimenDispensation.js")
 
     <script type="text/javascript">
 
-        console.log('OpenMRS.drugOrdersConfig', OpenMRS.drugOrdersConfig.provider);
-        console.log('patient', OpenMRS.drugOrdersConfig.patient);
         var patient = OpenMRS.drugOrdersConfig.patient.uuid;
         var provider = OpenMRS.drugOrdersConfig.provider.uuid;
         jq(document).ready(function(){
@@ -101,7 +99,6 @@ ui.includeJavascript("orderentryui", "regimenDispensation.js")
 
                    }];
 
-    console.log("elly ordersets ++++++++++++++++++++++"+JSON.stringify(OpenMRS.orderSet));
     //Build an array containing e regimen records.
      regimen = OpenMRS.orderSet.orderSets;
      regimen.unshift({"name": "Select regimen"});
@@ -139,7 +136,6 @@ jq("select.regComponents").change(function(){
         }
 
         jq('#share').html("");
-         console.log("this is selected value: " + selectedRegComponents);
     var nextRowID = 0;
         for (var c = 0; c < regimen.length; c++) {
           component = regimen[c].name;
@@ -185,7 +181,13 @@ jq("select.regComponents").change(function(){
 
     }),
         jq('<label /> ', { class: 'appm', text: 'Quantity:' }),
-        jq('<input />', { id: 'quantity_'+nextRowID, name: 'quantity', placeholder: 'quantity', type: 'number' }),
+        jq('<input />', { id: 'quantity_'+nextRowID, name: 'quantity', placeholder: 'quantity',
+            type: 'number',class: 'quantity' }),
+        jq('quantity_'+nextRowID).each(function () {
+            jq(this).rules("add", {
+                required: true
+            });
+        }),
 
         ddlQuantityUnits =jq('<select />', { id: 'quantityUnits_'+nextRowID, name: 'units', placeholder: 'units', type: 'text' }),
         jq.each(quantityUnits, function(text, key) {
@@ -219,6 +221,7 @@ var quantity_units;
 jq(function() {
     jq('#saveButton').click(function() {
      //   actionLink("yourmoduleid", "encountersToday", "getEncounters");
+
         drugPayload = [];
         var rowID = 0;
          var   selectedRegComponents = jq(".regComponents option:selected").val();
@@ -257,6 +260,7 @@ jq(function() {
 
                 }
             }
+
         payload = {
             "patient": patient,
             "provider":provider,
@@ -281,5 +285,15 @@ jq(function() {
 
     });
 });
+
+        jq(function() {
+            jq('#cancelButton').click(function () {
+                jq('#share').html("");
+                jq("#ddlRegimen").val("Select regimen");
+                jq("#saveButton").hide();
+                jq("#cancelButton").hide();
+
+            })
+        });
 </script>
 </body>
