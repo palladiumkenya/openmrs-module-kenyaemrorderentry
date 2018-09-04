@@ -21,11 +21,13 @@
     ui.includeJavascript("orderentryui", "order-model.js")
     ui.includeJavascript("orderentryui", "order-entry.js")
     ui.includeJavascript("orderentryui", "drugOrders.js")
+    ui.includeJavascript("orderentryui", "bootstrap.min.js")
 
     ui.includeCss("uicommons", "ngDialog/ngDialog.min.css")
     ui.includeCss("orderentryui", "drugOrders.css")
     ui.includeCss("uicommons", "styleguide/jquery-ui-1.9.2.custom.min.css")
     ui.includeCss("orderentryui", "index.css")
+    ui.includeCss("orderentryui", "bootstrap.min.css")
 %>
 <style type="text/css">
 #new-order input {
@@ -34,9 +36,26 @@
 th,td{
  text-align:left;
 }
+.panel {
+    float: left;
+    width: 20%;
+    padding: 10px;
+}
+.regimen {
+    float: left;
+    width: 80%;
+    padding: 10px;
+    display:block;
+}
+
+/* Clear floats after the columns */
+.row:after {
+    content: "";
+    display: table;
+    clear: both;
+}
 </style>
 <script type="text/javascript">
-
     window.OpenMRS = window.OpenMRS || {};
     window.OpenMRS.drugOrdersConfig = ${ jsonConfig };
     window.sessionContext = {'locale':'en_GB'}
@@ -160,20 +179,21 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                     </button>
                 </div>
             </div>
-
-
             <h3> Drug Orders Dispensation</h3>
             <div>
             ${ ui.includeFragment("orderentryui", "patientdashboard/regimenDispensation", ["patient": patient]) }
-
-
-
             </div>
 
+            <h3>Patient Current Regimen</h3>
+              <div>
+                   ${ ui.includeFragment("orderentryui", "patientdashboard/currentRegimen", ["patient": patient]) }
+              </div>
+            <!--
             <h3>Active Drug Orders (gsp)</h3>
             <div>
                 ${ ui.includeFragment("orderentryui", "patientdashboard/activeDrugOrders", ["patient": patient]) }
             </div>
+            -->
 
             <h3>Active Drug Orders</h3>
             <span ng-show="activeDrugOrders.loading">${ ui.message("uicommons.loading.placeholder") }</span>

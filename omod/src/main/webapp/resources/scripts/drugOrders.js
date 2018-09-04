@@ -76,6 +76,51 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                     careSetting: $scope.careSetting.uuid
                 }).then(function(results) {
                     $scope.activeDrugOrders = _.map(results, function(item) { return new OpenMRS.DrugOrderModel(item) });
+                    $scope.programs={
+                                    "programs": [
+                                      {
+                                        "name": "HIV",
+                                        "regimen_lines": [
+                                          {
+                                            "name": "Adult first line",
+                                            "regimens": [
+                                              {
+                                                "name": "TDF + 3TC + NVP (300mg OD/150mg BD/200mg BD)"
+                                              },
+                                              {
+                                                "name": "TDF + 3TC + EFV (300mg OD/150mg BD/200mg BD"
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "name": "Adult second line",
+                                            "regimens": [
+                                              {
+                                                "name": "2nd + 3TC + NVPP (300mg OD/150mg BD/200mg BD)"
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "name": "Adult third line",
+                                            "regimens": [
+                                              {
+                                                "name": "3rd + 3TC + NVPP (300mg OD/150mg BD/200mg BD)"
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "name": "TB",
+                                        "regimen_lines": [
+                                          {
+                                            "name": "Adult first line",
+                                            "regimens": []
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
                 });
 
                 $scope.pastDrugOrders = { loading: true };
@@ -109,7 +154,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
             $scope.dosingTypes = OpenMRS.dosingTypes;
 
             var config = OpenMRS.drugOrdersConfig;
-            var activeOrderSet=OpenMRS.orderSet;
+            var availableOrderSet=OpenMRS.orderSet;
             $scope.init = function() {
                 $scope.routes = config.routes;
                 $scope.doseUnits = config.doseUnits;
@@ -128,10 +173,9 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                 $timeout(function() {
                     angular.element('#new-order input[type=text]').first().focus();
                 });
-                $scope.orderSet=activeOrderSet;
+                $scope.orderSet=availableOrderSet;
+
             }
-
-
             // functions that affect the overall state of the page
 
             $scope.setCareSetting = function(careSetting) {
@@ -236,5 +280,22 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                     angular.element('#draft-orders input.dc-reason').last().focus();
                 });
             });
+            $scope.activeRegimens=[];
+            $scope.regimenOrderSet=[];
+            $scope.regimenLines=[];
+            $scope.setProgramRegimens=function(regimens){
+            $scope.activeRegimens=[];
+             $scope.activeRegimens=regimens;
+             console.log("regimens ++++"+JSON.stringify(regimens));
+            }
+            $scope.setRegimenOrderSet=function(set){
+              $scope.regimenOrderSet=[];
+              $scope.regimenOrderSet=set;
+            }
+            $scope.setRegimenLines=function(regimenLine){
+              $scope.regimenLines=[];
+              $scope.regimenLines=regimenLine;
+              console.log("regimen lines ++++"+JSON.stringify(regimenLine));
+            }
 
         }]);

@@ -5,151 +5,39 @@ ui.includeJavascript("orderentryui", "regimenDispensation.js")
 
 
 %>
-
-
-<body>
-
-        <hr />
-        Regimen: <select id="ddlRegimen" class="regComponents">
-        </select>
-        <br />
-        <div>
-
-       </div>
-       <div class="box-body" id="share" style="padding-top: 10px">
-
-
-       </div>
-<div>
-<div style="padding-top: 10px">
-    <button id="saveButton" ><img src="${ ui.resourceLink("kenyaui", "images/glyphs/ok.png") }" /> Save</button>
-    <button id="cancelButton"><img src="${ ui.resourceLink("kenyaui", "images/glyphs/cancel.png") }" /> Cancel</button>
-</div>
-</div>
-
-
-
-    <script type="text/javascript">
-
-        console.log('OpenMRS.drugOrdersConfig', OpenMRS.drugOrdersConfig.provider);
-        console.log('patient', OpenMRS.drugOrdersConfig.patient);
-        var patient = OpenMRS.drugOrdersConfig.patient.uuid;
-        var provider = OpenMRS.drugOrdersConfig.provider.uuid;
-        jq(document).ready(function(){
-            jq("#saveButton").hide();
-            jq("#cancelButton").hide();
-
-    //Build an array containing e regimen records.
-     regimenTest = [{
-                       "name":"TDF + 3TC + NVP (300mg OD/150mg BD/200mg BD)",
-                       "components": [
-                {
-                    "name":"TDF",
-                    "dose":"300",
-                    "drug_id":"1",
-                    "units":"mg",
-                    "units_uuid": '',
-                    "frequency":"5"
-                },
-                {
-                    "name":"3TC",
-                    "dose":"150",
-                    "drug_id":"2",
-                    "units":"mg",
-                    "units_uuid": '',
-                    "frequency":"3"
-                },
-                {
-                    "name":"NVP",
-                    "dose":"200",
-                    "drug_id":"4",
-                    "units":"mg",
-                    "units_uuid": '',
-                    "frequency":"3"
-                }
-                   ]
-
-                   },
-                   {
-                       "name":"TDF + 3TC(BD) + EFV (300mg OD/150mg BD/600mg OD)",
-                       "components": [
-                           {
-                               "name":"TDF",
-                               "drug_id":"1",
-                               "dose":"300",
-                               "units":"mg",
-                               "units_uuid": '',
-                               "frequency":"5"
-                           },
-                           {
-                               "name":"3TC",
-                               "drug_id":"2",
-                               "dose":"150",
-                               "units":"mg",
-                               "units_uuid": '',
-                               "frequency":"3"
-                           },
-                           {
-                               "name":"EFV",
-                               "drug_id":"3",
-                               "dose":"600",
-                               "units":"mg",
-                               "units_uuid": '',
-                               "frequency":"5"
-                           }
-                   ]
-
-                   }];
-
-    console.log("elly ordersets ++++++++++++++++++++++"+JSON.stringify(OpenMRS.orderSet));
-    //Build an array containing e regimen records.
-     regimen = OpenMRS.orderSet.orderSets;
-     regimen.unshift({"name": "Select regimen"});
-
-
-    var ddlRegimen = jq("#ddlRegimen");
-    jq(regimen).each(function () {
-        var option = jq("<option />");
-        option.html("select regimens");
-
-        option.html(this.name);
-        option.val(this.name);
-        ddlRegimen.append(option);
-    });
+<script type="text/javascript">
+    var patient = OpenMRS.drugOrdersConfig.patient.uuid;
+    var provider = OpenMRS.drugOrdersConfig.provider.uuid;
+    jq(document).ready(function(){
+        jq("#saveButton").hide();
+        jq("#cancelButton").hide();
+ regimen = OpenMRS.orderSet.orderSets;
 });
 
 jq(document).ready(function(){
     items = { '5' : 'Once daily', '4' : 'Once daily, at bedtime',
     '1' : 'Once daily, in the evening', '2' : 'Once daily, in the morning',
 '3' : 'Twice daily','TDS' : 'Thrice daily'};
-    var units = { '161553' : 'mg',
-        '162263' : 'ml'};
-    var quantityUnits = { '1513' : 'tab'};
-
-jq("select.regComponents").change(function(){
+    var units = { '161553' : 'mg','162263' : 'ml','161554':'grams','1513' : 'tab'};
+    var quantityUnits = {'161553' : 'mg','162263' : 'ml','161554':'grams','1513' : 'tab'};
+jq(document).on("click", ".regimen_item", function() {
     jq("#saveButton").show();
     jq("#cancelButton").show();
-
-
-        var selectedRegComponents = jq(".regComponents option:selected").val();
-        if(selectedRegComponents == 'Select regimen') {
-            jq("#saveButton").hide();
-            jq("#cancelButton").hide();
-
-        }
-
-        jq('#share').html("");
-         console.log("this is selected value: " + selectedRegComponents);
+    var selectedRegComponents = jq(this).text().trim();
+    if(selectedRegComponents == 'Select regimen') {
+        jq("#saveButton").hide();
+        jq("#cancelButton").hide();
+    }
+    jq('#share').html("");
+     console.log("this is selected value: " + selectedRegComponents);
+     console.log("regimen payload  "+JSON.stringify(regimen));
     var nextRowID = 0;
         for (var c = 0; c < regimen.length; c++) {
           component = regimen[c].name;
-
+          console.log("component is "+component);
          if(selectedRegComponents == component) {
-
-
+            console.log("selectedRegComponents is equal to component");
             jq.grep(regimen[c].components, function(item){
-
-
     jq(function() {
          nextRowID = nextRowID + 1;
 
@@ -280,6 +168,40 @@ jq(function() {
             })
 
     });
+
 });
 </script>
-</body>
+<div class="row">
+  <div class="panel">
+  <h3>Programs</h3>
+      <ul class="list-group">
+      <li class="list-group-item button" ng-click="setRegimenLines(program.regimen_lines)"
+      ng-repeat="program in programs.programs" style="margin:2px;">{{program.name}}</li>
+      </ul>
+  </div>
+  <div class="regimen">
+  <div ng-show="regimenLines.length > 0">
+  <h3>Regimen Lines</h3>
+      <ul class="list-group" style="display:inline;">
+      <li class="button" ng-repeat="regimen_line in regimenLines" style="margin:2px;"
+      ng-click="setProgramRegimens(regimen_line.regimens)">{{regimen_line.name}}</li>
+      </ul>
+  </div>
+  <div ng-show="activeRegimens.length > 0">
+  <h3>Regimens</h3>
+      <ul class="list-group" style="display:inline;">
+      <li class="button regimen_item" ng-repeat="regimen in activeRegimens" style="margin:2px;">
+      {{regimen.name}}
+      </li>
+      </ul>
+  </div>
+  <div>
+  <h3>Drug Order Sets</h3>
+  <div class="box-body" id="share" style="padding-top: 10px"></div>
+  <div style="padding-top: 10px">
+      <button id="saveButton" ><img src="${ ui.resourceLink("kenyaui", "images/glyphs/ok.png") }" /> Save</button>
+      <button id="cancelButton"><img src="${ ui.resourceLink("kenyaui", "images/glyphs/cancel.png") }" /> Cancel</button>
+  </div>
+  </div>
+  </div>
+</div>
