@@ -121,6 +121,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                                       }
                                     ]
                                   }
+                    $scope.regimenLines=$scope.programs.programs[0].regimen_lines;
                 });
 
                 $scope.pastDrugOrders = { loading: true };
@@ -282,7 +283,6 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
             });
             $scope.activeRegimens=[];
             $scope.regimenOrderSet=[];
-            $scope.regimenLines=[];
             $scope.setProgramRegimens=function(regimens){
             $scope.activeRegimens=[];
              $scope.activeRegimens=regimens;
@@ -294,6 +294,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
             }
             $scope.setRegimenLines=function(regimenLine){
               $scope.regimenLines=[];
+              $scope.activeRegimens=[];
               $scope.regimenLines=regimenLine;
               console.log("regimen lines ++++"+JSON.stringify(regimenLine));
             }

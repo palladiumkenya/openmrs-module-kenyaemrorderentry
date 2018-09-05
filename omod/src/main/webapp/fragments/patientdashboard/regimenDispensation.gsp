@@ -13,21 +13,20 @@ ui.includeJavascript("orderentryui", "regimenDispensation.js")
         jq("#cancelButton").hide();
  regimen = OpenMRS.orderSet.orderSets;
 });
-
+var selectedRegComponents;
 jq(document).ready(function(){
     items = { '5' : 'Once daily', '4' : 'Once daily, at bedtime',
     '1' : 'Once daily, in the evening', '2' : 'Once daily, in the morning',
 '3' : 'Twice daily','TDS' : 'Thrice daily'};
     var units = { '161553' : 'mg','162263' : 'ml','161554':'grams','1513' : 'tab'};
     var quantityUnits = {'161553' : 'mg','162263' : 'ml','161554':'grams','1513' : 'tab'};
-jq(document).on("click", ".regimen_item", function() {
-    jq("#saveButton").show();
-    jq("#cancelButton").show();
-    var selectedRegComponents = jq(this).text().trim();
-    if(selectedRegComponents == 'Select regimen') {
-        jq("#saveButton").hide();
-        jq("#cancelButton").hide();
-    }
+jq(document).on("click", ".regimen-item", function() {
+jq("li.regimen-item").removeClass("active");
+jq(this).addClass("active");
+selectedRegComponents ="";
+    jq("#saveButton").hide();
+    jq("#cancelButton").hide();
+    selectedRegComponents = jq(this).text().trim();
     jq('#share').html("");
      console.log("this is selected value: " + selectedRegComponents);
      console.log("regimen payload  "+JSON.stringify(regimen));
@@ -36,6 +35,8 @@ jq(document).on("click", ".regimen_item", function() {
           component = regimen[c].name;
           console.log("component is "+component);
          if(selectedRegComponents == component) {
+         jq("#saveButton").show();
+         jq("#cancelButton").show();
             console.log("selectedRegComponents is equal to component");
             jq.grep(regimen[c].components, function(item){
     jq(function() {
@@ -93,7 +94,14 @@ jq(document).on("click", ".regimen_item", function() {
 
         }
     });
-
+jq(document).on("click", "li.program-line", function() {
+  jq("li.program-line").removeClass("active");
+  jq(this).addClass("active");
+});
+jq(document).on("click", "li.regimen-line", function() {
+  jq("li.regimen-line").removeClass("active");
+  jq(this).addClass("active");
+});
 });
 var doses;
 var frequency;
@@ -109,7 +117,7 @@ jq(function() {
      //   actionLink("yourmoduleid", "encountersToday", "getEncounters");
         drugPayload = [];
         var rowID = 0;
-         var   selectedRegComponents = jq(".regComponents option:selected").val();
+         //var   selectedRegComponents = jq(".regComponents option:selected").val();
          var obj;
             for (var c = 0; c < regimen.length; c++) {
                var component = regimen[c].name;
@@ -171,32 +179,32 @@ jq(function() {
 
 });
 </script>
-<div class="row">
-  <div class="panel">
+<div class="row panel panel-default">
+  <div class="program panel-body">
   <h3>Programs</h3>
       <ul class="list-group">
-      <li class="list-group-item button" ng-click="setRegimenLines(program.regimen_lines)"
+      <li class="program-line button" ng-click="setRegimenLines(program.regimen_lines)"
       ng-repeat="program in programs.programs" style="margin:2px;">{{program.name}}</li>
       </ul>
   </div>
-  <div class="regimen">
-  <div ng-show="regimenLines.length > 0">
+  <div class="regimen panel-body">
+  <div ng-show="regimenLines.length > 0" style="border-style:solid;border-color:gray;padding:10px;">
   <h3>Regimen Lines</h3>
       <ul class="list-group" style="display:inline;">
-      <li class="button" ng-repeat="regimen_line in regimenLines" style="margin:2px;"
+      <li class="button regimen-line" ng-repeat="regimen_line in regimenLines" style="margin:2px;"
       ng-click="setProgramRegimens(regimen_line.regimens)">{{regimen_line.name}}</li>
       </ul>
   </div>
-  <div ng-show="activeRegimens.length > 0">
-  <h3>Regimens</h3>
+  <div ng-show="activeRegimens.length > 0" style="border-style:solid;border-color:gray;padding:10px;margin-top: 20px;">
+  <h3 style="margin-top: 30px;">Regimens</h3>
       <ul class="list-group" style="display:inline;">
-      <li class="button regimen_item" ng-repeat="regimen in activeRegimens" style="margin:2px;">
+      <li class="button regimen-item" ng-repeat="regimen in activeRegimens" style="margin:2px;">
       {{regimen.name}}
       </li>
       </ul>
   </div>
-  <div>
-  <h3>Drug Order Sets</h3>
+  <div ng-show="activeRegimens.length > 0" style="border-style:solid;border-color:gray;padding:10px;margin-top: 20px;">
+  <h3 style="margin-top: 30px;">Drug Order Sets</h3>
   <div class="box-body" id="share" style="padding-top: 10px"></div>
   <div style="padding-top: 10px">
       <button id="saveButton" ><img src="${ ui.resourceLink("kenyaui", "images/glyphs/ok.png") }" /> Save</button>

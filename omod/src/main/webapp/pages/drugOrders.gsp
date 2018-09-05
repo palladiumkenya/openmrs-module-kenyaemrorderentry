@@ -36,23 +36,32 @@
 th,td{
  text-align:left;
 }
-.panel {
+.program {
     float: left;
     width: 20%;
     padding: 10px;
+    border-style: solid;
+    border-color: gray;
+    margin-left: auto;
 }
 .regimen {
     float: left;
-    width: 80%;
+    width: 75%;
     padding: 10px;
-    display:block;
+    display: block;
+    margin: auto;
 }
-
 /* Clear floats after the columns */
 .row:after {
     content: "";
     display: table;
     clear: both;
+}
+.navbar .nav > .active {
+    background:none;
+}
+li.active {
+  background-color:#b1d8b3;
 }
 </style>
 <script type="text/javascript">
