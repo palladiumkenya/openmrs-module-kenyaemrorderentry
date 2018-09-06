@@ -107,6 +107,22 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                                                 "name": "3rd + 3TC + NVPP (300mg OD/150mg BD/200mg BD)"
                                               }
                                             ]
+                                          },
+                                          {
+                                            "name": "Peds first line",
+                                            "regimens": [
+                                              {
+                                                "name": "3rd + 3TC + NVPP (300mg OD/150mg BD/200mg BD)"
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "name": "Peds second line",
+                                            "regimens": [
+                                              {
+                                                "name": "3rd + 3TC + NVPP (300mg OD/150mg BD/200mg BD)"
+                                              }
+                                            ]
                                           }
                                         ]
                                       },
@@ -286,7 +302,6 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
             $scope.setProgramRegimens=function(regimens){
             $scope.activeRegimens=[];
              $scope.activeRegimens=regimens;
-             console.log("regimens ++++"+JSON.stringify(regimens));
             }
             $scope.setRegimenOrderSet=function(set){
               $scope.regimenOrderSet=[];
@@ -296,7 +311,5 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
               $scope.regimenLines=[];
               $scope.activeRegimens=[];
               $scope.regimenLines=regimenLine;
-              console.log("regimen lines ++++"+JSON.stringify(regimenLine));
             }
-
         }]);

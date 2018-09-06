@@ -63,6 +63,9 @@ th,td{
 li.active {
   background-color:#b1d8b3;
 }
+.hide-section{
+  display:none;
+}
 </style>
 <script type="text/javascript">
     window.OpenMRS = window.OpenMRS || {};
