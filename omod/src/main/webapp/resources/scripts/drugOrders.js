@@ -75,19 +75,23 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                             "tests":[
                                 {
                                     "name":"VL",
-                                    "concept_id":"277272"
+                                    "concept_id":"277272",
+                                    "concept":"411111"
                                 },
                                 {
                                     "name":"CD4",
-                                    "concept_id":"5555"
+                                    "concept_id":"5555",
+                                    "concept":"856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                                 },
                                 {
                                     "name":"Viral load",
-                                    "concept_id":"200000"
+                                    "concept_id":"200000",
+                                    "concept":"856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                                 },
                                 {
                                     "name":"CD4 % test",
-                                    "concept_id":"33333"
+                                    "concept_id":"33333",
+                                    "concept":"411111"
                                 }
                             ]
                         },
@@ -97,11 +101,13 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                             "tests":[
                                 {
                                     "name":"PCR",
-                                    "concept_id":"8888"
+                                    "concept_id":"8888",
+                                    "concept":"411111"
                                 },
                                 {
                                     "name":"CD4 counts",
-                                    "concept_id":"44444"
+                                    "concept_id":"44444",
+                                    "concept":"411111"
                                 }
                             ]
                         },
@@ -111,11 +117,13 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                             "tests":[
                                 {
                                     "name":"PCR",
-                                    "concept_id":"80000"
+                                    "concept_id":"80000",
+                                    "concept":"411111"
                                 },
                                 {
                                     "name":"CD4 counts",
-                                    "concept_id":"411111"
+                                    "concept_id":"411111",
+                                    "concept":"411111"
                                 }
                             ]
                         }
@@ -129,11 +137,13 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                             "tests":[
                                 {
                                     "name":"Urine A",
-                                    "concept_id":"277272"
+                                    "concept_id":"277272",
+                                    "concept":"411111"
                                 },
                                 {
                                     "name":"Urine B",
-                                    "concept_id":"5555"
+                                    "concept_id":"5555",
+                                    "concept":"411111"
                                 }
                             ]
                         },
@@ -142,11 +152,13 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                             "tests":[
                                 {
                                     "name":"Urates",
-                                    "concept_id":"8888"
+                                    "concept_id":"8888",
+                                    "concept":"411111"
                                 },
                                 {
                                     "name":"Uric acide",
-                                    "concept_id":"44444"
+                                    "concept_id":"44444",
+                                    "concept":"411111"
                                 }
                             ]
                         }
@@ -158,6 +170,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
 
             function loadExistingOrders() {
                 $scope.activeDrugOrders = { loading: true };
+                $scope.activeTestOrders = { loading: true };
 
                 OrderService.getOrders({
                     t: 'drugorder',
@@ -167,6 +180,16 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                 }).then(function(results) {
                     $scope.activeDrugOrders = _.map(results, function(item) { return new OpenMRS.DrugOrderModel(item) });
                     $scope.labOrders = labs;
+                });
+
+                OrderService.getOrders({
+                    t: 'testorder',
+                    v: 'full',
+                    patient: config.patient.uuid,
+                    careSetting: $scope.careSetting.uuid
+                }).then(function(results) {
+                    $scope.activeTestOrders = _.map(results, function(item) { return new OpenMRS.TestOrderModel(item) });
+                    console.log('$scope.activeTestOrders', $scope.activeTestOrders);
                 });
 
                 $scope.pastDrugOrders = { loading: true };
@@ -305,6 +328,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
 
             $scope.postLabOrdersEncounters = function() {
                 console.log('$scope.filteredOrders111111', $scope.filteredOrders);
+
                 var uuid = {uuid:"b2d06302-0901-41a6-8045-dfa32e36b105"};
                 var encounterContext = {
                     patient: config.patient,
@@ -313,14 +337,34 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                     encounterDatetime: "2018-08-23 11:24:36",
                     encounterRole: config.encounterRole
                 };
-                $scope.lOrders = [
+                $scope.lOrders = createLabOrdersPaylaod($scope.filteredOrders);
+                /*$scope.lOrders = [
                     {
                         orderer: config.provider.uuid,
                         careSetting: $scope.careSetting.uuid,
                         type:"testorder",
                         concept: "856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                     }
-                ];
+                ];*/
+
+              //  $scope.lOrders = _.filter($scope.lOrders, 'orderer','careSetting','type','concept');
+                console.log('$scope.lOrders', $scope.lOrders);
+
+
+                for (var i = 0; i < $scope.lOrders.length; ++i) {
+                    var orders = [];
+
+                    var data = $scope.lOrders[i];
+                    for (var r in data) {
+                        if (data.hasOwnProperty(r)) {
+                          var lpick = _.pick(data, 'orderer', 'careSetting', 'type','concept');
+                            console.log('data', lpick);
+                        }
+                    }
+
+                    orders.push(lpick);
+                    console.log('orders=====11', orders);
+                }
 
                 $scope.loading = true;
                 OrderEntryService.signAndSave({ draftOrders: $scope.lOrders }, encounterContext)
@@ -331,6 +375,23 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                     emr.errorMessage(errorResponse.data.error.message);
                     $scope.loading = false;
                 });
+
+            }
+
+            function createLabOrdersPaylaod(selectedOrders) {
+                var orders = [];
+                for (var i = 0; i < selectedOrders.length; ++i) {
+                    var data = selectedOrders[i];
+                    for (var r in data) {
+                        if (data.hasOwnProperty(r)) {
+                            data['orderer'] = config.provider.uuid;
+                            data['careSetting'] = $scope.careSetting.uuid;
+                            data['type'] = "testorder";
+                        }
+                    }
+                    orders.push(data);
+                }
+                return orders;
 
             }
 

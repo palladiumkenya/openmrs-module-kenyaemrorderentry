@@ -98,7 +98,6 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                          <div style="padding-top:10px">
                             <h5>Selected Order</h5>
                              <div class="panel">
-                                 <div class="panel-heading">This Page is Disabled</div>
                                  <div class="panel-body">
                             <div class="list-group">
                                 <div class="list-group-item" ng-repeat="order in filteredOrders" >
