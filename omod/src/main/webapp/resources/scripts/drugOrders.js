@@ -76,7 +76,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                                 {
                                     "name":"VL",
                                     "concept_id":"277272",
-                                    "concept":"411111"
+                                    "concept":"411133"
                                 },
                                 {
                                     "name":"CD4",
@@ -86,12 +86,12 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                                 {
                                     "name":"Viral load",
                                     "concept_id":"200000",
-                                    "concept":"856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                    "concept":"856AAAAAAAAAAAAAAAAA"
                                 },
                                 {
                                     "name":"CD4 % test",
                                     "concept_id":"33333",
-                                    "concept":"411111"
+                                    "concept":"4111"
                                 }
                             ]
                         },
@@ -102,12 +102,12 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                                 {
                                     "name":"PCR",
                                     "concept_id":"8888",
-                                    "concept":"411111"
+                                    "concept":"411112"
                                 },
                                 {
                                     "name":"CD4 counts",
                                     "concept_id":"44444",
-                                    "concept":"411111"
+                                    "concept":"411115"
                                 }
                             ]
                         },
@@ -118,12 +118,12 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                                 {
                                     "name":"PCR",
                                     "concept_id":"80000",
-                                    "concept":"411111"
+                                    "concept":"411113"
                                 },
                                 {
                                     "name":"CD4 counts",
                                     "concept_id":"411111",
-                                    "concept":"411111"
+                                    "concept":"11111"
                                 }
                             ]
                         }
@@ -138,7 +138,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                                 {
                                     "name":"Urine A",
                                     "concept_id":"277272",
-                                    "concept":"411111"
+                                    "concept":"4111166"
                                 },
                                 {
                                     "name":"Urine B",
@@ -153,12 +153,12 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                                 {
                                     "name":"Urates",
                                     "concept_id":"8888",
-                                    "concept":"411111"
+                                    "concept":"4111131"
                                 },
                                 {
                                     "name":"Uric acide",
                                     "concept_id":"44444",
-                                    "concept":"411111"
+                                    "concept":"4111178"
                                 }
                             ]
                         }
@@ -360,10 +360,11 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                           var lpick = _.pick(data, 'orderer', 'careSetting', 'type','concept');
                             console.log('data', lpick);
                         }
+                        orders.push(lpick);
+                        console.log('orders=====11',_.uniq(orders) );
                     }
 
-                    orders.push(lpick);
-                    console.log('orders=====11', orders);
+
                 }
 
                 $scope.loading = true;

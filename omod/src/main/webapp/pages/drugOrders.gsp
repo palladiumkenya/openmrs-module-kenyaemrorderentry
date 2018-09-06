@@ -164,6 +164,36 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                 </div>
 
             </form>
+            <div style="padding-top: 10px">
+            <div class="table-responsive" >
+                <table ng-hide="activeDrugOrders.loading" class="table table-striped">
+                    <tr>
+                        <th>Order Date</th>
+                        <th>Order No</th>
+                        <th>Test Name</th>
+                        <th>Ordered By</th>
+                    </tr>
+                    <tr ng-repeat="test in activeTestOrders">
+                        <td>
+                            {{ test.dateActivated | date:'dd-MM-yyyy' }}
+                        </td>
+                        <td>
+                            {{ test.orderNumber }}
+                        </td>
+                        <td>
+                            {{test.display}}
+
+                        </td>
+                        <td>
+                            {{test.orderer.display}}
+
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            </div>
+
+
 
             <h3>Drug Order Types</h3>
 
