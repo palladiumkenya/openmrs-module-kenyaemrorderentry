@@ -81,12 +81,12 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                                 {
                                     "name":"CD4",
                                     "concept_id":"5555",
-                                    "concept":"856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                    "concept":"856666666"
                                 },
                                 {
                                     "name":"Viral load",
                                     "concept_id":"200000",
-                                    "concept":"856AAAAAAAAAAAAAAAAA"
+                                    "concept":"856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                                 },
                                 {
                                     "name":"CD4 % test",
@@ -105,14 +105,14 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                                     "concept":"411112"
                                 },
                                 {
-                                    "name":"CD4 counts",
+                                    "name":"CD4 test",
                                     "concept_id":"44444",
                                     "concept":"411115"
                                 }
                             ]
                         },
                         {
-                            "panel_name":"TB panel test is selected",
+                            "panel_name":"TB panel  selected",
                             "id":"2",
                             "tests":[
                                 {
@@ -122,8 +122,8 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                                 },
                                 {
                                     "name":"CD4 counts",
-                                    "concept_id":"411111",
-                                    "concept":"11111"
+                                    "concept_id":"5497",
+                                    "concept":"5497AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                                 }
                             ]
                         }
@@ -300,7 +300,6 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                 });
                 $scope.filteredOrders = unchecked;
                 $scope.selectedOrders = $scope.filteredOrders;
-               // console.log('$scope.filteredOrders2222', $scope.filteredOrders);
 
 
             }
@@ -327,8 +326,6 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
             }
 
             $scope.postLabOrdersEncounters = function() {
-                console.log('$scope.filteredOrders111111', $scope.filteredOrders);
-
                 var uuid = {uuid:"b2d06302-0901-41a6-8045-dfa32e36b105"};
                 var encounterContext = {
                     patient: config.patient,
@@ -338,33 +335,12 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                     encounterRole: config.encounterRole
                 };
                 $scope.lOrders = createLabOrdersPaylaod($scope.filteredOrders);
-                /*$scope.lOrders = [
-                    {
-                        orderer: config.provider.uuid,
-                        careSetting: $scope.careSetting.uuid,
-                        type:"testorder",
-                        concept: "856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                    }
-                ];*/
-
-              //  $scope.lOrders = _.filter($scope.lOrders, 'orderer','careSetting','type','concept');
-                console.log('$scope.lOrders', $scope.lOrders);
-
 
                 for (var i = 0; i < $scope.lOrders.length; ++i) {
-                    var orders = [];
-
-                    var data = $scope.lOrders[i];
-                    for (var r in data) {
-                        if (data.hasOwnProperty(r)) {
-                          var lpick = _.pick(data, 'orderer', 'careSetting', 'type','concept');
-                            console.log('data', lpick);
-                        }
-                        orders.push(lpick);
-                        console.log('orders=====11',_.uniq(orders) );
-                    }
-
-
+                    delete $scope.lOrders[i].concept_id;
+                    delete $scope.lOrders[i].name;
+                    delete $scope.lOrders[i].$$hashKey;
+                    delete $scope.lOrders[i].selected;
                 }
 
                 $scope.loading = true;
