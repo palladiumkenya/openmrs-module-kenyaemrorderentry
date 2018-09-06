@@ -65,10 +65,100 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                 $scope.newDraftDrugOrder = OpenMRS.createEmptyDraftOrder(orderContext);
             });
 
+            var labs = [
+                {
+                    "name":"Blood",
+                    "panel": [
+                        {
+                            "panel_name":"HIV panel test",
+                            "id":"1",
+                            "tests":[
+                                {
+                                    "name":"VL",
+                                    "concept_id":"277272"
+                                },
+                                {
+                                    "name":"CD4",
+                                    "concept_id":"5555"
+                                },
+                                {
+                                    "name":"Viral load",
+                                    "concept_id":"200000"
+                                },
+                                {
+                                    "name":"CD4 % test",
+                                    "concept_id":"33333"
+                                }
+                            ]
+                        },
+                        {
+                            "panel_name":"TB panel test is selected",
+                            "id":"2",
+                            "tests":[
+                                {
+                                    "name":"PCR",
+                                    "concept_id":"8888"
+                                },
+                                {
+                                    "name":"CD4 counts",
+                                    "concept_id":"44444"
+                                }
+                            ]
+                        },
+                        {
+                            "panel_name":"TB panel test is selected",
+                            "id":"2",
+                            "tests":[
+                                {
+                                    "name":"PCR",
+                                    "concept_id":"80000"
+                                },
+                                {
+                                    "name":"CD4 counts",
+                                    "concept_id":"411111"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name":"Urine",
+                    "panel": [
+                        {
+                            "panel_name":"Urine Routine",
+                            "tests":[
+                                {
+                                    "name":"Urine A",
+                                    "concept_id":"277272"
+                                },
+                                {
+                                    "name":"Urine B",
+                                    "concept_id":"5555"
+                                }
+                            ]
+                        },
+                        {
+                            "panel_name":"Urine Pregnancy",
+                            "tests":[
+                                {
+                                    "name":"Urates",
+                                    "concept_id":"8888"
+                                },
+                                {
+                                    "name":"Uric acide",
+                                    "concept_id":"44444"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ];
+
             // TODO changing dosingType of a draft order should reset defaults (and discard non-defaulted properties)
 
             function loadExistingOrders() {
                 $scope.activeDrugOrders = { loading: true };
+
                 OrderService.getOrders({
                     t: 'drugorder',
                     v: 'full',
@@ -76,6 +166,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                     careSetting: $scope.careSetting.uuid
                 }).then(function(results) {
                     $scope.activeDrugOrders = _.map(results, function(item) { return new OpenMRS.DrugOrderModel(item) });
+                    $scope.labOrders = labs;
                 });
 
                 $scope.pastDrugOrders = { loading: true };
@@ -107,6 +198,8 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
             $scope.pastDrugOrders = { loading: true };
             $scope.draftDrugOrders = [];
             $scope.dosingTypes = OpenMRS.dosingTypes;
+            $scope.showFields = false;
+            $scope.showTestFields = false;
 
             var config = OpenMRS.drugOrdersConfig;
             var activeOrderSet=OpenMRS.orderSet;
@@ -162,6 +255,83 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
 
             $scope.cancelNewDraftOrder = function() {
                 $scope.newDraftDrugOrder = OpenMRS.createEmptyDraftOrder(orderContext);
+            }
+
+
+            // The beginning of lab orders functionality
+
+            $scope.loadLabPanels = function(panels) {
+                $scope.showFields = true;
+                $scope.panelTests = [];
+                $scope.labPanels = panels.panel
+            }
+
+            $scope.loadLabPanelTests = function(tests) {
+                $scope.showTestFields = true;
+                $scope.panelTests = tests.tests
+            }
+            $scope.deselectedOrder = function(order) {
+                order.selected = false;
+                var unchecked = _.filter($scope.filteredOrders, function(o) {
+                    return o.concept_id !== order.concept_id;
+                });
+                $scope.filteredOrders = unchecked;
+                $scope.selectedOrders = $scope.filteredOrders;
+               // console.log('$scope.filteredOrders2222', $scope.filteredOrders);
+
+
+            }
+            $scope.labOrdersTests = [];
+            $scope.selectedOrders = [];
+            $scope.getSelectedTests = function(tests) {
+                if(tests.selected === true) {
+                    $scope.selectedOrders.push(tests);
+                    $scope.filteredOrders = _.uniq($scope.selectedOrders);
+
+
+                }
+
+                    if (tests.selected === false) {
+                        var unchecked = _.filter($scope.filteredOrders, function(o) {
+                            return o.concept_id !== tests.concept_id;
+                        });
+                        $scope.filteredOrders = unchecked;
+                        $scope.selectedOrders = $scope.filteredOrders;
+                        console.log('falsseee', $scope.filteredOrders);
+
+                    }
+
+            }
+
+            $scope.postLabOrdersEncounters = function() {
+                console.log('$scope.filteredOrders111111', $scope.filteredOrders);
+                var uuid = {uuid:"b2d06302-0901-41a6-8045-dfa32e36b105"};
+                var encounterContext = {
+                    patient: config.patient,
+                    encounterType: uuid,
+                    location: null, // TODO
+                    encounterDatetime: "2018-08-23 11:24:36",
+                    encounterRole: config.encounterRole
+                };
+                $scope.lOrders = [
+                    {
+                        orderer: config.provider.uuid,
+                        careSetting: $scope.careSetting.uuid,
+                        type:"testorder",
+                        concept: "856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                    }
+                ];
+
+                $scope.loading = true;
+                OrderEntryService.signAndSave({ draftOrders: $scope.lOrders }, encounterContext)
+                    .$promise.then(function(result) {
+                    location.href = location.href;
+                }, function(errorResponse) {
+                        console.log('errorResponse.data.error.message',errorResponse.data.error.message);
+                    emr.errorMessage(errorResponse.data.error.message);
+                    $scope.loading = false;
+                });
+
             }
 
 
@@ -225,6 +395,8 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
             }
 
             $scope.reviseOrder = function(activeOrder) {
+                console.log('revised order is clicked');
+                $scope.which = 'single';
                 $scope.newDraftDrugOrder = activeOrder.createRevisionOrder();
             }
 

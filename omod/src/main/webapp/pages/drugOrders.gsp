@@ -7,6 +7,11 @@
     ui.includeJavascript("uicommons", "angular-common.js")
     ui.includeJavascript("uicommons", "angular-ui/ui-bootstrap-tpls-0.11.2.js")
     ui.includeJavascript("uicommons", "ngDialog/ngDialog.js")
+    ui.includeJavascript("orderentryui", "bootstrap.min.js")
+
+    ui.includeJavascript("orderentryui", "angular-material.js")
+    ui.includeJavascript("orderentryui", "angular-material.min.js")
+
     ui.includeJavascript("uicommons", "filters/display.js")
     ui.includeJavascript("uicommons", "filters/serverDate.js")
     ui.includeJavascript("uicommons", "services/conceptService.js")
@@ -26,6 +31,11 @@
     ui.includeCss("orderentryui", "drugOrders.css")
     ui.includeCss("uicommons", "styleguide/jquery-ui-1.9.2.custom.min.css")
     ui.includeCss("orderentryui", "index.css")
+
+    ui.includeCss("orderentryui", "angular-material.css")
+    ui.includeCss("orderentryui", "angular-material.min.css")
+    ui.includeCss("orderentryui", "bootstrap.min.css")
+    ui.includeCss("orderentryui", "labOrders.css")
 %>
 <style type="text/css">
 #new-order input {
@@ -64,11 +74,110 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
             </li>
         </ul>
 
+
+
         <div class="ui-tabs-panel ui-widget-content">
-            <label  class="ke-field-label">Which Order</label>
+            <form>
+            <h3>Lab Orders</h3>
+                <table class="table">
+                    <tbody>
+                    <tr>
+                        <td class="col-md-3">
+                            <div class="list-group">
+                                <div class="list-group-item" ng-repeat="lab in labOrders" ng-click="loadLabPanels(lab)">
+                                    <div class="link-item">
+                                        <a class="formLink">
+                                            {{lab.name}}
+                                        </a>
+                                    </div>
 
-            
 
+                                </div>
+                            </div>
+
+                         <div style="padding-top:10px">
+                            <h5>Selected Order</h5>
+                             <div class="panel">
+                                 <div class="panel-heading">This Page is Disabled</div>
+                                 <div class="panel-body">
+                            <div class="list-group">
+                                <div class="list-group-item" ng-repeat="order in filteredOrders" >
+                                    <div class="link-item">
+                                        <button type="button" ng-click="deselectedOrder(order)">
+                                            {{order.name}}<span class="glyphicon glyphicon-remove"></span>
+                                        </button>
+                                    </div>
+
+
+                                </div>
+                            </div>
+                                 </div>
+                            </div>
+                         </div>
+                        </td>
+                        <td>
+                            <div>
+                                <fieldset class="scheduler-border">
+                                    <legend class="scheduler-border">Panels</legend>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <ul>
+                                                <li ng-repeat="panel in labPanels"  ng-click="loadLabPanelTests(panel)">
+                                                    <button type="button" class="column">
+                                                        {{panel.panel_name}}</button>
+                                                </li>
+                                            </ul>
+                                        </div>
+
+                                    </div>
+
+                                </fieldset>
+                            </div>
+
+                            <div>
+                                <fieldset class="scheduler-border">
+                                    <legend class="scheduler-border"> Tests</legend>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div ng-repeat="test in panelTests" ng-click="getSelectedTests(test)">
+                                                <div class="column">
+                                                    <input type="checkbox" id="scales" name="feature" ng-model='test.selected'
+                                                           value="test.concept_id">
+                                                    <label>{{test.name}}</label>
+                                                </div>
+
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                    </tbody>
+                </table>
+                <div style="padding-left: 50%">
+                    <button type="button"  ng-click="postLabOrdersEncounters()">
+                        Post lab orders</button>
+                </div>
+
+            </form>
+
+            <h3>Drug Order Types</h3>
+
+            <span class="ke-field-content">
+                <div>
+                    <input type="radio" ng-model="which"  value="single" /> Single Drug
+
+                    <input type="radio" ng-model="which"  value="regimen" /> Regimen
+                </div>
+
+
+             </span>
+            <div ng-show="which === 'single'">
             <form id="new-order" class="sized-inputs css-form" name="newOrderForm" novalidate>
                 <p>
                     <span ng-show="newDraftDrugOrder.action === 'NEW'">
@@ -129,6 +238,7 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                     <button class="cancel" ng-click="cancelNewDraftOrder()">Cancel</button>
                 </p>
             </form>
+</div>
 
             <div id="draft-orders" ng-show="draftDrugOrders.length > 0">
                 <h3>Unsaved Draft Orders ({{ draftDrugOrders.length }})</h3>
@@ -164,18 +274,23 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                 </div>
             </div>
 
-
-            <h3> Drug Orders Dispensation</h3>
+        <div ng-show="which === 'regimen'">
+            <h3> Order Regimen</h3>
             <div>
             ${ ui.includeFragment("orderentryui", "patientdashboard/regimenDispensation", ["patient": patient]) }
 
 
-
             </div>
+        </div>
 
             
-
+        <div style="padding-top: 20px">
+            <div class="info-section">
+                <div class="info-header">
+                    <i class="icon-medicine"></i>
             <h3>Active Drug Orders</h3>
+                </div>
+            </div>
             <span ng-show="activeDrugOrders.loading">${ ui.message("uicommons.loading.placeholder") }</span>
             <span ng-hide="activeDrugOrders.loading || activeDrugOrders.length > 0">None</span>
             <table ng-hide="activeDrugOrders.loading" class="ke-table-vertical">
@@ -192,20 +307,34 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                         {{ order | instructions }}
                     </td>
                     <td>
-                        <a ng-show="!replacementFor(order)" ng-click="reviseOrder(order)">
-                            <button><img src="${ ui.resourceLink("kenyaui", "images/glyphs/edit.png") }" /> Edit</button>
-                        </a>
-                        <a ng-show="!replacementFor(order)" ng-click="discontinueOrder(order)">
-                            <button><img src="${ ui.resourceLink("kenyaui", "images/glyphs/cancel.png") }" /> Cancel</button>
-                        </a>
+                        <span style="background: white">
+                        <span ng-show="!replacementFor(order)" ng-click="reviseOrder(order)">
+                            <span >
+                            <button style=" background: white !important; border: 0px">
+                                <img src="${ ui.resourceLink("kenyaui", "images/glyphs/edit.png") }" /> Edit</button>
+                            </span>
+                        </span>
+                        <span ng-show="!replacementFor(order)" ng-click="discontinueOrder(order)">
+                            <button  style=" background: white !important; border: 0px">
+                                <img src="${ ui.resourceLink("kenyaui", "images/glyphs/cancel.png") }" /> Cancel</button>
+                        </span>
+                        </span>
+
                         <span ng-show="replacementFor(order)">
                             will {{ replacementFor(order).action }}
                         </span>
                     </td>
                 </tr>
             </table>
+        </div>
+
+            <div class="info-section">
+                <div class="info-header">
+                    <i class="icon-medicine"></i>
 
             <h3>Past Drug Orders</h3>
+                </div>
+            </div>
             <span ng-show="pastDrugOrders.loading">${ ui.message("uicommons.loading.placeholder") }</span>
             <span ng-hide="pastDrugOrders.loading || pastDrugOrders.length > 0">None</span>
             <table id="past-drug-orders" ng-hide="pastDrugOrders.loading" class="ke-table-vertical">
@@ -226,12 +355,22 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                     </td>
                 </tr>
             </table>
+
         </div>
+
     </div>
 
+
 </div>
+
+
+        ${ ui.includeFragment("orderentryui", "patientdashboard/labOrders", ["patient": patient]) }
+
+
+    </div>
 </div>
 <script type="text/javascript">
     // manually bootstrap angular app, in case there are multiple angular apps on a page
     angular.bootstrap('#drug-orders-app', ['drugOrders']);
+
 </script>
