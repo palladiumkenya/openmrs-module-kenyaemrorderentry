@@ -90,6 +90,41 @@ public class DrugOrdersPageController {
 
         model.put("patient", patient);
         model.put("jsonConfig", ui.toJson(jsonConfig));
+
+        JSONObject drugOrderDispensationPayload=new JSONObject();
+        JSONArray programs=new JSONArray();
+
+        //start of first program
+        JSONObject program=new JSONObject();
+        JSONArray regimenLines=new JSONArray();
+        String[] regimenNames={"TDF + 3TC + NVP (300mg OD/150mg BD/200mg BD)",
+                "TDF + 3TC + EFV (300mg OD/150mg BD/200mg BD"};
+        JSONObject regimenLine=(JSONObject)createRegimenLine(regimenNames,"Adult first line");
+        regimenLines.add(regimenLine);
+        String[] regimenNames2={"2nd + 3TC + NVPP (300mg OD/150mg BD/200mg BD)"};
+        regimenLine=(JSONObject)createRegimenLine(regimenNames2,"Adult second line");
+        regimenLines.add(regimenLine);
+        String[] regimenNames3={"3rd + 3TC + NVPP (300mg OD/150mg BD/200mg BD)"};
+        regimenLine=(JSONObject)createRegimenLine(regimenNames3,"Adult third line");
+        regimenLines.add(regimenLine);
+        program.put("name", "HIV");
+        program.put("regimen_lines", regimenLines);
+        programs.add(program);
+        //end of first program
+
+        //start of second program
+        program=new JSONObject();
+        regimenLines=new JSONArray();
+        String[] regimenNames5={"Test for TB"};
+        regimenLine=(JSONObject)createRegimenLine(regimenNames5,"Adult first line");
+        regimenLines.add(regimenLine);
+        program.put("name", "TB");
+        program.put("regimen_lines", regimenLines);
+        programs.add(program);
+        //end of second program
+        drugOrderDispensationPayload.put("programs",programs);
+        model.put("drugOrderDispensationPayload",drugOrderDispensationPayload.toString());
+        model.put("dispensePayload",payload());
     }
 
     private Object convertTo(Object object, Representation rep) {
@@ -98,6 +133,82 @@ public class DrugOrdersPageController {
 
     private Object convertToFull(Object object) {
         return object == null ? null : ConversionUtil.convertToRepresentation(object, Representation.FULL);
+    }
+    private Object createRegimenLine(String[] regimenNames,String regimenLineName){
+        JSONObject regimenLine=new JSONObject();
+        JSONArray regimens=new JSONArray();
+        JSONObject regimen=new JSONObject();
+        for(int i=0; i<regimenNames.length;i++){
+            regimen.put("name",regimenNames[i].toString());
+            regimens.add(regimen.toJSONString());
+        }
+        regimenLine.put("name",regimenLineName);
+        regimenLine.put("regimens", regimens);
+        return regimenLine;
+    }
+    private String payload(){
+        String payload="{\n" +
+                "                                    \"programs\": [\n" +
+                "                                      {\n" +
+                "                                        \"name\": \"HIV\",\n" +
+                "                                        \"regimen_lines\": [\n" +
+                "                                          {\n" +
+                "                                            \"name\": \"Adult first line\",\n" +
+                "                                            \"regimens\": [\n" +
+                "                                              {\n" +
+                "                                                \"name\": \"TDF + 3TC + NVP (300mg OD/150mg BD/200mg BD)\"\n" +
+                "                                              },\n" +
+                "                                              {\n" +
+                "                                                \"name\": \"TDF + 3TC + EFV (300mg OD/150mg BD/200mg BD\"\n" +
+                "                                              }\n" +
+                "                                            ]\n" +
+                "                                          },\n" +
+                "                                          {\n" +
+                "                                            \"name\": \"Adult second line\",\n" +
+                "                                            \"regimens\": [\n" +
+                "                                              {\n" +
+                "                                                \"name\": \"2nd + 3TC + NVPP (300mg OD/150mg BD/200mg BD)\"\n" +
+                "                                              }\n" +
+                "                                            ]\n" +
+                "                                          },\n" +
+                "                                          {\n" +
+                "                                            \"name\": \"Adult third line\",\n" +
+                "                                            \"regimens\": [\n" +
+                "                                              {\n" +
+                "                                                \"name\": \"3rd + 3TC + NVPP (300mg OD/150mg BD/200mg BD)\"\n" +
+                "                                              }\n" +
+                "                                            ]\n" +
+                "                                          },\n" +
+                "                                          {\n" +
+                "                                            \"name\": \"Peds first line\",\n" +
+                "                                            \"regimens\": [\n" +
+                "                                              {\n" +
+                "                                                \"name\": \"3rd + 3TC + NVPP (300mg OD/150mg BD/200mg BD)\"\n" +
+                "                                              }\n" +
+                "                                            ]\n" +
+                "                                          },\n" +
+                "                                          {\n" +
+                "                                            \"name\": \"Peds second line\",\n" +
+                "                                            \"regimens\": [\n" +
+                "                                              {\n" +
+                "                                                \"name\": \"3rd + 3TC + NVPP (300mg OD/150mg BD/200mg BD)\"\n" +
+                "                                              }\n" +
+                "                                            ]\n" +
+                "                                          }\n" +
+                "                                        ]\n" +
+                "                                      },\n" +
+                "                                      {\n" +
+                "                                        \"name\": \"TB\",\n" +
+                "                                        \"regimen_lines\": [\n" +
+                "                                          {\n" +
+                "                                            \"name\": \"Adult first line\",\n" +
+                "                                            \"regimens\": []\n" +
+                "                                          }\n" +
+                "                                        ]\n" +
+                "                                      }\n" +
+                "                                    ]\n" +
+                "                                  }";
+        return payload;
     }
 
 }

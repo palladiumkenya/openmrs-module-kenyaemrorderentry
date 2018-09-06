@@ -76,68 +76,6 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                     careSetting: $scope.careSetting.uuid
                 }).then(function(results) {
                     $scope.activeDrugOrders = _.map(results, function(item) { return new OpenMRS.DrugOrderModel(item) });
-                    $scope.programs={
-                                    "programs": [
-                                      {
-                                        "name": "HIV",
-                                        "regimen_lines": [
-                                          {
-                                            "name": "Adult first line",
-                                            "regimens": [
-                                              {
-                                                "name": "TDF + 3TC + NVP (300mg OD/150mg BD/200mg BD)"
-                                              },
-                                              {
-                                                "name": "TDF + 3TC + EFV (300mg OD/150mg BD/200mg BD"
-                                              }
-                                            ]
-                                          },
-                                          {
-                                            "name": "Adult second line",
-                                            "regimens": [
-                                              {
-                                                "name": "2nd + 3TC + NVPP (300mg OD/150mg BD/200mg BD)"
-                                              }
-                                            ]
-                                          },
-                                          {
-                                            "name": "Adult third line",
-                                            "regimens": [
-                                              {
-                                                "name": "3rd + 3TC + NVPP (300mg OD/150mg BD/200mg BD)"
-                                              }
-                                            ]
-                                          },
-                                          {
-                                            "name": "Peds first line",
-                                            "regimens": [
-                                              {
-                                                "name": "3rd + 3TC + NVPP (300mg OD/150mg BD/200mg BD)"
-                                              }
-                                            ]
-                                          },
-                                          {
-                                            "name": "Peds second line",
-                                            "regimens": [
-                                              {
-                                                "name": "3rd + 3TC + NVPP (300mg OD/150mg BD/200mg BD)"
-                                              }
-                                            ]
-                                          }
-                                        ]
-                                      },
-                                      {
-                                        "name": "TB",
-                                        "regimen_lines": [
-                                          {
-                                            "name": "Adult first line",
-                                            "regimens": []
-                                          }
-                                        ]
-                                      }
-                                    ]
-                                  }
-                    $scope.regimenLines=$scope.programs.programs[0].regimen_lines;
                 });
 
                 $scope.pastDrugOrders = { loading: true };
@@ -172,6 +110,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
 
             var config = OpenMRS.drugOrdersConfig;
             var availableOrderSet=OpenMRS.orderSet;
+            var programRegimens=OpenMRS.drugDispensePayload;
             $scope.init = function() {
                 $scope.routes = config.routes;
                 $scope.doseUnits = config.doseUnits;
@@ -191,7 +130,8 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                     angular.element('#new-order input[type=text]').first().focus();
                 });
                 $scope.orderSet=availableOrderSet;
-
+                $scope.programs=programRegimens;
+                $scope.regimenLines=$scope.programs.programs[0].regimen_lines;
             }
             // functions that affect the overall state of the page
 

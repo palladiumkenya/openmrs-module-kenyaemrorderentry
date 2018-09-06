@@ -72,6 +72,7 @@ li.active {
     window.OpenMRS.drugOrdersConfig = ${ jsonConfig };
     window.sessionContext = {'locale':'en_GB'}
     window.OpenMRS.orderSet=${orderSetJson}
+    window.OpenMRS.drugDispensePayload=${dispensePayload};
 </script>
 
 ${ ui.includeFragment("appui", "messages", [ codes: [
