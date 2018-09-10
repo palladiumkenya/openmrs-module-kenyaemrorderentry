@@ -66,7 +66,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
             });
 
             // TODO changing dosingType of a draft order should reset defaults (and discard non-defaulted properties)
-
+            var programRegimens=OpenMRS.drugDispensePayload;
             function loadExistingOrders() {
                 $scope.activeDrugOrders = { loading: true };
                 OrderService.getOrders({
@@ -76,6 +76,9 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                     careSetting: $scope.careSetting.uuid
                 }).then(function(results) {
                     $scope.activeDrugOrders = _.map(results, function(item) { return new OpenMRS.DrugOrderModel(item) });
+                    $scope.programs=programRegimens;
+                    console.log("program regimens+++++++++++++++++++++++++++"+JSON.stringify(programRegimens));
+                    $scope.regimenLines=$scope.programs.programs[0].regimen_lines;
                 });
 
                 $scope.pastDrugOrders = { loading: true };
@@ -110,7 +113,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
 
             var config = OpenMRS.drugOrdersConfig;
             var availableOrderSet=OpenMRS.orderSet;
-            var programRegimens=OpenMRS.drugDispensePayload;
+
             $scope.init = function() {
                 $scope.routes = config.routes;
                 $scope.doseUnits = config.doseUnits;
@@ -130,8 +133,6 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                     angular.element('#new-order input[type=text]').first().focus();
                 });
                 $scope.orderSet=availableOrderSet;
-                $scope.programs=programRegimens;
-                $scope.regimenLines=$scope.programs.programs[0].regimen_lines;
             }
             // functions that affect the overall state of the page
 
