@@ -66,7 +66,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
             });
 
             // TODO changing dosingType of a draft order should reset defaults (and discard non-defaulted properties)
-            var programRegimens=OpenMRS.drugDispensePayload;
+            var programRegimens=OpenMRS.kenyaemrRegimenJsonPayload;
             function loadExistingOrders() {
                 $scope.activeDrugOrders = { loading: true };
                 OrderService.getOrders({
@@ -77,7 +77,6 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                 }).then(function(results) {
                     $scope.activeDrugOrders = _.map(results, function(item) { return new OpenMRS.DrugOrderModel(item) });
                     $scope.programs=programRegimens;
-                    console.log("program regimens+++++++++++++++++++++++++++"+JSON.stringify(programRegimens));
                     $scope.regimenLines=$scope.programs.programs[0].regimen_lines;
                 });
 
@@ -112,8 +111,6 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
             $scope.dosingTypes = OpenMRS.dosingTypes;
 
             var config = OpenMRS.drugOrdersConfig;
-            var availableOrderSet=OpenMRS.orderSet;
-
             $scope.init = function() {
                 $scope.routes = config.routes;
                 $scope.doseUnits = config.doseUnits;
@@ -132,7 +129,6 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                 $timeout(function() {
                     angular.element('#new-order input[type=text]').first().focus();
                 });
-                $scope.orderSet=availableOrderSet;
             }
             // functions that affect the overall state of the page
 
@@ -239,18 +235,23 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                 });
             });
             $scope.activeRegimens=[];
-            $scope.regimenOrderSet=[];
+            $scope.components=[];
+            $scope.components.quantity=[];
             $scope.setProgramRegimens=function(regimens){
             $scope.activeRegimens=[];
              $scope.activeRegimens=regimens;
             }
-            $scope.setRegimenOrderSet=function(set){
-              $scope.regimenOrderSet=[];
-              $scope.regimenOrderSet=set;
+            $scope.setRegimenMembers=function(members){
+              $scope.components=[];
+              $scope.components=members;
             }
             $scope.setRegimenLines=function(regimenLine){
               $scope.regimenLines=[];
               $scope.activeRegimens=[];
               $scope.regimenLines=regimenLine;
+            }
+            window.drugOrderMembers=[];
+            $scope.saveOrderSet=function(orderset){
+            drugOrderMembers=orderset;
             }
         }]);

@@ -67,18 +67,18 @@ li.active {
   display:none;
 }
 </style>
-<script type="text/javascript">
-    window.OpenMRS = window.OpenMRS || {};
-    window.OpenMRS.drugOrdersConfig = ${ jsonConfig };
-    window.sessionContext = {'locale':'en_GB'}
-    window.OpenMRS.orderSet=${orderSetJson}
-    window.OpenMRS.drugDispensePayload=${dispensePayload};
-</script>
 
+${ ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator") }
 ${ ui.includeFragment("appui", "messages", [ codes: [
         "orderentryui.pastAction.REVISE",
         "orderentryui.pastAction.DISCONTINUE"
 ] ])}
+<script type="text/javascript">
+    window.OpenMRS = window.OpenMRS || {};
+    window.OpenMRS.drugOrdersConfig = ${ jsonConfig };
+    window.sessionContext = {'locale':'en_GB'}
+    window.OpenMRS.drugDispensePayload=${dispensePayload};
+</script>
 <div class="ke-page-sidebar">
     <div class="ke-panel-frame">
         ${ ui.includeFragment("kenyaui", "widget/panelMenuItem", [ iconProvider: "kenyaui", icon: "buttons/back.png", label: "Back", href: "" ]) }

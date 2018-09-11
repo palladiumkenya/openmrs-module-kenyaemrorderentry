@@ -48,7 +48,7 @@ public class DrugOrdersPageController {
         JSONObject orderSetObj,orderSetMember;
         JSONArray orderSetArray=new JSONArray();
 
-        for(OrderSet orderSet:orderSetsList){
+        /*for(OrderSet orderSet:orderSetsList){
             orderSetObj=new JSONObject();
             orderSetObj.put("name", orderSet.getName());
             orderSetObj.put("regimen_line", orderSet.getDescription());
@@ -71,7 +71,7 @@ public class DrugOrdersPageController {
         }
         JSONObject response=new JSONObject();
         response.put("orderSets", orderSetArray);
-        model.put("orderSetJson", response.toString());
+        model.put("orderSetJson", response.toString());*/
 
         Map<String, Object> jsonConfig = new LinkedHashMap<String, Object>();
         jsonConfig.put("patient", convertToFull(patient));
@@ -148,66 +148,97 @@ public class DrugOrdersPageController {
     }
     private String payload(){
         String payload="{\n" +
-                "                                    \"programs\": [\n" +
-                "                                      {\n" +
-                "                                        \"name\": \"HIV\",\n" +
-                "                                        \"regimen_lines\": [\n" +
-                "                                          {\n" +
-                "                                            \"name\": \"Adult first line\",\n" +
-                "                                            \"regimens\": [\n" +
-                "                                              {\n" +
-                "                                                \"name\": \"TDF + 3TC + NVP (300mg OD/150mg BD/200mg BD)\"\n" +
-                "                                              },\n" +
-                "                                              {\n" +
-                "                                                \"name\": \"TDF + 3TC + EFV (300mg OD/150mg BD/200mg BD\"\n" +
-                "                                              }\n" +
-                "                                            ]\n" +
-                "                                          },\n" +
-                "                                          {\n" +
-                "                                            \"name\": \"Adult second line\",\n" +
-                "                                            \"regimens\": [\n" +
-                "                                              {\n" +
-                "                                                \"name\": \"2nd + 3TC + NVPP (300mg OD/150mg BD/200mg BD)\"\n" +
-                "                                              }\n" +
-                "                                            ]\n" +
-                "                                          },\n" +
-                "                                          {\n" +
-                "                                            \"name\": \"Adult third line\",\n" +
-                "                                            \"regimens\": [\n" +
-                "                                              {\n" +
-                "                                                \"name\": \"3rd + 3TC + NVPP (300mg OD/150mg BD/200mg BD)\"\n" +
-                "                                              }\n" +
-                "                                            ]\n" +
-                "                                          },\n" +
-                "                                          {\n" +
-                "                                            \"name\": \"Peds first line\",\n" +
-                "                                            \"regimens\": [\n" +
-                "                                              {\n" +
-                "                                                \"name\": \"3rd + 3TC + NVPP (300mg OD/150mg BD/200mg BD)\"\n" +
-                "                                              }\n" +
-                "                                            ]\n" +
-                "                                          },\n" +
-                "                                          {\n" +
-                "                                            \"name\": \"Peds second line\",\n" +
-                "                                            \"regimens\": [\n" +
-                "                                              {\n" +
-                "                                                \"name\": \"3rd + 3TC + NVPP (300mg OD/150mg BD/200mg BD)\"\n" +
-                "                                              }\n" +
-                "                                            ]\n" +
-                "                                          }\n" +
-                "                                        ]\n" +
-                "                                      },\n" +
-                "                                      {\n" +
-                "                                        \"name\": \"TB\",\n" +
-                "                                        \"regimen_lines\": [\n" +
-                "                                          {\n" +
-                "                                            \"name\": \"Adult first line\",\n" +
-                "                                            \"regimens\": []\n" +
-                "                                          }\n" +
-                "                                        ]\n" +
-                "                                      }\n" +
-                "                                    ]\n" +
-                "                                  }";
+                "  \"programs\": [\n" +
+                "    {\n" +
+                "      \"name\": \"HIV\",\n" +
+                "      \"regimen_lines\": [\n" +
+                "        {\n" +
+                "          \"name\": \"Adult first line\",\n" +
+                "          \"regimens\": [\n" +
+                "            {\n" +
+                "              \"name\": \"TDF + 3TC + NVP (300mg OD/150mg BD/200mg BD)\",\n" +
+                "              \"components\": [\n" +
+                "                {\n" +
+                "                  \"name\": \"TDF\",\n" +
+                "                  \"dose\": \"300\",\n" +
+                "                  \"units\": \"mg\",\n" +
+                "                  \"units_uuid\": \"111177BBBBBBBBBBBBBBBBBBBBBBBBBBBBBB\",\n" +
+                "                  \"drug_id\": \"15\",\n" +
+                "                  \"frequency\":\"3\"\n" +
+                "                },\n" +
+                "                {\n" +
+                "                  \"name\": \"3TC\",\n" +
+                "                  \"dose\": \"150\",\n" +
+                "                  \"units\": \"mg\",\n" +
+                "                  \"units_uuid\": \"111177BBBBBBBBBBBBBBBBBBBBBBBBBBBBBB\",\n" +
+                "                  \"drug_id\": \"14\",\n" +
+                "                  \"frequency\":\"3\"\n" +
+                "                },\n" +
+                "                {\n" +
+                "                  \"name\": \"NVP\",\n" +
+                "                  \"dose\": \"200\",\n" +
+                "                  \"units\": \"mg\",\n" +
+                "                  \"units_uuid\": \"111177BBBBBBBBBBBBBBBBBBBBBBBBBBBBBB\",\n" +
+                "                  \"drug_id\": \"16\",\n" +
+                "                  \"frequency\":\"3\"\n" +
+                "                }\n" +
+                "              ]\n" +
+                "            },\n" +
+                "            {\n" +
+                "              \"name\": \"TDF + 3TC + EFV (300mg OD/150mg BD/200mg BD\",\n" +
+                "              \"components\": []\n" +
+                "            }\n" +
+                "          ]\n" +
+                "        },\n" +
+                "        {\n" +
+                "          \"name\": \"Adult second line\",\n" +
+                "          \"regimens\": [\n" +
+                "            {\n" +
+                "              \"name\": \"2nd + 3TC + NVPP (300mg OD/150mg BD/200mg BD)\",\n" +
+                "              \"components\": []\n" +
+                "            }\n" +
+                "          ]\n" +
+                "        },\n" +
+                "        {\n" +
+                "          \"name\": \"Adult third line\",\n" +
+                "          \"regimens\": [\n" +
+                "            {\n" +
+                "              \"name\": \"3rd + 3TC + NVPP (300mg OD/150mg BD/200mg BD)\",\n" +
+                "              \"components\": []\n" +
+                "            }\n" +
+                "          ]\n" +
+                "        },\n" +
+                "        {\n" +
+                "          \"name\": \"Peds first line\",\n" +
+                "          \"regimens\": [\n" +
+                "            {\n" +
+                "              \"name\": \"3rd + 3TC + NVPP (300mg OD/150mg BD/200mg BD)\",\n" +
+                "              \"components\": []\n" +
+                "            }\n" +
+                "          ]\n" +
+                "        },\n" +
+                "        {\n" +
+                "          \"name\": \"Peds second line\",\n" +
+                "          \"regimens\": [\n" +
+                "            {\n" +
+                "              \"name\": \"3rd + 3TC + NVPP (300mg OD/150mg BD/200mg BD)\",\n" +
+                "              \"components\": []\n" +
+                "            }\n" +
+                "          ]\n" +
+                "        }\n" +
+                "      ]\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"name\": \"TB\",\n" +
+                "      \"regimen_lines\": [\n" +
+                "        {\n" +
+                "          \"name\": \"Adult first line\",\n" +
+                "          \"regimens\": []\n" +
+                "        }\n" +
+                "      ]\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
         return payload;
     }
 

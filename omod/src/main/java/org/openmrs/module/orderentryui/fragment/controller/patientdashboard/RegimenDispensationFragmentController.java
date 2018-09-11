@@ -51,12 +51,11 @@ public class RegimenDispensationFragmentController {
         for(int i=0; i<drugGroupOrder.size();i++) {
             DrugOrder drugOrder = new DrugOrder();
             JSONObject drugOrderJson=(JSONObject)drugGroupOrder.get(i);
-            String drugId=drugOrderJson.get("drug").toString();
+            String drugId=drugOrderJson.get("drug_id").toString();
             Double dose=Double.parseDouble(drugOrderJson.get("dose").toString());
-            int doseUnitConceptId=Integer.valueOf(drugOrderJson.get("dose_unit").toString());
-            int frequencyId=Integer.valueOf(drugOrderJson.get("frequency").toString());
+            String doseUnitConceptUuiId=drugOrderJson.get("units").toString();
+            String frequencyUuId=drugOrderJson.get("frequency").toString();
             Double quantity=Double.parseDouble(drugOrderJson.get("quantity").toString());
-            int quantityUnitConceptId=Integer.valueOf(drugOrderJson.get("quantity_unit").toString());
 
             drugOrder.setPatient(patient);
             drugOrder.setEncounter(encounter);
@@ -64,18 +63,17 @@ public class RegimenDispensationFragmentController {
             drugOrder.setDrug(drug);
             drugOrder.setOrderer(provider);
             drugOrder.setDose(dose);
-            Concept doseUnitConcept = conceptService.getConcept(doseUnitConceptId);
+            Concept doseUnitConcept = conceptService.getConceptByUuid(doseUnitConceptUuiId);
             drugOrder.setDoseUnits(doseUnitConcept);
             drugOrder.setDosingType(SimpleDosingInstructions.class);
             Concept route = conceptService.getConcept(160240);
             drugOrder.setRoute(route);
-            OrderFrequency orderFrequency = orderService.getOrderFrequency(frequencyId);
+            OrderFrequency orderFrequency = orderService.getOrderFrequencyByUuid(frequencyUuId);
             drugOrder.setFrequency(orderFrequency);
             CareSetting careSetting = orderService.getCareSetting(1);
             drugOrder.setCareSetting(careSetting);
             drugOrder.setQuantity(quantity);
-            Concept quantityUnits = conceptService.getConcept(quantityUnitConceptId);
-            drugOrder.setQuantityUnits(quantityUnits);
+            drugOrder.setQuantityUnits(doseUnitConcept);
             drugOrder.setNumRefills(0);
             drugOrder.setOrderGroup(orderGroup);
             orderList.add(drugOrder);
