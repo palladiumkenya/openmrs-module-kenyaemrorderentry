@@ -6,7 +6,6 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.openmrs.*;
 import org.openmrs.api.*;
-import org.openmrs.api.context.Context;
 import org.openmrs.module.appui.UiSessionContext;
 import org.openmrs.module.webservices.rest.web.ConversionUtil;
 import org.openmrs.module.webservices.rest.web.representation.NamedRepresentation;
@@ -19,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.*;
 
 public class DrugOrdersPageController {
+    public static final Locale LOCALE = Locale.ENGLISH;
 
     public void get(@RequestParam("patient") Patient patient,
                     @RequestParam(value = "careSetting", required = false) CareSetting careSetting,
@@ -90,6 +90,7 @@ public class DrugOrdersPageController {
 
         model.put("patient", patient);
         model.put("jsonConfig", ui.toJson(jsonConfig));
+        labOrdersConceptPanels( conceptService, sessionContext, ui, model);
     }
 
     private Object convertTo(Object object, Representation rep) {
@@ -163,6 +164,74 @@ public class DrugOrdersPageController {
         orderGroup.setOrderSet(orderSet);
         orderGroup.setOrders(orderList);
         orderService.saveOrderGroup(orderGroup);
+    }
+
+    public void labOrdersConceptPanels(@SpringBean("conceptService") ConceptService conceptService,
+                                       UiSessionContext sessionContext,
+                                       UiUtils ui,
+                                       PageModel model) {
+
+        // Define sample type
+        Map<String, List<Concept>> sampleTypes = new HashMap<String, List<Concept>>();
+
+        // Build panels for urine
+        List<Concept> urineTestPanels = Arrays.asList(
+                conceptService.getConcept(163697)
+        );
+
+        // Build panels for Blood
+        List<Concept> bloodTestPanels = Arrays.asList(
+                conceptService.getConcept( 	161430),
+                conceptService.getConcept( 	657),
+                conceptService.getConcept( 	161487)
+
+        );
+        sampleTypes.put("Urine", urineTestPanels);
+        sampleTypes.put("Blood", bloodTestPanels);
+
+
+
+        JSONArray labTestJsonPayload = new JSONArray();
+
+        for (Map.Entry<String, List<Concept>> entry : sampleTypes.entrySet()) {
+            JSONObject sampleTypeObject = new JSONObject();
+
+            String testSampleTypeName = entry.getKey();
+            List<Concept> panelConcepts = entry.getValue();
+
+            JSONArray sampleTypePanels = new JSONArray();
+
+            for (Concept panelConcept : panelConcepts) {
+                JSONObject labTestObj, panelObj;
+                JSONArray labTestArray = new JSONArray();
+                panelObj=new JSONObject();
+
+                String panelName = panelConcept.getName(LOCALE).getName();
+
+                for(Concept labTest:conceptService.getConceptsByConceptSet(panelConcept)) {
+                    labTestObj=new JSONObject();
+                    labTestObj.put("concept_id",labTest.getConceptId());
+                    labTestObj.put("concept",labTest.getUuid());
+                    labTestObj.put("name",conceptService.getConcept(labTest.getConceptId()).getName(LOCALE).getName());
+                    labTestArray.add(labTestObj);
+
+
+                }
+                panelObj.put("name",panelName);
+                panelObj.put("tests",labTestArray);
+                sampleTypePanels.add(panelObj);
+
+            }
+            sampleTypeObject.put("name", testSampleTypeName);
+            sampleTypeObject.put("panels", sampleTypePanels);
+            labTestJsonPayload.add(sampleTypeObject);
+
+
+        }
+        System.out.println("labTestJsonPayload=========================+++++"+labTestJsonPayload);
+        model.put("labTestJsonPayload", labTestJsonPayload.toString());
+
+
     }
 
 }

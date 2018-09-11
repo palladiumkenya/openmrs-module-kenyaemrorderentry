@@ -65,7 +65,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                 $scope.newDraftDrugOrder = OpenMRS.createEmptyDraftOrder(orderContext);
             });
 
-            var labs = [
+           /* var labs = [
                 {
                     "name":"Blood",
                     "panel": [
@@ -164,7 +164,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                         }
                     ]
                 }
-            ];
+            ];*/
 
             // TODO changing dosingType of a draft order should reset defaults (and discard non-defaulted properties)
 
@@ -179,7 +179,10 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                     careSetting: $scope.careSetting.uuid
                 }).then(function(results) {
                     $scope.activeDrugOrders = _.map(results, function(item) { return new OpenMRS.DrugOrderModel(item) });
+
+
                     $scope.labOrders = labs;
+                    console.log('OpenMRs.labTestJsonPayload;',$scope.labOrders);
                 });
 
                 OrderService.getOrders({
@@ -226,6 +229,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
 
             var config = OpenMRS.drugOrdersConfig;
             var activeOrderSet=OpenMRS.orderSet;
+            var labs=OpenMRS.labTestJsonPayload;
             $scope.init = function() {
                 $scope.routes = config.routes;
                 $scope.doseUnits = config.doseUnits;
@@ -286,7 +290,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
             $scope.loadLabPanels = function(panels) {
                 $scope.showFields = true;
                 $scope.panelTests = [];
-                $scope.labPanels = panels.panel
+                $scope.labPanels = panels.panels
             }
 
             $scope.loadLabPanelTests = function(tests) {

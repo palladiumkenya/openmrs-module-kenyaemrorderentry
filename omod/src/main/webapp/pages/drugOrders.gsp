@@ -51,6 +51,7 @@ th,td{
     window.OpenMRS.drugOrdersConfig = ${ jsonConfig };
     window.sessionContext = {'locale':'en_GB'}
     window.OpenMRS.orderSet=${orderSetJson}
+    window.OpenMRS.labTestJsonPayload=${labTestJsonPayload}
 </script>
 
 ${ ui.includeFragment("appui", "messages", [ codes: [
@@ -79,10 +80,10 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
         <div class="ui-tabs-panel ui-widget-content">
             <form>
             <h3>Lab Orders</h3>
-                <table class="table">
+                <table class="table col-lg-12">
                     <tbody>
                     <tr>
-                        <td class="col-md-3">
+                        <td class="col-lg-3">
                             <div class="list-group">
                                 <div class="list-group-item" ng-repeat="lab in labOrders" ng-click="loadLabPanels(lab)">
                                     <div class="link-item">
@@ -103,8 +104,10 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                                 <div class="list-group-item" ng-repeat="order in filteredOrders" >
                                     <div class="link-item">
                                         <button type="button" ng-click="deselectedOrder(order)">
-                                            {{order.name}}<span class="glyphicon glyphicon-remove"></span>
+                                            {{order.name}}
                                         </button>
+                                        <a><span class="glyphicon glyphicon-remove link" style="color:red;
+                                        padding-left: 1em; cursor: pointer" ></span></a>
                                     </div>
 
 
@@ -114,16 +117,16 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                             </div>
                          </div>
                         </td>
-                        <td>
-                            <div>
-                                <fieldset class="scheduler-border">
-                                    <legend class="scheduler-border">Panels</legend>
+                        <td class="col-lg-12">
+                            <div class="col-lg-12">
+                                <fieldset class="col-lg-12 scheduler-border">
+                                    <legend class="col-lg-12 scheduler-border">Panels</legend>
                                     <div class="row">
-                                        <div class="col-md-12">
+                                        <div class="col-lg-12">
                                             <ul>
                                                 <li ng-repeat="panel in labPanels"  ng-click="loadLabPanelTests(panel)">
                                                     <button type="button" class="column">
-                                                        {{panel.panel_name}}</button>
+                                                        {{panel.name}}</button>
                                                 </li>
                                             </ul>
                                         </div>
@@ -133,11 +136,11 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                                 </fieldset>
                             </div>
 
-                            <div>
-                                <fieldset class="scheduler-border">
-                                    <legend class="scheduler-border"> Tests</legend>
+                            <div class="col-lg-12">
+                                <fieldset class="col-lg-12 scheduler-border">
+                                    <legend class="col-lg-12 scheduler-border"> Tests</legend>
                                     <div class="row">
-                                        <div class="col-md-12">
+                                        <div class="col-lg-12">
                                             <div ng-repeat="test in panelTests" ng-click="getSelectedTests(test)">
                                                 <div class="column">
                                                     <input type="checkbox" id="scales" name="feature" ng-model='test.selected'
@@ -192,7 +195,6 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                 </table>
             </div>
             </div>
-
 
 
             <h3>Drug Order Types</h3>
