@@ -228,43 +228,38 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                  <th width="50%">Instructions</th>
                  <th width="20%">Action</th>
                 </tr>
-                <tr ng-repeat="order in drugOrdersTest.order_groups">
+                <tr ng-repeat="order in patientActiveDrugOrders.order_groups">
                     <td ng-class="{ 'will-replace': replacementFor(order) }">
                         {{ order.date }}
                     </td>
                     <td ng-class="{ 'will-replace': replacementFor(order) }">
-                        {{ order.instructions }}
+                        {{ order.name}}
                     </td>
                 </tr>
             </table>
             <h5>Single Drugs</h5>
             <span ng-show="activeDrugOrders.loading">${ ui.message("uicommons.loading.placeholder") }</span>
-            <span ng-hide="activeDrugOrders.loading || activeDrugOrders.length > 0">None</span>
-            <table ng-hide="activeDrugOrders.loading" class="ke-table-vertical">
-                <tr>
-                 <th width="30%">Dates</th>
-                 <th width="50%">Instructions</th>
-                 <th width="20%">Action</th>
-                </tr>
-                <tr ng-repeat="order in drugOrdersTest.single_drugs">
-                    <td ng-class="{ 'will-replace': replacementFor(order) }">
-                        {{ order.date }}
-                    </td>
-                    <td ng-class="{ 'will-replace': replacementFor(order) }">
-                        {{ order.instructions }}
-                    </td>
-                    <td>
-                        <a ng-show="!replacementFor(order)" ng-click="reviseOrder(order)">
-                            <button><img src="${ ui.resourceLink("kenyaui", "images/glyphs/edit.png") }" /> Edit</button>
-                        </a>
-                        <a ng-show="!replacementFor(order)" ng-click="discontinueOrder(order)">
-                            <button><img src="${ ui.resourceLink("kenyaui", "images/glyphs/cancel.png") }" /> Cancel</button>
-                        </a>
-                        <span ng-show="replacementFor(order)">
-                            will {{ replacementFor(order).action }}
-                        </span>
-                    </td>
-                </tr>
+                        <span ng-hide="activeDrugOrders.loading || activeDrugOrders.length > 0">None</span>
+                        <table ng-hide="activeDrugOrders.loading">
+                            <tr ng-repeat="order in activeDrugOrders">
+                                <td ng-class="{ 'will-replace': replacementFor(order) }">
+                                    {{ order | dates }}
+                                </td>
+                                <td ng-class="{ 'will-replace': replacementFor(order) }">
+                                    {{ order | instructions }}
+                                </td>
+                                <td class="actions">
+                                    <a ng-show="!replacementFor(order)" ng-click="reviseOrder(order)">
+                                        <i class="icon-pencil edit-action"></i>
+                                    </a>
+                                    <a ng-show="!replacementFor(order)" ng-click="discontinueOrder(order)">
+                                        <i class="icon-remove delete-action"></i>
+                                    </a>
+                                    <span ng-show="replacementFor(order)">
+                                        will {{ replacementFor(order).action }}
+                                    </span>
+                                </td>
+                            </tr>
             </table>
 
             <h3>Past Drug Orders</h3>

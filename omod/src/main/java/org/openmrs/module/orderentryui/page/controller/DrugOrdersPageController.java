@@ -72,7 +72,7 @@ public class DrugOrdersPageController {
             DrugOrder drugOrder=(DrugOrder)order;
             if(order.getOrderGroup()!=null){
                 if(order.getOrderGroup().getOrderGroupId()==previousOrderGroupId){
-                    //continue;
+                    continue;
                 }
                 else{
                     orderObj = new JSONObject();
@@ -89,7 +89,7 @@ public class DrugOrdersPageController {
                 orderObj.put("orderNumber", order.getOrderNumber());
                 orderObj.put("concept", convertToFull(order.getConcept()));
                 orderObj.put("careSetting", convertToFull(order.getCareSetting()));
-                orderObj.put("dateActivated", "2018-09-12");
+                orderObj.put("dateActivated", order.getDateActivated().toString());
                 orderObj.put("encounter", convertToFull(order.getEncounter()));
                 orderObj.put("orderer", convertToFull(order.getOrderer()));
                 orderObj.put("drug", convertToFull(drugOrder.getDrug()));
@@ -106,8 +106,7 @@ public class DrugOrdersPageController {
         JSONObject activeOrdersResponse=new JSONObject();
         activeOrdersResponse.put("order_groups",orderGroupArray);
         activeOrdersResponse.put("single_drugs",orderArray);
-        System.out.println("activeordersResponse++++++++++++++++++++++++" + activeOrdersResponse.toString());
-        model.put("activeOrdersResponse",activeOrdersResponse.toString());
+        model.put("activeOrdersResponse",ui.toJson(activeOrdersResponse));
     }
 
     private Object convertTo(Object object, Representation rep) {
