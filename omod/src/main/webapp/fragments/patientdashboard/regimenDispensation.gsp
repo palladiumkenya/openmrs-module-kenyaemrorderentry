@@ -10,94 +10,20 @@ ui.includeJavascript("orderentryui", "regimenDispensation.js")
     var provider = OpenMRS.drugOrdersConfig.provider.uuid;
 var selectedRegComponents;
 jq(document).ready(function(){
-var regimen=[];
-    items = { '5' : 'Once daily', '4' : 'Once daily, at bedtime',
-    '1' : 'Once daily, in the evening', '2' : 'Once daily, in the morning',
-'3' : 'Twice daily','TDS' : 'Thrice daily'};
-    var units = { '161553' : 'mg','162263' : 'ml','161554':'grams','1513' : 'tab'};
-    var quantityUnits = {'161553' : 'mg','162263' : 'ml','161554':'grams','1513' : 'tab'};
-jq(document).on("click", ".regimen-item2", function() {
-jq("li.regimen-item").removeClass("active");
-jq(this).addClass("active");
-jq("#drug-order-group").removeClass("hide-section");
-selectedRegComponents ="";
-    selectedRegComponents = jq(this).text().trim();
-    jq('#share').html("");
-     console.log("this is selected value: " + selectedRegComponents);
-     console.log("regimen payload  "+JSON.stringify(regimen));
-    var nextRowID = 0;
-        for (var c = 0; c < regimen.length; c++) {
-          component = regimen[c].name;
-          console.log("component is "+component);
-         if(selectedRegComponents == component) {
-         jq("#saveButton").show();
-         jq("#cancelButton").show();
-            console.log("selectedRegComponents is equal to component");
-            jq.grep(regimen[c].components, function(item){
-    jq(function() {
-         nextRowID = nextRowID + 1;
-
-    jq('#share').append(
-    jq('<label />', { class: 'appm', text: 'Drugs:' }),
-    jq('<input />', { id: 'drugs_'+nextRowID, name: 'drugs', placeholder: 'Name', type: 'text',readonly:'readonly' }).val ( item.name ),
-    jq('<label /> ', { class: 'appm', text: 'Dosage:' }),
-    jq('<input />', { id: 'doses_'+nextRowID, name: 'doses', placeholder: 'doses', type: 'number' }).val ( item.dose ),
-
-    //    jq('<label />', { class: 'appm', text: 'Units:' }),
-
-        ddlUnits =jq('<select />', { id: 'units_'+nextRowID, name: 'units', placeholder: 'units', type: 'text' }),
-        jq.each(units, function(text, key) {
-            option = new Option(key, text);
-            if(text == item.units) {
-                option.setAttribute('selected', true) ;
-
-            }
-            ddlUnits.append(jq(option));
-
-        }),
-
-    jq('<label />', { class: 'appm', text: 'Frequency:' }),
-
-    ddlFrequency =jq('<select />', { id: 'frequency_'+nextRowID, name: 'frequency', placeholder: 'frequency', type: 'text' }),
-    jq.each(items, function(text, key) {
-     option = new Option(key, text);
-    if(text == item.frequency) {
-     option.setAttribute('selected', true) ;
-
-    }
-    ddlFrequency.append(jq(option));
-
-    }),
-        jq('<label /> ', { class: 'appm', text: 'Quantity:' }),
-        jq('<input />', { id: 'quantity_'+nextRowID, name: 'quantity', placeholder: 'quantity', type: 'number' }),
-
-        ddlQuantityUnits =jq('<select />', { id: 'quantityUnits_'+nextRowID, name: 'units', placeholder: 'units', type: 'text' }),
-        jq.each(quantityUnits, function(text, key) {
-            option = new Option(key, text);
-            ddlQuantityUnits.append(jq(option));
-
-        }),
-
-        jq('<br />')
-    )
-
-    });
-
-            });
-
-          }
-
-        }
-    });
 jq(document).on("click", "li.program-line", function() {
   jq("li.program-line").removeClass("active");
   jq(this).addClass("active");
   jq("#drug-order-group").addClass("hide-section");
 });
-jq(document).on("click", "li.regimen-line2", function() {
+jq(document).on("click", "li.regimen-line", function() {
   jq("li.regimen-line").removeClass("active");
   jq(this).addClass("active");
   jq("#drug-order-group").addClass("hide-section");
+});
+jq(document).on("click", "li.regimen-item", function() {
+  jq("li.regimen-item").removeClass("active");
+  jq(this).addClass("active");
+  jq("#drug-order-group").removeClass("hide-section");
 });
 jq('#saveOrder').click(function(){
 console.log("drugOrderMembers+++++++++++++++++++++++"+JSON.stringify(drugOrderMembers));
@@ -120,80 +46,6 @@ jq.getJSON('${ ui.actionLink("orderentryui", "patientdashboard/regimenDispensati
         console.log("status: "+JSON.stringify(err));
     })
 });
-
-var doses;
-var frequency;
-var drugs;
-var drugPayload = [];
-var payload = {};
-var quantities;
-var quantity_units;
-
-
-    jq('#saveButton2').click(function() {
-     //   actionLink("yourmoduleid", "encountersToday", "getEncounters");
-        drugPayload = [];
-        var rowID = 0;
-         //var   selectedRegComponents = jq(".regComponents option:selected").val();
-         var obj;
-            for (var c = 0; c < regimen.length; c++) {
-               var component = regimen[c].name;
-
-                if (selectedRegComponents == component) {
-                    jq.grep(regimen[c].components, function (item) {
-
-                            rowID = rowID + 1;
-
-                            doses = jq("#doses_"+rowID).val();
-                            dose_units = jq("#units_"+rowID).val();
-                            drugs = item.drug_id;
-                            frequency = jq("#frequency_"+rowID).val();
-
-                            quantities = jq("#quantity_"+rowID).val();
-                            quantity_units = jq("#quantityUnits_"+rowID).val();
-                            obj = {
-                                "frequency" :frequency,
-                                "drug" :drugs,
-                                "dose" :doses,
-                                "dose_unit":dose_units,
-                                "quantity":quantities,
-                                "quantity_unit":quantity_units
-
-
-                            };
-
-                        drugPayload.push(obj);
-
-
-                    });
-
-
-                }
-            }
-        payload = {
-            "patient": patient,
-            "provider":provider,
-            "drugs":drugPayload
-
-        };
-        console.log('payload=======', JSON.stringify(payload));
-
-
-        jq.getJSON('${ ui.actionLink("orderentryui", "patientdashboard/regimenDispensation", "saveOrderGroup") }',
-            {
-                'payload': JSON.stringify(payload)
-            })
-            .success(function(data) {
-                console.log('payload submitted successfully');
-
-            })
-            .error(function(xhr, status, err) {
-                console.log('AJAX error ' + JSON.stringify(xhr));
-                console.log("status: "+JSON.stringify(err));
-            })
-
-    });
-
 });
 </script>
 <div class="row panel panel-default">
@@ -215,31 +67,30 @@ var quantity_units;
   <div ng-show="activeRegimens.length > 0" style="border-style:solid;border-color:gray;padding:10px;margin-top:10px;">
   <h3 style="margin-top:5px;">Regimens</h3>
       <ul class="list-group" style="display:inline;">
-      <li class="button regimen-item" ng-repeat="regimen in activeRegimens" style="margin:2px;"
+      <li class="button regimen-item" ng-repeat="regimen in activeRegimens" style="margin:2px;width:200px;"
       ng-click="setRegimenMembers(regimen.components)">
       {{regimen.name}}
       </li>
       </ul>
   </div>
-  <div ng-show="components.length > 0" style="border-style:solid;border-color:gray;padding:10px;margin-top:10px;">
+  <div id="drug-order-group" ng-show="components.length > 0" style="border-style:solid;border-color:gray;padding:10px;margin-top:10px;">
   <h3 style="margin-top:5px;">Drug Order Sets</h3>
   <div ng-repeat="component in components"  class="box-body" style="padding-top: 10px">
-  Drug: <input ng-model="component.name" >
-  Dose:<input ng-model="component.dose" >
+  Drug: <input ng-model="component.name" readonly="">
+  Dose:<input ng-model="component.dose" size="5">
   Units:<select ng-model="component.units">
    <option ng-repeat="unit in doseUnits" value="{{unit.uuid}}">{{unit.display}}</option>
    </select>
   Frequency:<select ng-model="component.frequency">
    <option ng-repeat="freq in frequencies" value="{{freq.uuid}}">{{freq.display}}</option>
    </select>
-  Quantity: <input ng-model="component.quantity" >
+  Quantity: <input ng-model="component.quantity" size="5">
   Units:<select ng-model="component.units_uuid">
      <option ng-repeat="unit in doseUnits" value="{{unit.uuid}}">{{unit.display}}</option>
      </select>
   </div>
-var dose_units;
   <div style="padding-top: 10px">
-      <button ng-click="saveOrderSet(components)" id="saveOrder"><img src="${ ui.resourceLink("kenyaui", "images/glyphs/ok.png") }" /> Save</button>
+      <button ng-click="saveOrderSet(components)" id="saveOrder" style="width:250px;"><img src="${ ui.resourceLink("kenyaui", "images/glyphs/ok.png") }" /> Save</button>
   </div>
   </div>
   </div>

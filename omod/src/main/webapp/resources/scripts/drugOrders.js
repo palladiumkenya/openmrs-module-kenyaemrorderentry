@@ -75,9 +75,14 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                     patient: config.patient.uuid,
                     careSetting: $scope.careSetting.uuid
                 }).then(function(results) {
-                    $scope.activeDrugOrders = _.map(results, function(item) { return new OpenMRS.DrugOrderModel(item) });
+                    $scope.order_groups=[];
+                    $scope.single_drugs=[];
+                    console.log("order results++++++++++++++++++++++++++++++"+JSON.stringify(results));
+                    $scope.activeDrugOrders = _.map(results, function(item) {
+                    return new OpenMRS.DrugOrderModel(item) });
                     $scope.programs=programRegimens;
                     $scope.regimenLines=$scope.programs.programs[0].regimen_lines;
+                    $scope.drugOrdersTest=activeDrugOrdersTest;
                 });
 
                 $scope.pastDrugOrders = { loading: true };

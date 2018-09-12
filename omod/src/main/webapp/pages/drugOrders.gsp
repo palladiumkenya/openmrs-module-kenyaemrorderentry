@@ -1,5 +1,5 @@
 <%
-    ui.decorateWith("kenyaemr", "standardPage", [ patient: currentPatient, layout: "sidebar" ])
+    ui.decorateWith("kenyaemr", "standardPage", [ patient: currentPatient ])
     ui.includeJavascript("uicommons", "emr.js")
     ui.includeJavascript("uicommons", "angular.min.js")
     ui.includeJavascript("uicommons", "angular-app.js")
@@ -46,7 +46,7 @@ th,td{
 }
 .regimen {
     float: left;
-    width: 75%;
+    width: 78%;
     padding: 10px;
     display: block;
     margin: auto;
@@ -77,13 +77,30 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
     window.OpenMRS = window.OpenMRS || {};
     window.OpenMRS.drugOrdersConfig = ${ jsonConfig };
     window.sessionContext = {'locale':'en_GB'}
-    window.OpenMRS.drugDispensePayload=${dispensePayload};
+    window.OpenMRS.activeOrdersPayload=${activeOrdersResponse};
+    window.activeDrugOrdersTest={
+     "order_groups":[
+     {
+       "instructions":"TDF + 3TC + NVP (300mg OD/150mg BD/200mg BD)",
+       "date":"2018-09-11"
+     },
+     {
+        "instructions":"AZT + 3TC + EFV (300mg BD/150mg BD/600mg NOCTE)",
+        "date":"2018-09-11"
+     }
+          ],
+     "single_drugs":[
+     {
+        "instructions":"TDF: 300 Capsule, Twice daily, Oral (Dispense: 60 Capsule) ",
+        "date":"2018-09-11"
+     },
+     {
+        "instructions":"Pyrazinamide (400mg): 2 Capsule, Twice daily, Oral (Dispense: 60 Capsule) ",
+        "date":"2018-09-11"
+     }
+     ]
+    }
 </script>
-<div class="ke-page-sidebar">
-    <div class="ke-panel-frame">
-        ${ ui.includeFragment("kenyaui", "widget/panelMenuItem", [ iconProvider: "kenyaui", icon: "buttons/back.png", label: "Back", href: "" ]) }
-    </div>
-</div>
 <div class="ke-page-content">
 <div id="drug-orders-app" ng-controller="DrugOrdersCtrl" ng-init='init()'>
     <div class="ui-tabs">
@@ -196,11 +213,6 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
             <div>
             ${ ui.includeFragment("orderentryui", "patientdashboard/regimenDispensation", ["patient": patient]) }
             </div>
-
-            <h3>Patient Current Regimen</h3>
-              <div>
-                   ${ ui.includeFragment("orderentryui", "patientdashboard/currentRegimen", ["patient": patient]) }
-              </div>
             <!--
             <h3>Active Drug Orders (gsp)</h3>
             <div>
@@ -209,6 +221,23 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
             -->
 
             <h3>Active Drug Orders</h3>
+            <h5>Drug Groups</h5>
+            <table ng-hide="activeDrugOrders.loading" class="ke-table-vertical">
+                <tr>
+                 <th width="30%">Dates</th>
+                 <th width="50%">Instructions</th>
+                 <th width="20%">Action</th>
+                </tr>
+                <tr ng-repeat="order in drugOrdersTest.order_groups">
+                    <td ng-class="{ 'will-replace': replacementFor(order) }">
+                        {{ order.date }}
+                    </td>
+                    <td ng-class="{ 'will-replace': replacementFor(order) }">
+                        {{ order.instructions }}
+                    </td>
+                </tr>
+            </table>
+            <h5>Single Drugs</h5>
             <span ng-show="activeDrugOrders.loading">${ ui.message("uicommons.loading.placeholder") }</span>
             <span ng-hide="activeDrugOrders.loading || activeDrugOrders.length > 0">None</span>
             <table ng-hide="activeDrugOrders.loading" class="ke-table-vertical">
@@ -217,12 +246,12 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                  <th width="50%">Instructions</th>
                  <th width="20%">Action</th>
                 </tr>
-                <tr ng-repeat="order in activeDrugOrders">
+                <tr ng-repeat="order in drugOrdersTest.single_drugs">
                     <td ng-class="{ 'will-replace': replacementFor(order) }">
-                        {{ order | dates }}
+                        {{ order.date }}
                     </td>
                     <td ng-class="{ 'will-replace': replacementFor(order) }">
-                        {{ order | instructions }}
+                        {{ order.instructions }}
                     </td>
                     <td>
                         <a ng-show="!replacementFor(order)" ng-click="reviseOrder(order)">

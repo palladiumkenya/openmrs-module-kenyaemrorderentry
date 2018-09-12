@@ -48,30 +48,52 @@ public class DrugOrdersPageController {
         JSONObject orderSetObj,orderSetMember;
         JSONArray orderSetArray=new JSONArray();
 
-        /*for(OrderSet orderSet:orderSetsList){
-            orderSetObj=new JSONObject();
-            orderSetObj.put("name", orderSet.getName());
-            orderSetObj.put("regimen_line", orderSet.getDescription());
-            JSONArray membersArray=new JSONArray();
-            for(OrderSetMember member:orderSet.getOrderSetMembers()){
-                orderSetMember=new JSONObject();
-                if(member !=null){
-                    String[] template=member.getOrderTemplate().split(",");
-                    orderSetMember.put("name",template[0]);
-                    orderSetMember.put("drug_id",template[4]);
-                    orderSetMember.put("dose",template[1]);
-                    orderSetMember.put("units",template[2]);
-                    orderSetMember.put("units_uuid",template[5]);
-                    orderSetMember.put("frequency",template[3]);
-                    membersArray.add(orderSetMember);
+        OrderType drugOrders = orderService.getOrderTypeByUuid(OrderType.DRUG_ORDER_TYPE_UUID);
+        List<Order> activeDrugOrders = orderService.getActiveOrders(patient, drugOrders, null, null);
+        JSONObject orderObj;
+        JSONArray orderGroupArray=new JSONArray();
+        JSONArray orderArray=new JSONArray();
+        int previousOrderGroupId=0;
+        for(Order order:activeDrugOrders){
+            DrugOrder drugOrder=(DrugOrder)order;
+            if(order.getOrderGroup()!=null){
+                if(order.getOrderGroup().getOrderGroupId()==previousOrderGroupId){
+                    continue;
+                }
+                else{
+                    orderObj = new JSONObject();
+                    OrderSet orderSet=order.getOrderGroup().getOrderSet();
+                    orderObj.put("name",orderSet.getName());
+                    orderObj.put("date",order.getDateActivated());
+                    orderGroupArray.add(orderObj);
+                    previousOrderGroupId=order.getOrderGroup().getOrderGroupId();
                 }
             }
-            orderSetObj.put("components", membersArray);
-            orderSetArray.add(orderSetObj);
+            else {
+                orderObj = new JSONObject();
+                orderObj.put("uuid", order.getUuid());
+                orderObj.put("orderNumber", order.getOrderNumber());
+                orderObj.put("patient", convertToFull(order.getPatient()));
+                orderObj.put("concept", convertToFull(order.getConcept()));
+                orderObj.put("careSetting", convertToFull(order.getCareSetting()));
+                orderObj.put("dateActivated", order.getDateActivated());
+                orderObj.put("encounter", convertToFull(order.getEncounter()));
+                orderObj.put("orderer", convertToFull(order.getOrderer()));
+                orderObj.put("drug", convertToFull(drugOrder.getDrug()));
+                orderObj.put("dosingType", drugOrder.getDosingType());
+                orderObj.put("dose", drugOrder.getDose());
+                orderObj.put("doseUnits", convertToFull(drugOrder.getDoseUnits()));
+                orderObj.put("frequency", convertToFull(drugOrder.getFrequency()));
+                orderObj.put("quantity", drugOrder.getQuantity());
+                orderObj.put("quantityUnits", convertToFull(drugOrder.getQuantityUnits()));
+                orderObj.put("route", convertToFull(drugOrder.getRoute()));
+                orderArray.add(orderObj);
+            }
         }
-        JSONObject response=new JSONObject();
-        response.put("orderSets", orderSetArray);
-        model.put("orderSetJson", response.toString());*/
+        JSONObject activeOrdersResponse=new JSONObject();
+        activeOrdersResponse.put("order_groups",orderGroupArray);
+        activeOrdersResponse.put("single_drugs",orderArray);
+        model.put("activeOrdersResponse",activeOrdersResponse);
 
         Map<String, Object> jsonConfig = new LinkedHashMap<String, Object>();
         jsonConfig.put("patient", convertToFull(patient));
