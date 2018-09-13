@@ -221,7 +221,7 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
             -->
 
             <h3>Active Drug Orders</h3>
-            <h5>Drug Groups</h5>
+            <h5 style="margin:5px;">Group Drug Orders</h5>
             <table ng-hide="activeDrugOrders.loading" class="ke-table-vertical">
                 <tr>
                  <th width="30%">Dates</th>
@@ -235,31 +235,39 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                     <td ng-class="{ 'will-replace': replacementFor(order) }">
                         {{ order.name}}
                     </td>
+                    <td>
+                    <button ng-click="editOrderGroup(order.name)" id="editOrder">Edit</button>
+                    </td>
                 </tr>
             </table>
-            <h5>Single Drugs</h5>
+            <h5 style="margin:5px;">Single Drug Orders</h5>
             <span ng-show="activeDrugOrders.loading">${ ui.message("uicommons.loading.placeholder") }</span>
-                        <span ng-hide="activeDrugOrders.loading || activeDrugOrders.length > 0">None</span>
-                        <table ng-hide="activeDrugOrders.loading">
-                            <tr ng-repeat="order in activeDrugOrders">
-                                <td ng-class="{ 'will-replace': replacementFor(order) }">
-                                    {{ order | dates }}
-                                </td>
-                                <td ng-class="{ 'will-replace': replacementFor(order) }">
-                                    {{ order | instructions }}
-                                </td>
-                                <td class="actions">
-                                    <a ng-show="!replacementFor(order)" ng-click="reviseOrder(order)">
-                                        <i class="icon-pencil edit-action"></i>
-                                    </a>
-                                    <a ng-show="!replacementFor(order)" ng-click="discontinueOrder(order)">
-                                        <i class="icon-remove delete-action"></i>
-                                    </a>
-                                    <span ng-show="replacementFor(order)">
-                                        will {{ replacementFor(order).action }}
-                                    </span>
-                                </td>
-                            </tr>
+            <span ng-hide="activeDrugOrders.loading || activeDrugOrders.length > 0">None</span>
+            <table ng-hide="activeDrugOrders.loading" class="ke-table-vertical">
+                <tr>
+                 <th width="30%">Dates</th>
+                 <th width="50%">Instructions</th>
+                 <th width="20%">Action</th>
+                </tr>
+                <tr ng-repeat="order in activeDrugOrders">
+                    <td ng-class="{ 'will-replace': replacementFor(order) }">
+                        {{ order | dates }}
+                    </td>
+                    <td ng-class="{ 'will-replace': replacementFor(order) }">
+                        {{ order | instructions }}
+                    </td>
+                    <td class="actions">
+                        <a ng-show="!replacementFor(order)" ng-click="reviseOrder(order)">
+                            <i class="icon-pencil edit-action"></i>
+                        </a>
+                        <a ng-show="!replacementFor(order)" ng-click="discontinueOrder(order)">
+                            <i class="icon-remove delete-action"></i>
+                        </a>
+                        <span ng-show="replacementFor(order)">
+                            will {{ replacementFor(order).action }}
+                        </span>
+                    </td>
+                </tr>
             </table>
 
             <h3>Past Drug Orders</h3>

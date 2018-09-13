@@ -25,6 +25,10 @@ jq(document).on("click", "li.regimen-item", function() {
   jq(this).addClass("active");
   jq("#drug-order-group").removeClass("hide-section");
 });
+jq('#editOrder').click(function(){
+    jq("#drug-order-group").removeClass("hide-section");
+});
+}
 jq('#saveOrder').click(function(){
 console.log("drugOrderMembers+++++++++++++++++++++++"+JSON.stringify(drugOrderMembers));
 payload = {
