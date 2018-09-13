@@ -75,7 +75,6 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                     patient: config.patient.uuid,
                     careSetting: $scope.careSetting.uuid
                 }).then(function(results) {
-                    console.log("activeOrderset results+++++++++++++++++++++++"+JSON.stringify(results));
                     $scope.activeDrugOrders = _.map(OpenMRS.activeOrdersPayload.single_drugs, function(item) {
                     return new OpenMRS.DrugOrderModel(item) });
                     $scope.programs=programRegimens;
@@ -244,9 +243,11 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
             $scope.activeRegimens=[];
              $scope.activeRegimens=regimens;
             }
-            $scope.setRegimenMembers=function(members){
+            $scope.setRegimenMembers=function(regimen){
+            console.log("regimen selected++++++++++++++++++++"+JSON.stringify(regimen));
               $scope.components=[];
-              $scope.components=members;
+              $scope.components=regimen.components;
+              orderSetId=regimen.orderSetId;
             }
             $scope.setRegimenLines=function(regimenLine){
               $scope.regimenLines=[];
@@ -254,6 +255,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
               $scope.regimenLines=regimenLine;
             }
             window.drugOrderMembers=[];
+            window.orderSetSelected={};
             $scope.saveOrderSet=function(orderset){
             drugOrderMembers=orderset;
             }

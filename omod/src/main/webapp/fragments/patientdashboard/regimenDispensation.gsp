@@ -30,7 +30,8 @@ console.log("drugOrderMembers+++++++++++++++++++++++"+JSON.stringify(drugOrderMe
 payload = {
             "patient": patient,
             "provider":provider,
-            "drugs":drugOrderMembers
+            "drugs":drugOrderMembers,
+            "orderSetId":orderSetId
 
         };
 jq.getJSON('${ ui.actionLink("orderentryui", "patientdashboard/regimenDispensation", "saveOrderGroup") }',
@@ -68,7 +69,7 @@ jq.getJSON('${ ui.actionLink("orderentryui", "patientdashboard/regimenDispensati
   <h3 style="margin-top:5px;">Regimens</h3>
       <ul class="list-group" style="display:inline;">
       <li class="button regimen-item" ng-repeat="regimen in activeRegimens" style="margin:2px;width:200px;"
-      ng-click="setRegimenMembers(regimen.components)">
+      ng-click="setRegimenMembers(regimen)">
       {{regimen.name}}
       </li>
       </ul>

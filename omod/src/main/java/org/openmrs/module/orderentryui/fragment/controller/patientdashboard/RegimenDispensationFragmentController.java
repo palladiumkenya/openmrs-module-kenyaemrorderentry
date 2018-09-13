@@ -30,6 +30,7 @@ public class RegimenDispensationFragmentController {
                                @SpringBean("providerService") ProviderService providerService,
                                @SpringBean("orderSetService") OrderSetService orderSetService,
                                @RequestParam("payload") String payload) throws ParseException {
+        System.out.println("payload++++++++++++++++++++++++++++++"+payload.toString());
         OrderGroup orderGroup=new OrderGroup();
         JSONParser parser=new JSONParser();
         Object object=parser.parse(payload);
@@ -38,6 +39,7 @@ public class RegimenDispensationFragmentController {
         String providerUuid=orderContext.get("provider").toString();
         JSONArray drugGroupOrder=(JSONArray)orderContext.get("drugs");
         Patient patient = patientService.getPatientByUuid(patientUuid);
+        String orderSetId=orderContext.get("orderSetId").toString();
 
         Encounter encounter = new Encounter();
         EncounterType encounterType=encounterService.getEncounterTypeByUuid("7df67b83-1b84-4fe2-b1b7-794b4e9bfcc3");
@@ -81,7 +83,7 @@ public class RegimenDispensationFragmentController {
 
         orderGroup.setEncounter(encounter);
         orderGroup.setPatient(patient);
-        OrderSet orderSet=orderSetService.getOrderSet(1);
+        OrderSet orderSet=orderSetService.getOrderSet(Integer.valueOf(orderSetId));
         orderGroup.setOrderSet(orderSet);
         orderGroup.setOrders(orderList);
         orderService.saveOrderGroup(orderGroup);
