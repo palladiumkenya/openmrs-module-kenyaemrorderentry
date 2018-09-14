@@ -267,6 +267,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                        if(regimen.name===orderGroup){
                         console.log("regimen to edit++++++++++++++++++++"+JSON.stringify(regimen));
                         $scope.components=regimen.components;
+                        orderSetId=regimen.orderSetId;
                        }
                     });
                 });
