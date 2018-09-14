@@ -1,5 +1,5 @@
 <%
-    ui.decorateWith("kenyaemr", "standardPage", [ patient: currentPatient, layout: "sidebar" ])
+    ui.decorateWith("kenyaemr", "standardPage", [ patient: currentPatient])
     ui.includeJavascript("uicommons", "emr.js")
     ui.includeJavascript("uicommons", "angular.min.js")
     ui.includeJavascript("uicommons", "angular-app.js")
@@ -52,17 +52,15 @@ th,td{
     window.sessionContext = {'locale':'en_GB'}
     window.OpenMRS.orderSet=${orderSetJson}
     window.OpenMRS.labTestJsonPayload=${labTestJsonPayload}
+    window.OpenMRS.panelList=${panelList}
+
 </script>
 
 ${ ui.includeFragment("appui", "messages", [ codes: [
         "orderentryui.pastAction.REVISE",
         "orderentryui.pastAction.DISCONTINUE"
 ] ])}
-<div class="ke-page-sidebar">
-    <div class="ke-panel-frame">
-        ${ ui.includeFragment("kenyaui", "widget/panelMenuItem", [ iconProvider: "kenyaui", icon: "buttons/back.png", label: "Back", href: "" ]) }
-    </div>
-</div>
+
 <div class="ke-page-content">
 <div id="drug-orders-app" ng-controller="DrugOrdersCtrl" ng-init='init()'>
     <div class="ui-tabs">
@@ -97,9 +95,13 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                             </div>
 
                          <div style="padding-top:10px">
-                            <h5>Selected Order</h5>
-                             <div class="panel">
-                                 <div class="panel-body">
+                             <div class="card">
+                                 <div class = "card-header">
+                                     <h5 class = "card-title">
+                                         Selected Order
+                                     </h5>
+                                 </div>
+                                 <div class="card-body">
                             <div class="list-group">
                                 <div class="list-group-item" ng-repeat="order in filteredOrders" >
                                     <div class="link-item">
@@ -167,6 +169,86 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                 </div>
 
             </form>
+            <div>
+
+
+
+                <div>
+        <div class="row">
+            <div class="col-lg-12">
+                <form class="form-horizontal">
+                    <div  style="padding-top: 45px">
+                        <div class = "card">
+                            <div class = "card-header">
+                                <h4 class = "card-title">
+                                    Lab Results
+                                </h4>
+                            </div>
+
+                            <div class = "card-body">
+                                <div ng-repeat="control in panelListResults">
+                                    <div class="column">
+
+                                    <div ng-if="control.rendering === 'select'" >
+                                        <div class="form-group row">
+                                        <label class="col-lg-2">{{control.label}}:</label>
+                                        <div class="col-lg-4">
+                                        <select class="form-control" ng-model="typeValues[control.orderId]" >
+                                            <option ng-repeat=" o in control.answers"
+                                                    ng-value="o.concept">{{o.label}}
+                                            </option>
+                                        </select>
+                                        </div>
+                                        </div>
+                                    </div>
+
+                                    <div ng-if="control.rendering === 'inputtext'">
+                                        <div class="form-group row">
+                                        <label class="col-lg-2">{{control.label}}:</label>
+                                            <div class="col-lg-4">
+                                        <input class="form-control" type="text" ng-model="typeValues[control.orderId]" >
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div ng-if="control.rendering === 'inputnumeric'">
+                                        <div class="form-group row">
+                                        <label class="col-lg-2">{{control.label}}:</label>
+                                            <div class="col-lg-4">
+                                        <input class="form-control" type="number" ng-model="typeValues[control.orderId]">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div ng-if="control.rendering === 'textarea'">
+                                        <div class="form-group row">
+                                        <label class="col-lg-2">{{control.label}}:</label>
+                                            <div class="col-lg-4">
+                                        <textarea  class="form-control">
+                                        </textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    </div>
+
+
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="padding-left: 50%">
+                        <button type="button"  ng-click="postLabOrderResults()">
+                            Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+            </div>
+
+            </div>
+
+
             <div style="padding-top: 10px">
             <div class="table-responsive" >
                 <table ng-hide="activeDrugOrders.loading" class="table table-striped">
