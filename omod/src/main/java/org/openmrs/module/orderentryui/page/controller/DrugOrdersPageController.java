@@ -64,21 +64,35 @@ public class DrugOrdersPageController {
 
         OrderType drugOrders = orderService.getOrderTypeByUuid(OrderType.DRUG_ORDER_TYPE_UUID);
         List<Order> activeDrugOrders = orderService.getActiveOrders(patient, drugOrders, null, null);
-        JSONObject orderObj;
+        JSONObject orderObj,component;
         JSONArray orderGroupArray=new JSONArray();
         JSONArray orderArray=new JSONArray();
+        JSONArray components=new JSONArray();
         int previousOrderGroupId=0;
         for(Order order:activeDrugOrders){
             DrugOrder drugOrder=(DrugOrder)order;
             if(order.getOrderGroup()!=null){
+                component=new JSONObject();
+                component.put("name", drugOrder.getDrug().getName());
+                component.put("dose", drugOrder.getDose().toString());
+                component.put("units", convertToFull(order.getConcept()));
+                component.put("units_uuid", convertToFull(order.getCareSetting()));
+                component.put("frequency", order.getDateActivated().toString());
+                component.put("drug_id", convertToFull(order.getEncounter()));
                 if(order.getOrderGroup().getOrderGroupId()==previousOrderGroupId){
+                    components.add(component);
                     continue;
                 }
                 else{
                     orderObj = new JSONObject();
+                    components=new JSONArray();
+                    components.add(component);
                     OrderSet orderSet=order.getOrderGroup().getOrderSet();
                     orderObj.put("name",orderSet.getName());
                     orderObj.put("date",order.getDateActivated().toString());
+                    orderObj.put("orderGroupUuId",order.getUuid());
+                    orderObj.put("orderSetId",orderSet.getOrderSetId());
+                    orderObj.put("components", components);
                     orderGroupArray.add(orderObj);
                     previousOrderGroupId=order.getOrderGroup().getOrderGroupId();
                 }

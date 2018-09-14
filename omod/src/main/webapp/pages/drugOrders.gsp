@@ -78,28 +78,6 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
     window.OpenMRS.drugOrdersConfig = ${ jsonConfig };
     window.sessionContext = {'locale':'en_GB'}
     window.OpenMRS.activeOrdersPayload=${activeOrdersResponse};
-    window.activeDrugOrdersTest={
-     "order_groups":[
-     {
-       "instructions":"TDF + 3TC + NVP (300mg OD/150mg BD/200mg BD)",
-       "date":"2018-09-11"
-     },
-     {
-        "instructions":"AZT + 3TC + EFV (300mg BD/150mg BD/600mg NOCTE)",
-        "date":"2018-09-11"
-     }
-          ],
-     "single_drugs":[
-     {
-        "instructions":"TDF: 300 Capsule, Twice daily, Oral (Dispense: 60 Capsule) ",
-        "date":"2018-09-11"
-     },
-     {
-        "instructions":"Pyrazinamide (400mg): 2 Capsule, Twice daily, Oral (Dispense: 60 Capsule) ",
-        "date":"2018-09-11"
-     }
-     ]
-    }
 </script>
 <div class="ke-page-content">
 <div id="drug-orders-app" ng-controller="DrugOrdersCtrl" ng-init='init()'>
@@ -236,7 +214,7 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                         {{ order.name}}
                     </td>
                     <td>
-                    <button ng-click="editOrderGroup(order.name)" id="editOrder">Edit</button>
+                    <button ng-click="editOrderGroup(order)" id="editOrder">Edit</button>
                     </td>
                 </tr>
             </table>

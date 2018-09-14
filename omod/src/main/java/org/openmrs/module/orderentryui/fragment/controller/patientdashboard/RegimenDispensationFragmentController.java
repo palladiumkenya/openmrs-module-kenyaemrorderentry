@@ -30,11 +30,21 @@ public class RegimenDispensationFragmentController {
                                @SpringBean("providerService") ProviderService providerService,
                                @SpringBean("orderSetService") OrderSetService orderSetService,
                                @RequestParam("payload") String payload) throws ParseException {
+        boolean orderGroupExists=false;
         System.out.println("payload++++++++++++++++++++++++++++++"+payload.toString());
-        OrderGroup orderGroup=new OrderGroup();
         JSONParser parser=new JSONParser();
         Object object=parser.parse(payload);
         JSONObject orderContext=(JSONObject)object;
+        OrderGroup orderGroup;
+        if(orderContext.get("activeOrderGroupUuId") !=null) {
+            String orderGroupUuId=orderContext.get("activeOrderGroupUuId").toString();
+            orderGroup=orderService.getOrderGroupByUuid(orderGroupUuId);
+            orderGroupExists=true;
+            System.out.println("active ordergroup+++++++++++++++++++++"+orderGroupUuId);
+        }
+        else{
+            orderGroup=new OrderGroup();
+        }
         String patientUuid=orderContext.get("patient").toString();
         String providerUuid=orderContext.get("provider").toString();
         JSONArray drugGroupOrder=(JSONArray)orderContext.get("drugs");
@@ -51,9 +61,9 @@ public class RegimenDispensationFragmentController {
         Provider provider = providerService.getProviderByUuid(providerUuid);
         ArrayList<Order> orderList=new ArrayList<Order>();
         for(int i=0; i<drugGroupOrder.size();i++) {
-            DrugOrder drugOrder = new DrugOrder();
             JSONObject drugOrderJson=(JSONObject)drugGroupOrder.get(i);
             String drugId=drugOrderJson.get("drug_id").toString();
+            DrugOrder drugOrder=new DrugOrder();
             Double dose=Double.parseDouble(drugOrderJson.get("dose").toString());
             String doseUnitConceptUuiId=drugOrderJson.get("units").toString();
             String frequencyUuId=drugOrderJson.get("frequency").toString();

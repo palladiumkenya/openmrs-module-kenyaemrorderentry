@@ -34,7 +34,8 @@ payload = {
             "patient": patient,
             "provider":provider,
             "drugs":drugOrderMembers,
-            "orderSetId":orderSetId
+            "orderSetId":orderSetId,
+            "activeOrderGroupUuId":activeOrderGroupUuId
 
         };
 jq.getJSON('${ ui.actionLink("orderentryui", "patientdashboard/regimenDispensation", "saveOrderGroup") }',

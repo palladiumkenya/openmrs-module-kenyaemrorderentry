@@ -259,15 +259,17 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
             $scope.saveOrderSet=function(orderset){
             drugOrderMembers=orderset;
             }
+            window.activeOrderGroupUuId=null;
             $scope.editOrderGroup=function(orderGroup){
-            console.log("ordergroup to edit+++++++++++++++++"+orderGroup);
+            console.log("ordergroup to edit+++++++++++++++++"+JSON.stringify(orderGroup));
                 _.map($scope.programs.programs, function(program) {
                 _.map(program.regimen_lines, function(regimenLine) {
                     _.map(regimenLine.regimens, function(regimen) {
-                       if(regimen.name===orderGroup){
+                       if(regimen.name===orderGroup.name){
                         console.log("regimen to edit++++++++++++++++++++"+JSON.stringify(regimen));
                         $scope.components=regimen.components;
                         orderSetId=regimen.orderSetId;
+                        activeOrderGroupUuId=orderGroup.orderGroupUuId;
                        }
                     });
                 });
