@@ -84,7 +84,6 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                     $scope.labOrders = labs;
                     console.log('OpenMRs.labTestJsonPayload;',$scope.labOrders);
                     $scope.panelListResults = panelList;
-                   // $scope.activeOrderResult = labResults;
                 });
 
                 OrderService.getOrders({
@@ -226,8 +225,6 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                         });
                         $scope.filteredOrders = unchecked;
                         $scope.selectedOrders = $scope.filteredOrders;
-                        console.log('falsseee', $scope.filteredOrders);
-
                     }
 
             }
@@ -286,7 +283,9 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
             $scope.typeValues = {};
             $scope.postLabOrderResults = function() {
 
-                $scope.obsPayload = createLabResultsObsPaylaod($scope.panelListResults,$scope.activeTestOrders[0]);
+
+                $scope.obsPayload = createLabResultsObsPaylaod($scope.panelListResults);
+                $scope.discontinueFilledOrders = angular.copy($scope.obsPayload);
                 for (var i = 0; i < $scope.obsPayload.length; ++i) {
                     delete $scope.obsPayload[i].label;
                     delete $scope.obsPayload[i].orderId;
@@ -306,6 +305,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                 $scope.loading = true;
                 OrderEntryService.signAndSave({ draftOrders: [] }, encounterContext, $scope.obsPayload)
                     .$promise.then(function(result) {
+                    discontinueLabTestOrders($scope.discontinueFilledOrders);
                     location.href = location.href;
                 }, function(errorResponse) {
                     console.log('errorResponse.data.error.message',errorResponse.data.error.message);
@@ -313,11 +313,10 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                     $scope.loading = false;
                 });
 
-            }
+            };
 
 
-            function createLabResultsObsPaylaod(res,activeTestOrders) {
-
+            function createLabResultsObsPaylaod(res) {
                 var obs = [];
                 for (var i = 0; i < res.length; ++i) {
                     var data = res[i];
@@ -339,6 +338,61 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                 }
 
                 return completedFields;
+            }
+            // discontinue lab test orders
+            function discontinueLabTestOrders(completedFields) {
+
+                var obs = [];
+                for (var i = 0; i < completedFields.length; ++i) {
+                    var data = completedFields[i];
+
+                    for (var r in data) {
+                        if (data.hasOwnProperty(r)) {
+                            data['previousOrder'] = data.orderUuid;
+                            data['type'] = "testorder";
+                            data['action'] = "DISCONTINUE";
+                            data['careSetting'] = $scope.careSetting.uuid;
+                            data['orderReasonNonCoded'] = "";
+                        }
+
+                    }
+
+                     obs.push(data);
+
+                }
+                $scope.lOrders = obs;
+
+                for (var i = 0; i < $scope.lOrders.length; ++i) {
+                    delete $scope.lOrders[i].label;
+                    delete $scope.lOrders[i].orderId;
+                    delete $scope.lOrders[i].orderUuid;
+                    delete $scope.lOrders[i].answers;
+                    delete $scope.lOrders[i].$$hashKey;
+                    delete $scope.lOrders[i].rendering;
+                    delete $scope.lOrders[i].order;
+                    delete $scope.lOrders[i].value;
+                }
+
+                var uuid = {uuid:"b2d06302-0901-41a6-8045-dfa32e36b105"};
+                var encounterContext = {
+                    patient: config.patient,
+                    encounterType: uuid,
+                    location: null, // TODO
+                    // encounterDatetime: "2018-08-23 11:24:36",
+                    encounterRole: config.encounterRole
+                };
+
+
+                $scope.loading = true;
+                OrderEntryService.signAndSave({ draftOrders: $scope.lOrders }, encounterContext)
+                    .$promise.then(function(result) {
+                    location.href = location.href;
+                }, function(errorResponse) {
+                    console.log('errorResponse.data.error.message',errorResponse.data.error.message);
+                    emr.errorMessage(errorResponse.data.error.message);
+                    $scope.loading = false;
+                });
+
             }
 
 

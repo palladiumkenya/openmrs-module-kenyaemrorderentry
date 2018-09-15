@@ -243,7 +243,6 @@ public class DrugOrdersPageController {
 
 
         }
-       // System.out.println("labTestJsonPayload=========================+++++"+labTestJsonPayload);
         model.put("labTestJsonPayload", labTestJsonPayload.toString());
 
 
@@ -253,9 +252,6 @@ public class DrugOrdersPageController {
         OrderType labType = orderService.getOrderTypeByUuid(OrderType.TEST_ORDER_TYPE_UUID);
         List<Order> activeOrders = orderService.getActiveOrders(patient, labType, null, null);
 
-        System.out.println("Active orders =========================+++++" + activeOrders);
-
-
         JSONArray panelList = new JSONArray();
 
         for(Order order : activeOrders) {
@@ -263,6 +259,8 @@ public class DrugOrdersPageController {
             String inputType = "";
             String orderUuid = order.getUuid();
             Integer orderId = order.getOrderId();
+            Encounter labTestEncounter = order.getEncounter();
+
 
             JSONObject labOrderObject = new JSONObject();
             // develop rendering for result
@@ -272,6 +270,7 @@ public class DrugOrdersPageController {
             labOrderObject.put("concept", labTestConcept.getUuid());
             labOrderObject.put("orderUuid", orderUuid);
             labOrderObject.put("orderId", orderId);
+            labOrderObject.put("encounter", labTestEncounter.getUuid());
 
             if (labTestConcept.getDatatype().isCoded()) {
                 inputType = "select";
@@ -299,7 +298,6 @@ public class DrugOrdersPageController {
             panelList.add(labOrderObject);
 
         }
-        System.out.println("panelList=========================+++++"+panelList.toString());
         model.put("panelList", panelList.toString());
 
        // return panelList.toString();
