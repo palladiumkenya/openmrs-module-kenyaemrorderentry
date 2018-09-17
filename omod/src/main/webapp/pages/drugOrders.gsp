@@ -51,8 +51,6 @@ th,td{
     window.OpenMRS.drugOrdersConfig = ${ jsonConfig };
     window.sessionContext = {'locale':'en_GB'}
     window.OpenMRS.orderSet=${orderSetJson}
-    window.OpenMRS.labTestJsonPayload=${labTestJsonPayload}
-    window.OpenMRS.panelList=${panelList}
 
 </script>
 
@@ -76,207 +74,6 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
 
 
         <div class="ui-tabs-panel ui-widget-content">
-            <form>
-            <h3>Lab Orders</h3>
-                <table class="table col-lg-12">
-                    <tbody>
-                    <tr>
-                        <td class="col-lg-3">
-                            <div class="list-group">
-                                <div class="list-group-item" ng-repeat="lab in labOrders" ng-click="loadLabPanels(lab)">
-                                    <div class="link-item">
-                                        <a class="formLink">
-                                            {{lab.name}}
-                                        </a>
-                                    </div>
-
-
-                                </div>
-                            </div>
-
-                         <div style="padding-top:10px">
-                             <div class="card">
-                                 <div class = "card-header">
-                                     <h5 class = "card-title">
-                                         Selected Order
-                                     </h5>
-                                 </div>
-                                 <div class="card-body">
-                            <div class="list-group">
-                                <div class="list-group-item" ng-repeat="order in filteredOrders" >
-                                    <div class="link-item">
-                                        <button type="button" ng-click="deselectedOrder(order)">
-                                            {{order.name}}
-                                        </button>
-                                        <a><span class="glyphicon glyphicon-remove link" style="color:red;
-                                        padding-left: 1em; cursor: pointer" ></span></a>
-                                    </div>
-
-
-                                </div>
-                            </div>
-                                 </div>
-                            </div>
-                         </div>
-                        </td>
-                        <td class="col-lg-12">
-                            <div class="col-lg-12">
-                                <fieldset class="col-lg-12 scheduler-border">
-                                    <legend class="col-lg-12 scheduler-border">Panels</legend>
-                                    <div class="row">
-                                        <div class="col-lg-12">
-                                            <ul>
-                                                <li ng-repeat="panel in labPanels"  ng-click="loadLabPanelTests(panel)">
-                                                    <button type="button" class="column">
-                                                        {{panel.name}}</button>
-                                                </li>
-                                            </ul>
-                                        </div>
-
-                                    </div>
-
-                                </fieldset>
-                            </div>
-
-                            <div class="col-lg-12">
-                                <fieldset class="col-lg-12 scheduler-border">
-                                    <legend class="col-lg-12 scheduler-border"> Tests</legend>
-                                    <div class="row">
-                                        <div class="col-lg-12">
-                                            <div ng-repeat="test in panelTests" ng-click="getSelectedTests(test)">
-                                                <div class="column">
-                                                    <input type="checkbox" id="scales" name="feature" ng-model='test.selected'
-                                                           value="test.concept_id">
-                                                    <label>{{test.name}}</label>
-                                                </div>
-
-
-                                            </div>
-                                        </div>
-                                    </div>
-                                </fieldset>
-                            </div>
-
-                        </td>
-
-                    </tr>
-
-                    </tbody>
-                </table>
-                <div style="padding-left: 50%">
-                    <button type="button"  ng-click="postLabOrdersEncounters()">
-                        Post lab orders</button>
-                </div>
-
-            </form>
-            <div>
-
-
-
-                <div>
-        <div class="row">
-            <div class="col-lg-12">
-                <form class="form-horizontal">
-                    <div  style="padding-top: 45px">
-                        <div class = "card">
-                            <div class = "card-header">
-                                <h4 class = "card-title">
-                                    Lab Results
-                                </h4>
-                            </div>
-
-                            <div class = "card-body">
-                                <div ng-repeat="control in panelListResults">
-                                    <div class="column">
-
-                                    <div ng-if="control.rendering === 'select'" >
-                                        <div class="form-group row">
-                                        <label class="col-lg-2">{{control.label}}:</label>
-                                        <div class="col-lg-4">
-                                        <select class="form-control" ng-model="typeValues[control.orderId]" >
-                                            <option ng-repeat=" o in control.answers"
-                                                    ng-value="o.concept">{{o.label}}
-                                            </option>
-                                        </select>
-                                        </div>
-                                        </div>
-                                    </div>
-
-                                    <div ng-if="control.rendering === 'inputtext'">
-                                        <div class="form-group row">
-                                        <label class="col-lg-2">{{control.label}}:</label>
-                                            <div class="col-lg-4">
-                                        <input class="form-control" type="text" ng-model="typeValues[control.orderId]" >
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div ng-if="control.rendering === 'inputnumeric'">
-                                        <div class="form-group row">
-                                        <label class="col-lg-2">{{control.label}}:</label>
-                                            <div class="col-lg-4">
-                                        <input class="form-control" type="number" ng-model="typeValues[control.orderId]">
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div ng-if="control.rendering === 'textarea'">
-                                        <div class="form-group row">
-                                        <label class="col-lg-2">{{control.label}}:</label>
-                                            <div class="col-lg-4">
-                                        <textarea  class="form-control">
-                                        </textarea>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    </div>
-
-
-
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div style="padding-left: 50%">
-                        <button type="button"  ng-click="postLabOrderResults()">
-                            Save</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-            </div>
-
-            </div>
-
-
-            <div style="padding-top: 10px">
-            <div class="table-responsive" >
-                <table ng-hide="activeDrugOrders.loading" class="table table-striped">
-                    <tr>
-                        <th>Order Date</th>
-                        <th>Order No</th>
-                        <th>Test Name</th>
-                        <th>Ordered By</th>
-                    </tr>
-                    <tr ng-repeat="test in activeTestOrders">
-                        <td>
-                            {{ test.dateActivated | date:'dd-MM-yyyy' }}
-                        </td>
-                        <td>
-                            {{ test.orderNumber }}
-                        </td>
-                        <td>
-                            {{test.display}}
-
-                        </td>
-                        <td>
-                            {{test.orderer.display}}
-
-                        </td>
-                    </tr>
-                </table>
-            </div>
-            </div>
 
 
             <h3>Drug Order Types</h3>
@@ -477,10 +274,9 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
 </div>
 
 
-        ${ ui.includeFragment("orderentryui", "patientdashboard/labOrders", ["patient": patient]) }
 
 
-    </div>
+
 </div>
 <script type="text/javascript">
     // manually bootstrap angular app, in case there are multiple angular apps on a page
