@@ -266,8 +266,8 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                 _.map(program.regimen_lines, function(regimenLine) {
                     _.map(regimenLine.regimens, function(regimen) {
                        if(regimen.name===orderGroup.name){
-                        console.log("regimen to edit++++++++++++++++++++"+JSON.stringify(regimen));
-                        $scope.components=regimen.components;
+                        console.log("regimen to edit++++++++++++++++++++"+JSON.stringify(orderGroup));
+                        $scope.components=orderGroup.components;
                         orderSetId=regimen.orderSetId;
                         activeOrderGroupUuId=orderGroup.orderGroupUuId;
                        }

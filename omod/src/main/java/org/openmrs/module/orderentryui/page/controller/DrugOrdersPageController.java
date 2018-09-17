@@ -75,10 +75,10 @@ public class DrugOrdersPageController {
                 component=new JSONObject();
                 component.put("name", drugOrder.getDrug().getName());
                 component.put("dose", drugOrder.getDose().toString());
-                component.put("units", convertToFull(order.getConcept()));
-                component.put("units_uuid", convertToFull(order.getCareSetting()));
-                component.put("frequency", order.getDateActivated().toString());
-                component.put("drug_id", convertToFull(order.getEncounter()));
+                component.put("units", drugOrder.getDoseUnits().getUuid());
+                component.put("frequency", drugOrder.getFrequency().getUuid());
+                component.put("drug_id", drugOrder.getDrug().getDrugId());
+                component.put("order_id",order.getOrderId());
                 if(order.getOrderGroup().getOrderGroupId()==previousOrderGroupId){
                     components.add(component);
                     continue;
@@ -90,7 +90,7 @@ public class DrugOrdersPageController {
                     OrderSet orderSet=order.getOrderGroup().getOrderSet();
                     orderObj.put("name",orderSet.getName());
                     orderObj.put("date",order.getDateActivated().toString());
-                    orderObj.put("orderGroupUuId",order.getUuid());
+                    orderObj.put("orderGroupUuId",order.getOrderGroup().getUuid());
                     orderObj.put("orderSetId",orderSet.getOrderSetId());
                     orderObj.put("components", components);
                     orderGroupArray.add(orderObj);

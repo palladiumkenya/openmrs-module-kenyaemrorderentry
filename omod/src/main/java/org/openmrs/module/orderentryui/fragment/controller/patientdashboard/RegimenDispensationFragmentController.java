@@ -40,7 +40,6 @@ public class RegimenDispensationFragmentController {
             String orderGroupUuId=orderContext.get("activeOrderGroupUuId").toString();
             orderGroup=orderService.getOrderGroupByUuid(orderGroupUuId);
             orderGroupExists=true;
-            System.out.println("active ordergroup+++++++++++++++++++++"+orderGroupUuId);
         }
         else{
             orderGroup=new OrderGroup();
@@ -62,39 +61,57 @@ public class RegimenDispensationFragmentController {
         ArrayList<Order> orderList=new ArrayList<Order>();
         for(int i=0; i<drugGroupOrder.size();i++) {
             JSONObject drugOrderJson=(JSONObject)drugGroupOrder.get(i);
+            DrugOrder drugOrder;
             String drugId=drugOrderJson.get("drug_id").toString();
-            DrugOrder drugOrder=new DrugOrder();
             Double dose=Double.parseDouble(drugOrderJson.get("dose").toString());
             String doseUnitConceptUuiId=drugOrderJson.get("units").toString();
             String frequencyUuId=drugOrderJson.get("frequency").toString();
             Double quantity=Double.parseDouble(drugOrderJson.get("quantity").toString());
+            if(orderGroupExists){
+                drugOrder=(DrugOrder)orderService.getOrder(Integer.valueOf(drugOrderJson.get("order_id").toString())).cloneForRevision();
+                drugOrder.setDose(dose);
+                Concept doseUnitConcept = conceptService.getConceptByUuid(doseUnitConceptUuiId);
+                drugOrder.setDoseUnits(doseUnitConcept);
+                //OrderFrequency orderFrequency = orderService.getOrderFrequencyByUuid(frequencyUuId);
+                //drugOrder.setFrequency(orderFrequency);
+                drugOrder.setQuantity(quantity);
+                drugOrder.setQuantityUnits(doseUnitConcept);
+                drugOrder.setInstructions("Take after a meal");
+                drugOrder.setOrderer(provider);
+                drugOrder.setEncounter(encounter);
+                orderList.add(drugOrder);
+            }
+            else{
+                drugOrder=new DrugOrder();
+                drugOrder.setPatient(patient);
+                drugOrder.setEncounter(encounter);
+                Drug drug = conceptService.getDrugByNameOrId(drugId);
+                drugOrder.setDrug(drug);
+                drugOrder.setOrderer(provider);
+                drugOrder.setDose(dose);
+                Concept doseUnitConcept = conceptService.getConceptByUuid(doseUnitConceptUuiId);
+                drugOrder.setDoseUnits(doseUnitConcept);
+                drugOrder.setDosingType(SimpleDosingInstructions.class);
+                Concept route = conceptService.getConcept(160240);
+                drugOrder.setRoute(route);
+                OrderFrequency orderFrequency = orderService.getOrderFrequencyByUuid(frequencyUuId);
+                drugOrder.setFrequency(orderFrequency);
+                CareSetting careSetting = orderService.getCareSetting(1);
+                drugOrder.setCareSetting(careSetting);
+                drugOrder.setQuantity(quantity);
+                drugOrder.setQuantityUnits(doseUnitConcept);
+                drugOrder.setNumRefills(0);
+                drugOrder.setOrderGroup(orderGroup);
+                orderList.add(drugOrder);
+            }
 
-            drugOrder.setPatient(patient);
-            drugOrder.setEncounter(encounter);
-            Drug drug = conceptService.getDrugByNameOrId(drugId);
-            drugOrder.setDrug(drug);
-            drugOrder.setOrderer(provider);
-            drugOrder.setDose(dose);
-            Concept doseUnitConcept = conceptService.getConceptByUuid(doseUnitConceptUuiId);
-            drugOrder.setDoseUnits(doseUnitConcept);
-            drugOrder.setDosingType(SimpleDosingInstructions.class);
-            Concept route = conceptService.getConcept(160240);
-            drugOrder.setRoute(route);
-            OrderFrequency orderFrequency = orderService.getOrderFrequencyByUuid(frequencyUuId);
-            drugOrder.setFrequency(orderFrequency);
-            CareSetting careSetting = orderService.getCareSetting(1);
-            drugOrder.setCareSetting(careSetting);
-            drugOrder.setQuantity(quantity);
-            drugOrder.setQuantityUnits(doseUnitConcept);
-            drugOrder.setNumRefills(0);
-            drugOrder.setOrderGroup(orderGroup);
-            orderList.add(drugOrder);
         }
-
-        orderGroup.setEncounter(encounter);
-        orderGroup.setPatient(patient);
-        OrderSet orderSet=orderSetService.getOrderSet(Integer.valueOf(orderSetId));
-        orderGroup.setOrderSet(orderSet);
+        if(!orderGroupExists){
+            orderGroup.setEncounter(encounter);
+            orderGroup.setPatient(patient);
+            OrderSet orderSet=orderSetService.getOrderSet(Integer.valueOf(orderSetId));
+            orderGroup.setOrderSet(orderSet);
+        }
         orderGroup.setOrders(orderList);
         orderService.saveOrderGroup(orderGroup);
     }

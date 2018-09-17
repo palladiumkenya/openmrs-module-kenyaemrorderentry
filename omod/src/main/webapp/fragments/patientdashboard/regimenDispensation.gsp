@@ -43,7 +43,7 @@ jq.getJSON('${ ui.actionLink("orderentryui", "patientdashboard/regimenDispensati
         'payload': JSON.stringify(payload)
     })
     .success(function(data) {
-        console.log('payload submitted successfully');
+       payload={};
 
     })
     .error(function(xhr, status, err) {
