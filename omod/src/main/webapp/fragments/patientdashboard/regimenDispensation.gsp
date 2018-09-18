@@ -50,6 +50,7 @@ jq.getJSON('${ ui.actionLink("orderentryui", "patientdashboard/regimenDispensati
        setTimeout(function(){
        jq('#order-group-success').modal('hide');
        }, 5000);
+       window.location.reload(true);
     })
     .error(function(xhr, status, err) {
         console.log('AJAX error ' + JSON.stringify(xhr));
@@ -75,7 +76,7 @@ jq.getJSON('${ ui.actionLink("orderentryui", "patientdashboard/regimenDispensati
     })
     .success(function(data) {
        payload={};
-
+       window.location.reload(true);
     })
     .error(function(xhr, status, err) {
         console.log('AJAX error ' + JSON.stringify(xhr));
