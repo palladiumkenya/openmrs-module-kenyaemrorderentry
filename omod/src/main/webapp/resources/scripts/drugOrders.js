@@ -260,8 +260,8 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
             drugOrderMembers=orderset;
             }
             window.activeOrderGroupUuId=null;
+            window.discontinueOrderUuId=null;
             $scope.editOrderGroup=function(orderGroup){
-            console.log("ordergroup to edit+++++++++++++++++"+JSON.stringify(orderGroup));
                 _.map($scope.programs.programs, function(program) {
                 _.map(program.regimen_lines, function(regimenLine) {
                     _.map(regimenLine.regimens, function(regimen) {
@@ -275,5 +275,11 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                 });
 
                 });
+            }
+            $scope.dispenseOrderGroup=function(orderGroup){
+            console.log("order_groups+++++++++++++++++++++++++++++++++"+JSON.stringify(orderGroup));
+                drugOrderMembers=orderGroup.components;
+                orderSetId=orderGroup.order_id;
+                discontinueOrderUuId=orderGroup.orderGroupUuId;
             }
         }]);

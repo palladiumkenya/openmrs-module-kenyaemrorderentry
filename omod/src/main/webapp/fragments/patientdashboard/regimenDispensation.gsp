@@ -35,10 +35,41 @@ payload = {
             "provider":provider,
             "drugs":drugOrderMembers,
             "orderSetId":orderSetId,
-            "activeOrderGroupUuId":activeOrderGroupUuId
+            "activeOrderGroupUuId":activeOrderGroupUuId,
+            "discontinueOrderUuId":discontinueOrderUuId
 
         };
 jq.getJSON('${ ui.actionLink("orderentryui", "patientdashboard/regimenDispensation", "saveOrderGroup") }',
+    {
+        'payload': JSON.stringify(payload)
+    })
+    .success(function(data) {
+       payload={};
+       jq("#drug-order-group").addClass("hide-section");
+       jq('#order-group-success').modal('show');
+       setTimeout(function(){
+       jq('#order-group-success').modal('hide');
+       }, 5000);
+    })
+    .error(function(xhr, status, err) {
+        console.log('AJAX error ' + JSON.stringify(xhr));
+        console.log("status: "+JSON.stringify(err));
+        jq('#order-group-error').modal('show');
+        setTimeout(function(){
+           jq('#order-group-error').modal('hide');
+           }, 5000);
+    })
+});
+jq(document).on("click", ".dispenseOrder", function() {
+payload = {
+            "patient": patient,
+            "provider":provider,
+            "drugs":drugOrderMembers,
+            "orderSetId":orderSetId,
+            "discontinueOrderUuId":discontinueOrderUuId
+
+        };
+jq.getJSON('${ ui.actionLink("orderentryui", "patientdashboard/regimenDispensation", "discontintueOrderGroup") }',
     {
         'payload': JSON.stringify(payload)
     })
@@ -98,5 +129,38 @@ jq.getJSON('${ ui.actionLink("orderentryui", "patientdashboard/regimenDispensati
       <button ng-click="saveOrderSet(components)" id="saveOrder" style="width:250px;"><img src="${ ui.resourceLink("kenyaui", "images/glyphs/ok.png") }" /> Save</button>
   </div>
   </div>
+<!-- Success Modal -->
+<div class="modal fade" id="order-group-success" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true"
+style="font-size:16px;">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel" style="color:green;">Success</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" style="color:green;">
+        Order group saved successfully
+      </div>
+    </div>
   </div>
+</div>
+<!--Error Modal -->
+<div class="modal fade" id="order-group-error" tabindex="-1" role="dialog" style="font-size:16px;">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel" style="color:red;">Server Error</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" style="color:red;">
+        Problem encountered on the server while saving the order group, please try again.
+      </div>
+    </div>
+  </div>
+</div>
+</div>
 </div>

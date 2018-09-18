@@ -215,6 +215,7 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                     </td>
                     <td>
                     <button ng-click="editOrderGroup(order)" id="editOrder">Edit</button>
+                    <button ng-click="dispenseOrderGroup(order)" class="dispenseOrder">Dispense</button>
                     </td>
                 </tr>
             </table>
@@ -236,10 +237,10 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                     </td>
                     <td class="actions">
                         <a ng-show="!replacementFor(order)" ng-click="reviseOrder(order)">
-                            <i class="icon-pencil edit-action"></i>
+                            <button>Edit</button>
                         </a>
                         <a ng-show="!replacementFor(order)" ng-click="discontinueOrder(order)">
-                            <i class="icon-remove delete-action"></i>
+                            <button>Dispense</button>
                         </a>
                         <span ng-show="replacementFor(order)">
                             will {{ replacementFor(order).action }}
