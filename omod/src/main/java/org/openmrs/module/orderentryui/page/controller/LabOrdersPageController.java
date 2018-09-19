@@ -27,7 +27,7 @@ public class LabOrdersPageController {
                     UiUtils ui,
                     PageModel model,
                     @SpringBean("orderSetService") OrderSetService orderSetService,
-                    @SpringBean("patientService")PatientService patientService,
+                    @SpringBean("patientService") PatientService patientService,
                     @SpringBean("conceptService") ConceptService conceptService,
                     @SpringBean("providerService") ProviderService providerService) {
 
@@ -50,8 +50,8 @@ public class LabOrdersPageController {
 
         model.put("patient", patient);
         model.put("jsonConfig", ui.toJson(jsonConfig));
-        labOrdersConceptPanels( conceptService, sessionContext, ui, model);
-        getActiveLabOrders(orderService,conceptService,patient,model);
+        labOrdersConceptPanels(conceptService, sessionContext, ui, model);
+        getActiveLabOrders(orderService, conceptService, patient, model);
 
     }
 
@@ -76,28 +76,48 @@ public class LabOrdersPageController {
         List<Concept> urineTestPanels = Arrays.asList(
                 conceptService.getConcept(163697),
                 conceptService.getConcept(161488),
-                conceptService.getConcept(163652)
+                conceptService.getConcept(163652),
+                conceptService.getConcept(161446)
 
 
         );
 
         // Build panels for Blood
         List<Concept> bloodTestPanels = Arrays.asList(
-                conceptService.getConcept( 	161430),
-                conceptService.getConcept( 	657),
-                conceptService.getConcept( 	161487),
-                conceptService.getConcept( 	161437),
-                conceptService.getConcept( 	163602),
-                conceptService.getConcept( 	1010),
-                conceptService.getConcept( 	161532)
+                conceptService.getConcept(161430),
+                conceptService.getConcept(657),
+                conceptService.getConcept(161487),
+                conceptService.getConcept(161437),
+                conceptService.getConcept(163602),
+                conceptService.getConcept(1010),
+                conceptService.getConcept(161532),
+                conceptService.getConcept(1019),
+                conceptService.getConcept(161483),
+                conceptService.getConcept(161488),
+                conceptService.getConcept(953),
+                conceptService.getConcept(161476),
+                conceptService.getConcept(161426),
+                conceptService.getConcept(161431),
+                conceptService.getConcept(161475)
 
 
+        );
+        // Build panels for Stool
+        List<Concept> stoolTestPanels = Arrays.asList(
+                conceptService.getConcept(161451)
+
+
+        );
+        // Build panels for Histology
+        List<Concept> histologyTestPanels = Arrays.asList(
+                conceptService.getConcept(159645)
 
 
         );
         sampleTypes.put("Urine", urineTestPanels);
         sampleTypes.put("Blood", bloodTestPanels);
-
+        sampleTypes.put("Stool", stoolTestPanels);
+        sampleTypes.put("Histology/Cytology", histologyTestPanels);
 
 
         JSONArray labTestJsonPayload = new JSONArray();
@@ -113,21 +133,21 @@ public class LabOrdersPageController {
             for (Concept panelConcept : panelConcepts) {
                 JSONObject labTestObj, panelObj;
                 JSONArray labTestArray = new JSONArray();
-                panelObj=new JSONObject();
+                panelObj = new JSONObject();
 
                 String panelName = panelConcept.getName(LOCALE).getName();
 
-                for(Concept labTest:conceptService.getConceptsByConceptSet(panelConcept)) {
-                    labTestObj=new JSONObject();
-                    labTestObj.put("concept_id",labTest.getConceptId());
-                    labTestObj.put("concept",labTest.getUuid());
-                    labTestObj.put("name",conceptService.getConcept(labTest.getConceptId()).getName(LOCALE).getName());
+                for (Concept labTest : conceptService.getConceptsByConceptSet(panelConcept)) {
+                    labTestObj = new JSONObject();
+                    labTestObj.put("concept_id", labTest.getConceptId());
+                    labTestObj.put("concept", labTest.getUuid());
+                    labTestObj.put("name", conceptService.getConcept(labTest.getConceptId()).getName(LOCALE).getName());
                     labTestArray.add(labTestObj);
 
 
                 }
-                panelObj.put("name",panelName);
-                panelObj.put("tests",labTestArray);
+                panelObj.put("name", panelName);
+                panelObj.put("tests", labTestArray);
                 sampleTypePanels.add(panelObj);
 
             }
@@ -137,18 +157,29 @@ public class LabOrdersPageController {
 
 
         }
+
+        // Add panels with no concept ids
+        JSONArray finalJsonPayloadArray = buildTestPanelWithoutPanelConcept("Blood", labTestJsonPayload,
+                "GROUPING AND CROSSMATCH", Arrays.asList(
+                        concService.getConcept(161233), // blood cross matching
+                        concService.getConcept(160232), // rhesus type
+                        concService.getConcept(163126) // blood group
+                ));
+        System.out.println("finalJsonPayloadArray++++++++++++++++++++++++++++++++++++++++++++++++++++"+finalJsonPayloadArray);
         model.put("labTestJsonPayload", labTestJsonPayload.toString());
 
 
     }
-    public void getActiveLabOrders(@SpringBean("orderService") OrderService orderService, @SpringBean("conceptService") ConceptService conceptService,
+
+    public void getActiveLabOrders(@SpringBean("orderService") OrderService orderService, @SpringBean("conceptService")
+            ConceptService conceptService,
                                    Patient patient, PageModel model) {
         OrderType labType = orderService.getOrderTypeByUuid(OrderType.TEST_ORDER_TYPE_UUID);
         List<Order> activeOrders = orderService.getActiveOrders(patient, labType, null, null);
 
         JSONArray panelList = new JSONArray();
 
-        for(Order order : activeOrders) {
+        for (Order order : activeOrders) {
             Concept labTestConcept = order.getConcept();
             String inputType = "";
             String orderUuid = order.getUuid();
@@ -178,7 +209,6 @@ public class LabOrdersPageController {
                 labOrderObject.put("answers", testResultList);
 
 
-
             } else if (labTestConcept.getDatatype().isNumeric()) {
                 inputType = "inputnumeric";
             } else if (labTestConcept.getDatatype().isText()) {
@@ -194,14 +224,56 @@ public class LabOrdersPageController {
         }
         model.put("panelList", panelList.toString());
 
-       // return panelList.toString();
+        // return panelList.toString();
 
+    }
+
+    private JSONArray buildTestPanelWithoutPanelConcept(String sampleType, JSONArray sampleTypeArray, String panelName,
+                                                        List<Concept> testConcepts) {
+        if (null == panelName || panelName.equals("") || null == testConcepts || testConcepts.size() == 0)
+            return null ;
+
+        JSONObject labTestObj, panelObj;
+        JSONArray labTestArray = new JSONArray();
+        panelObj = new JSONObject();
+
+        for (Concept labTest : testConcepts) {
+            labTestObj = new JSONObject();
+            labTestObj.put("concept_id", labTest.getConceptId());
+            labTestObj.put("concept", labTest.getUuid());
+            labTestObj.put("name", concService.getConcept(labTest.getConceptId()).getName(LOCALE).getName());
+            labTestArray.add(labTestObj);
+
+
+        }
+        panelObj.put("name", panelName);
+        panelObj.put("tests", labTestArray);
+
+        JSONArray typePanels = getSampleTypePanels(sampleTypeArray, sampleType);
+        if (typePanels != null)
+            typePanels.add(panelObj);
+
+
+        return typePanels;
+    }
+
+    private JSONArray getSampleTypePanels(JSONArray array, String key)
+    {
+        JSONArray value = null;
+        for (Object o : array)
+        {
+            JSONObject item = (JSONObject) o;
+            if (key.equals(item.get("name"))) {
+                value = (JSONArray) item.get("panels");
+                break;
+            }
+        }    return value;
     }
 
     private JSONArray constructBooleanAnswers() {
         JSONArray ansList = new JSONArray();
 
-        for(Integer ans : Arrays.asList(1065, 1066)) {
+        for (Integer ans : Arrays.asList(1065, 1066)) {
             Concept concept = concService.getConcept(ans);
             JSONObject testResultObject = new JSONObject();
             testResultObject.put("concept", concept.getUuid());

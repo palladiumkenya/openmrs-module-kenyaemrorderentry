@@ -191,6 +191,7 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
         }
         $scope.labOrdersTests = [];
         $scope.selectedOrders = [];
+        $scope.noOrderSelected ='Selected orders is empty';
         $scope.getSelectedTests = function(tests) {
             if(tests.selected === true) {
                 $scope.selectedOrders.push(tests);
