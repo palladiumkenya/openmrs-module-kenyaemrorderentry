@@ -214,7 +214,7 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
 
                                                             <div ng-if="control.rendering === 'select'" >
                                                                 <div class="form-group row">
-                                                                    <label class="col-lg-2">{{control.label}}:</label>
+                                                                    <label class="col-lg-3">{{control.label}}:</label>
                                                                     <div class="col-lg-4">
                                                                         <select class="form-control" ng-model="typeValues[control.orderId]" >
                                                                             <option ng-repeat=" o in control.answers"
@@ -227,7 +227,7 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
 
                                                             <div ng-if="control.rendering === 'inputtext'">
                                                                 <div class="form-group row">
-                                                                    <label class="col-lg-2">{{control.label}}:</label>
+                                                                    <label class="col-lg-3">{{control.label}}:</label>
                                                                     <div class="col-lg-4">
                                                                         <input class="form-control" type="text" ng-model="typeValues[control.orderId]" >
                                                                     </div>
@@ -236,7 +236,7 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
 
                                                             <div ng-if="control.rendering === 'inputnumeric'">
                                                                 <div class="form-group row">
-                                                                    <label class="col-lg-2">{{control.label}}:</label>
+                                                                    <label class="col-lg-3">{{control.label}}:</label>
                                                                     <div class="col-lg-4">
                                                                         <input class="form-control" type="number" ng-model="typeValues[control.orderId]">
                                                                     </div>
@@ -245,7 +245,7 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
 
                                                             <div ng-if="control.rendering === 'textarea'">
                                                                 <div class="form-group row">
-                                                                    <label class="col-lg-2">{{control.label}}:</label>
+                                                                    <label class="col-lg-3">{{control.label}}:</label>
                                                                     <div class="col-lg-4">
                                                                         <textarea  class="form-control">
                                                                         </textarea>
@@ -257,7 +257,7 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
 
 
                                                     </div>
-                                                    <div style="padding-left: 50%; padding-top: 10px" ng-show="panelListResults.length !== 0" >
+                                                    <div style="padding-left: 50%; padding-top: 30px" ng-show="panelListResults.length !== 0" >
                                                         <button type="button"  ng-click="postLabOrderResults()">
                                                             Save</button>
                                                     </div>

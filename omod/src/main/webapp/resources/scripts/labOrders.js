@@ -78,6 +78,17 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
                 careSetting: $scope.careSetting.uuid
             }).then(function(results) {
                 $scope.activeTestOrders = _.map(results, function(item) { return new OpenMRS.TestOrderModel(item) });
+                $scope.activeTestOrders.sort(function(a, b) {
+                    var key1 = a.dateActivated;
+                    var key2 = b.dateActivated;
+                    if (key1 > key2) {
+                        return -1;
+                    } else if (key1 === key2) {
+                        return 0;
+                    } else {
+                        return 1;
+                    }
+                });
                 $scope.labOrders = labs;
                 $scope.panelListResults = panelList;
             });
