@@ -5,295 +5,163 @@ ui.includeJavascript("orderentryui", "regimenDispensation.js")
 
 
 %>
-
-
-<body>
-
-        <hr />
-        Regimen: <select id="ddlRegimen" class="regComponents">
-        </select>
-        <br />
-        <div>
-
-       </div>
-       <div class="box-body" id="share" style="padding-top: 10px">
-
-
-       </div>
-<div>
-<div style="padding-top: 10px">
-    <button id="saveButton" ><img src="${ ui.resourceLink("kenyaui", "images/glyphs/ok.png") }" /> Save</button>
-    <button id="cancelButton"><img src="${ ui.resourceLink("kenyaui", "images/glyphs/cancel.png") }" /> Cancel</button>
-</div>
-</div>
-
-
-
-    <script type="text/javascript">
-
-        var patient = OpenMRS.drugOrdersConfig.patient.uuid;
-        var provider = OpenMRS.drugOrdersConfig.provider.uuid;
-        jq(document).ready(function(){
-            jq("#saveButton").hide();
-            jq("#cancelButton").hide();
-
-    //Build an array containing e regimen records.
-     regimenTest = [{
-                       "name":"TDF + 3TC + NVP (300mg OD/150mg BD/200mg BD)",
-                       "components": [
-                {
-                    "name":"TDF",
-                    "dose":"300",
-                    "drug_id":"1",
-                    "units":"mg",
-                    "units_uuid": '',
-                    "frequency":"5"
-                },
-                {
-                    "name":"3TC",
-                    "dose":"150",
-                    "drug_id":"2",
-                    "units":"mg",
-                    "units_uuid": '',
-                    "frequency":"3"
-                },
-                {
-                    "name":"NVP",
-                    "dose":"200",
-                    "drug_id":"4",
-                    "units":"mg",
-                    "units_uuid": '',
-                    "frequency":"3"
-                }
-                   ]
-
-                   },
-                   {
-                       "name":"TDF + 3TC(BD) + EFV (300mg OD/150mg BD/600mg OD)",
-                       "components": [
-                           {
-                               "name":"TDF",
-                               "drug_id":"1",
-                               "dose":"300",
-                               "units":"mg",
-                               "units_uuid": '',
-                               "frequency":"5"
-                           },
-                           {
-                               "name":"3TC",
-                               "drug_id":"2",
-                               "dose":"150",
-                               "units":"mg",
-                               "units_uuid": '',
-                               "frequency":"3"
-                           },
-                           {
-                               "name":"EFV",
-                               "drug_id":"3",
-                               "dose":"600",
-                               "units":"mg",
-                               "units_uuid": '',
-                               "frequency":"5"
-                           }
-                   ]
-
-                   }];
-
-    //Build an array containing e regimen records.
-     regimen = OpenMRS.orderSet.orderSets;
-     regimen.unshift({"name": "Select regimen"});
-
-
-    var ddlRegimen = jq("#ddlRegimen");
-    jq(regimen).each(function () {
-        var option = jq("<option />");
-        option.html("select regimens");
-
-        option.html(this.name);
-        option.val(this.name);
-        ddlRegimen.append(option);
-    });
-});
-
+<script type="text/javascript">
+    var patient = OpenMRS.drugOrdersConfig.patient.uuid;
+    var provider = OpenMRS.drugOrdersConfig.provider.uuid;
+var selectedRegComponents;
 jq(document).ready(function(){
-    items = { '5' : 'Once daily', '4' : 'Once daily, at bedtime',
-    '1' : 'Once daily, in the evening', '2' : 'Once daily, in the morning',
-'3' : 'Twice daily','TDS' : 'Thrice daily'};
-    var units = { '161553' : 'mg',
-        '162263' : 'ml'};
-    var quantityUnits = { '1513' : 'tab'};
-
-jq("select.regComponents").change(function(){
-    jq("#saveButton").show();
-    jq("#cancelButton").show();
-
-
-        var selectedRegComponents = jq(".regComponents option:selected").val();
-        if(selectedRegComponents == 'Select regimen') {
-            jq("#saveButton").hide();
-            jq("#cancelButton").hide();
-
-        }
-
-        jq('#share').html("");
-    var nextRowID = 0;
-        for (var c = 0; c < regimen.length; c++) {
-          component = regimen[c].name;
-
-         if(selectedRegComponents == component) {
-
-
-            jq.grep(regimen[c].components, function(item){
-
-
-    jq(function() {
-         nextRowID = nextRowID + 1;
-
-    jq('#share').append(
-    jq('<label />', { class: 'appm', text: 'Drugs:' }),
-    jq('<input />', { id: 'drugs_'+nextRowID, name: 'drugs', placeholder: 'Name', type: 'text',readonly:'readonly' }).val ( item.name ),
-    jq('<label /> ', { class: 'appm', text: 'Dosage:' }),
-    jq('<input />', { id: 'doses_'+nextRowID, name: 'doses', placeholder: 'doses', type: 'number' }).val ( item.dose ),
-
-    //    jq('<label />', { class: 'appm', text: 'Units:' }),
-
-        ddlUnits =jq('<select />', { id: 'units_'+nextRowID, name: 'units', placeholder: 'units', type: 'text' }),
-        jq.each(units, function(text, key) {
-            option = new Option(key, text);
-            if(text == item.units) {
-                option.setAttribute('selected', true) ;
-
-            }
-            ddlUnits.append(jq(option));
-
-        }),
-
-    jq('<label />', { class: 'appm', text: 'Frequency:' }),
-
-    ddlFrequency =jq('<select />', { id: 'frequency_'+nextRowID, name: 'frequency', placeholder: 'frequency', type: 'text' }),
-    jq.each(items, function(text, key) {
-     option = new Option(key, text);
-    if(text == item.frequency) {
-     option.setAttribute('selected', true) ;
-
-    }
-    ddlFrequency.append(jq(option));
-
-    }),
-        jq('<label /> ', { class: 'appm', text: 'Quantity:' }),
-        jq('<input />', { id: 'quantity_'+nextRowID, name: 'quantity', placeholder: 'quantity',
-            type: 'number',class: 'quantity' }),
-        jq('quantity_'+nextRowID).each(function () {
-            jq(this).rules("add", {
-                required: true
-            });
-        }),
-
-        ddlQuantityUnits =jq('<select />', { id: 'quantityUnits_'+nextRowID, name: 'units', placeholder: 'units', type: 'text' }),
-        jq.each(quantityUnits, function(text, key) {
-            option = new Option(key, text);
-            ddlQuantityUnits.append(jq(option));
-
-        }),
-
-        jq('<br />')
-    )
-
-    });
-
-            });
-
-          }
-
-        }
-    });
-
+jq(document).on("click", "li.program-line", function() {
+  jq("li.program-line").removeClass("active");
+  jq(this).addClass("active");
+  jq("#drug-order-group").addClass("hide-section");
 });
-var doses;
-var frequency;
-var drugs;
-var drugPayload = [];
-var payload = {};
-var quantities;
-var dose_units;
-var quantity_units;
-
-jq(function() {
-    jq('#saveButton').click(function() {
-     //   actionLink("yourmoduleid", "encountersToday", "getEncounters");
-
-        drugPayload = [];
-        var rowID = 0;
-         var   selectedRegComponents = jq(".regComponents option:selected").val();
-         var obj;
-            for (var c = 0; c < regimen.length; c++) {
-               var component = regimen[c].name;
-
-                if (selectedRegComponents == component) {
-                    jq.grep(regimen[c].components, function (item) {
-
-                            rowID = rowID + 1;
-
-                            doses = jq("#doses_"+rowID).val();
-                            dose_units = jq("#units_"+rowID).val();
-                            drugs = item.drug_id;
-                            frequency = jq("#frequency_"+rowID).val();
-
-                            quantities = jq("#quantity_"+rowID).val();
-                            quantity_units = jq("#quantityUnits_"+rowID).val();
-                            obj = {
-                                "frequency" :frequency,
-                                "drug" :drugs,
-                                "dose" :doses,
-                                "dose_unit":dose_units,
-                                "quantity":quantities,
-                                "quantity_unit":quantity_units
-
-
-                            };
-
-                        drugPayload.push(obj);
-
-
-                    });
-
-
-                }
-            }
-
-        payload = {
+jq(document).on("click", "li.regimen-line", function() {
+  jq("li.regimen-line").removeClass("active");
+  jq(this).addClass("active");
+  jq("#drug-order-group").addClass("hide-section");
+});
+jq(document).on("click", "li.regimen-item", function() {
+  jq("li.regimen-item").removeClass("active");
+  jq(this).addClass("active");
+  jq("#drug-order-group").removeClass("hide-section");
+});
+jq('#editOrder').click(function(){
+    jq("#drug-order-group").removeClass("hide-section");
+});
+jq('#saveOrder').click(function(){
+console.log("drugOrderMembers+++++++++++++++++++++++"+JSON.stringify(drugOrderMembers));
+payload = {
             "patient": patient,
             "provider":provider,
-            "drugs":drugPayload
+            "drugs":drugOrderMembers,
+            "orderSetId":orderSetId,
+            "activeOrderGroupUuId":activeOrderGroupUuId,
+            "discontinueOrderUuId":discontinueOrderUuId
 
         };
-        console.log('payload=======', JSON.stringify(payload));
-
-
-        jq.getJSON('${ ui.actionLink("orderentryui", "patientdashboard/regimenDispensation", "saveOrderGroup") }',
-            {
-                'payload': JSON.stringify(payload)
-            })
-            .success(function(data) {
-                console.log('payload submitted successfully');
-
-            })
-            .error(function(xhr, status, err) {
-                console.log('AJAX error ' + JSON.stringify(xhr));
-                console.log("status: "+JSON.stringify(err));
-            })
-
-    });
+jq.getJSON('${ ui.actionLink("orderentryui", "patientdashboard/regimenDispensation", "saveOrderGroup") }',
+    {
+        'payload': JSON.stringify(payload)
+    })
+    .success(function(data) {
+       payload={};
+       jq("#drug-order-group").addClass("hide-section");
+       jq('#order-group-success').modal('show');
+       setTimeout(function(){
+       jq('#order-group-success').modal('hide');
+       }, 5000);
+       window.location.reload(true);
+    })
+    .error(function(xhr, status, err) {
+        console.log('AJAX error ' + JSON.stringify(xhr));
+        console.log("status: "+JSON.stringify(err));
+        jq('#order-group-error').modal('show');
+        setTimeout(function(){
+           jq('#order-group-error').modal('hide');
+           }, 5000);
+    })
 });
+jq(document).on("click", ".dispenseOrder", function() {
+payload = {
+            "patient": patient,
+            "provider":provider,
+            "drugs":drugOrderMembers,
+            "orderSetId":orderSetId,
+            "discontinueOrderUuId":discontinueOrderUuId
 
-        jq(function() {
-            jq('#cancelButton').click(function () {
-                jq('#share').html("");
-                jq("#ddlRegimen").val("Select regimen");
-                jq("#saveButton").hide();
-                jq("#cancelButton").hide();
-
-            })
-        });
+        };
+jq.getJSON('${ ui.actionLink("orderentryui", "patientdashboard/regimenDispensation", "discontintueOrderGroup") }',
+    {
+        'payload': JSON.stringify(payload)
+    })
+    .success(function(data) {
+       payload={};
+       window.location.reload(true);
+    })
+    .error(function(xhr, status, err) {
+        console.log('AJAX error ' + JSON.stringify(xhr));
+        console.log("status: "+JSON.stringify(err));
+    })
+});
+});
 </script>
-</body>
+<div class="row panel panel-default">
+  <div class="program panel-body">
+  <h3>Programs</h3>
+      <ul class="list-group">
+      <li class="program-line button" ng-click="setRegimenLines(program.regimen_lines)"
+      ng-repeat="program in programs.programs" style="margin:2px;">{{program.name}}</li>
+      </ul>
+  </div>
+  <div class="regimen panel-body">
+  <div ng-show="regimenLines.length > 0" style="border-style:solid;border-color:gray;padding:10px;">
+  <h3>Regimen Lines</h3>
+      <ul class="list-group" style="display:inline;">
+      <li class="button regimen-line" ng-repeat="regimen_line in regimenLines" style="margin:2px;"
+      ng-click="setProgramRegimens(regimen_line.regimens)">{{regimen_line.name}}</li>
+      </ul>
+  </div>
+  <div ng-show="activeRegimens.length > 0" style="border-style:solid;border-color:gray;padding:10px;margin-top:10px;">
+  <h3 style="margin-top:5px;">Regimens</h3>
+      <ul class="list-group" style="display:inline;">
+      <li class="button regimen-item" ng-repeat="regimen in activeRegimens" style="margin:2px;width:200px;"
+      ng-click="setRegimenMembers(regimen)">
+      {{regimen.name}}
+      </li>
+      </ul>
+  </div>
+  <div id="drug-order-group" ng-show="components.length > 0" style="border-style:solid;border-color:gray;padding:10px;margin-top:10px;">
+  <h3 style="margin-top:5px;">Drug Order Sets</h3>
+  <div ng-repeat="component in components"  class="box-body" style="padding-top: 10px">
+  Drug: <input ng-model="component.name" readonly="">
+  Dose:<input ng-model="component.dose" size="5">
+  Units:<select ng-model="component.units">
+   <option ng-repeat="unit in doseUnits" value="{{unit.uuid}}">{{unit.display}}</option>
+   </select>
+  Frequency:<select ng-model="component.frequency">
+   <option ng-repeat="freq in frequencies" value="{{freq.uuid}}">{{freq.display}}</option>
+   </select>
+  Quantity: <input ng-model="component.quantity" size="5">
+  Units:<select ng-model="component.units_uuid">
+     <option ng-repeat="unit in doseUnits" value="{{unit.uuid}}">{{unit.display}}</option>
+     </select>
+  </div>
+  <div style="padding-top: 10px">
+      <button ng-click="saveOrderSet(components)" id="saveOrder" style="width:250px;"><img src="${ ui.resourceLink("kenyaui", "images/glyphs/ok.png") }" /> Save</button>
+  </div>
+  </div>
+<!-- Success Modal -->
+<div class="modal fade" id="order-group-success" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true"
+style="font-size:16px;">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel" style="color:green;">Success</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" style="color:green;">
+        Order group saved successfully
+      </div>
+    </div>
+  </div>
+</div>
+<!--Error Modal -->
+<div class="modal fade" id="order-group-error" tabindex="-1" role="dialog" style="font-size:16px;">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel" style="color:red;">Server Error</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" style="color:red;">
+        Problem encountered on the server while saving the order group, please try again.
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
