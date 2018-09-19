@@ -1,5 +1,5 @@
 <%
-    ui.decorateWith("kenyaemr", "standardPage", [ patient: currentPatient])
+    ui.decorateWith("kenyaemr", "standardPage", [ patient: patient])
     ui.includeJavascript("uicommons", "emr.js")
     ui.includeJavascript("uicommons", "angular.min.js")
     ui.includeJavascript("uicommons", "angular-app.js")
