@@ -65,10 +65,13 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                 $scope.newDraftDrugOrder = OpenMRS.createEmptyDraftOrder(orderContext);
             });
 
+
             // TODO changing dosingType of a draft order should reset defaults (and discard non-defaulted properties)
 
             function loadExistingOrders() {
                 $scope.activeDrugOrders = { loading: true };
+                $scope.activeTestOrders = { loading: true };
+
                 OrderService.getOrders({
                     t: 'drugorder',
                     v: 'full',
@@ -76,6 +79,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                     careSetting: $scope.careSetting.uuid
                 }).then(function(results) {
                     $scope.activeDrugOrders = _.map(results, function(item) { return new OpenMRS.DrugOrderModel(item) });
+
                 });
 
                 $scope.pastDrugOrders = { loading: true };
@@ -107,6 +111,8 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
             $scope.pastDrugOrders = { loading: true };
             $scope.draftDrugOrders = [];
             $scope.dosingTypes = OpenMRS.dosingTypes;
+            $scope.showFields = false;
+            $scope.showTestFields = false;
 
             var config = OpenMRS.drugOrdersConfig;
             var activeOrderSet=OpenMRS.orderSet;
@@ -163,7 +169,6 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
             $scope.cancelNewDraftOrder = function() {
                 $scope.newDraftDrugOrder = OpenMRS.createEmptyDraftOrder(orderContext);
             }
-
 
             // functions that affect the shopping cart of orders written but not yet saved
 
@@ -225,6 +230,8 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
             }
 
             $scope.reviseOrder = function(activeOrder) {
+                console.log('revised order is clicked');
+                $scope.which = 'single';
                 $scope.newDraftDrugOrder = activeOrder.createRevisionOrder();
             }
 

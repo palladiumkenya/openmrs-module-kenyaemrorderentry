@@ -1,5 +1,5 @@
 <%
-    ui.decorateWith("kenyaemr", "standardPage", [ patient: currentPatient, layout: "sidebar" ])
+    ui.decorateWith("kenyaemr", "standardPage", [ patient: currentPatient])
     ui.includeJavascript("uicommons", "emr.js")
     ui.includeJavascript("uicommons", "angular.min.js")
     ui.includeJavascript("uicommons", "angular-app.js")
@@ -7,6 +7,11 @@
     ui.includeJavascript("uicommons", "angular-common.js")
     ui.includeJavascript("uicommons", "angular-ui/ui-bootstrap-tpls-0.11.2.js")
     ui.includeJavascript("uicommons", "ngDialog/ngDialog.js")
+    ui.includeJavascript("orderentryui", "bootstrap.min.js")
+
+    ui.includeJavascript("orderentryui", "angular-material.js")
+    ui.includeJavascript("orderentryui", "angular-material.min.js")
+
     ui.includeJavascript("uicommons", "filters/display.js")
     ui.includeJavascript("uicommons", "filters/serverDate.js")
     ui.includeJavascript("uicommons", "services/conceptService.js")
@@ -26,6 +31,11 @@
     ui.includeCss("orderentryui", "drugOrders.css")
     ui.includeCss("uicommons", "styleguide/jquery-ui-1.9.2.custom.min.css")
     ui.includeCss("orderentryui", "index.css")
+
+    ui.includeCss("orderentryui", "angular-material.css")
+    ui.includeCss("orderentryui", "angular-material.min.css")
+    ui.includeCss("orderentryui", "bootstrap.min.css")
+    ui.includeCss("orderentryui", "labOrders.css")
 %>
 <style type="text/css">
 #new-order input {
@@ -41,17 +51,14 @@ th,td{
     window.OpenMRS.drugOrdersConfig = ${ jsonConfig };
     window.sessionContext = {'locale':'en_GB'}
     window.OpenMRS.orderSet=${orderSetJson}
+
 </script>
 
 ${ ui.includeFragment("appui", "messages", [ codes: [
         "orderentryui.pastAction.REVISE",
         "orderentryui.pastAction.DISCONTINUE"
 ] ])}
-<div class="ke-page-sidebar">
-    <div class="ke-panel-frame">
-        ${ ui.includeFragment("kenyaui", "widget/panelMenuItem", [ iconProvider: "kenyaui", icon: "buttons/back.png", label: "Back", href: "" ]) }
-    </div>
-</div>
+
 <div class="ke-page-content">
 <div id="drug-orders-app" ng-controller="DrugOrdersCtrl" ng-init='init()'>
     <div class="ui-tabs">
@@ -64,8 +71,23 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
             </li>
         </ul>
 
+
+
         <div class="ui-tabs-panel ui-widget-content">
 
+
+            <h3>Drug Order Types</h3>
+
+            <span class="ke-field-content">
+                <div>
+                    <input type="radio" ng-model="which"  value="single" /> Single Drug
+
+                    <input type="radio" ng-model="which"  value="regimen" /> Regimen
+                </div>
+
+
+             </span>
+            <div ng-show="which === 'single'">
             <form id="new-order" class="sized-inputs css-form" name="newOrderForm" novalidate>
                 <p>
                     <span ng-show="newDraftDrugOrder.action === 'NEW'">
@@ -126,6 +148,7 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                     <button class="cancel" ng-click="cancelNewDraftOrder()">Cancel</button>
                 </p>
             </form>
+</div>
 
             <div id="draft-orders" ng-show="draftDrugOrders.length > 0">
                 <h3>Unsaved Draft Orders ({{ draftDrugOrders.length }})</h3>
@@ -161,21 +184,23 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                 </div>
             </div>
 
-
-            <h3> Drug Orders Dispensation</h3>
+        <div ng-show="which === 'regimen'">
+            <h3> Order Regimen</h3>
             <div>
             ${ ui.includeFragment("orderentryui", "patientdashboard/regimenDispensation", ["patient": patient]) }
 
 
-
             </div>
+        </div>
 
-            <h3>Active Drug Orders (gsp)</h3>
-            <div>
-                ${ ui.includeFragment("orderentryui", "patientdashboard/activeDrugOrders", ["patient": patient]) }
-            </div>
-
+            
+        <div style="padding-top: 20px">
+            <div class="info-section">
+                <div class="info-header">
+                    <i class="icon-medicine"></i>
             <h3>Active Drug Orders</h3>
+                </div>
+            </div>
             <span ng-show="activeDrugOrders.loading">${ ui.message("uicommons.loading.placeholder") }</span>
             <span ng-hide="activeDrugOrders.loading || activeDrugOrders.length > 0">None</span>
             <table ng-hide="activeDrugOrders.loading" class="ke-table-vertical">
@@ -192,20 +217,34 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                         {{ order | instructions }}
                     </td>
                     <td>
-                        <a ng-show="!replacementFor(order)" ng-click="reviseOrder(order)">
-                            <button><img src="${ ui.resourceLink("kenyaui", "images/glyphs/edit.png") }" /> Edit</button>
-                        </a>
-                        <a ng-show="!replacementFor(order)" ng-click="discontinueOrder(order)">
-                            <button><img src="${ ui.resourceLink("kenyaui", "images/glyphs/cancel.png") }" /> Cancel</button>
-                        </a>
+                        <span style="background: white">
+                        <span ng-show="!replacementFor(order)" ng-click="reviseOrder(order)">
+                            <span >
+                            <button style=" background: white !important; border: 0px">
+                                <img src="${ ui.resourceLink("kenyaui", "images/glyphs/edit.png") }" /> Edit</button>
+                            </span>
+                        </span>
+                        <span ng-show="!replacementFor(order)" ng-click="discontinueOrder(order)">
+                            <button  style=" background: white !important; border: 0px">
+                                <img src="${ ui.resourceLink("kenyaui", "images/glyphs/cancel.png") }" /> Cancel</button>
+                        </span>
+                        </span>
+
                         <span ng-show="replacementFor(order)">
                             will {{ replacementFor(order).action }}
                         </span>
                     </td>
                 </tr>
             </table>
+        </div>
+
+            <div class="info-section">
+                <div class="info-header">
+                    <i class="icon-medicine"></i>
 
             <h3>Past Drug Orders</h3>
+                </div>
+            </div>
             <span ng-show="pastDrugOrders.loading">${ ui.message("uicommons.loading.placeholder") }</span>
             <span ng-hide="pastDrugOrders.loading || pastDrugOrders.length > 0">None</span>
             <table id="past-drug-orders" ng-hide="pastDrugOrders.loading" class="ke-table-vertical">
@@ -226,12 +265,21 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                     </td>
                 </tr>
             </table>
+
         </div>
+
     </div>
 
+
 </div>
+
+
+
+
+
 </div>
 <script type="text/javascript">
     // manually bootstrap angular app, in case there are multiple angular apps on a page
     angular.bootstrap('#drug-orders-app', ['drugOrders']);
+
 </script>

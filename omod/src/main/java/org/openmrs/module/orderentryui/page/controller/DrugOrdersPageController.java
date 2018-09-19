@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.*;
 
 public class DrugOrdersPageController {
+    public static final Locale LOCALE = Locale.ENGLISH;
+    ConceptService concService = Context.getConceptService();
 
     public void get(@RequestParam("patient") Patient patient,
                     @RequestParam(value = "careSetting", required = false) CareSetting careSetting,
@@ -61,7 +63,7 @@ public class DrugOrdersPageController {
                     orderSetMember.put("drug_id",template[4]);
                     orderSetMember.put("dose",template[1]);
                     orderSetMember.put("units",template[2]);
-                    orderSetMember.put("units_uuid",template[5]);
+                  //  orderSetMember.put("units_uuid",template[5]);
                     orderSetMember.put("frequency",template[3]);
                     membersArray.add(orderSetMember);
                 }
