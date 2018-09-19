@@ -85,7 +85,7 @@ public class LabOrdersPageController {
         // Build panels for Blood
         List<Concept> bloodTestPanels = Arrays.asList(
                 conceptService.getConcept(161430),
-                conceptService.getConcept(657),
+               // conceptService.getConcept(657),
                 conceptService.getConcept(161487),
                 conceptService.getConcept(161437),
                 conceptService.getConcept(163602),
@@ -165,7 +165,14 @@ public class LabOrdersPageController {
                         concService.getConcept(160232), // rhesus type
                         concService.getConcept(163126) // blood group
                 ));
-        System.out.println("finalJsonPayloadArray++++++++++++++++++++++++++++++++++++++++++++++++++++"+finalJsonPayloadArray);
+        JSONArray hivMonitoring = buildTestPanelWithoutPanelConcept("Blood", labTestJsonPayload,
+                "HIV MONITORING", Arrays.asList(
+                        concService.getConcept(856), // hiv viral load
+                        concService.getConcept(1305), // hiv viral load Qualitative
+                        concService.getConcept(5497), // cd4 counts
+                        concService.getConcept(730) // cd4%
+                ));
+       // System.out.println("finalJsonPayloadArray++++++++++++++++++++++++++++++++++++++++++++++++++++"+finalJsonPayloadArray);
         model.put("labTestJsonPayload", labTestJsonPayload.toString());
 
 
