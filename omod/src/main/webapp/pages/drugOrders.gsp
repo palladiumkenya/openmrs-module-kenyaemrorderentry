@@ -1,5 +1,5 @@
 <%
-    ui.decorateWith("kenyaemr", "standardPage", [ patient: currentPatient, layout: "sidebar" ])
+    ui.decorateWith("kenyaemr", "standardPage", [ patient: currentPatient ])
     ui.includeJavascript("uicommons", "emr.js")
     ui.includeJavascript("uicommons", "angular.min.js")
     ui.includeJavascript("uicommons", "angular-app.js")
@@ -21,11 +21,13 @@
     ui.includeJavascript("orderentryui", "order-model.js")
     ui.includeJavascript("orderentryui", "order-entry.js")
     ui.includeJavascript("orderentryui", "drugOrders.js")
+    ui.includeJavascript("orderentryui", "bootstrap.min.js")
 
     ui.includeCss("uicommons", "ngDialog/ngDialog.min.css")
     ui.includeCss("orderentryui", "drugOrders.css")
     ui.includeCss("uicommons", "styleguide/jquery-ui-1.9.2.custom.min.css")
     ui.includeCss("orderentryui", "index.css")
+    ui.includeCss("orderentryui", "bootstrap.min.css")
 %>
 <style type="text/css">
 #new-order input {
@@ -34,24 +36,49 @@
 th,td{
  text-align:left;
 }
+.program {
+    float: left;
+    width: 20%;
+    padding: 10px;
+    border-style: solid;
+    border-color: gray;
+    margin-left: auto;
+}
+.regimen {
+    float: left;
+    width: 78%;
+    padding: 10px;
+    display: block;
+    margin: auto;
+}
+/* Clear floats after the columns */
+.row:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+.navbar .nav > .active {
+    background:none;
+}
+li.active {
+  background-color:#b1d8b3;
+}
+.hide-section{
+  display:none;
+}
 </style>
-<script type="text/javascript">
 
-    window.OpenMRS = window.OpenMRS || {};
-    window.OpenMRS.drugOrdersConfig = ${ jsonConfig };
-    window.sessionContext = {'locale':'en_GB'}
-    window.OpenMRS.orderSet=${orderSetJson}
-</script>
-
+${ ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator") }
 ${ ui.includeFragment("appui", "messages", [ codes: [
         "orderentryui.pastAction.REVISE",
         "orderentryui.pastAction.DISCONTINUE"
 ] ])}
-<div class="ke-page-sidebar">
-    <div class="ke-panel-frame">
-        ${ ui.includeFragment("kenyaui", "widget/panelMenuItem", [ iconProvider: "kenyaui", icon: "buttons/back.png", label: "Back", href: "" ]) }
-    </div>
-</div>
+<script type="text/javascript">
+    window.OpenMRS = window.OpenMRS || {};
+    window.OpenMRS.drugOrdersConfig = ${ jsonConfig };
+    window.sessionContext = {'locale':'en_GB'}
+    window.OpenMRS.activeOrdersPayload=${activeOrdersResponse};
+</script>
 <div class="ke-page-content">
 <div id="drug-orders-app" ng-controller="DrugOrdersCtrl" ng-init='init()'>
     <div class="ui-tabs">
@@ -160,22 +187,39 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                     </button>
                 </div>
             </div>
-
-
             <h3> Drug Orders Dispensation</h3>
             <div>
             ${ ui.includeFragment("orderentryui", "patientdashboard/regimenDispensation", ["patient": patient]) }
-
-
-
             </div>
-
+            <!--
             <h3>Active Drug Orders (gsp)</h3>
             <div>
                 ${ ui.includeFragment("orderentryui", "patientdashboard/activeDrugOrders", ["patient": patient]) }
             </div>
+            -->
 
             <h3>Active Drug Orders</h3>
+            <h5 style="margin:5px;">Group Drug Orders</h5>
+            <table ng-hide="activeDrugOrders.loading" class="ke-table-vertical">
+                <tr>
+                 <th width="30%">Dates</th>
+                 <th width="50%">Instructions</th>
+                 <th width="20%">Action</th>
+                </tr>
+                <tr ng-repeat="order in patientActiveDrugOrders.order_groups">
+                    <td ng-class="{ 'will-replace': replacementFor(order) }">
+                        {{ order.date }}
+                    </td>
+                    <td ng-class="{ 'will-replace': replacementFor(order) }">
+                        {{ order.name}}
+                    </td>
+                    <td>
+                    <button ng-click="editOrderGroup(order)" id="editOrder">Edit</button>
+                    <button ng-click="dispenseOrderGroup(order)" class="dispenseOrder">Dispense</button>
+                    </td>
+                </tr>
+            </table>
+            <h5 style="margin:5px;">Single Drug Orders</h5>
             <span ng-show="activeDrugOrders.loading">${ ui.message("uicommons.loading.placeholder") }</span>
             <span ng-hide="activeDrugOrders.loading || activeDrugOrders.length > 0">None</span>
             <table ng-hide="activeDrugOrders.loading" class="ke-table-vertical">
@@ -191,12 +235,12 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                     <td ng-class="{ 'will-replace': replacementFor(order) }">
                         {{ order | instructions }}
                     </td>
-                    <td>
+                    <td class="actions">
                         <a ng-show="!replacementFor(order)" ng-click="reviseOrder(order)">
-                            <button><img src="${ ui.resourceLink("kenyaui", "images/glyphs/edit.png") }" /> Edit</button>
+                            <button>Edit</button>
                         </a>
                         <a ng-show="!replacementFor(order)" ng-click="discontinueOrder(order)">
-                            <button><img src="${ ui.resourceLink("kenyaui", "images/glyphs/cancel.png") }" /> Cancel</button>
+                            <button>Dispense</button>
                         </a>
                         <span ng-show="replacementFor(order)">
                             will {{ replacementFor(order).action }}
