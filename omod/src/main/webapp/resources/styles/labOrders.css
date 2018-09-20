@@ -73,3 +73,8 @@ body {
     background-color: #428bca;
     padding : 5px 15px;
 }
+.selected {
+    background-color:black;
+    color:white;
+    font-weight:bold;
+}

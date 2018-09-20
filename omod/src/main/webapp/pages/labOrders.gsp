@@ -1,5 +1,5 @@
 <%
-    ui.decorateWith("kenyaemr", "standardPage", [ patient: patient])
+    ui.decorateWith("kenyaemr", "standardPage", [patient: patient])
     ui.includeJavascript("uicommons", "emr.js")
     ui.includeJavascript("uicommons", "angular.min.js")
     ui.includeJavascript("uicommons", "angular-app.js")
@@ -39,26 +39,28 @@
 %>
 <style type="text/css">
 #new-order input {
-    margin:5px;
+    margin: 5px;
 }
-th,td{
-    text-align:left;
+
+th, td {
+    text-align: left;
 }
 </style>
 <script type="text/javascript">
 
     window.OpenMRS = window.OpenMRS || {};
     window.OpenMRS.drugOrdersConfig = ${ jsonConfig };
-    window.sessionContext = {'locale':'en_GB'}
-    window.OpenMRS.labTestJsonPayload=${labTestJsonPayload}
-        window.OpenMRS.panelList=${panelList}
+    window.sessionContext = {'locale': 'en_GB'}
+    window.OpenMRS.labTestJsonPayload = ${labTestJsonPayload}
+        window.OpenMRS.panelList =
+    ${panelList}
 
 </script>
 
-${ ui.includeFragment("appui", "messages", [ codes: [
+${ui.includeFragment("appui", "messages", [codes: [
         "orderentryui.pastAction.REVISE",
         "orderentryui.pastAction.DISCONTINUE"
-] ])}
+]])}
 
 <div class="ke-page-content">
     <div id="lab-orders-app" ng-controller="LabOrdersCtrl" ng-init='init()'>
@@ -73,26 +75,27 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
             </ul>
 
 
-
             <div class="ui-tabs-panel ui-widget-content">
                 <h3>Lab Orders</h3>
+
                 <div id="program-tabs" class="ke-tabs">
                     <div class="ke-tabmenu">
                         <div class="ke-tabmenu-item" data-tabid="active_orders">Active Orders</div>
 
                         <div class="ke-tabmenu-item" data-tabid="new_orders">Create New Order</div>
 
-                        <div class="ke-tabmenu-item" data-tabid="lab_results">Lab Results</div>
-
+                        <div class="ke-tabmenu-item" data-tabid="lab_results">Enter Lab Results</div>
 
                     </div>
-                    <div class="ke-tab" data-tabid="new_orders" style="padding-top:45px">
+
+                    <div class="ke-tab" data-tabid="new_orders" style="padding-top:10px">
                         <div class="card">
-                            <div class = "card-header">
-                                <h4 class = "card-title">
-                                    Create New Orders
+                            <div class="card-header">
+                                <h4 class="card-title">
+                                    Create New Order(s)
                                 </h4>
                             </div>
+
                             <div class="card-body">
                                 <form>
                                     <table class="table col-lg-12">
@@ -100,37 +103,41 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                                         <tr>
                                             <td class="col-lg-3">
                                                 <div class="list-group">
-                                                    <div class="list-group-item" ng-repeat="lab in labOrders" ng-click="loadLabPanels(lab)">
+                                                    <div class="list-group-item" ng-repeat="lab in labOrders"
+                                                         ng-click="loadLabPanels(lab)">
                                                         <div class="link-item">
                                                             <a class="formLink">
                                                                 {{lab.name}}
                                                             </a>
                                                         </div>
 
-
                                                     </div>
                                                 </div>
 
                                                 <div style="padding-top:10px">
                                                     <div class="card">
-                                                        <div class = "card-header">
-                                                            <h5 class = "card-title">
-                                                                Selected Order
+                                                        <div class="card-header">
+                                                            <h5 class="card-title">
+                                                                Selected Order(s)
                                                             </h5>
                                                         </div>
+
                                                         <div class="card-body">
                                                             <div ng-show="selectedOrders.length === 0">{{noOrderSelected}}</div>
+
                                                             <div class="list-group">
-                                                                <div class="list-group-item" ng-repeat="order in filteredOrders" >
+                                                                <div class="list-group-item"
+                                                                     ng-repeat="order in filteredOrders">
                                                                     <div class="link-item">
-                                                                        <button type="button" ng-click="deselectedOrder(order)">
+                                                                        <button type="button"
+                                                                                ng-click="deselectedOrder(order)">
                                                                             {{order.name}}
                                                                         </button>
-                                                                        <a><span class="glyphicon glyphicon-remove link" style="color:red;
-                                                                        padding-left: 1em; cursor: pointer" ></span></a>
+                                                                        <a><span class="glyphicon glyphicon-remove link"
+                                                                                 style="color:red;
+                                                                                 padding-left: 1em; cursor: pointer"></span>
+                                                                        </a>
                                                                     </div>
-
-
 
                                                                 </div>
                                                             </div>
@@ -141,12 +148,16 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                                             <td class="col-lg-12">
                                                 <div class="col-lg-12">
                                                     <fieldset class="col-lg-12 scheduler-border">
-                                                        <legend class="col-lg-12 scheduler-border">Panels</legend>
+                                                        <legend class="col-lg-12 scheduler-border">Panels | <mark>{{sampleTypeName}}</mark></legend>
+
                                                         <div class="row">
                                                             <div class="col-lg-12">
                                                                 <ul>
-                                                                    <li ng-repeat="panel in labPanels"  ng-click="loadLabPanelTests(panel)">
-                                                                        <button type="button" class="column">
+                                                                    <li ng-repeat="panel in labPanels"
+                                                                        ng-click="loadLabPanelTests(panel)">
+                                                                        <button type="button" class="column"
+                                                                                ng-click="toggle = !toggle"
+                                                                                ng-class="{'blue' : toggle}">
                                                                             {{panel.name}}</button>
                                                                     </li>
                                                                 </ul>
@@ -159,18 +170,22 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
 
                                                 <div class="col-lg-12">
                                                     <fieldset class="col-lg-12 scheduler-border">
-                                                        <legend class="col-lg-12 scheduler-border"> Tests</legend>
+                                                        <legend class="col-lg-12 scheduler-border">Tests | <mark>{{panelTypeName}}</mark></legend>
+
                                                         <div class="row">
                                                             <div class="col-lg-12">
-                                                                <div ng-repeat="test in panelTests" ng-click="getSelectedTests(test)">
+                                                                <div ng-repeat="test in panelTests"
+                                                                     ng-click="getSelectedTests(test)">
                                                                     <div class="column">
                                                                         <div class="form-group form-check">
-                                                                            <input class="form-check-input" type="checkbox" id="scales" name="feature" ng-model='test.selected'
+                                                                            <input class="form-check-input"
+                                                                                   type="checkbox" id="scales"
+                                                                                   name="feature"
+                                                                                   ng-model='test.selected'
                                                                                    value="test.concept_id">
                                                                             <label class="form-check-label">{{test.name}}</label>
                                                                         </div>
                                                                     </div>
-
 
                                                                 </div>
                                                             </div>
@@ -184,39 +199,43 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
 
                                         </tbody>
                                     </table>
-                                    <div style="padding-left: 50%" >
-                                        <button type="button"  ng-click="postLabOrdersEncounters()" ng-disabled="selectedOrders.length === 0">
-                                            Post lab orders</button>
+
+                                    <div style="padding-left: 50%">
+                                        <button type="button" ng-click="postLabOrdersEncounters()"
+                                                ng-disabled="selectedOrders.length === 0"><img src="${ ui.resourceLink("kenyaui", "images/glyphs/ok.png") }" />
+                                            Save orders</button>
                                     </div>
 
                                 </form>
                             </div>
                         </div>
                     </div>
-                    <div class="ke-tab" data-tabid="lab_results">
 
+                    <div class="ke-tab" data-tabid="lab_results">
 
                         <div>
                             <div class="row">
                                 <div class="col-lg-12">
                                     <form class="form-horizontal">
-                                        <div  style="padding-top: 45px">
-                                            <div class = "card">
-                                                <div class = "card-header">
-                                                    <h4 class = "card-title">
-                                                        Lab Results
+                                        <div style="padding-top: 10px">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <h4 class="card-title">
+                                                        Enter Lab Results
                                                     </h4>
                                                 </div>
 
-                                                <div class = "card-body">
+                                                <div class="card-body">
                                                     <div ng-repeat="control in panelListResults">
                                                         <div class="column">
 
-                                                            <div ng-if="control.rendering === 'select'" >
+                                                            <div ng-if="control.rendering === 'select'">
                                                                 <div class="form-group row">
-                                                                    <label class="col-lg-3">{{control.label}}:</label>
+                                                                    <label class="col-lg-3"><b>{{control.label}}:</b></label>
+
                                                                     <div class="col-lg-4">
-                                                                        <select class="form-control" ng-model="typeValues[control.orderId]" >
+                                                                        <select class="form-control"
+                                                                                ng-model="typeValues[control.orderId]">
                                                                             <option ng-repeat=" o in control.answers"
                                                                                     ng-value="o.concept">{{o.label}}
                                                                             </option>
@@ -227,41 +246,45 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
 
                                                             <div ng-if="control.rendering === 'inputtext'">
                                                                 <div class="form-group row">
-                                                                    <label class="col-lg-3">{{control.label}}:</label>
+                                                                    <label class="col-lg-3"><b>{{control.label}}:</b></label>
+
                                                                     <div class="col-lg-4">
-                                                                        <input class="form-control" type="text" ng-model="typeValues[control.orderId]" >
+                                                                        <input class="form-control" type="text"
+                                                                               ng-model="typeValues[control.orderId]">
                                                                     </div>
                                                                 </div>
                                                             </div>
 
                                                             <div ng-if="control.rendering === 'inputnumeric'">
                                                                 <div class="form-group row">
-                                                                    <label class="col-lg-3">{{control.label}}:</label>
+                                                                    <label class="col-lg-3"><b>{{control.label}}:</b></label>
+
                                                                     <div class="col-lg-4">
-                                                                        <input class="form-control" type="number" ng-model="typeValues[control.orderId]">
+                                                                        <input class="form-control" type="number"
+                                                                               ng-model="typeValues[control.orderId]">
                                                                     </div>
                                                                 </div>
                                                             </div>
 
                                                             <div ng-if="control.rendering === 'textarea'">
                                                                 <div class="form-group row">
-                                                                    <label class="col-lg-3">{{control.label}}:</label>
+                                                                    <label class="col-lg-3"><b>{{control.label}}:</b></label>
+
                                                                     <div class="col-lg-4">
-                                                                        <textarea  class="form-control">
+                                                                        <textarea class="form-control">
                                                                         </textarea>
                                                                     </div>
                                                                 </div>
                                                             </div>
                                                         </div>
 
-
-
                                                     </div>
-                                                    <div style="padding-left: 50%; padding-top: 30px" ng-show="panelListResults.length !== 0" >
-                                                        <button type="button"  ng-click="postLabOrderResults()">
-                                                            Save</button>
-                                                    </div>
+                                                </div>
 
+                                                <div style="padding-left: 50%; padding-bottom: 20px"
+                                                     ng-show="panelListResults.length !== 0">
+                                                    <button type="button" ng-click="postLabOrderResults()">
+                                                        <img src="${ ui.resourceLink("kenyaui", "images/glyphs/ok.png") }" />  Save</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -274,17 +297,17 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                     </div>
 
 
-                    <div  class="ke-tab" data-tabid="active_orders" style="padding-top: 45px">
+                    <div class="ke-tab" data-tabid="active_orders" style="padding-top: 10px">
                         <form>
-                            <div class = "card">
-                                <div class = "card-header">
-                                    <h4 class = "card-title">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4 class="card-title">
                                         Active Lab Orders
                                     </h4>
                                 </div>
 
-                                <div class = "card-body">
-                                    <div class="table-responsive" >
+                                <div class="card-body">
+                                    <div class="table-responsive">
                                         <table ng-hide="activeTestOrders.loading" class="table table-striped">
                                             <tr>
                                                 <th>Order Date</th>
@@ -319,14 +342,9 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
 
             </div>
 
-
         </div>
 
     </div>
-
-
-
-
 
 </div>
 <script type="text/javascript">
