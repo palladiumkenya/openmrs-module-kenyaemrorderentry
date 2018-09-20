@@ -179,14 +179,20 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
 
 
         // The beginning of lab orders functionality
+        $scope.selectedRow = null;
 
         $scope.loadLabPanels = function(panels) {
+          //  $scope.selectedRow = index;
+            $scope.sampleTypeName =panels.name;
+            console.log(' $scope.sampleTypeName =panels.name', $scope.sampleTypeName);
             $scope.showFields = true;
             $scope.panelTests = [];
+            $scope.panelTypeName = '';
             $scope.labPanels = panels.panels
         }
 
         $scope.loadLabPanelTests = function(tests) {
+            $scope.panelTypeName = tests.name;
             $scope.showTestFields = true;
             $scope.panelTests = tests.tests
         }
