@@ -25,8 +25,13 @@ jq(document).on("click", "li.regimen-item", function() {
   jq(this).addClass("active");
   jq("#drug-order-group").removeClass("hide-section");
 });
-jq('#editOrder').click(function(){
+jq(document).on("click", ".edit-order", function() {
+    console.log("edit order clicked+++++++++++++++++++++++++++");
     jq("#drug-order-group").removeClass("hide-section");
+    jq(".ke-tabmenu-item-active").removeClass("ke-tabmenu-item-active");
+    jq(".new-order").addClass("ke-tabmenu-item-active");
+    jq("div.ke-tab").css("display","none");
+    jq("div.new-order-section").css("display","block");
 });
 jq('#saveOrder').click(function(){
 console.log("drugOrderMembers+++++++++++++++++++++++"+JSON.stringify(drugOrderMembers));

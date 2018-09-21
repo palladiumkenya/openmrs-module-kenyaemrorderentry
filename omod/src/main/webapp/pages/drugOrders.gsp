@@ -80,9 +80,6 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
     window.OpenMRS.activeOrdersPayload=${activeOrdersResponse};
 </script>
 
-
-
-
 <div class="ke-page-content">
 <div id="drug-orders-app" ng-controller="DrugOrdersCtrl" ng-init='init()'>
    <div class="ui-tabs">
@@ -99,10 +96,10 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
          <div id="program-tabs" class="ke-tabs">
             <div class="ke-tabmenu">
                <div class="ke-tabmenu-item" data-tabid="active_drug_orders">Active Orders</div>
-               <div class="ke-tabmenu-item" data-tabid="new_drug_orders">Create New Order</div>
+               <div class="ke-tabmenu-item new-order" data-tabid="new_drug_orders">Create New Order</div>
                <div class="ke-tabmenu-item" data-tabid="past_drug_orders">Past Drug Orders</div>
             </div>
-            <div class="ke-tab" data-tabid="new_drug_orders" style="padding-top:45px">
+            <div class="ke-tab new-order-section" data-tabid="new_drug_orders" style="padding-top:45px">
                <div class="card">
                   <div class = "card-header">
                      <h4 class = "card-title">
@@ -223,7 +220,7 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                               {{ order.name}}
                            </td>
                            <td>
-                              <button ng-click="editOrderGroup(order)" id="editOrder">Edit</button>
+                              <button ng-click="editOrderGroup(order)" class="edit-order">Edit</button>
                               <button ng-click="dispenseOrderGroup(order)" class="dispenseOrder">Dispense</button>
                            </td>
                         </tr>
