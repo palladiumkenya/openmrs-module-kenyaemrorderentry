@@ -233,26 +233,28 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
                 patient: config.patient,
                 encounterType: uuid,
                 location: null, // TODO
-                // encounterDatetime: "2018-08-23 11:24:36",
+               // encounterDatetime: "2018-09-20",
                 encounterRole: config.encounterRole
             };
             $scope.lOrders = createLabOrdersPaylaod($scope.filteredOrders);
+            $scope.lOrdersPayload = angular.copy( $scope.lOrders);
 
-            for (var i = 0; i < $scope.lOrders.length; ++i) {
-                delete $scope.lOrders[i].concept_id;
-                delete $scope.lOrders[i].name;
-                delete $scope.lOrders[i].$$hashKey;
-                delete $scope.lOrders[i].selected;
+            for (var i = 0; i < $scope.lOrdersPayload.length; ++i) {
+                delete $scope.lOrdersPayload[i].concept_id;
+                delete $scope.lOrdersPayload[i].name;
+                delete $scope.lOrdersPayload[i].$$hashKey;
+                delete $scope.lOrdersPayload[i].selected;
             }
+            console.log('$scope.lOrders===>>>',$scope.lOrdersPayload);
 
 
 
             $scope.loading = true;
-            OrderEntryService.signAndSave({ draftOrders: $scope.lOrders }, encounterContext)
+            OrderEntryService.signAndSave({ draftOrders: $scope.lOrdersPayload }, encounterContext)
                 .$promise.then(function(result) {
                 location.href = location.href;
             }, function(errorResponse) {
-                console.log('errorResponse.data.error.message',errorResponse.data.error.message);
+                console.log('errorResponse.data.error.message',errorResponse.data.error);
                 emr.errorMessage(errorResponse.data.error.message);
                 $scope.loading = false;
             });
@@ -260,6 +262,7 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
         }
 
         function createLabOrdersPaylaod(selectedOrders) {
+            console.log('selectedOrders===',selectedOrders);
             var orders = [];
             for (var i = 0; i < selectedOrders.length; ++i) {
                 var data = selectedOrders[i];
@@ -269,6 +272,8 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
                         data['orderer'] = config.provider.uuid;
                         data['careSetting'] = $scope.careSetting.uuid;
                         data['type'] = "testorder";
+                        data['dateActivated'] = $scope.orderDate;
+                            //$scope.orderDate;
                     }
                 }
                 orders.push(data);
@@ -297,7 +302,7 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
                 patient: config.patient,
                 encounterType: uuid,
                 location: null, // TODO
-                // encounterDatetime: "2018-08-23 11:24:36",
+                // encounterDatetime: "2018-09-20",
                 encounterRole: config.encounterRole
             };
             $scope.loading = true;
@@ -438,13 +443,60 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
             var dcOrder = activeOrder.createDiscontinueOrder(orderContext);
             $scope.draftDrugOrders.push(dcOrder);
             $scope.$broadcast('added-dc-order', dcOrder);
-        }
+        };
 
         $scope.reviseOrder = function(activeOrder) {
             console.log('revised order is clicked');
             $scope.which = 'single';
             $scope.newDraftDrugOrder = activeOrder.createRevisionOrder();
+        };
+        $scope.voidOrders = '';
+        $scope.getOrderUuid = function(order) {
+            $scope.OrderUuid = order.uuid
+
         }
+
+
+        $scope.voidActiveLabOrders = function() {
+            var uuid = {uuid:"b2d06302-0901-41a6-8045-dfa32e36b105"};
+            var encounterContext = {
+                patient: config.patient,
+                encounterType: uuid,
+                location: null, // TODO
+                encounterRole: config.encounterRole
+            };
+
+            var voidOrderPayload =[{
+                voided: "true",
+                voidReason: $scope.voidOrders,
+                uuid: $scope.OrderUuid
+               // type : "testorder"
+            }];
+            console.log('voidOrderPayload',voidOrderPayload);
+
+            $scope.loading = true;
+            OrderEntryService.signAndSave({ draftOrders: voidOrderPayload }, encounterContext)
+                .$promise.then(function(result) {
+                location.href = location.href;
+            }, function(errorResponse) {
+                console.log('errorResponse.data.error.message',errorResponse.data.error);
+                emr.errorMessage(errorResponse.data.error.message);
+                $scope.loading = false;
+            });
+
+        };
+        $scope.closeModal = function() {
+            $scope.voidOrders = '';
+            $scope.orderDate = '';
+        }
+        $scope.setOrderDate = function() {
+            var res = angular.element('#orderDate').val();
+            $scope.orderDate = res.substring(0, 10);
+            console.log('$scope.orderDate', $scope.orderDate);
+
+        }
+
+
 
 
         // events

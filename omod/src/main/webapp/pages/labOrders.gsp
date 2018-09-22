@@ -9,8 +9,6 @@
     ui.includeJavascript("uicommons", "ngDialog/ngDialog.js")
     ui.includeJavascript("orderentryui", "bootstrap.min.js")
 
-    ui.includeJavascript("orderentryui", "angular-material.js")
-    ui.includeJavascript("orderentryui", "angular-material.min.js")
 
     ui.includeJavascript("uicommons", "filters/display.js")
     ui.includeJavascript("uicommons", "filters/serverDate.js")
@@ -32,10 +30,13 @@
     ui.includeCss("uicommons", "styleguide/jquery-ui-1.9.2.custom.min.css")
     ui.includeCss("orderentryui", "index.css")
 
-    ui.includeCss("orderentryui", "angular-material.css")
-    ui.includeCss("orderentryui", "angular-material.min.css")
+
     ui.includeCss("orderentryui", "bootstrap.min.css")
     ui.includeCss("orderentryui", "labOrders.css")
+    ui.includeCss("orderentryui", "font-awesome.css")
+    ui.includeCss("orderentryui", "font-awesome.min.css")
+    ui.includeCss("orderentryui", "font-awesome.css.map")
+    ui.includeCss("orderentryui", "fontawesome-webfont.svg")
 %>
 <style type="text/css">
 #new-order input {
@@ -129,14 +130,15 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                                 <div class="list-group-item"
                                                                      ng-repeat="order in filteredOrders">
                                                                     <div class="link-item">
-                                                                        <button type="button"
-                                                                                ng-click="deselectedOrder(order)">
-                                                                            {{order.name}}
-                                                                        </button>
-                                                                        <a><span class="glyphicon glyphicon-remove link"
-                                                                                 style="color:red;
-                                                                                 padding-left: 1em; cursor: pointer"></span>
-                                                                        </a>
+                                                                        <div class="btn-group" role="group" aria-label="Basic example">
+                                                                            <button type="button">{{order.name}}</button>
+                                                                            <button type="button" class="fa fa-calendar fa-1x"
+                                                                                    data-toggle="modal" data-target="#dateOrder"></button>
+                                                                            <button type="button" class="fa fa-warning fa-1x"></button>
+                                                                            <button type="button" class="fa fa-remove fa-1x"
+                                                                                    ng-click="deselectedOrder(order)" style="color:#9D0101;cursor: pointer"></button>
+                                                                        </div>
+
                                                                     </div>
 
                                                                 </div>
@@ -271,7 +273,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                                     <label class="col-lg-3"><b>{{control.label}}:</b></label>
 
                                                                     <div class="col-lg-4">
-                                                                        <textarea class="form-control">
+                                                                        <textarea class="form-control" ng-model="typeValues[control.orderId]">
                                                                         </textarea>
                                                                     </div>
                                                                 </div>
@@ -314,6 +316,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                 <th>Order No</th>
                                                 <th>Test Name</th>
                                                 <th>Ordered By</th>
+                                                <th>Actions</th>
                                             </tr>
                                             <tr ng-repeat="test in activeTestOrders">
                                                 <td>
@@ -330,6 +333,13 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                     {{test.orderer.display}}
 
                                                 </td>
+                                                <td>
+                                                    <button type="button" class="btn btn-warning" data-toggle="modal"
+                                                            data-target="#voidOrdersModal" ng-click="getOrderUuid(test)">
+                                                        Cancel
+                                                    </button>
+                                                </td>
+
                                             </tr>
                                         </table>
                                     </div>
@@ -342,6 +352,50 @@ ${ui.includeFragment("appui", "messages", [codes: [
 
             </div>
 
+        </div>
+        <!-- Modal voiding lab orders -->
+        <div class="modal fade" id="voidOrdersModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalCenterTitle">Void Orders</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <label >Reason(s) for voiding orders</label>
+                        <div>
+                            <textarea class="form-control" ng-model="voidOrders">
+                            </textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button"  data-dismiss="modal" ng-click="closeModal()">Close</button>
+                        <button type="button" ng-click="voidActiveLabOrders()">
+                            <img src="${ ui.resourceLink("kenyaui", "images/glyphs/ok.png") }" /> Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal date for lab orders -->
+        <div class="modal fade" id="dateOrder" tabindex="-1" role="dialog" aria-labelledby="dateModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-body">
+                        <label >Enter Date Order was made</label>
+                        <div>
+                            Date: ${ ui.includeFragment("kenyaui", "field/java.util.Date", [ id: "orderDate", formFieldName: "orderDate"]) }
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button"  data-dismiss="modal" ng-click="closeModal()">Close</button>
+                        <button type="button" ng-click="setOrderDate()">
+                            <img src="${ ui.resourceLink("kenyaui", "images/glyphs/ok.png") }" /> Save</button>
+                    </div>
+                </div>
+            </div>
         </div>
 
     </div>
