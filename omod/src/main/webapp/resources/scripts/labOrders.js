@@ -458,27 +458,19 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
 
 
         $scope.voidActiveLabOrders = function() {
-            var uuid = {uuid:"b2d06302-0901-41a6-8045-dfa32e36b105"};
-            var encounterContext = {
-                patient: config.patient,
-                encounterType: uuid,
-                location: null, // TODO
-                encounterRole: config.encounterRole
+            var voidOrderPayload ={
+                voided: true,
+                voidReason: $scope.voidOrders
             };
 
-            var voidOrderPayload =[{
-                voided: "true",
-                voidReason: $scope.voidOrders,
-                uuid: $scope.OrderUuid
-               // type : "testorder"
-            }];
-            console.log('voidOrderPayload',voidOrderPayload);
-
             $scope.loading = true;
-            OrderEntryService.signAndSave({ draftOrders: voidOrderPayload }, encounterContext)
+            OrderEntryService.saveVoidedOrders(voidOrderPayload, $scope.OrderUuid)
                 .$promise.then(function(result) {
+                $('#voidOrdersModal').modal('hide');
                 location.href = location.href;
             }, function(errorResponse) {
+                $('#voidOrdersModal').modal('hide');
+                location.href = location.href;
                 console.log('errorResponse.data.error.message',errorResponse.data.error);
                 emr.errorMessage(errorResponse.data.error.message);
                 $scope.loading = false;
@@ -493,6 +485,7 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
             var res = angular.element('#orderDate').val();
             $scope.orderDate = res.substring(0, 10);
             console.log('$scope.orderDate', $scope.orderDate);
+            $('#dateOrder').modal('hide');
 
         }
 

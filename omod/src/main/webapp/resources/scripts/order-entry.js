@@ -18,6 +18,14 @@ angular.module("orderEntry", ['orderService', 'encounterService', 'session'])
                 query: { method:'GET' }
             });
     }])
+    .factory("VoidOrders", [ "$resource", function($resource) {
+        return $resource("/" + OPENMRS_CONTEXT_PATH  + "/ws/rest/v1/order/:uuid" +"/?!purge", {
+            uuid: '@uuid'
+        }, {
+            query: { method:'DELETE' }
+        });
+    }])
+
 
     .factory("OrderContext", [ "$q", "SessionInfo", "OrderEntryConfig", "OrderFrequency", function($q, SessionInfo, OrderEntryConfig, OrderFrequency) {
         function addAll(fromArray, toArray) {
@@ -127,7 +135,8 @@ angular.module("orderEntry", ['orderService', 'encounterService', 'session'])
         }
     }])
 
-    .factory("OrderEntryService", [ "$rootScope", "$q", "Order", "Encounter", "SessionInfo", function($rootScope, $q, Order, Encounter, SessionInfo) {
+    .factory("OrderEntryService", [ "$rootScope","VoidOrders", "$q", "Order", "Encounter", "SessionInfo","$http","$window",
+        function($rootScope, VoidOrders, $q, Order, Encounter, SessionInfo, $http, $window) {
 
         function replaceWithUuids(obj, props) {
             var replaced = angular.extend({}, obj);
@@ -258,6 +267,27 @@ angular.module("orderEntry", ['orderService', 'encounterService', 'session'])
                     $rootScope.$broadcast("visit-changed", encounter.visit);
                 });
                 return saved;
+            },
+            // beginning of voiding orders
+
+            saveVoidedOrders: function(orderContext, uuid, successCallback, errorCallback) {
+                var deferred = $q.defer();
+                var req = {
+                    method: 'DELETE',
+                    url: 'http://localhost:8080/openmrs/ws/rest/v1/order/' + uuid +'?!purge',
+                    headers: {
+                        'Content-Type': undefined
+                    },
+                    data: orderContext
+                };
+
+                 $http(req).then(function(response) {
+                    deferred.resolve(response);
+                     $window.location.reload();
+                });
+
+
+
             }
         }
     }]);
