@@ -178,6 +178,15 @@ public class LabOrdersPageController {
 
     }
 
+    public void pastLabOrders(@SpringBean("orderService") OrderService orderService, @SpringBean("conceptService")
+            ConceptService conceptService,
+                              Patient patient, PageModel model,
+                              @SpringBean("obsService") ObsService obsService) {
+        List<Obs> pastOrders = obsService.;
+
+
+    }
+
     public void getActiveLabOrders(@SpringBean("orderService") OrderService orderService, @SpringBean("conceptService")
             ConceptService conceptService,
                                    Patient patient, PageModel model) {

@@ -86,6 +86,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                         <div class="ke-tabmenu-item" data-tabid="new_orders">Create New Order</div>
 
                         <div class="ke-tabmenu-item" data-tabid="lab_results">Enter Lab Results</div>
+                        <div class="ke-tabmenu-item" data-tabid="past_orders">Past Lab Orders</div>
 
                     </div>
 
@@ -133,7 +134,8 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                                         <div class="btn-group" role="group" aria-label="Basic example">
                                                                             <button type="button">{{order.name}}</button>
                                                                             <button type="button" class="fa fa-calendar fa-1x"
-                                                                                    data-toggle="modal" data-target="#dateOrder"></button>
+                                                                                    data-toggle="modal" data-target="#dateOrder"
+                                                                                    ng-click="orderDateSelected(order)"></button>
                                                                             <button type="button" class="fa fa-warning fa-1x"></button>
                                                                             <button type="button" class="fa fa-remove fa-1x"
                                                                                     ng-click="deselectedOrder(order)" style="color:#9D0101;cursor: pointer"></button>
@@ -347,6 +349,42 @@ ${ui.includeFragment("appui", "messages", [codes: [
                             </div>
                         </form>
                     </div>
+                    <div class="ke-tab" data-tabid="past_orders" style="padding-top: 10px">
+                        <form>
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4 class="card-title">
+                                        Past Lab Orders
+                                    </h4>
+                                </div>
+
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table ng-hide="activeTestOrders.loading" class="table table-striped">
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Tests Ordered</th>
+                                                <th>Results</th>
+                                            </tr>
+                                            <tr ng-repeat="past in pastLabOrders">
+                                                <td>
+                                                    {{ past.dateActivated | date:'dd-MM-yyyy' }}
+                                                </td>
+                                                <td>
+                                                    {{past.display}}
+                                                </td>
+                                                <td>
+                                                    {{past.display}}
+
+                                                </td>
+
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
 
                 </div>
 
@@ -387,6 +425,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                         <label >Enter Date Order was made</label>
                         <div>
                             Date: ${ ui.includeFragment("kenyaui", "field/java.util.Date", [ id: "orderDate", formFieldName: "orderDate"]) }
+                            Date2 <input type="date" ng-model="orderDate">
                         </div>
                     </div>
                     <div class="modal-footer">
