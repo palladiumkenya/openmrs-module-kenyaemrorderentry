@@ -100,7 +100,7 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                <div class="ke-tabmenu-item single-order" data-tabid="new_drug_orders">Single Drug Order</div>
                <div class="ke-tabmenu-item" data-tabid="past_drug_orders">Past Drug Orders</div>
             </div>
-            <div class="ke-tab single-order-section" data-tabid="new_drug_orders" style="padding-top:45px">
+            <div class="ke-tab single-order-section" data-tabid="new_drug_orders">
                <div class="card">
                   <div class = "card-header">
                      <h4 class = "card-title">
@@ -195,7 +195,7 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                   </div>
                </div>
             </div>
-            <div class="ke-tab new-order-section" data-tabid="standard_regimen_orders" style="padding-top:45px">
+            <div class="ke-tab new-order-section" data-tabid="standard_regimen_orders">
                <div class="card">
                   <div class = "card-header">
                      <h4 class = "card-title">

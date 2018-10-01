@@ -65,17 +65,17 @@ public class RegimenDispensationFragmentController {
             String drugId=drugOrderJson.get("drug_id").toString();
             Double dose=Double.parseDouble(drugOrderJson.get("dose").toString());
             String doseUnitConceptUuiId=drugOrderJson.get("units_uuid").toString();
+            String quantityUnitConceptUuiId=drugOrderJson.get("quantity_units").toString();
             String frequencyUuId=drugOrderJson.get("frequency").toString();
             Double quantity=Double.parseDouble(drugOrderJson.get("quantity").toString());
             if(orderGroupExists){
                 drugOrder=(DrugOrder)orderService.getOrder(Integer.valueOf(drugOrderJson.get("order_id").toString())).cloneForRevision();
                 drugOrder.setDose(dose);
                 Concept doseUnitConcept = conceptService.getConceptByUuid(doseUnitConceptUuiId);
+                Concept quantityUnitConcept=conceptService.getConceptByUuid(quantityUnitConceptUuiId);
                 drugOrder.setDoseUnits(doseUnitConcept);
-                //OrderFrequency orderFrequency = orderService.getOrderFrequencyByUuid(frequencyUuId);
-                //drugOrder.setFrequency(orderFrequency);
                 drugOrder.setQuantity(quantity);
-                drugOrder.setQuantityUnits(doseUnitConcept);
+                drugOrder.setQuantityUnits(quantityUnitConcept);
                 drugOrder.setInstructions("Take after a meal");
                 drugOrder.setOrderer(provider);
                 drugOrder.setEncounter(encounter);
@@ -90,6 +90,7 @@ public class RegimenDispensationFragmentController {
                 drugOrder.setOrderer(provider);
                 drugOrder.setDose(dose);
                 Concept doseUnitConcept = conceptService.getConceptByUuid(doseUnitConceptUuiId);
+                Concept quantityUnitConcept=conceptService.getConceptByUuid(quantityUnitConceptUuiId);
                 drugOrder.setDoseUnits(doseUnitConcept);
                 drugOrder.setDosingType(SimpleDosingInstructions.class);
                 Concept route = conceptService.getConcept(160240);
@@ -99,7 +100,7 @@ public class RegimenDispensationFragmentController {
                 CareSetting careSetting = orderService.getCareSetting(1);
                 drugOrder.setCareSetting(careSetting);
                 drugOrder.setQuantity(quantity);
-                drugOrder.setQuantityUnits(doseUnitConcept);
+                drugOrder.setQuantityUnits(quantityUnitConcept);
                 drugOrder.setNumRefills(0);
                 drugOrder.setOrderGroup(orderGroup);
                 orderList.add(drugOrder);
