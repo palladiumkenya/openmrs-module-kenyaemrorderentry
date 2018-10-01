@@ -88,6 +88,13 @@ jq.getJSON('${ ui.actionLink("orderentryui", "patientdashboard/regimenDispensati
         console.log("status: "+JSON.stringify(err));
     })
 });
+jq(document).on("click", ".edit-single-drug,.dispense-single-drug", function() {
+    jq(".ke-tabmenu-item-active").removeClass("ke-tabmenu-item-active");
+    jq(".single-order").addClass("ke-tabmenu-item-active");
+    jq("div.ke-tab").css("display","none");
+    jq("div.single-order-section").css("display","block");
+});
+
 });
 </script>
 <div class="row panel panel-default">
@@ -121,13 +128,14 @@ jq.getJSON('${ ui.actionLink("orderentryui", "patientdashboard/regimenDispensati
   Drug: <input ng-model="component.name" readonly="">
   Dose:<input ng-model="component.dose" size="5">
   Units:<select ng-model="component.units">
-   <option ng-repeat="unit in doseUnits" value="{{unit.uuid}}">{{unit.display}}</option>
+   <option ng-repeat="unit in doseUnits" ng-selected="component.units_uuid==unit.uuid" value="{{unit.uuid}}">{{unit.display}}</option>
    </select>
   Frequency:<select ng-model="component.frequency">
-   <option ng-repeat="freq in frequencies" value="{{freq.uuid}}">{{freq.display}}</option>
+   <option ng-repeat="freq in frequencies" ng-selected="component.frequency==freq.uuid" value="{{freq.uuid}}">{{freq.display}}</option>
    </select>
   Quantity: <input ng-model="component.quantity" size="5">
   Units:<select ng-model="component.units_uuid">
+     <option>Select</option>
      <option ng-repeat="unit in doseUnits" value="{{unit.uuid}}">{{unit.display}}</option>
      </select>
   </div>

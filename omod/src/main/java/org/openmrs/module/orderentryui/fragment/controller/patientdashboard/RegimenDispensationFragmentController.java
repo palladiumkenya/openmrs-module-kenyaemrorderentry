@@ -64,7 +64,7 @@ public class RegimenDispensationFragmentController {
             DrugOrder drugOrder;
             String drugId=drugOrderJson.get("drug_id").toString();
             Double dose=Double.parseDouble(drugOrderJson.get("dose").toString());
-            String doseUnitConceptUuiId=drugOrderJson.get("units").toString();
+            String doseUnitConceptUuiId=drugOrderJson.get("units_uuid").toString();
             String frequencyUuId=drugOrderJson.get("frequency").toString();
             Double quantity=Double.parseDouble(drugOrderJson.get("quantity").toString());
             if(orderGroupExists){
