@@ -96,14 +96,15 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
          <div id="program-tabs" class="ke-tabs">
             <div class="ke-tabmenu">
                <div class="ke-tabmenu-item" data-tabid="active_drug_orders">Active Orders</div>
-               <div class="ke-tabmenu-item new-order" data-tabid="new_drug_orders">Create New Order</div>
+               <div class="ke-tabmenu-item new-order" data-tabid="standard_regimen_orders">Standard Regimen Order</div>
+               <div class="ke-tabmenu-item single-order" data-tabid="new_drug_orders">Single Drug Order</div>
                <div class="ke-tabmenu-item" data-tabid="past_drug_orders">Past Drug Orders</div>
             </div>
-            <div class="ke-tab new-order-section" data-tabid="new_drug_orders" style="padding-top:45px">
+            <div class="ke-tab single-order-section" data-tabid="new_drug_orders">
                <div class="card">
                   <div class = "card-header">
                      <h4 class = "card-title">
-                        Create New Drug Orders
+                        Create New Drug Order
                      </h4>
                   </div>
                   <div class="card-body">
@@ -190,10 +191,21 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                            </button>
                         </div>
                      </div>
-                     <h3> Drug Order Sets</h3>
-                     <div>
-                        ${ ui.includeFragment("orderentryui", "patientdashboard/regimenDispensation", ["patient": patient]) }
-                     </div>
+
+                  </div>
+               </div>
+            </div>
+            <div class="ke-tab new-order-section" data-tabid="standard_regimen_orders">
+               <div class="card">
+                  <div class = "card-header">
+                     <h4 class = "card-title">
+                        Drug Order Sets
+                     </h4>
+                  </div>
+                  <div class="card-body">
+                   <div>
+                      ${ ui.includeFragment("orderentryui", "patientdashboard/regimenDispensation", ["patient": patient]) }
+                   </div>
                   </div>
                </div>
             </div>
@@ -242,10 +254,10 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                               {{ order | instructions }}
                            </td>
                            <td class="actions">
-                              <a ng-show="!replacementFor(order)" ng-click="reviseOrder(order)">
+                              <a ng-show="!replacementFor(order)" ng-click="reviseOrder(order)" class="edit-single-drug">
                               <button>Edit</button>
                               </a>
-                              <a ng-show="!replacementFor(order)" ng-click="discontinueOrder(order)">
+                              <a ng-show="!replacementFor(order)" ng-click="discontinueOrder(order)" class="dispense-single-drug">
                               <button>Dispense</button>
                               </a>
                               <span ng-show="replacementFor(order)">

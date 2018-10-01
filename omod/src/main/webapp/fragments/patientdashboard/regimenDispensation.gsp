@@ -14,6 +14,7 @@ jq(document).on("click", "li.program-line", function() {
   jq("li.program-line").removeClass("active");
   jq(this).addClass("active");
   jq("#drug-order-group").addClass("hide-section");
+  jq("#regimen-lines,#active-regimens").removeClass("hide-section");
 });
 jq(document).on("click", "li.regimen-line", function() {
   jq("li.regimen-line").removeClass("active");
@@ -32,6 +33,7 @@ jq(document).on("click", ".edit-order", function() {
     jq(".new-order").addClass("ke-tabmenu-item-active");
     jq("div.ke-tab").css("display","none");
     jq("div.new-order-section").css("display","block");
+    jq("#regimen-lines,#active-regimens").addClass("hide-section");
 });
 jq('#saveOrder').click(function(){
 console.log("drugOrderMembers+++++++++++++++++++++++"+JSON.stringify(drugOrderMembers));
@@ -55,6 +57,7 @@ jq.getJSON('${ ui.actionLink("orderentryui", "patientdashboard/regimenDispensati
        setTimeout(function(){
        jq('#order-group-success').modal('hide');
        }, 5000);
+       jq("#regimen-lines,#active-regimens").removeClass("hide-section");
        window.location.reload(true);
     })
     .error(function(xhr, status, err) {
@@ -88,6 +91,13 @@ jq.getJSON('${ ui.actionLink("orderentryui", "patientdashboard/regimenDispensati
         console.log("status: "+JSON.stringify(err));
     })
 });
+jq(document).on("click", ".edit-single-drug,.dispense-single-drug", function() {
+    jq(".ke-tabmenu-item-active").removeClass("ke-tabmenu-item-active");
+    jq(".single-order").addClass("ke-tabmenu-item-active");
+    jq("div.ke-tab").css("display","none");
+    jq("div.single-order-section").css("display","block");
+});
+
 });
 </script>
 <div class="row panel panel-default">
@@ -99,14 +109,14 @@ jq.getJSON('${ ui.actionLink("orderentryui", "patientdashboard/regimenDispensati
       </ul>
   </div>
   <div class="regimen panel-body">
-  <div ng-show="regimenLines.length > 0" style="border-style:solid;border-color:gray;padding:10px;">
+  <div ng-show="regimenLines.length > 0" style="border-style:solid;border-color:gray;padding:10px;" id="regimen-lines">
   <h3>Regimen Lines</h3>
       <ul class="list-group" style="display:inline;">
       <li class="button regimen-line" ng-repeat="regimen_line in regimenLines" style="margin:2px;"
       ng-click="setProgramRegimens(regimen_line.regimens)">{{regimen_line.name}}</li>
       </ul>
   </div>
-  <div ng-show="activeRegimens.length > 0" style="border-style:solid;border-color:gray;padding:10px;margin-top:10px;">
+  <div ng-show="activeRegimens.length > 0" style="border-style:solid;border-color:gray;padding:10px;margin-top:10px;" id="active-regimens">
   <h3 style="margin-top:5px;">Regimens</h3>
       <ul class="list-group" style="display:inline;">
       <li class="button regimen-item" ng-repeat="regimen in activeRegimens" style="margin:2px;width:200px;"
@@ -120,14 +130,15 @@ jq.getJSON('${ ui.actionLink("orderentryui", "patientdashboard/regimenDispensati
   <div ng-repeat="component in components"  class="box-body" style="padding-top: 10px">
   Drug: <input ng-model="component.name" readonly="">
   Dose:<input ng-model="component.dose" size="5">
-  Units:<select ng-model="component.units">
-   <option ng-repeat="unit in doseUnits" value="{{unit.uuid}}">{{unit.display}}</option>
+  Units:<select ng-model="component.units_uuid">
+   <option ng-repeat="unit in doseUnits" ng-selected="component.units_uuid==unit.uuid" value="{{unit.uuid}}">{{unit.display}}</option>
    </select>
   Frequency:<select ng-model="component.frequency">
-   <option ng-repeat="freq in frequencies" value="{{freq.uuid}}">{{freq.display}}</option>
+   <option ng-repeat="freq in frequencies" ng-selected="component.frequency==freq.uuid" value="{{freq.uuid}}">{{freq.display}}</option>
    </select>
   Quantity: <input ng-model="component.quantity" size="5">
-  Units:<select ng-model="component.units_uuid">
+  Units:<select ng-model="component.quantity_units">
+     <option>Select</option>
      <option ng-repeat="unit in doseUnits" value="{{unit.uuid}}">{{unit.display}}</option>
      </select>
   </div>

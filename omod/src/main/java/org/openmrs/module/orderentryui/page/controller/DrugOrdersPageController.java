@@ -75,7 +75,7 @@ public class DrugOrdersPageController {
                 component=new JSONObject();
                 component.put("name", drugOrder.getDrug().getName());
                 component.put("dose", drugOrder.getDose().toString());
-                component.put("units", drugOrder.getDoseUnits().getUuid());
+                component.put("units_uuid", drugOrder.getDoseUnits().getUuid());
                 component.put("frequency", drugOrder.getFrequency().getUuid());
                 component.put("drug_id", drugOrder.getDrug().getDrugId());
                 component.put("order_id",order.getOrderId());
