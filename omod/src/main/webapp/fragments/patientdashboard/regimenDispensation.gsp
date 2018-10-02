@@ -62,11 +62,18 @@ jq.getJSON('${ ui.actionLink("orderentryui", "patientdashboard/regimenDispensati
     })
     .error(function(xhr, status, err) {
         console.log('AJAX error ' + JSON.stringify(xhr));
-        console.log("status: "+JSON.stringify(err));
+        console.log("response text: "+JSON.stringify(xhr.response));
+        if(xhr.status==500){
+            jq('#modal-text').text("Please fill all mandatory fields; dose,units,frequency and quantity.");
+            jq('#order-group-error').modal('show');
+        }
+        else{
+        jq('#modal-text').text("Problem encountered on the server while saving the order group, please try again.");
         jq('#order-group-error').modal('show');
+        }
         setTimeout(function(){
-           jq('#order-group-error').modal('hide');
-           }, 5000);
+       jq('#order-group-error').modal('hide');
+       }, 5000);
     })
 });
 jq(document).on("click", ".dispenseOrder", function() {
@@ -173,9 +180,7 @@ style="font-size:16px;">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <div class="modal-body" style="color:red;">
-        Problem encountered on the server while saving the order group, please try again.
-      </div>
+      <div class="modal-body" style="color:red;" id="modal-text"></div>
     </div>
   </div>
 </div>
