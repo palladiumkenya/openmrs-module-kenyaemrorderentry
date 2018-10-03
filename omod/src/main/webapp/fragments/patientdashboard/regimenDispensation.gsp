@@ -62,11 +62,38 @@ jq.getJSON('${ ui.actionLink("orderentryui", "patientdashboard/regimenDispensati
     })
     .error(function(xhr, status, err) {
         console.log('AJAX error ' + JSON.stringify(xhr));
-        console.log("status: "+JSON.stringify(err));
+        console.log("response text: "+JSON.stringify(xhr.statusText));
+        if(xhr.status==400){
+            jq('#modal-text').text("Request to server has invalid syntax, please contact the system administrator.");
+            jq('#order-group-error').modal('show');
+        }
+        else if(xhr.status==401){
+            jq('#modal-text').text("You must be authenticated to access this page, please login with your username and password.");
+            jq('#order-group-error').modal('show');
+        }
+        else if(xhr.status==403){
+            jq('#modal-text').text("You are not authorized to access this page, please contact the system administrator.");
+            jq('#order-group-error').modal('show');
+        }
+        else if(xhr.status==404){
+            jq('#modal-text').text("The requested page cannot be found, please contact the system administrator.");
+            jq('#order-group-error').modal('show');
+        }
+        else if(xhr.status==500){
+            jq('#modal-text').text("Please fill all mandatory fields and ensure the drug(s) you are ordering are not currently active orders.");
+            jq('#order-group-error').modal('show');
+        }
+        else if(xhr.status==503){
+            jq('#modal-text').text("The server is currently unavailable, please try again later.");
+            jq('#order-group-error').modal('show');
+        }
+        else{
+        jq('#modal-text').text("Problem encountered on the server while saving the order group, please try again.");
         jq('#order-group-error').modal('show');
+        }
         setTimeout(function(){
-           jq('#order-group-error').modal('hide');
-           }, 5000);
+       jq('#order-group-error').modal('hide');
+       }, 10000);
     })
 });
 jq(document).on("click", ".dispenseOrder", function() {
@@ -158,7 +185,7 @@ style="font-size:16px;">
         </button>
       </div>
       <div class="modal-body" style="color:green;">
-        Order group saved successfully
+        Regimen saved successfully
       </div>
     </div>
   </div>
@@ -173,9 +200,7 @@ style="font-size:16px;">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <div class="modal-body" style="color:red;">
-        Problem encountered on the server while saving the order group, please try again.
-      </div>
+      <div class="modal-body" style="color:red;" id="modal-text"></div>
     </div>
   </div>
 </div>
