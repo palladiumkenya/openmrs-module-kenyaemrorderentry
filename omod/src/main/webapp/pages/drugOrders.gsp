@@ -218,7 +218,8 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                   </div>
                   <div class = "card-body">
                      <h5 style="margin:5px;">Standard Regimen Orders</h5>
-                     <table ng-hide="activeDrugOrders.loading" class="ke-table-vertical">
+                     <span ng-show="patientActiveDrugOrders.order_groups.length==0">None</span>
+                     <table ng-show="patientActiveDrugOrders.order_groups.length > 0" class="ke-table-vertical">
                         <tr>
                            <th width="30%">Dates</th>
                            <th width="50%">Instructions</th>
@@ -239,8 +240,8 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                      </table>
                      <h5 style="margin:5px;">Other Drug Orders</h5>
                      <span ng-show="activeDrugOrders.loading">${ ui.message("uicommons.loading.placeholder") }</span>
-                     <span ng-hide="activeDrugOrders.loading || activeDrugOrders.length > 0">None</span>
-                     <table ng-hide="activeDrugOrders.loading" class="ke-table-vertical">
+                     <span ng-show="activeDrugOrders.length == 0">None</span>
+                     <table ng-show="activeDrugOrders.length > 0" class="ke-table-vertical">
                         <tr>
                            <th width="30%">Dates</th>
                            <th width="50%">Instructions</th>
