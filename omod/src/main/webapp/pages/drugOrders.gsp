@@ -97,7 +97,7 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
             <div class="ke-tabmenu">
                <div class="ke-tabmenu-item" data-tabid="active_drug_orders">Active Orders</div>
                <div class="ke-tabmenu-item new-order" data-tabid="standard_regimen_orders">Standard Regimen Order</div>
-               <div class="ke-tabmenu-item single-order" data-tabid="new_drug_orders">Single Drug Order</div>
+               <div class="ke-tabmenu-item single-order" data-tabid="new_drug_orders">Other Drugs Order</div>
                <div class="ke-tabmenu-item" data-tabid="past_drug_orders">Past Drug Orders</div>
             </div>
             <div class="ke-tab single-order-section" data-tabid="new_drug_orders">
