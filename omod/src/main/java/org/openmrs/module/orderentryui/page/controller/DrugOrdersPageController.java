@@ -79,6 +79,7 @@ public class DrugOrdersPageController {
                 component.put("frequency", drugOrder.getFrequency().getUuid());
                 component.put("drug_id", drugOrder.getDrug().getDrugId());
                 component.put("order_id",order.getOrderId());
+                component.put("quantity",drugOrder.getQuantity());
                 if(order.getOrderGroup().getOrderGroupId()==previousOrderGroupId){
                     components.add(component);
                     continue;

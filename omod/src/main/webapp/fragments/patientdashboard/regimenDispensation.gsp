@@ -153,7 +153,7 @@ jq(document).on("click", ".edit-single-drug,.dispense-single-drug", function() {
       </ul>
   </div>
   <div id="drug-order-group" ng-show="components.length > 0" style="border-style:solid;border-color:gray;padding:10px;margin-top:10px;">
-  <h3 style="margin-top:5px;">Drug Order Sets</h3>
+  <h3 style="margin-top:5px;">Standard Regimen Drugs</h3>
   <div ng-repeat="component in components"  class="box-body" style="padding-top: 10px">
   Drug: <input ng-model="component.name" readonly="">
   Dose:<input ng-model="component.dose" size="5">
