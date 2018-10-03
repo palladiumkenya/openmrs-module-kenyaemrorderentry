@@ -217,7 +217,7 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                      </h4>
                   </div>
                   <div class = "card-body">
-                     <h5 style="margin:5px;">Group Drug Orders</h5>
+                     <h5 style="margin:5px;">Standard Regimen Orders</h5>
                      <table ng-hide="activeDrugOrders.loading" class="ke-table-vertical">
                         <tr>
                            <th width="30%">Dates</th>
@@ -237,7 +237,7 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                            </td>
                         </tr>
                      </table>
-                     <h5 style="margin:5px;">Single Drug Orders</h5>
+                     <h5 style="margin:5px;">Other Drug Orders</h5>
                      <span ng-show="activeDrugOrders.loading">${ ui.message("uicommons.loading.placeholder") }</span>
                      <span ng-hide="activeDrugOrders.loading || activeDrugOrders.length > 0">None</span>
                      <table ng-hide="activeDrugOrders.loading" class="ke-table-vertical">
