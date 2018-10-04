@@ -97,7 +97,7 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
             <div class="ke-tabmenu">
                <div class="ke-tabmenu-item" data-tabid="active_drug_orders">Active Orders</div>
                <div class="ke-tabmenu-item new-order" data-tabid="standard_regimen_orders">Standard Regimen Order</div>
-               <div class="ke-tabmenu-item single-order" data-tabid="new_drug_orders">Single Drug Order</div>
+               <div class="ke-tabmenu-item single-order" data-tabid="new_drug_orders">Other Drugs Order</div>
                <div class="ke-tabmenu-item" data-tabid="past_drug_orders">Past Drug Orders</div>
             </div>
             <div class="ke-tab single-order-section" data-tabid="new_drug_orders">
@@ -217,8 +217,9 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                      </h4>
                   </div>
                   <div class = "card-body">
-                     <h5 style="margin:5px;">Group Drug Orders</h5>
-                     <table ng-hide="activeDrugOrders.loading" class="ke-table-vertical">
+                     <h5 style="margin:5px;">Standard Regimen Orders</h5>
+                     <span ng-show="patientActiveDrugOrders.order_groups.length==0">None</span>
+                     <table ng-show="patientActiveDrugOrders.order_groups.length > 0" class="ke-table-vertical">
                         <tr>
                            <th width="30%">Dates</th>
                            <th width="50%">Instructions</th>
@@ -237,10 +238,10 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                            </td>
                         </tr>
                      </table>
-                     <h5 style="margin:5px;">Single Drug Orders</h5>
+                     <h5 style="margin:5px;">Other Drug Orders</h5>
                      <span ng-show="activeDrugOrders.loading">${ ui.message("uicommons.loading.placeholder") }</span>
-                     <span ng-hide="activeDrugOrders.loading || activeDrugOrders.length > 0">None</span>
-                     <table ng-hide="activeDrugOrders.loading" class="ke-table-vertical">
+                     <span ng-show="activeDrugOrders.length == 0">None</span>
+                     <table ng-show="activeDrugOrders.length > 0" class="ke-table-vertical">
                         <tr>
                            <th width="30%">Dates</th>
                            <th width="50%">Instructions</th>
