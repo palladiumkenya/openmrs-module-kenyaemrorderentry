@@ -204,8 +204,12 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                      </h4>
                   </div>
                   <div class="card-body">
-                  <div ng-repeat="regimen in patientRegimens" style="font-size:16px;color:green;">
-                  Current {{regimen.program}} Regimen:{{regimen.name}}
+                  <div ng-repeat="regimen in patientRegimens" style="font-size:16px;color:green;margin-bottom:2px;">
+                  <span style="width:40%;">Current {{regimen.program}} Regimen:{{regimen.name}}</span>
+                  <button ng-click="setRegimenMembers(regimen)">Refill</button>
+                  <button>Restart</button>
+                  <button>Change</button>
+                  <button>Stop</button>
                   </div>
                    <div>
                       ${ ui.includeFragment("orderentryui", "patientdashboard/regimenDispensation", ["patient": patient]) }
