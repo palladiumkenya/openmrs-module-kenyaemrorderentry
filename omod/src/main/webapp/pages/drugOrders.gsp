@@ -78,6 +78,7 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
     window.OpenMRS.drugOrdersConfig = ${ jsonConfig };
     window.sessionContext = {'locale':'en_GB'}
     window.OpenMRS.activeOrdersPayload=${activeOrdersResponse};
+    window.OpenMRS.currentRegimens=${currentRegimens};
 </script>
 
 <div class="ke-page-content">
@@ -203,6 +204,9 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                      </h4>
                   </div>
                   <div class="card-body">
+                  <div ng-repeat="regimen in patientRegimens" style="font-size:16px;color:green;">
+                  Current {{regimen.program}} Regimen:{{regimen.name}}
+                  </div>
                    <div>
                       ${ ui.includeFragment("orderentryui", "patientdashboard/regimenDispensation", ["patient": patient]) }
                    </div>

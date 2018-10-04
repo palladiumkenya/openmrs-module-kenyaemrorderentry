@@ -122,6 +122,7 @@ public class DrugOrdersPageController {
         activeOrdersResponse.put("order_groups",orderGroupArray);
         activeOrdersResponse.put("single_drugs",orderArray);
         model.put("activeOrdersResponse",ui.toJson(activeOrdersResponse));
+        model.put("currentRegimens",computeCurrentRegimen());
     }
 
     private Object convertTo(Object object, Representation rep) {
@@ -131,5 +132,82 @@ public class DrugOrdersPageController {
     private Object convertToFull(Object object) {
         return object == null ? null : ConversionUtil.convertToRepresentation(object, Representation.FULL);
     }
-
+    private String computeCurrentRegimen(){
+        String currentRegimen="{\n" +
+                "  \"patientregimens\": [\n" +
+                "    {\n" +
+                "      \"program\": \"HIV\",\n" +
+                "      \"name\": \"TDF + 3TC + NVP (300mg OD/150mg BD/200mg BD)\",\n" +
+                "      \"components\": [\n" +
+                "        {\n" +
+                "          \"dose\": \"300.0\",\n" +
+                "          \"drug_id\": 15,\n" +
+                "          \"quantity\": 60,\n" +
+                "          \"name\": \"TDF\",\n" +
+                "          \"order_id\": 154,\n" +
+                "          \"units_uuid\": \"161553AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\",\n" +
+                "          \"frequency\": \"067ac6ea-a396-37dc-b324-2c3943e2d1ce\"\n" +
+                "        },\n" +
+                "        {\n" +
+                "          \"dose\": \"150.0\",\n" +
+                "          \"drug_id\": 14,\n" +
+                "          \"quantity\": 120,\n" +
+                "          \"name\": \"3TC\",\n" +
+                "          \"order_id\": 155,\n" +
+                "          \"units_uuid\": \"161553AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\",\n" +
+                "          \"frequency\": \"9159cc28-3443-3265-9e79-503caecb69bd\"\n" +
+                "        },\n" +
+                "        {\n" +
+                "          \"dose\": \"200.0\",\n" +
+                "          \"drug_id\": 16,\n" +
+                "          \"quantity\": 120,\n" +
+                "          \"name\": \"NVP\",\n" +
+                "          \"order_id\": 156,\n" +
+                "          \"units_uuid\": \"161553AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\",\n" +
+                "          \"frequency\": \"9159cc28-3443-3265-9e79-503caecb69bd\"\n" +
+                "        }\n" +
+                "      ]\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"program\": \"TB\",\n" +
+                "      \"name\": \"RHZE (150mg/75mg/400mg/275mg x 1 tabs)\",\n" +
+                "      \"components\": [\n" +
+                "        {\n" +
+                "          \"name\": \"R150\",\n" +
+                "          \"dose\": \"1\",\n" +
+                "          \"units\": \"tab\",\n" +
+                "          \"units_uuid\": \"1513AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\",\n" +
+                "          \"frequency\": \"067ac6ea-a396-37dc-b324-2c3943e2d1ce\",\n" +
+                "          \"drug_id\": \"3\"\n" +
+                "        },\n" +
+                "        {\n" +
+                "          \"name\": \"H75\",\n" +
+                "          \"dose\": \"1\",\n" +
+                "          \"units\": \"tab\",\n" +
+                "          \"units_uuid\": \"1513AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\",\n" +
+                "          \"frequency\": \"067ac6ea-a396-37dc-b324-2c3943e2d1ce\",\n" +
+                "          \"drug_id\": \"1\"\n" +
+                "        },\n" +
+                "        {\n" +
+                "          \"name\": \"Z400\",\n" +
+                "          \"dose\": \"1\",\n" +
+                "          \"units\": \"tab\",\n" +
+                "          \"units_uuid\": \"1513AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\",\n" +
+                "          \"frequency\": \"067ac6ea-a396-37dc-b324-2c3943e2d1ce\",\n" +
+                "          \"drug_id\": \"4\"\n" +
+                "        },\n" +
+                "        {\n" +
+                "          \"name\": \"E275\",\n" +
+                "          \"dose\": \"1\",\n" +
+                "          \"units\": \"tab\",\n" +
+                "          \"units_uuid\": \"1513AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\",\n" +
+                "          \"frequency\": \"067ac6ea-a396-37dc-b324-2c3943e2d1ce\",\n" +
+                "          \"drug_id\": \"8\"\n" +
+                "        }\n" +
+                "      ]\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
+        return currentRegimen;
+    }
 }
