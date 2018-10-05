@@ -53,8 +53,8 @@ th, td {
     window.OpenMRS.drugOrdersConfig = ${ jsonConfig };
     window.sessionContext = {'locale': 'en_GB'}
     window.OpenMRS.labTestJsonPayload = ${labTestJsonPayload}
-        window.OpenMRS.panelList =
-    ${panelList}
+    window.OpenMRS.panelList =${panelList}
+        window.OpenMRS.labObsResults =${labObsResults}
 
 </script>
 
@@ -81,12 +81,12 @@ ${ui.includeFragment("appui", "messages", [codes: [
 
                 <div id="program-tabs" class="ke-tabs">
                     <div class="ke-tabmenu">
-                        <div class="ke-tabmenu-item" data-tabid="active_orders">Active Orders</div>
+                        <div class="ke-tabmenu-item" data-tabid="active_orders">Active Order(s)</div>
 
-                        <div class="ke-tabmenu-item" data-tabid="new_orders">Create New Order</div>
+                        <div class="ke-tabmenu-item" data-tabid="new_orders">Create New Order(s)</div>
 
-                        <div class="ke-tabmenu-item" data-tabid="lab_results">Enter Lab Results</div>
-                        <div class="ke-tabmenu-item" data-tabid="past_orders">Past Lab Orders</div>
+                        <div class="ke-tabmenu-item" data-tabid="lab_results">Enter Lab Result(s)</div>
+                        <div class="ke-tabmenu-item" data-tabid="past_orders">Previous Lab Order(s)</div>
 
                     </div>
 
@@ -152,7 +152,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                             <td class="col-lg-12">
                                                 <div class="col-lg-12">
                                                     <fieldset class="col-lg-12 scheduler-border">
-                                                        <legend class="col-lg-12 scheduler-border">Panels | <mark>{{sampleTypeName}}</mark></legend>
+                                                        <legend class="col-lg-12 scheduler-border">Panels | <span style="background-color: pink">{{sampleTypeName}}</span></legend>
 
                                                         <div class="row">
                                                             <div class="col-lg-12">
@@ -174,7 +174,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
 
                                                 <div class="col-lg-12">
                                                     <fieldset class="col-lg-12 scheduler-border">
-                                                        <legend class="col-lg-12 scheduler-border">Tests | <mark>{{panelTypeName}}</mark></legend>
+                                                        <legend class="col-lg-12 scheduler-border">Tests | <span style="background-color: pink">{{panelTypeName}}</span></legend>
 
                                                         <div class="row">
                                                             <div class="col-lg-12">
@@ -225,7 +225,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                             <div class="card">
                                                 <div class="card-header">
                                                     <h4 class="card-title">
-                                                        Enter Lab Results
+                                                        Enter Lab Result(s)
                                                     </h4>
                                                 </div>
 
@@ -280,6 +280,44 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                                     </div>
                                                                 </div>
                                                             </div>
+
+                                                            <div>
+                                                                <div class="form-group row" ng-if="control.hvVl">
+                                                                    <label class="col-lg-3"><b>HIV viral load:</b></label>
+
+                                                                    <div ng-repeat="vl in control.hvVl">
+                                                                        <div ng-if="vl.concept ==='1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' ||
+                                                                            vl.concept ==='856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'"></div>
+
+
+                                                                        <div>
+                                                                            <div ng-if="vl.rendering ==='checkbox'">
+                                                                                <input class="form-check-input"
+                                                                                       type="checkbox" id="vl"
+                                                                                       name="feature"
+                                                                                       ng-model="typeValues[vl.orderId]"
+                                                                                       value="'1302AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'">
+                                                                                <label class="form-check-label">LDL</label>
+                                                                            </div>
+
+
+                                                                        <div ng-if="vl.rendering === 'inputnumeric'" >
+                                                                            <input class="form-control" type="number"
+                                                                                   ng-model="typeValues[vl.orderId]"
+
+                                                                            >
+                                                                        </div>
+                                                                            {{typeValues}}
+
+
+
+                                                                        </div>
+
+                                                                    </div>
+
+
+                                                                </div>
+                                                            </div>
                                                         </div>
 
                                                     </div>
@@ -306,7 +344,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                             <div class="card">
                                 <div class="card-header">
                                     <h4 class="card-title">
-                                        Active Lab Orders
+                                        Active Lab Order(s)
                                     </h4>
                                 </div>
 
@@ -354,7 +392,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                             <div class="card">
                                 <div class="card-header">
                                     <h4 class="card-title">
-                                        Past Lab Orders
+                                        Previous Lab Order(s)
                                     </h4>
                                 </div>
 
@@ -362,8 +400,9 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                     <div class="table-responsive">
                                         <table ng-hide="activeTestOrders.loading" class="table table-striped">
                                             <tr>
-                                                <th>Date</th>
+                                                <th>Order Date</th>
                                                 <th>Tests Ordered</th>
+                                                <th>Result Date</th>
                                                 <th>Results</th>
                                             </tr>
                                             <tr ng-repeat="past in pastLabOrders">
@@ -371,10 +410,22 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                     {{ past.dateActivated | date:'dd-MM-yyyy' }}
                                                 </td>
                                                 <td>
-                                                    {{past.display}}
+                                                    {{past.name}}
                                                 </td>
                                                 <td>
-                                                    {{past.display}}
+                                                    {{ past.resultDate | date:'dd-MM-yyyy' }}
+                                                </td>
+                                                <td>
+                                                    <span ng-if="past.valueNumeric">
+                                                        {{past.valueNumeric}}
+                                                    </span>
+                                                    <span ng-if="past.valueCoded">
+                                                        {{past.valueCoded}}
+                                                    </span>
+                                                    <span ng-if="past.valueText">
+                                                        {{past.valueText}}
+                                                    </span>
+
 
                                                 </td>
 
@@ -396,7 +447,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalCenterTitle">Void Orders</h5>
+                        <h5 class="modal-title" id="exampleModalCenterTitle">Cancel Order</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -410,7 +461,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                     </div>
                     <div class="modal-footer">
                         <button type="button"  data-dismiss="modal" ng-click="closeModal()">Close</button>
-                        <button type="button" ng-click="voidActiveLabOrders()">
+                        <button type="button"  ng-disabled="voidOrders === ''" ng-click="voidActiveLabOrders()">
                             <img src="${ ui.resourceLink("kenyaui", "images/glyphs/ok.png") }" /> Save</button>
                     </div>
                 </div>
@@ -425,11 +476,10 @@ ${ui.includeFragment("appui", "messages", [codes: [
                         <label >Enter Date Order was made</label>
                         <div>
                             Date: ${ ui.includeFragment("kenyaui", "field/java.util.Date", [ id: "orderDate", formFieldName: "orderDate"]) }
-                            Date2 <input type="date" ng-model="orderDate">
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button"  data-dismiss="modal" ng-click="closeModal()">Close</button>
+                        <button type="button"   ng-click="closeModal()">Close</button>
                         <button type="button" ng-click="setOrderDate()">
                             <img src="${ ui.resourceLink("kenyaui", "images/glyphs/ok.png") }" /> Save</button>
                     </div>
