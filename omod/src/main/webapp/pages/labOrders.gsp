@@ -9,8 +9,6 @@
     ui.includeJavascript("uicommons", "ngDialog/ngDialog.js")
     ui.includeJavascript("orderentryui", "bootstrap.min.js")
 
-    ui.includeJavascript("orderentryui", "angular-material.js")
-    ui.includeJavascript("orderentryui", "angular-material.min.js")
 
     ui.includeJavascript("uicommons", "filters/display.js")
     ui.includeJavascript("uicommons", "filters/serverDate.js")
@@ -32,10 +30,13 @@
     ui.includeCss("uicommons", "styleguide/jquery-ui-1.9.2.custom.min.css")
     ui.includeCss("orderentryui", "index.css")
 
-    ui.includeCss("orderentryui", "angular-material.css")
-    ui.includeCss("orderentryui", "angular-material.min.css")
+
     ui.includeCss("orderentryui", "bootstrap.min.css")
     ui.includeCss("orderentryui", "labOrders.css")
+    ui.includeCss("orderentryui", "font-awesome.css")
+    ui.includeCss("orderentryui", "font-awesome.min.css")
+    ui.includeCss("orderentryui", "font-awesome.css.map")
+    ui.includeCss("orderentryui", "fontawesome-webfont.svg")
 %>
 <style type="text/css">
 #new-order input {
@@ -52,8 +53,8 @@ th, td {
     window.OpenMRS.drugOrdersConfig = ${ jsonConfig };
     window.sessionContext = {'locale': 'en_GB'}
     window.OpenMRS.labTestJsonPayload = ${labTestJsonPayload}
-        window.OpenMRS.panelList =
-    ${panelList}
+    window.OpenMRS.panelList =${panelList}
+        window.OpenMRS.labObsResults =${labObsResults}
 
 </script>
 
@@ -80,11 +81,12 @@ ${ui.includeFragment("appui", "messages", [codes: [
 
                 <div id="program-tabs" class="ke-tabs">
                     <div class="ke-tabmenu">
-                        <div class="ke-tabmenu-item" data-tabid="active_orders">Active Orders</div>
+                        <div class="ke-tabmenu-item" data-tabid="active_orders">Active Order(s)</div>
 
-                        <div class="ke-tabmenu-item" data-tabid="new_orders">Create New Order</div>
+                        <div class="ke-tabmenu-item" data-tabid="new_orders">Create New Order(s)</div>
 
-                        <div class="ke-tabmenu-item" data-tabid="lab_results">Enter Lab Results</div>
+                        <div class="ke-tabmenu-item" data-tabid="lab_results">Enter Lab Result(s)</div>
+                        <div class="ke-tabmenu-item" data-tabid="past_orders">Previous Lab Order(s)</div>
 
                     </div>
 
@@ -129,14 +131,19 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                                 <div class="list-group-item"
                                                                      ng-repeat="order in filteredOrders">
                                                                     <div class="link-item">
-                                                                        <button type="button"
-                                                                                ng-click="deselectedOrder(order)">
-                                                                            {{order.name}}
-                                                                        </button>
-                                                                        <a><span class="glyphicon glyphicon-remove link"
-                                                                                 style="color:red;
-                                                                                 padding-left: 1em; cursor: pointer"></span>
-                                                                        </a>
+                                                                        <div class="btn-group" role="group" aria-label="Basic example">
+                                                                            <button type="button">{{order.name}}</button>
+                                                                            <button type="button" class="fa fa-calendar fa-1x"
+                                                                                    data-toggle="modal" data-target="#dateOrder"
+                                                                                    ng-click="orderSelectedToAddDateActivated(order)"></button>
+                                                                            <button type="button" class="fa fa-warning fa-1x"
+                                                                                    data-toggle="modal" data-target="#orderUrgency"
+                                                                                    ng-click="orderSelectedToAddDateActivated(order)"
+                                                                                    ></button>
+                                                                            <button type="button" class="fa fa-remove fa-1x"
+                                                                                    ng-click="deselectedOrder(order)" style="color:#9D0101;cursor: pointer"></button>
+                                                                        </div>
+
                                                                     </div>
 
                                                                 </div>
@@ -148,7 +155,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                             <td class="col-lg-12">
                                                 <div class="col-lg-12">
                                                     <fieldset class="col-lg-12 scheduler-border">
-                                                        <legend class="col-lg-12 scheduler-border">Panels | <mark>{{sampleTypeName}}</mark></legend>
+                                                        <legend class="col-lg-12 scheduler-border">Panels | <span style="background-color: pink">{{sampleTypeName}}</span></legend>
 
                                                         <div class="row">
                                                             <div class="col-lg-12">
@@ -170,7 +177,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
 
                                                 <div class="col-lg-12">
                                                     <fieldset class="col-lg-12 scheduler-border">
-                                                        <legend class="col-lg-12 scheduler-border">Tests | <mark>{{panelTypeName}}</mark></legend>
+                                                        <legend class="col-lg-12 scheduler-border">Tests | <span style="background-color: pink">{{panelTypeName}}</span></legend>
 
                                                         <div class="row">
                                                             <div class="col-lg-12">
@@ -221,7 +228,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                             <div class="card">
                                                 <div class="card-header">
                                                     <h4 class="card-title">
-                                                        Enter Lab Results
+                                                        Enter Lab Result(s)
                                                     </h4>
                                                 </div>
 
@@ -271,9 +278,47 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                                     <label class="col-lg-3"><b>{{control.label}}:</b></label>
 
                                                                     <div class="col-lg-4">
-                                                                        <textarea class="form-control">
+                                                                        <textarea class="form-control" ng-model="typeValues[control.orderId]">
                                                                         </textarea>
                                                                     </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div>
+                                                                <div class="form-group row" ng-if="control.hvVl">
+                                                                    <label class="col-lg-3"><b>HIV viral load:</b></label>
+
+                                                                    <div ng-repeat="vl in control.hvVl">
+                                                                        <div ng-if="vl.concept ==='1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' ||
+                                                                            vl.concept ==='856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'"></div>
+
+
+                                                                        <div>
+                                                                            <div ng-if="vl.rendering ==='checkbox'" class="form-group form-check">
+                                                                                <input class="form-check-input"
+                                                                                       type="checkbox" id="vl"
+                                                                                       name="feature"
+                                                                                       checked="checked"
+                                                                                       ng-model="typeValues[vl.orderId]"
+                                                                                       ng-click="toggleSelection(vl.orderId)"
+                                                                                       value="'1302AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'">
+                                                                                <label class="form-check-label">LDL</label>
+                                                                            </div>
+
+
+                                                                        <div ng-if="vl.rendering === 'inputnumeric'" >
+                                                                            <input class="form-control" type="number"
+                                                                                   ng-model="typeValues[vl.orderId]"
+                                                                                   ng-disabled="ischecked ==='yes'"
+
+                                                                            >
+                                                                        </div>
+
+                                                                        </div>
+
+                                                                    </div>
+
+
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -302,7 +347,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                             <div class="card">
                                 <div class="card-header">
                                     <h4 class="card-title">
-                                        Active Lab Orders
+                                        Active Lab Order(s)
                                     </h4>
                                 </div>
 
@@ -314,6 +359,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                 <th>Order No</th>
                                                 <th>Test Name</th>
                                                 <th>Ordered By</th>
+                                                <th>Actions</th>
                                             </tr>
                                             <tr ng-repeat="test in activeTestOrders">
                                                 <td>
@@ -330,6 +376,62 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                     {{test.orderer.display}}
 
                                                 </td>
+                                                <td>
+                                                    <button type="button" class="btn btn-warning" data-toggle="modal"
+                                                            data-target="#voidOrdersModal" ng-click="getOrderUuid(test)">
+                                                        Cancel
+                                                    </button>
+                                                </td>
+
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="ke-tab" data-tabid="past_orders" style="padding-top: 10px">
+                        <form>
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4 class="card-title">
+                                        Previous Lab Order(s)
+                                    </h4>
+                                </div>
+
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table ng-hide="activeTestOrders.loading" class="table table-striped">
+                                            <tr>
+                                                <th>Order Date</th>
+                                                <th>Tests Ordered</th>
+                                                <th>Result Date</th>
+                                                <th>Results</th>
+                                            </tr>
+                                            <tr ng-repeat="past in pastLabOrders">
+                                                <td>
+                                                    {{ past.dateActivated | date:'dd-MM-yyyy' }}
+                                                </td>
+                                                <td>
+                                                    {{past.name}}
+                                                </td>
+                                                <td>
+                                                    {{ past.resultDate | date:'dd-MM-yyyy' }}
+                                                </td>
+                                                <td>
+                                                    <span ng-if="past.valueNumeric">
+                                                        {{past.valueNumeric}}
+                                                    </span>
+                                                    <span ng-if="past.valueCoded">
+                                                        {{past.valueCoded}}
+                                                    </span>
+                                                    <span ng-if="past.valueText">
+                                                        {{past.valueText}}
+                                                    </span>
+
+
+                                                </td>
+
                                             </tr>
                                         </table>
                                     </div>
@@ -343,8 +445,89 @@ ${ui.includeFragment("appui", "messages", [codes: [
             </div>
 
         </div>
+        <!-- Modal voiding lab orders -->
+        <div class="modal fade" id="voidOrdersModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalCenterTitle">Cancel Order</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <label >Reason(s) for voiding orders</label>
+                        <div>
+                            <textarea class="form-control" ng-model="voidOrders">
+                            </textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button"  data-dismiss="modal" ng-click="closeModal()">Close</button>
+                        <button type="button"  ng-disabled="voidOrders === ''" ng-click="voidActiveLabOrders()">
+                            <img src="${ ui.resourceLink("kenyaui", "images/glyphs/ok.png") }" /> Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal date for lab orders -->
+        <div class="modal fade" id="dateOrder" tabindex="-1" role="dialog" aria-labelledby="dateModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="dateModalCenterTitle"></h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <label >Enter Date Order was made</label>
+                        <div>
+                            Date: ${ ui.includeFragment("kenyaui", "field/java.util.Date", [ id: "orderDate", formFieldName: "orderDate"]) }
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button"   ng-click="closeModal()">Close</button>
+                        <button type="button" ng-click="setOrderDate()">
+                            <img src="${ ui.resourceLink("kenyaui", "images/glyphs/ok.png") }" /> Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Modal urgency for lab orders -->
+        <div class="modal fade" id="orderUrgency" tabindex="-1" role="dialog" aria-labelledby="urgencyModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="urgencyModalCenterTitle"></h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <label >Order Urgency</label>
+                        <div>
+                            <select id="ddlOrderUrgency" class="form-control">
+                                <option value="ROUTINE"selected="selected">ROUTINE</option>
+                                <option value="STAT" >IMMEDIATELY</option>
+                            </select>
+
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button"   ng-click="closeModal()">Close</button>
+                        <button type="button" ng-click="setOrderUrgency()">
+                            <img src="${ ui.resourceLink("kenyaui", "images/glyphs/ok.png") }" /> Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
     </div>
+
+
+</div>
 
 </div>
 <script type="text/javascript">
