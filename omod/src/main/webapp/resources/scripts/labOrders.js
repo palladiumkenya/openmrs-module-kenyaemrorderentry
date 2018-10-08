@@ -72,6 +72,7 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
             $scope.activeTestOrders = { loading: true };
             $scope.pastLabOrders = { loading: true };
 
+
             OrderService.getOrders({
                 t: 'testorder',
                 v: 'full',
@@ -79,6 +80,8 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
                 careSetting: $scope.careSetting.uuid
             }).then(function(results) {
                 $scope.activeTestOrders = _.map(results, function(item) { return new OpenMRS.TestOrderModel(item) });
+
+                $scope.activeTestOrders = customizeActiveOrdersToDisplaySingHivVl($scope.activeTestOrders);
                 $scope.activeTestOrders.sort(function(a, b) {
                     var key1 = a.dateActivated;
                     var key2 = b.dateActivated;
@@ -90,9 +93,10 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
                         return 1;
                     }
                 });
+
                 $scope.labOrders = labs;
                 $scope.panelListResults = customiseHivViralLoadObj(panelList);
-                console.log('$scope.panelListResults',$scope.panelListResults);
+
             });
 
 
@@ -116,8 +120,12 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
                         return 1;
                     }
                 });
-                console.log('$scope.pastLabOrders', $scope.pastLabOrders);
-                console.log('pastOrders--->>', pastOrders);
+            });
+        }
+        function customizeActiveOrdersToDisplaySingHivVl(result) {
+            return _.filter(result, function(o) {
+
+                return o.display !== 'HIV VIRAL LOAD';
             });
         }
 
@@ -344,6 +352,7 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
             });
         }
 
+
         function createLabOrdersPaylaod(selectedOrders) {
             var orders = [];
 
@@ -359,6 +368,7 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
 
                     }
                     if(data.concept ==='856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                        // create another object for LDL
                         vl = {
                             orderer:config.provider.uuid,
                             careSetting:$scope.careSetting.uuid,
@@ -378,13 +388,13 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
 
                 return Object.keys(o).length !== 0;
             });
-            console.log('orders====filterOrders',filterOrders);
             return filterOrders;
 
         }
 
-        $scope.orderDateSelected = function(order) {
-            $scope.orderDateSel = order;
+        $scope.orderSelectedToAddDateActivated = function(order) {
+            $scope.orderSel = order;
+            $scope.orderUrgency = order;
 
 
         }
@@ -428,10 +438,18 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
             });
 
         };
-        $scope.voidHv ='';
+
+
+        $scope.toggleSelection = function (id) {
+            if($scope.typeValues[id]=== undefined || $scope.typeValues[id] ===false) {
+                $scope.ischecked='yes';
+            } else {
+                $scope.ischecked=' ';
+            }
+
+        };
 
         function createLabResultsObsPaylaod(res) {
-          //  console.log('res====', res);
             var obs = [];
             for (var i = 0; i < res.length; ++i) {
                 var data = res[i];
@@ -455,16 +473,17 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
                     }
 
                 }
-                console.log('data====', data);
                 if(data.value === true) {
                     data['value'] = "1302AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
                 }
 
                 if(data.concept==='856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' && data.value === undefined) {
                     $scope.OrderUuid = data.order;
+                    console.log('$scope.OrderUuid111111111', $scope.OrderUuid)
                 }
-                if(data.concept==='1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' && data.value === undefined) {
+                if(data.concept==='1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' && data.value === undefined) {
                     $scope.OrderUuid = data.order;
+                    console.log('$scope.OrderUuid222222', $scope.OrderUuid)
                 }
 
                 obs.push(data);
@@ -473,8 +492,6 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
                 });
 
             }
-            console.log('completedFields====', completedFields);
-
             return completedFields;
         }
         // discontinue lab test orders
@@ -534,10 +551,6 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
             });
 
         }
-
-
-        // this is the
-
 
         // functions that affect the shopping cart of orders written but not yet saved
 
@@ -603,22 +616,30 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
             $scope.orderDate = '';
             angular.element('#orderDate').val('');
             $('#dateOrder').modal('hide');
+            $('#orderUrgency').modal('hide');
         }
-        //$scope.orderDate = '';
         $scope.setOrderDate = function() {
             $scope.orderDate = angular.element('#orderDate').val();
-            $scope.orderDateSel['dateActivated'] =  $scope.orderDate.substring(0, 10);
-            $scope.orderDateSel['encounterDatetime'] =  $scope.orderDate.substring(0, 10);
+            $scope.orderSel['dateActivated'] =  $scope.orderDate.substring(0, 10);
+            $scope.orderSel['encounterDatetime'] =  $scope.orderDate.substring(0, 10);
 
-            $scope.filteredOrders.push($scope.orderDateSel);
+            $scope.filteredOrders.push($scope.orderSel);
             $scope.filteredOrders = _.uniq($scope.filteredOrders);
-            console.log('$scope.orderDate', $scope.filteredOrders);
+
             $('#dateOrder').modal('hide');
+            $('#orderUrgency').modal('hide');
 
         }
 
+        $scope.setOrderUrgency = function() {
 
+            var e = document.getElementById("ddlOrderUrgency");
+            $scope.orderUrgency['urgency'] =  e.options[e.selectedIndex].value;
+            $scope.filteredOrders.push($scope.orderUrgency);
+            $scope.filteredOrders = _.uniq($scope.filteredOrders);
+            $('#orderUrgency').modal('hide');
 
+        }
 
         // events
 

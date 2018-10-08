@@ -135,8 +135,11 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                                             <button type="button">{{order.name}}</button>
                                                                             <button type="button" class="fa fa-calendar fa-1x"
                                                                                     data-toggle="modal" data-target="#dateOrder"
-                                                                                    ng-click="orderDateSelected(order)"></button>
-                                                                            <button type="button" class="fa fa-warning fa-1x"></button>
+                                                                                    ng-click="orderSelectedToAddDateActivated(order)"></button>
+                                                                            <button type="button" class="fa fa-warning fa-1x"
+                                                                                    data-toggle="modal" data-target="#orderUrgency"
+                                                                                    ng-click="orderSelectedToAddDateActivated(order)"
+                                                                                    ></button>
                                                                             <button type="button" class="fa fa-remove fa-1x"
                                                                                     ng-click="deselectedOrder(order)" style="color:#9D0101;cursor: pointer"></button>
                                                                         </div>
@@ -291,11 +294,13 @@ ${ui.includeFragment("appui", "messages", [codes: [
 
 
                                                                         <div>
-                                                                            <div ng-if="vl.rendering ==='checkbox'">
+                                                                            <div ng-if="vl.rendering ==='checkbox'" class="form-group form-check">
                                                                                 <input class="form-check-input"
                                                                                        type="checkbox" id="vl"
                                                                                        name="feature"
+                                                                                       checked="checked"
                                                                                        ng-model="typeValues[vl.orderId]"
+                                                                                       ng-click="toggleSelection(vl.orderId)"
                                                                                        value="'1302AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'">
                                                                                 <label class="form-check-label">LDL</label>
                                                                             </div>
@@ -304,12 +309,10 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                                         <div ng-if="vl.rendering === 'inputnumeric'" >
                                                                             <input class="form-control" type="number"
                                                                                    ng-model="typeValues[vl.orderId]"
+                                                                                   ng-disabled="ischecked ==='yes'"
 
                                                                             >
                                                                         </div>
-                                                                            {{typeValues}}
-
-
 
                                                                         </div>
 
@@ -472,6 +475,12 @@ ${ui.includeFragment("appui", "messages", [codes: [
         <div class="modal fade" id="dateOrder" tabindex="-1" role="dialog" aria-labelledby="dateModalCenterTitle" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="dateModalCenterTitle"></h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
                     <div class="modal-body">
                         <label >Enter Date Order was made</label>
                         <div>
@@ -486,8 +495,39 @@ ${ui.includeFragment("appui", "messages", [codes: [
                 </div>
             </div>
         </div>
+        <!-- Modal urgency for lab orders -->
+        <div class="modal fade" id="orderUrgency" tabindex="-1" role="dialog" aria-labelledby="urgencyModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="urgencyModalCenterTitle"></h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <label >Order Urgency</label>
+                        <div>
+                            <select id="ddlOrderUrgency" class="form-control">
+                                <option value="ROUTINE"selected="selected">ROUTINE</option>
+                                <option value="STAT" >IMMEDIATELY</option>
+                            </select>
+
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button"   ng-click="closeModal()">Close</button>
+                        <button type="button" ng-click="setOrderUrgency()">
+                            <img src="${ ui.resourceLink("kenyaui", "images/glyphs/ok.png") }" /> Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
     </div>
+
+
+</div>
 
 </div>
 <script type="text/javascript">
