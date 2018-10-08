@@ -204,13 +204,22 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                      </h4>
                   </div>
                   <div class="card-body">
-                  <div ng-repeat="regimen in patientRegimens" style="font-size:16px;color:green;margin-bottom:2px;">
-                  <span style="width:40%;">Current {{regimen.program}} Regimen:{{regimen.name}}</span>
-                  <button ng-click="setRegimenMembers(regimen)">Refill</button>
-                  <button>Restart</button>
-                  <button>Change</button>
-                  <button>Stop</button>
-                  </div>
+                  <table>
+                  <tr ng-repeat="regimen in patientRegimens" style="font-size:16px;color:green;">
+                  <td style="width:35%;">Current {{regimen.program}} Regimen:{{regimen.name}}</td>
+                  <td>
+                      <button ng-click="setRegimenMembers(regimen)">Refill</button>
+                      <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#{{regimen.program}}">
+                      <img src="/openmrs/ms/uiframework/resource/kenyaui/images/glyphs/edit.png">
+                      </button>
+                        <div id="{{regimen.program}}" class="collapse">
+                          <button>Restart</button>
+                          <button>Change</button>
+                          <button>Stop</button>
+                        </div>
+                  </td>
+                  </tr>
+                  </table>
                    <div>
                       ${ ui.includeFragment("orderentryui", "patientdashboard/regimenDispensation", ["patient": patient]) }
                    </div>
@@ -313,10 +322,6 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
       </div>
    </div>
 </div>
-
-
-
-
 <script type="text/javascript">
     // manually bootstrap angular app, in case there are multiple angular apps on a page
     angular.bootstrap('#drug-orders-app', ['drugOrders']);
