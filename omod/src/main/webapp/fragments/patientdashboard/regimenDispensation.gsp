@@ -35,7 +35,7 @@ jq(document).on("click", ".edit-order", function() {
     jq("div.new-order-section").css("display","block");
     jq("#regimen-lines,#active-regimens").addClass("hide-section");
 });
-jq('#saveOrder').click(function(){
+jq('.saveOrder').click(function(){
 console.log("drugOrderMembers+++++++++++++++++++++++"+JSON.stringify(drugOrderMembers));
 payload = {
             "patient": patient,
@@ -43,7 +43,8 @@ payload = {
             "drugs":drugOrderMembers,
             "orderSetId":orderSetId,
             "activeOrderGroupUuId":activeOrderGroupUuId,
-            "discontinueOrderUuId":discontinueOrderUuId
+            "discontinueOrderUuId":discontinueOrderUuId,
+            "oldRegimen":oldRegimen
 
         };
 jq.getJSON('${ ui.actionLink("orderentryui", "patientdashboard/regimenDispensation", "saveOrderGroup") }',
@@ -102,7 +103,8 @@ payload = {
             "provider":provider,
             "drugs":drugOrderMembers,
             "orderSetId":orderSetId,
-            "discontinueOrderUuId":discontinueOrderUuId
+            "discontinueOrderUuId":discontinueOrderUuId,
+            "oldRegimen":oldRegimen
 
         };
 jq.getJSON('${ ui.actionLink("orderentryui", "patientdashboard/regimenDispensation", "discontintueOrderGroup") }',
@@ -174,16 +176,16 @@ jq(document).on("click", ".change-regimen", function() {
      </select>
   </div>
   <div style="padding-top: 10px" ng-show="regimenStatus=='absent'">
-      <button id="start-regimen" style="width:250px;">Start Regimen</button>
+      <button ng-click="saveOrderSet(components)" class="saveOrder" style="width:250px;">Start Regimen</button>
   </div>
   <div style="padding-top: 10px" ng-show="regimenStatus=='active'">
-    <button ng-click="saveOrderSet(components)" id="saveOrder" style="width:250px;">Refill Regimen</button>
+    <button ng-click="saveOrderSet(components)" class="saveOrder" style="width:250px;">Refill Regimen</button>
 </div>
   <div style="padding-top: 10px" ng-show="regimenStatus=='stopped'">
-    <button id="restart-regimen" style="width:250px;">Restart Regimen</button>
+    <button ng-click="saveOrderSet(components)" class="saveOrder" style="width:250px;">Restart Regimen</button>
 </div>
 <div style="padding-top: 10px" ng-show="regimenStatus=='change'">
-    <button id="change-regimen" style="width:250px;">Change Regimen</button>
+    <button ng-click="saveOrderSet(components)" class="saveOrder" style="width:250px;">Change Regimen</button>
 </div>
   </div>
 <!-- Success Modal -->

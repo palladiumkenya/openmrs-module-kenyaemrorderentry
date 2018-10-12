@@ -265,6 +265,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
             }
             window.drugOrderMembers=[];
             window.orderSetSelected={};
+            window.oldRegimen=[];
             $scope.saveOrderSet=function(orderset){
             drugOrderMembers=orderset;
             }
@@ -292,9 +293,9 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                 discontinueOrderUuId=orderGroup.orderGroupUuId;
             }
             $scope.changeRegimen=function(currentRegimen){
-              console.log("components to be stopped++++++++++++++++++++"+JSON.stringify(currentRegimen));
-              $scope.oldComponents=[];
-              $scope.oldComponents=currentRegimen.components;
+              console.log("components to be changed++++++++++++++++++++"+JSON.stringify(currentRegimen));
+              oldRegimen=[];
+              oldRegimen=currentRegimen.components;
               $scope.regimenStatus='change';
               $scope.showRegimenPanel=true;
             }
@@ -336,7 +337,6 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
         if(typeof drug_id=="string"){
         drug_id=parseInt(drug_id);
         }
-        console.log("typeof "+typeof drug_id);
         drugs.push(drug_id);
         }
         drugs.sort(function(a, b){return a - b});
