@@ -134,6 +134,7 @@ public class DrugOrdersPageController {
     }
     private String computeCurrentRegimen(){
         String currentRegimen="{\n" +
+                "  \"regimenstatus\": \"stopped\",\n" +
                 "  \"patientregimens\": [\n" +
                 "    {\n" +
                 "      \"program\": \"HIV\",\n" +

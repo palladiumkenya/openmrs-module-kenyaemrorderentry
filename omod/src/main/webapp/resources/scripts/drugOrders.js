@@ -68,6 +68,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
             // TODO changing dosingType of a draft order should reset defaults (and discard non-defaulted properties)
             var programRegimens=OpenMRS.kenyaemrRegimenJsonPayload;
             var currentRegimens=OpenMRS.currentRegimens;
+            $scope.showRegimenPanel=false;
             function loadExistingOrders() {
                 $scope.activeDrugOrders = { loading: true };
                 OrderService.getOrders({
@@ -82,6 +83,11 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                     $scope.regimenLines=$scope.programs.programs[0].regimen_lines;
                     $scope.patientActiveDrugOrders=OpenMRS.activeOrdersPayload;
                     $scope.patientRegimens=currentRegimens.patientregimens;
+                    $scope.regimenStatus=currentRegimens.regimenstatus;
+                    if($scope.patientRegimens.length==0){
+                      $scope.showRegimenPanel=true;
+                    }
+
                 });
 
                 $scope.pastDrugOrders = { loading: true };
@@ -243,6 +249,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
             $scope.components.quantity=[];
             $scope.setProgramRegimens=function(regimens){
             $scope.activeRegimens=[];
+            $scope.oldComponents=[];
              $scope.activeRegimens=regimens;
             }
             $scope.setRegimenMembers=function(regimen){
@@ -284,4 +291,65 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                 orderSetId=orderGroup.order_id;
                 discontinueOrderUuId=orderGroup.orderGroupUuId;
             }
+            $scope.changeRegimen=function(currentRegimen){
+              console.log("components to be stopped++++++++++++++++++++"+JSON.stringify(currentRegimen));
+              $scope.oldComponents=[];
+              $scope.oldComponents=currentRegimen.components;
+              $scope.regimenStatus='change';
+              $scope.showRegimenPanel=true;
+            }
+            $scope.stopRegimen=function(regimen){
+            console.log("regimen to stop++++++++++++++++++++"+JSON.stringify(regimen));
+              $scope.components=[];
+              $scope.components=regimen.components;
+              $scope.regimenStatus='stopped';
+            }
+            $scope.refillRegimen=function(regimen){
+            console.log("regimen selected++++++++++++++++++++"+JSON.stringify(regimen));
+              $scope.components=[];
+              $scope.components=regimen.components;
+              orderSetId=regimen.orderSetId;
+              $scope.regimenStatus='active';
+              $scope.showRegimenPanel=true;
+              $scope.matchSetMembers(regimen.components);
+            }
+            $scope.matchSetMembers=function(members){
+            _.map($scope.programs.programs, function(program) {
+            _.map(program.regimen_lines, function(regimenLine) {
+                _.map(regimenLine.regimens, function(regimen) {
+                 var drugsFromOrderSet=$scope.createDrugsArrayFromPayload(regimen.components);
+                 var drugsFromCurrentRegimen=$scope.createDrugsArrayFromPayload(members);
+                 if($scope.arraysEqual(drugsFromOrderSet,drugsFromCurrentRegimen)){
+                console.log("current regimen matches this order set+++++"+JSON.stringify(regimen));
+                orderSetId=regimen.orderSetId;
+                 }
+                });
+                });
+                });
+            }
+
+        $scope.createDrugsArrayFromPayload=function (components){
+        var drugs=[];
+        var i;
+        for(i=0;i<components.length;i++){
+        var drug_id=components[i].drug_id;
+        if(typeof drug_id=="string"){
+        drug_id=parseInt(drug_id);
+        }
+        console.log("typeof "+typeof drug_id);
+        drugs.push(drug_id);
+        }
+        drugs.sort(function(a, b){return a - b});
+        return drugs;
+        }
+        $scope.arraysEqual=function (arr1, arr2) {
+            if(arr1.length !== arr2.length)
+                return false;
+            for(var i = arr1.length; i--;) {
+                if(arr1[i] !== arr2[i])
+                    return false;
+            }
+
+            return true;
+        }
         }]);

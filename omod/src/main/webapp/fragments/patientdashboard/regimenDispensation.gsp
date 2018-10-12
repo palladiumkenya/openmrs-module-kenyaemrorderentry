@@ -124,7 +124,11 @@ jq(document).on("click", ".edit-single-drug,.dispense-single-drug", function() {
     jq("div.ke-tab").css("display","none");
     jq("div.single-order-section").css("display","block");
 });
-
+jq(document).on("click", ".change-regimen", function() {
+    console.log("change regimen++++++++++++++++++++++++++++");
+    jq(".disable-on-regimen-change").hide();
+    jq("#drug-order-group").addClass("hide-section");
+});
 });
 </script>
 <div class="row panel panel-default">
@@ -169,9 +173,18 @@ jq(document).on("click", ".edit-single-drug,.dispense-single-drug", function() {
      <option ng-repeat="unit in doseUnits" value="{{unit.uuid}}">{{unit.display}}</option>
      </select>
   </div>
-  <div style="padding-top: 10px">
-      <button ng-click="saveOrderSet(components)" id="saveOrder" style="width:250px;"><img src="${ ui.resourceLink("kenyaui", "images/glyphs/ok.png") }" /> Save</button>
+  <div style="padding-top: 10px" ng-show="regimenStatus=='absent'">
+      <button id="start-regimen" style="width:250px;">Start Regimen</button>
   </div>
+  <div style="padding-top: 10px" ng-show="regimenStatus=='active'">
+    <button ng-click="saveOrderSet(components)" id="saveOrder" style="width:250px;">Refill Regimen</button>
+</div>
+  <div style="padding-top: 10px" ng-show="regimenStatus=='stopped'">
+    <button id="restart-regimen" style="width:250px;">Restart Regimen</button>
+</div>
+<div style="padding-top: 10px" ng-show="regimenStatus=='change'">
+    <button id="change-regimen" style="width:250px;">Change Regimen</button>
+</div>
   </div>
 <!-- Success Modal -->
 <div class="modal fade" id="order-group-success" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true"

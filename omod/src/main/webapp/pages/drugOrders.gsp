@@ -96,10 +96,10 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
          <h3>Drug Orders</h3>
          <div id="program-tabs" class="ke-tabs">
             <div class="ke-tabmenu">
-               <div class="ke-tabmenu-item" data-tabid="active_drug_orders">Active Orders</div>
+               <div class="ke-tabmenu-item disable-on-regimen-change" data-tabid="active_drug_orders">Active Orders</div>
                <div class="ke-tabmenu-item new-order" data-tabid="standard_regimen_orders">Standard Regimen Order</div>
-               <div class="ke-tabmenu-item single-order" data-tabid="new_drug_orders">Other Drugs Order</div>
-               <div class="ke-tabmenu-item" data-tabid="past_drug_orders">Past Drug Orders</div>
+               <div class="ke-tabmenu-item single-order disable-on-regimen-change" data-tabid="new_drug_orders">Other Drugs Order</div>
+               <div class="ke-tabmenu-item disable-on-regimen-change" data-tabid="past_drug_orders">Past Drug Orders</div>
             </div>
             <div class="ke-tab single-order-section" data-tabid="new_drug_orders">
                <div class="card">
@@ -200,27 +200,27 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                <div class="card">
                   <div class = "card-header">
                      <h4 class = "card-title">
-                        Drug Order Sets
+                       Standard Regimens
                      </h4>
                   </div>
                   <div class="card-body">
-                  <table>
-                  <tr ng-repeat="regimen in patientRegimens" style="font-size:16px;color:green;">
+                  <table ng-show="patientRegimens.length > 0">
+                  <tr ng-repeat="regimen in patientRegimens" style="font-size:16px;font-weight:bold;">
                   <td style="width:35%;">Current {{regimen.program}} Regimen:{{regimen.name}}</td>
                   <td>
-                      <button ng-click="setRegimenMembers(regimen)">Refill</button>
+                      <button ng-click="refillRegimen(regimen)">Refill</button>
                       <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#{{regimen.program}}">
                       <img src="/openmrs/ms/uiframework/resource/kenyaui/images/glyphs/edit.png">
                       </button>
                         <div id="{{regimen.program}}" class="collapse">
-                          <button>Restart</button>
-                          <button>Change</button>
+                          <button class="change-regimen" ng-click="changeRegimen(regimen)">Change</button>
                           <button>Stop</button>
                         </div>
                   </td>
                   </tr>
                   </table>
-                   <div>
+                  <span ng-show="regimenStatus=='absent'"> Regimen: Never on ARVs</span>
+                   <div ng-show="showRegimenPanel" style="margin-top:2px;">
                       ${ ui.includeFragment("orderentryui", "patientdashboard/regimenDispensation", ["patient": patient]) }
                    </div>
                   </div>

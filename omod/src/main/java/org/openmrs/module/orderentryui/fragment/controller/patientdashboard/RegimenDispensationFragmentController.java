@@ -76,7 +76,7 @@ public class RegimenDispensationFragmentController {
                 drugOrder.setDoseUnits(doseUnitConcept);
                 drugOrder.setQuantity(quantity);
                 drugOrder.setQuantityUnits(quantityUnitConcept);
-                drugOrder.setInstructions("Take after a meal");
+                drugOrder.setInstructions("");
                 drugOrder.setOrderer(provider);
                 drugOrder.setEncounter(encounter);
                 orderList.add(drugOrder);
