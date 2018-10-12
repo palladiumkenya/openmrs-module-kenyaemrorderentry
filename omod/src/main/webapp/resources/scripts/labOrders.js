@@ -80,6 +80,8 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
                 careSetting: $scope.careSetting.uuid
             }).then(function(results) {
                 $scope.activeTestOrders = _.map(results, function(item) { return new OpenMRS.TestOrderModel(item) });
+                $scope.activeTestOrdersForHvVl = $scope.activeTestOrders;
+                console.log('$scope.activeTestOrders',$scope.activeTestOrders);
 
                 $scope.activeTestOrders = customizeActiveOrdersToDisplaySingHivVl($scope.activeTestOrders);
                 $scope.activeTestOrders.sort(function(a, b) {
@@ -107,8 +109,12 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
                 careSetting: $scope.careSetting.uuid,
                 status: 'inactive'
             }).then(function(results) {
+                $scope.limit = 12;
                 $scope.pastLabOrders = pastOrders;
                 // _.map(results, function(item) { return new OpenMRS.TestOrderModel(item) });
+                $scope.pastLabOrders = filterDuplicates($scope.pastLabOrders);
+                $scope.pastLabOrders = renameNotDetectedToLDL($scope.pastLabOrders);
+                console.log('$scope.pastLabOrders',$scope.pastLabOrders);
                 $scope.pastLabOrders.sort(function(a, b) {
                     var key1 = a.dateActivated;
                     var key2 = b.dateActivated;
@@ -120,8 +126,48 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
                         return 1;
                     }
                 });
+                // $scope.pastLabOrders.slice(0, 12);
             });
         }
+        function renameNotDetectedToLDL(res) {
+            var orders = [];
+            for (var i = 0; i < res.length; ++i) {
+                var data = res[i];
+
+                for (var r in data) {
+                    if (data.hasOwnProperty(r)) {
+
+                        if (data.valueCoded === 'NOT DETECTED') {
+                            data['valueCoded'] = "LDL";
+                        }
+                        if (data.resultDate ) {
+                            data['resultDate'] = new Date(data.resultDate );
+                        }
+                        if (data.dateActivated ) {
+                            data['dateActivated'] = new Date(data.dateActivated );
+                        }
+
+                    }
+
+                }
+                orders.push(data);
+
+            }
+            return orders;
+        }
+        function filterDuplicates(arr){
+            var newArr = [];
+            angular.forEach(arr, function(value, key) {
+                var exists = false;
+                angular.forEach(newArr, function(val2, key) {
+                    if(angular.equals(value.OrderId, val2.OrderId)){ exists = true };
+                });
+                if(exists == false && value.OrderId != "") { newArr.push(value); }
+            });
+            return newArr;
+        }
+
+
         function customizeActiveOrdersToDisplaySingHivVl(result) {
             return _.filter(result, function(o) {
 
@@ -426,10 +472,12 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
                 encounterRole: config.encounterRole
             };
             $scope.loading = true;
+            console.log('$scope.obsPayload', $scope.obsPayload);
             OrderEntryService.signAndSave({ draftOrders: [] }, encounterContext, $scope.obsPayload)
                 .$promise.then(function(result) {
                 discontinueLabTestOrders($scope.discontinueFilledOrders);
                 $scope.voidActiveLabOrders();
+
                 location.href = location.href;
             }, function(errorResponse) {
                 console.log('errorResponse.data.error.message',errorResponse.data.error);
@@ -443,14 +491,60 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
         $scope.toggleSelection = function (id) {
             if($scope.typeValues[id]=== undefined || $scope.typeValues[id] ===false) {
                 $scope.ischecked='yes';
+                angular.element('#vload').val('');
             } else {
                 $scope.ischecked=' ';
             }
 
         };
+         function cancelOrder () {
+           // $scope.activeTestOrdersForHvVl;
+           // getActiveOrderForHivVl()
+            console.log('$scope.activeTestOrdersForHvVl',$scope.activeTestOrdersForHvVl);
+
+            for (var i = 0; i < $scope.activeTestOrdersForHvVl.length; ++i) {
+                var data = $scope.activeTestOrdersForHvVl[i];
+
+                for (var r in data) {
+                    if (data.hasOwnProperty(r)) {
+                        console.log('data.dateActivated',data.dateActivated);
+                        console.log('data.data.concept',data.concept);
+                        console.log('$scope.ldlDateActivated',$scope.ldlDateActivated);
+                        if(data.concept.uuid ==='856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' && data.dateActivated ===$scope.ldlDateActivated) {
+                            console.log('data.uuid++++++++++++++++',data.uuid);
+                            $scope.OrderUuidHvl =data.uuid;
+                            console.log('$scope.OrderUuid++++++++++++++++ entering here',$scope.OrderUuidHvl);
+
+                        }
+
+                    }
+
+                }
+
+            }
+            var voidOrderPayload ={
+                voided: true,
+                voidReason: $scope.voidOrders
+            };
+
+            $scope.loading = true;
+            OrderEntryService.saveVoidedOrders(voidOrderPayload, $scope.OrderUuidHvl)
+                .$promise.then(function(result) {
+                // location.href = location.href;
+            }, function(errorResponse) {
+                location.href = location.href;
+                console.log('errorResponse.data.error.message',errorResponse.data.error);
+                emr.errorMessage(errorResponse.data.error.message);
+                $scope.loading = false;
+            });
+
+
+        }
+
 
         function createLabResultsObsPaylaod(res) {
             var obs = [];
+           // $scope.hivVlUuid = '';
             for (var i = 0; i < res.length; ++i) {
                 var data = res[i];
 
@@ -458,33 +552,61 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
                     if (data.hasOwnProperty(r)) {
                         data['order'] = data.orderUuid;
                         data['value'] =  $scope.typeValues[data.orderId];
+                        /*if(data.concept==='856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                            $scope.hivVlUuid = data.orderUuid;
+                            console.log('$scope.hivVlUuid', $scope.hivVlUuid)
+                        }*/
 
                     }
                     var hv =data.hvVl;
-                    for(var l in hv) {
-                        if (hv.hasOwnProperty(l)) {
+                        for (var l in hv) {
+                            if (hv.hasOwnProperty(l)) {
 
-                            data['order'] = hv.orderUuid;
-                            data['value'] =  $scope.typeValues[hv.orderId];
-                            data['concept'] =  hv.concept;
-                            data['encounter'] =  hv.encounter;
 
+                                data['order'] = hv.orderUuid;
+                                data['value'] = $scope.typeValues[hv.orderId];
+                                data['concept'] = hv.concept;
+                                data['encounter'] = hv.encounter;
+
+                            }
                         }
-                    }
+
 
                 }
                 if(data.value === true) {
                     data['value'] = "1302AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
                 }
 
-                if(data.concept==='856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' && data.value === undefined) {
-                    $scope.OrderUuid = data.order;
-                    console.log('$scope.OrderUuid111111111', $scope.OrderUuid)
+
+
+                if(data.concept==='1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                    setLdlOrderUuidToVoid(data.order);
+
+                   // console.log('$scope.hivLdlUuid', $scope.hivLdlUuid)
                 }
-                if(data.concept==='1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' && data.value === undefined) {
-                    $scope.OrderUuid = data.order;
-                    console.log('$scope.OrderUuid222222', $scope.OrderUuid)
+                if(data.concept==='856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                    setVlOrderUuidToVoid(data.order);
+
+                    // console.log('$scope.hivLdlUuid', $scope.hivLdlUuid)
                 }
+
+                if(data.concept==='1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' && data.value !== undefined) {
+
+                        console.log('entering this zone111111111$scope.hivVlUuid',$scope.hivVlUuid);
+                        $scope.OrderUuid= $scope.hivVlUuid;
+                        console.log('$scope.OrderUuidvl', $scope.OrderUuid)
+
+
+                }
+                if(data.concept==='856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' && data.value !== undefined) {
+
+                    console.log('entering this zone22222$scope.hivLdlUuid',$scope.hivLdlUuid);
+                    $scope.OrderUuid= $scope.hivLdlUuid;
+                    console.log('$scope.OrderUuidLDL', $scope.OrderUuid)
+
+
+                }
+                console.log('data', data);
 
                 obs.push(data);
                 var completedFields = _.filter(obs, function(o) {
@@ -492,7 +614,17 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
                 });
 
             }
+            console.log('completedFields', completedFields);
             return completedFields;
+        }
+        function setVlOrderUuidToVoid(uuid) {
+            console.log('uuid------------->>>',uuid);
+            $scope.hivVlUuid = uuid;
+        }
+
+        function setLdlOrderUuidToVoid(uuid) {
+            console.log('uuid------------->>>',uuid);
+            $scope.hivLdlUuid = uuid;
         }
         // discontinue lab test orders
         function discontinueLabTestOrders(completedFields) {
@@ -586,7 +718,9 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
         };
         $scope.voidOrders = '';
         $scope.getOrderUuid = function(order) {
-            $scope.OrderUuid = order.uuid
+            console.log('orderpppppppppppppp', order);
+            $scope.OrderUuid = order.uuid;
+            $scope.ldlDateActivated = order.dateActivated;
 
         }
 
@@ -596,12 +730,16 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
                 voided: true,
                 voidReason: $scope.voidOrders
             };
+            console.log('$scope.OrderUuid=====selected',$scope.OrderUuid);
 
             $scope.loading = true;
             OrderEntryService.saveVoidedOrders(voidOrderPayload, $scope.OrderUuid)
                 .$promise.then(function(result) {
+
                 $('#voidOrdersModal').modal('hide');
-                location.href = location.href;
+
+                   // cancelOrder();
+               // location.href = location.href;
             }, function(errorResponse) {
                 $('#voidOrdersModal').modal('hide');
                 location.href = location.href;

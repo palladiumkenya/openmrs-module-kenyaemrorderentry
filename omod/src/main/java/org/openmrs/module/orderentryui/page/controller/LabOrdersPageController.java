@@ -58,7 +58,7 @@ public class LabOrdersPageController {
         model.put("jsonConfig", ui.toJson(jsonConfig));
         labOrdersConceptPanels(conceptService, sessionContext, ui, model);
         getActiveLabOrders(orderService, conceptService, patient, model);
-        pastLabOrders(orderService, conceptService,patient,model, obsService);
+        getLabOrders(orderService, conceptService,careSetting, patient, model,obsService);
 
     }
 
@@ -121,10 +121,17 @@ public class LabOrdersPageController {
 
 
         );
+        List<Concept> sputumTestPanels = Arrays.asList(
+               // conceptService.getConcept(159645)
+
+
+        );
         sampleTypes.put("Urine", urineTestPanels);
         sampleTypes.put("Blood", bloodTestPanels);
         sampleTypes.put("Stool", stoolTestPanels);
         sampleTypes.put("Histology/Cytology", histologyTestPanels);
+        sampleTypes.put("Sputum", sputumTestPanels);
+
 
 
         JSONArray labTestJsonPayload = new JSONArray();
@@ -177,7 +184,19 @@ public class LabOrdersPageController {
                         concService.getConcept(856), // hiv viral load
                      //   concService.getConcept(1305), // hiv viral load Qualitative
                         concService.getConcept(5497), // cd4 counts
-                        concService.getConcept(730) // cd4%
+                        concService.getConcept(730), // cd4%
+                        concService.getConcept(163722), // hiv rapid test
+                        concService.getConcept(844) // DNA PCR
+                ));
+
+        JSONArray tbMonitoring = buildTestPanelWithoutPanelConcept("Blood", labTestJsonPayload,
+                "TB MONITORING", Arrays.asList(
+                        concService.getConcept(162202) // GeneXpert MTB/RIF
+                ));
+        JSONArray sputumTb = buildTestPanelWithoutPanelConcept("Sputum", labTestJsonPayload,
+                "TB MONITORING", Arrays.asList(
+                        concService.getConcept(307),
+                        concService.getConcept(1465)
                 ));
 
         model.put("labTestJsonPayload", labTestJsonPayload.toString());
@@ -207,65 +226,6 @@ public class LabOrdersPageController {
                 }
         }
          return finalTests;
-    }
-
-    public void pastLabOrders(@SpringBean("orderService") OrderService orderService, @SpringBean("conceptService")
-            ConceptService conceptService,
-                              Patient patient, PageModel model,
-                              @SpringBean("obsService") ObsService obsService) {
-
-
-        List<Concept> bloodTestPanelExample =Arrays.asList(
-             //   conceptService.getConcept(1305),
-                conceptService.getConcept(856)
-
-
-        );
-
-
-        JSONArray obsResultList = new JSONArray();
-        for ( Concept con : bloodTestPanelExample ) {
-
-            List<Obs> pastOrders = obsService.getObservationsByPersonAndConcept(patient,conceptService.getConcept(con.getConceptId()));
-
-
-            if(pastOrders != null) {
-
-                for (Obs obs : pastOrders) {
-                    JSONObject obsObj = new JSONObject();
-
-                    if(obs.getOrder() !=null) {
-                        if (obs.getOrder().getOrderId() != null) {
-                            Integer orderId = obs.getOrder().getOrderId();
-
-                            if(obs.getValueCoded() !=null) {
-                                    obsObj.put("valueCoded", obs.getValueCoded().getName(LOCALE).getName());
-                                }
-                                obsObj.put("valueNumeric", obs.getValueNumeric());
-                                obsObj.put("valueText", obs.getValueText());
-                                obsObj.put("name", con.getName(LOCALE).getName());
-                                obsObj.put("obsId", obs.getId());
-                                obsObj.put("OrderId", obs.getOrder().getOrderId());
-                                obsObj.put("dateActivated",orderService.getOrder(orderId).getDateActivated().toString() );
-                                obsObj.put("resultDate",obs.getObsDatetime().toString() );
-                                obsResultList.add(obsObj);
-
-                        }
-                    }
-
-
-
-                }
-
-             //   System.out.println("obsResultList++++++++++++++++++++++++++++++++++++++++++++++++++++" + obsResultList);
-
-            }
-
-        }
-        model.put("labObsResults", obsResultList.toString());
-
-
-
     }
 
     public void getActiveLabOrders(@SpringBean("orderService") OrderService orderService, @SpringBean("conceptService")
@@ -320,9 +280,66 @@ public class LabOrdersPageController {
 
         }
         model.put("panelList", panelList.toString());
+    }
 
-        // return panelList.toString();
+    public void getLabOrders(@SpringBean("orderService") OrderService orderService, @SpringBean("conceptService")
+            ConceptService conceptService,
+                             @SpringBean("careSetting")
+                                     CareSetting careSetting,
+                             Patient patient, PageModel model,@SpringBean("obsService") ObsService obsService) {
+        OrderType labType = orderService.getOrderTypeByUuid(OrderType.TEST_ORDER_TYPE_UUID);
+        CareSetting careset = orderService.getCareSetting(1);
+        List<Order> labOrders = orderService.getOrders(patient, careset, labType, false);
+        //Map<String, List<Concept>> orderConcepts = new HashMap<String, List<Concept>>();
 
+
+        JSONArray labOrdersList = new JSONArray();
+
+        for (Order order : labOrders) {
+            Concept labConcept = order.getConcept();
+            if (order.getDateStopped() != null) {
+                List<Concept> labConcepts = new ArrayList<Concept>();
+                labConcepts.add(labConcept);
+                System.out.println("labConceptsooooooooooooooo" + labConcepts);
+                for (Concept con : labConcepts) {
+
+                    List<Obs> pastOrders = obsService.getObservationsByPersonAndConcept(patient, conceptService.getConcept(con.getConceptId()));
+                    //  System.out.println("pastOrders=================" + pastOrders);
+
+
+                    if (pastOrders != null) {
+
+                        for (Obs obs : pastOrders) {
+                            JSONObject obsObj = new JSONObject();
+
+                            if (obs.getOrder() != null) {
+                                if (obs.getOrder().getOrderId() != null) {
+                                    Integer orderId = obs.getOrder().getOrderId();
+
+                                    if (obs.getValueCoded() != null) {
+                                        obsObj.put("valueCoded", obs.getValueCoded().getName(LOCALE).getName());
+                                    }
+                                    obsObj.put("valueNumeric", obs.getValueNumeric());
+                                    obsObj.put("valueText", obs.getValueText());
+                                    obsObj.put("name", con.getName(LOCALE).getName());
+                                    obsObj.put("obsId", obs.getId());
+                                    obsObj.put("OrderId", obs.getOrder().getOrderId());
+                                    obsObj.put("dateActivated", orderService.getOrder(orderId).getDateActivated().toString());
+                                    obsObj.put("resultDate", obs.getObsDatetime().toString());
+                                    labOrdersList.add(obsObj);
+
+                                }
+                            }
+
+
+                        }
+                        //   System.out.println("obsResultList++++++++++++++++++++++++++++++++++++++++++++++++++++" + obsResultList);
+                    }
+
+                }
+            }
+        }
+        model.put("labObsResults", labOrdersList.toString());
     }
 
     private JSONArray buildTestPanelWithoutPanelConcept(String sampleType, JSONArray sampleTypeArray, String panelName,

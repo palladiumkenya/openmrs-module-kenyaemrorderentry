@@ -307,7 +307,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
 
 
                                                                         <div ng-if="vl.rendering === 'inputnumeric'" >
-                                                                            <input class="form-control" type="number"
+                                                                            <input class="form-control" type="number" id="vload"
                                                                                    ng-model="typeValues[vl.orderId]"
                                                                                    ng-disabled="ischecked ==='yes'"
 
@@ -408,9 +408,9 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                 <th>Result Date</th>
                                                 <th>Results</th>
                                             </tr>
-                                            <tr ng-repeat="past in pastLabOrders">
+                                            <tr ng-repeat="past in pastLabOrders | limitTo:limit">
                                                 <td>
-                                                    {{ past.dateActivated | date:'dd-MM-yyyy' }}
+                                                    {{ past.dateActivated | date:'dd-MM-yyyy'}}
                                                 </td>
                                                 <td>
                                                     {{past.name}}
