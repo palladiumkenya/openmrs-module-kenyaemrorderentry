@@ -34,6 +34,7 @@ jq(document).on("click", ".edit-order", function() {
     jq("div.ke-tab").css("display","none");
     jq("div.new-order-section").css("display","block");
     jq("#regimen-lines,#active-regimens").addClass("hide-section");
+    jq(".disable-on-regimen-change").hide();
 });
 jq('.saveOrder').click(function(){
 console.log("drugOrderMembers+++++++++++++++++++++++"+JSON.stringify(drugOrderMembers));

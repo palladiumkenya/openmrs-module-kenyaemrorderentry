@@ -279,6 +279,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                         $scope.components=orderGroup.components;
                         orderSetId=regimen.orderSetId;
                         activeOrderGroupUuId=orderGroup.orderGroupUuId;
+                        $scope.showRegimenPanel=true;
                        }
                     });
                 });
