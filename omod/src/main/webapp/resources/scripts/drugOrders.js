@@ -285,11 +285,10 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
 
                 });
             }
-            $scope.dispenseOrderGroup=function(orderGroup){
-            console.log("order_groups+++++++++++++++++++++++++++++++++"+JSON.stringify(orderGroup));
-                drugOrderMembers=orderGroup.components;
-                orderSetId=orderGroup.order_id;
-                discontinueOrderUuId=orderGroup.orderGroupUuId;
+            $scope.discontinueOrderGroup=function(components){
+                drugOrderMembers=components;
+                orderSetId=null;
+                discontinueOrderUuId=null;
             }
             $scope.changeRegimen=function(currentRegimen){
               console.log("components to be changed++++++++++++++++++++"+JSON.stringify(currentRegimen));

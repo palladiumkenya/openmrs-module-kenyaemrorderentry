@@ -126,14 +126,12 @@ public class RegimenDispensationFragmentController {
         JSONParser parser = new JSONParser();
         Object object = parser.parse(payload);
         JSONObject orderContext = (JSONObject) object;
-        if (orderContext.get("discontinueOrderUuId") != null){
-            String patientUuid = orderContext.get("patient").toString();
-            String providerUuid = orderContext.get("provider").toString();
-            JSONArray drugGroupOrder = (JSONArray) orderContext.get("drugs");
-            Patient patient = patientService.getPatientByUuid(patientUuid);
-            Provider provider = providerService.getProviderByUuid(providerUuid);
-            discontinueOrder(patient,provider,drugGroupOrder,encounterService,orderService);
-        }
+        String patientUuid = orderContext.get("patient").toString();
+        String providerUuid = orderContext.get("provider").toString();
+        JSONArray drugGroupOrder = (JSONArray) orderContext.get("drugs");
+        Patient patient = patientService.getPatientByUuid(patientUuid);
+        Provider provider = providerService.getProviderByUuid(providerUuid);
+        discontinueOrder(patient,provider,drugGroupOrder,encounterService,orderService);
     }
     private void discontinueOrder(Patient patient,Provider provider,JSONArray drugs,
         EncounterService encounterService,OrderService orderService){

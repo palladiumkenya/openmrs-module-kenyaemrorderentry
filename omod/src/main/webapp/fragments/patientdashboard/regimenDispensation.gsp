@@ -96,7 +96,7 @@ jq.getJSON('${ ui.actionLink("orderentryui", "patientdashboard/regimenDispensati
        }, 10000);
     })
 });
-jq(document).on("click", ".dispenseOrder", function() {
+jq(document).on("click", ".dispenseOrder,.stopOrder", function() {
 payload = {
             "patient": patient,
             "provider":provider,

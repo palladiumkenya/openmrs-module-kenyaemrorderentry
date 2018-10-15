@@ -214,7 +214,7 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                       </button>
                         <div id="{{regimen.program}}" class="collapse">
                           <button class="change-regimen" ng-click="changeRegimen(regimen)">Change</button>
-                          <button>Stop</button>
+                          <button ng-click="discontinueOrderGroup(regimen.components)" class="stopOrder">Stop</button>
                         </div>
                   </td>
                   </tr>
@@ -251,7 +251,7 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                            </td>
                            <td>
                               <button ng-click="editOrderGroup(order)" class="edit-order">Edit</button>
-                              <button ng-click="dispenseOrderGroup(order)" class="dispenseOrder">Dispense</button>
+                              <button ng-click="discontinueOrderGroup(order.components)" class="dispenseOrder">Dispense</button>
                            </td>
                         </tr>
                      </table>
