@@ -265,7 +265,6 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
             }
             window.drugOrderMembers=[];
             window.orderSetSelected={};
-            window.oldRegimen=[];
             $scope.saveOrderSet=function(orderset){
             drugOrderMembers=orderset;
             }
@@ -294,8 +293,6 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
             }
             $scope.changeRegimen=function(currentRegimen){
               console.log("components to be changed++++++++++++++++++++"+JSON.stringify(currentRegimen));
-              oldRegimen=[];
-              oldRegimen=currentRegimen.components;
               $scope.regimenStatus='change';
               $scope.showRegimenPanel=true;
             }

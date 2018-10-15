@@ -43,8 +43,7 @@ payload = {
             "drugs":drugOrderMembers,
             "orderSetId":orderSetId,
             "activeOrderGroupUuId":activeOrderGroupUuId,
-            "discontinueOrderUuId":discontinueOrderUuId,
-            "oldRegimen":oldRegimen
+            "discontinueOrderUuId":discontinueOrderUuId
 
         };
 jq.getJSON('${ ui.actionLink("orderentryui", "patientdashboard/regimenDispensation", "saveOrderGroup") }',
@@ -103,8 +102,7 @@ payload = {
             "provider":provider,
             "drugs":drugOrderMembers,
             "orderSetId":orderSetId,
-            "discontinueOrderUuId":discontinueOrderUuId,
-            "oldRegimen":oldRegimen
+            "discontinueOrderUuId":discontinueOrderUuId
 
         };
 jq.getJSON('${ ui.actionLink("orderentryui", "patientdashboard/regimenDispensation", "discontintueOrderGroup") }',

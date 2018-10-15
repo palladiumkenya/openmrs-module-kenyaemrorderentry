@@ -42,11 +42,6 @@ public class RegimenDispensationFragmentController {
         Patient patient = patientService.getPatientByUuid(patientUuid);
         String orderSetId=orderContext.get("orderSetId").toString();
         Provider provider = providerService.getProviderByUuid(providerUuid);
-        JSONArray oldRegimen=(JSONArray)orderContext.get("oldRegimen");
-        System.out.println("oldregimen size++++++++++++++++++++++"+oldRegimen.size());
-        if(oldRegimen.size() > 0){
-            discontinueOrder(patient,provider,oldRegimen,encounterService,orderService);
-        }
         if(orderContext.get("activeOrderGroupUuId") !=null){
             String orderGroupUuId=orderContext.get("activeOrderGroupUuId").toString();
             orderGroup=orderService.getOrderGroupByUuid(orderGroupUuId);
