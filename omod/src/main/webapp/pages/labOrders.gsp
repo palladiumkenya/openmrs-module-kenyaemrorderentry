@@ -298,9 +298,9 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                                                 <input class="form-check-input"
                                                                                        type="checkbox" id="vl"
                                                                                        name="feature"
-                                                                                       checked="checked"
-                                                                                       ng-model="typeValues[vl.orderId]"
-                                                                                       ng-click="toggleSelection(vl.orderId)"
+                                                                                       ng-checked="fag"
+                                                                                       ng-model="hivViralValuesLDL[vl.orderId]"
+                                                                                       ng-click="toggleSelection(vl)"
                                                                                        value="'1302AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'">
                                                                                 <label class="form-check-label">LDL</label>
                                                                             </div>
@@ -308,7 +308,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
 
                                                                         <div ng-if="vl.rendering === 'inputnumeric'" >
                                                                             <input class="form-control" type="number" id="vload"
-                                                                                   ng-model="typeValues[vl.orderId]"
+                                                                                   ng-model="hivViralValues[vl.orderId]"
                                                                                    ng-disabled="ischecked ==='yes'"
 
                                                                             >
@@ -464,7 +464,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                     </div>
                     <div class="modal-footer">
                         <button type="button"  data-dismiss="modal" ng-click="closeModal()">Close</button>
-                        <button type="button"  ng-disabled="voidOrders === ''" ng-click="voidActiveLabOrders()">
+                        <button type="button"  ng-disabled="voidOrders === ''" ng-click="voidAllHivViralLoadOrders()">
                             <img src="${ ui.resourceLink("kenyaui", "images/glyphs/ok.png") }" /> Save</button>
                     </div>
                 </div>
