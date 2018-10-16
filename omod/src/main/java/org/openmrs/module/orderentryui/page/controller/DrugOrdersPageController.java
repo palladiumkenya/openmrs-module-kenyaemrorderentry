@@ -90,9 +90,10 @@ public class DrugOrdersPageController {
                     components.add(component);
                     OrderSet orderSet=order.getOrderGroup().getOrderSet();
                     orderObj.put("name",orderSet.getName());
-                    orderObj.put("date",order.getDateActivated().toString());
+                    orderObj.put("date",order.getDateCreated().toString());
                     orderObj.put("orderGroupUuId",order.getOrderGroup().getUuid());
                     orderObj.put("orderSetId",orderSet.getOrderSetId());
+                    orderObj.put("instructions",order.getInstructions());
                     orderObj.put("components", components);
                     orderGroupArray.add(orderObj);
                     previousOrderGroupId=order.getOrderGroup().getOrderGroupId();
@@ -104,7 +105,7 @@ public class DrugOrdersPageController {
                 orderObj.put("orderNumber", order.getOrderNumber());
                 orderObj.put("concept", convertToFull(order.getConcept()));
                 orderObj.put("careSetting", convertToFull(order.getCareSetting()));
-                orderObj.put("dateActivated", order.getDateActivated().toString());
+                orderObj.put("dateActivated", order.getDateCreated().toString());
                 orderObj.put("encounter", convertToFull(order.getEncounter()));
                 orderObj.put("orderer", convertToFull(order.getOrderer()));
                 orderObj.put("drug", convertToFull(drugOrder.getDrug()));

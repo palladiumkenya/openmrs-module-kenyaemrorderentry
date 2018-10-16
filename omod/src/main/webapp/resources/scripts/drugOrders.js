@@ -250,6 +250,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
             $scope.setProgramRegimens=function(regimens){
             $scope.activeRegimens=[];
             $scope.oldComponents=[];
+            $scope.regimenDosingInstructions="";
              $scope.activeRegimens=regimens;
             }
             $scope.setRegimenMembers=function(regimen){
@@ -265,8 +266,11 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
             }
             window.drugOrderMembers=[];
             window.orderSetSelected={};
+            window.regimenDosingInstructions=null;
             $scope.saveOrderSet=function(orderset){
             drugOrderMembers=orderset;
+            regimenDosingInstructions=$scope.regimenDosingInstructions;
+            console.log("regimendosinginstructions+++++++++++++++++++++++++++++++"+$scope.regimenDosingInstructions);
             }
             window.activeOrderGroupUuId=null;
             window.discontinueOrderUuId=null;
@@ -279,7 +283,9 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                         $scope.components=orderGroup.components;
                         orderSetId=regimen.orderSetId;
                         activeOrderGroupUuId=orderGroup.orderGroupUuId;
+                        $scope.regimenDosingInstructions=orderGroup.instructions;
                         $scope.showRegimenPanel=true;
+                        $scope.regimenStatus='edit';
                        }
                     });
                 });

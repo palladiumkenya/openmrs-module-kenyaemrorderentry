@@ -13,9 +13,11 @@ import org.openmrs.ui.framework.fragment.FragmentConfiguration;
 import org.openmrs.ui.framework.fragment.FragmentModel;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class RegimenDispensationFragmentController {
 
@@ -38,6 +40,18 @@ public class RegimenDispensationFragmentController {
         OrderGroup orderGroup;
         String patientUuid=orderContext.get("patient").toString();
         String providerUuid=orderContext.get("provider").toString();
+        String dosingInstructions="";
+        if(orderContext.get("regimenDosingInstructions") !=null){
+            dosingInstructions=orderContext.get("regimenDosingInstructions").toString();
+        }
+        Date date=null;
+        if(!orderContext.get("orderDate").toString().trim().isEmpty()){
+            String orderDate=orderContext.get("orderDate").toString();
+            date=new SimpleDateFormat("dd-MMM-yyyy", Locale.US).parse(orderDate);
+        }
+        else{
+            date=new Date();
+        }
         JSONArray drugGroupOrder=(JSONArray)orderContext.get("drugs");
         Patient patient = patientService.getPatientByUuid(patientUuid);
         String orderSetId=orderContext.get("orderSetId").toString();
@@ -54,8 +68,8 @@ public class RegimenDispensationFragmentController {
         EncounterType encounterType=encounterService.getEncounterTypeByUuid("7df67b83-1b84-4fe2-b1b7-794b4e9bfcc3");
         encounter.setEncounterType(encounterType);
         encounter.setPatient(patient);
-        Date today=new Date();
-        encounter.setEncounterDatetime(today);
+        encounter.setEncounterDatetime(date);
+        encounter.setDateCreated(date);
         encounterService.saveEncounter(encounter);
         ArrayList<Order> orderList=new ArrayList<Order>();
         for(int i=0; i<drugGroupOrder.size();i++) {
@@ -75,17 +89,20 @@ public class RegimenDispensationFragmentController {
                 drugOrder.setDoseUnits(doseUnitConcept);
                 drugOrder.setQuantity(quantity);
                 drugOrder.setQuantityUnits(quantityUnitConcept);
-                drugOrder.setInstructions("");
+                drugOrder.setInstructions(dosingInstructions);
                 drugOrder.setOrderer(provider);
                 drugOrder.setEncounter(encounter);
+                drugOrder.setDateCreated(date);
                 orderList.add(drugOrder);
             }
             else{
                 drugOrder=new DrugOrder();
                 drugOrder.setPatient(patient);
                 drugOrder.setEncounter(encounter);
+                drugOrder.setDateCreated(date);
                 Drug drug = conceptService.getDrugByNameOrId(drugId);
                 drugOrder.setDrug(drug);
+                drugOrder.setInstructions(dosingInstructions);
                 drugOrder.setOrderer(provider);
                 drugOrder.setDose(dose);
                 Concept doseUnitConcept = conceptService.getConceptByUuid(doseUnitConceptUuiId);
@@ -131,16 +148,23 @@ public class RegimenDispensationFragmentController {
         JSONArray drugGroupOrder = (JSONArray) orderContext.get("drugs");
         Patient patient = patientService.getPatientByUuid(patientUuid);
         Provider provider = providerService.getProviderByUuid(providerUuid);
-        discontinueOrder(patient,provider,drugGroupOrder,encounterService,orderService);
+        Date date=null;
+        if(!orderContext.get("orderDate").toString().trim().isEmpty()){
+            String orderDate=orderContext.get("orderDate").toString();
+            date=new SimpleDateFormat("dd-MMM-yyyy", Locale.US).parse(orderDate);
+        }
+        else{
+            date=new Date();
+        }
+        discontinueOrder(patient,provider,drugGroupOrder,encounterService,orderService,date);
     }
     private void discontinueOrder(Patient patient,Provider provider,JSONArray drugs,
-        EncounterService encounterService,OrderService orderService){
+        EncounterService encounterService,OrderService orderService,Date orderDate){
         Encounter encounter = new Encounter();
         EncounterType encounterType=encounterService.getEncounterTypeByUuid("7df67b83-1b84-4fe2-b1b7-794b4e9bfcc3");
         encounter.setEncounterType(encounterType);
         encounter.setPatient(patient);
-        Date today=new Date();
-        encounter.setEncounterDatetime(today);
+        encounter.setEncounterDatetime(orderDate);
         encounterService.saveEncounter(encounter);
         ArrayList<Order> orderList=new ArrayList<Order>();
         for(int i=0; i<drugs.size();i++) {
