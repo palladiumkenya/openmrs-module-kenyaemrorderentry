@@ -281,10 +281,16 @@ angular.module("orderEntry", ['orderService', 'encounterService', 'session'])
                     data: orderContext
                 };
 
-                 $http(req).then(function(response) {
-                    deferred.resolve(response);
-                     $window.location.reload();
-                });
+                return $http(req).then(function (value) {
+
+                })
+
+                    //.$promise.then(function(response) {
+                   //  console.log('response===', response);
+                   // deferred.promise
+                        //.resolve(response);
+                    // $window.location.reload();
+               // });
 
 
 
