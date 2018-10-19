@@ -393,6 +393,7 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
             $scope.loading = true;
             OrderEntryService.signAndSave({ draftOrders: $scope.lOrdersPayload }, encounterContext)
                 .$promise.then(function(result) {
+                $('#spinner').modal('hide');
                 location.href = location.href;
             }, function(errorResponse) {
                 console.log('errorResponse.data.error.message',errorResponse.data.error);
@@ -481,6 +482,7 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
                     }
 
                 discontinueLabTestOrders($scope.discontinueFilledOrders);
+                $('#spinner').modal('hide');
 
 
                 location.href = location.href;
@@ -589,7 +591,6 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
 
 
                 obs.push(data);
-
 
             }
 
@@ -760,7 +761,7 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
             angular.element('#orderDate').val('');
             $('#dateOrder').modal('hide');
             $('#orderUrgency').modal('hide');
-        }
+        };
         $scope.setOrderDate = function() {
             $scope.orderDate = angular.element('#orderDate').val();
             $scope.orderSel['dateActivated'] =  $scope.orderDate.substring(0, 10);
@@ -772,7 +773,7 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
             $('#dateOrder').modal('hide');
             $('#orderUrgency').modal('hide');
 
-        }
+        };
 
         $scope.setOrderUrgency = function() {
 
@@ -782,8 +783,7 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
             $scope.filteredOrders = _.uniq($scope.filteredOrders);
             $('#orderUrgency').modal('hide');
 
-        }
-
+        };
         // events
 
         $scope.$on('added-dc-order', function(dcOrder) {
