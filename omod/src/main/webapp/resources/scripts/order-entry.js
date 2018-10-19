@@ -271,7 +271,6 @@ angular.module("orderEntry", ['orderService', 'encounterService', 'session'])
             // beginning of voiding orders
 
             saveVoidedOrders: function(orderContext, uuid, successCallback, errorCallback) {
-                var deferred = $q.defer();
                 var req = {
                     method: 'DELETE',
                     url: 'http://localhost:8080/openmrs/ws/rest/v1/order/' + uuid +'?!purge',
@@ -284,16 +283,6 @@ angular.module("orderEntry", ['orderService', 'encounterService', 'session'])
                 return $http(req).then(function (value) {
 
                 })
-
-                    //.$promise.then(function(response) {
-                   //  console.log('response===', response);
-                   // deferred.promise
-                        //.resolve(response);
-                    // $window.location.reload();
-               // });
-
-
-
             }
         }
     }]);
