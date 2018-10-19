@@ -136,7 +136,8 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                                             <button type="button" class="fa fa-calendar fa-1x"
                                                                                     data-toggle="modal" data-target="#dateOrder"
                                                                                     ng-click="orderSelectedToAddDateActivated(order)"></button>
-                                                                            <button type="button" class="fa fa-warning fa-1x"
+                                                                              <button type="button" class="fa fa-warning fa-1x"
+                                                                                      data-placement="top" title="Urgency"
                                                                                     data-toggle="modal" data-target="#orderUrgency"
                                                                                     ng-click="orderSelectedToAddDateActivated(order)"
                                                                                     ></button>
@@ -208,7 +209,8 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                     </table>
 
                                     <div style="padding-left: 50%">
-                                        <button type="button" ng-click="postLabOrdersEncounters()"
+                                        <button type="button" ng-click="postLabOrdersEncounters()" data-toggle="modal"
+                                                data-target="#spinner"
                                                 ng-disabled="selectedOrders.length === 0"><img src="${ ui.resourceLink("kenyaui", "images/glyphs/ok.png") }" />
                                             Save orders</button>
                                     </div>
@@ -300,7 +302,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                                                        name="feature"
                                                                                        ng-checked="fag"
                                                                                        ng-model="hivViralValuesLDL[vl.orderId]"
-                                                                                       ng-click="toggleSelection(vl)"
+                                                                                       ng-click="toggleSelection(vl.orderId)"
                                                                                        value="'1302AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'">
                                                                                 <label class="form-check-label">LDL</label>
                                                                             </div>
@@ -327,8 +329,9 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                 </div>
 
                                                 <div style="padding-left: 50%; padding-bottom: 20px"
-                                                     ng-show="panelListResults.length !== 0">
-                                                    <button type="button" ng-click="postLabOrderResults()">
+                                                     >
+                                                    <button type="button" ng-click="postLabOrderResults()" data-toggle="modal"
+                                                            data-target="#spinner">
                                                         <img src="${ ui.resourceLink("kenyaui", "images/glyphs/ok.png") }" />  Save</button>
                                                 </div>
                                             </div>
@@ -523,6 +526,21 @@ ${ui.includeFragment("appui", "messages", [codes: [
                 </div>
             </div>
         </div>
+
+        <!-- spinner modal -->
+        <div class="modal fade" id="spinner" tabindex="-1" role="dialog" aria-labelledby="spinnerModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+
+                    <div class="modal-body modal-header-primary">
+                        <div>
+                            <i class="fa fa-spinner fa-spin" style="font-size:30px"></i> Saving...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
 
     </div>
 

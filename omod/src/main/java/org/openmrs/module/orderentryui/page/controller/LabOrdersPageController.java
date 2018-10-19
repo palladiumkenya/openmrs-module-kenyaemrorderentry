@@ -300,12 +300,9 @@ public class LabOrdersPageController {
             if (order.getDateStopped() != null) {
                 List<Concept> labConcepts = new ArrayList<Concept>();
                 labConcepts.add(labConcept);
-                System.out.println("labConceptsooooooooooooooo" + labConcepts);
                 for (Concept con : labConcepts) {
 
                     List<Obs> pastOrders = obsService.getObservationsByPersonAndConcept(patient, conceptService.getConcept(con.getConceptId()));
-                    //  System.out.println("pastOrders=================" + pastOrders);
-
 
                     if (pastOrders != null) {
 
@@ -333,7 +330,6 @@ public class LabOrdersPageController {
 
 
                         }
-                        //   System.out.println("obsResultList++++++++++++++++++++++++++++++++++++++++++++++++++++" + obsResultList);
                     }
 
                 }
