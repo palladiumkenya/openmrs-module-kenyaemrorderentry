@@ -208,7 +208,7 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                   <tr ng-repeat="regimen in patientRegimens" style="font-size:16px;font-weight:bold;">
                   <td style="width:35%;">Current {{regimen.program}} Regimen:{{regimen.name}}</td>
                   <td>
-                      <button ng-click="refillRegimen(regimen)">Refill</button>
+                      <button ng-click="refillRegimen(regimen)" class="refill-regimen">Refill</button>
                       <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#{{regimen.program}}">
                       <img src="/openmrs/ms/uiframework/resource/kenyaui/images/glyphs/edit.png">
                       </button>

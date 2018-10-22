@@ -131,6 +131,9 @@ jq(document).on("click", ".change-regimen", function() {
     jq(".disable-on-regimen-change").hide();
     jq("#drug-order-group").addClass("hide-section");
 });
+jq(document).on("click", ".refill-regimen", function() {
+    jq("#drug-order-group").removeClass("hide-section");
+});
 });
 </script>
 <div class="row panel panel-default">
