@@ -28,6 +28,10 @@
     ui.includeCss("uicommons", "styleguide/jquery-ui-1.9.2.custom.min.css")
     ui.includeCss("orderentryui", "index.css")
     ui.includeCss("orderentryui", "bootstrap.min.css")
+    ui.includeCss("orderentryui", "font-awesome.css")
+    ui.includeCss("orderentryui", "font-awesome.min.css")
+    ui.includeCss("orderentryui", "font-awesome.css.map")
+    ui.includeCss("orderentryui", "fontawesome-webfont.svg")
 %>
 <style type="text/css">
 #new-order input {
@@ -209,7 +213,8 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                   <td style="width:35%;">Current {{regimen.program}} Regimen:{{regimen.name}}</td>
                   <td>
                       <button ng-click="refillRegimen(regimen)" class="refill-regimen">Refill</button>
-                      <button type="button" class="fa fa-ellipsis-h" data-toggle="collapse" data-target="#{{regimen.program}}">
+                      <button type="button" data-toggle="collapse" data-target="#{{regimen.program}}">
+                      ...
                       </button>
                         <div id="{{regimen.program}}" class="collapse">
                           <button class="change-regimen" ng-click="changeRegimen(regimen)">Change</button>
