@@ -253,6 +253,7 @@ public class LabOrdersPageController {
             labOrderObject.put("orderUuid", orderUuid);
             labOrderObject.put("orderId", orderId);
             labOrderObject.put("encounter", labTestEncounter.getUuid());
+            labOrderObject.put("dateActivated", order.getDateActivated().toString());
 
             if (labTestConcept.getDatatype().isCoded()) {
                 inputType = "select";

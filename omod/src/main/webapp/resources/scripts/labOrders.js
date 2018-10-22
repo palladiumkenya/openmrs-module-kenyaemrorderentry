@@ -83,9 +83,8 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
                 $scope.OrderUuid = '';
                 $scope.activeTestOrders = _.map(results, function(item) { return new OpenMRS.TestOrderModel(item) });
                 $scope.activeTestOrdersForHvVl = $scope.activeTestOrders;
-                console.log('$scope.activeTestOrders',$scope.activeTestOrders);
-
                 $scope.activeTestOrders = customizeActiveOrdersToDisplaySingHivVl($scope.activeTestOrders);
+                console.log('$scope.activeTestOrders',$scope.activeTestOrders);
                 $scope.activeTestOrders.sort(function(a, b) {
                     var key1 = a.dateActivated;
                     var key2 = b.dateActivated;
@@ -173,7 +172,7 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
         function customizeActiveOrdersToDisplaySingHivVl(result) {
             return _.filter(result, function(o) {
 
-                return o.display !== 'HIV VIRAL LOAD';
+                return o.display !== 'HIV VIRAL LOAD, QUALITATIVE';
             });
         }
 
@@ -188,33 +187,38 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
                 for (var r in data) {
 
                     if (data.hasOwnProperty(r)) {
+                        if (data.dateActivated ) {
+                            data['dateActivated'] = new Date(data.dateActivated );
+                        }
 
-                            if(data.concept ==='856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                                delete data.label;
-                                delete data.rendering;
-                                 l =
-                                    {
-                                        concept:data.concept,
-                                        encounter:data.encounter,
-                                        orderId:data.orderId,
-                                        orderUuid:data.orderUuid,
-                                        rendering:'inputnumeric'
+                    if(data.concept ==='856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                        delete data.label;
+                        delete data.rendering;
+                         l =
+                            {
+                                concept:data.concept,
+                                encounter:data.encounter,
+                                orderId:data.orderId,
+                                orderUuid:data.orderUuid,
+                                rendering:'inputnumeric',
+                                dateActivated:data.dateActivated
 
-                                    }
                             }
-                           else if(data.concept ==='1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                                delete data.label;
-                                delete data.rendering;
-                                ldl =
-                                    {
-                                        concept:data.concept,
-                                        encounter:data.encounter,
-                                        orderId:data.orderId,
-                                        orderUuid:data.orderUuid,
-                                        rendering:'checkbox'
+                    }
+                   else if(data.concept ==='1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                        delete data.label;
+                        delete data.rendering;
+                        ldl =
+                            {
+                                concept:data.concept,
+                                encounter:data.encounter,
+                                orderId:data.orderId,
+                                orderUuid:data.orderUuid,
+                                rendering:'checkbox',
+                                dateActivated:data.dateActivated
 
-                                    }
                             }
+                    }
 
                     }
                 }
@@ -349,6 +353,7 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
         $scope.noOrderSelected ='Selected orders is empty';
         $scope.getSelectedTests = function(tests) {
             if(tests.selected === true) {
+                checkIfSelectedTestIsActiveOrder(tests);
                 $scope.selectedOrders.push(tests);
                 $scope.filteredOrders = _.uniq($scope.selectedOrders);
 
@@ -362,6 +367,21 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
                 $scope.filteredOrders = unchecked;
                 $scope.selectedOrders = $scope.filteredOrders;
             }
+
+        };
+
+        function checkIfSelectedTestIsActiveOrder(test) {
+
+            _.each($scope.activeTestOrders, function(o) {
+
+                if (o.concept.uuid === test.concept) {
+                    $scope.testName =test.name;
+                    $('#generalMessage').modal('show');
+                    test.selected = false;
+                }
+
+        });
+
 
         }
 
@@ -394,7 +414,8 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
             OrderEntryService.signAndSave({ draftOrders: $scope.lOrdersPayload }, encounterContext)
                 .$promise.then(function(result) {
                 $('#spinner').modal('hide');
-                location.href = location.href;
+                $window.location.reload();
+              //  location.href = location.href;
             }, function(errorResponse) {
                 console.log('errorResponse.data.error.message',errorResponse.data.error);
                 emr.errorMessage(errorResponse.data.error.message);
@@ -465,6 +486,7 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
                 delete $scope.obsPayload[i].rendering;
                 delete $scope.obsPayload[i].hivVl;
                 delete $scope.obsPayload[i].name;
+                delete $scope.obsPayload[i].dateActivated;
             }
             var uuid = {uuid:"b2d06302-0901-41a6-8045-dfa32e36b105"};
             var encounterContext = {
@@ -514,7 +536,7 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
 
                 for (var r in data) {
                     if (data.hasOwnProperty(r)) {
-                        if(data.concept.uuid ==='856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' && data.dateActivated ===$scope.ldlDateActivated) {
+                        if(data.concept.uuid ==='1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' && data.dateActivated ===$scope.ldlDateActivated) {
                             $scope.OrderUuidHvl =data.uuid;
                         }
 
@@ -662,6 +684,7 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
                 delete $scope.lOrders[i].order;
                 delete $scope.lOrders[i].value;
                 delete $scope.lOrders[i].name;
+                delete $scope.lOrders[i].dateActivated;
                 delete $scope.lOrders[i].hivVl;
             }
 
@@ -728,7 +751,7 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
         }
         $scope.voidAllHivViralLoadOrders = function () {
             $scope.voidActiveLabOrders();
-            if($scope.ldlConcept ==='1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+            if($scope.ldlConcept ==='856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
                 cancelOrder();
             }
         }
@@ -761,6 +784,7 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
             angular.element('#orderDate').val('');
             $('#dateOrder').modal('hide');
             $('#orderUrgency').modal('hide');
+            $('#generalMessage').modal('hide');
         };
         $scope.setOrderDate = function() {
             $scope.orderDate = angular.element('#orderDate').val();

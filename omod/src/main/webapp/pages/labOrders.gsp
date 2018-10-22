@@ -240,7 +240,9 @@ ${ui.includeFragment("appui", "messages", [codes: [
 
                                                             <div ng-if="control.rendering === 'select'">
                                                                 <div class="form-group row">
-                                                                    <label class="col-lg-3"><b>{{control.label}}:</b></label>
+                                                                    <label class="col-lg-3"><b>{{control.label}}:</b>
+                                                                   <p>  <span >Date Ordered:{{control.dateActivated | date:'dd-MM-yyyy'}}</span>
+                                                                   </p></label>
 
                                                                     <div class="col-lg-4">
                                                                         <select class="form-control"
@@ -255,7 +257,9 @@ ${ui.includeFragment("appui", "messages", [codes: [
 
                                                             <div ng-if="control.rendering === 'inputtext'">
                                                                 <div class="form-group row">
-                                                                    <label class="col-lg-3"><b>{{control.label}}:</b></label>
+                                                                    <label class="col-lg-3"><b>{{control.label}}:</b>
+                                                                        <p>  <span >Date Ordered:{{control.dateActivated | date:'dd-MM-yyyy'}}</span>
+                                                                        </p></label>
 
                                                                     <div class="col-lg-4">
                                                                         <input class="form-control" type="text"
@@ -266,7 +270,9 @@ ${ui.includeFragment("appui", "messages", [codes: [
 
                                                             <div ng-if="control.rendering === 'inputnumeric'">
                                                                 <div class="form-group row">
-                                                                    <label class="col-lg-3"><b>{{control.label}}:</b></label>
+                                                                    <label class="col-lg-3"><b>{{control.label}}:</b>
+                                                                        <p>  <span >Date Ordered:{{control.dateActivated | date:'dd-MM-yyyy'}}</span>
+                                                                        </p></label>
 
                                                                     <div class="col-lg-4">
                                                                         <input class="form-control" type="number"
@@ -277,7 +283,9 @@ ${ui.includeFragment("appui", "messages", [codes: [
 
                                                             <div ng-if="control.rendering === 'textarea'">
                                                                 <div class="form-group row">
-                                                                    <label class="col-lg-3"><b>{{control.label}}:</b></label>
+                                                                    <label class="col-lg-3"><b>{{control.label}}:</b>
+                                                                        <p>  <span >Date Ordered:{{control.dateActivated | date:'dd-MM-yyyy'}}</span>
+                                                                        </p></label>
 
                                                                     <div class="col-lg-4">
                                                                         <textarea class="form-control" ng-model="typeValues[control.orderId]">
@@ -288,7 +296,9 @@ ${ui.includeFragment("appui", "messages", [codes: [
 
                                                             <div>
                                                                 <div class="form-group row" ng-if="control.hvVl">
-                                                                    <label class="col-lg-3"><b>HIV viral load:</b></label>
+                                                                    <label class="col-lg-3"><b>HIV viral load:</b>
+                                                                        <p>  <span >Date Ordered:{{control.hvVl[0].dateActivated | date:'dd-MM-yyyy'}}</span>
+                                                                        </p></label>
 
                                                                     <div ng-repeat="vl in control.hvVl">
                                                                         <div ng-if="vl.concept ==='1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' ||
@@ -536,6 +546,28 @@ ${ui.includeFragment("appui", "messages", [codes: [
                         <div>
                             <i class="fa fa-spinner fa-spin" style="font-size:30px"></i> Saving...
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- general message modal -->
+        <div class="modal fade" id="generalMessage" tabindex="-1" role="dialog" aria-labelledby="generalMessageModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header modal-header-warning">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+
+                    <div class="modal-body">
+                        <div>
+                         Active <b>{{testName}}</b>  Order Already exits. Please check the Active Orders Tab to cancel the order and proceed.
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button"  data-dismiss="modal" ng-click="closeModal()">Close</button>
                     </div>
                 </div>
             </div>
