@@ -83,7 +83,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                     $scope.regimenLines=$scope.programs.programs[0].regimen_lines;
                     $scope.patientActiveDrugOrders=OpenMRS.activeOrdersPayload;
                     $scope.patientRegimens=currentRegimens.patientregimens;
-                    $scope.regimenStatus=currentRegimens.regimenstatus;
+                    $scope.regimenStatus="absent";
                     if($scope.patientRegimens.length==0){
                       $scope.showRegimenPanel=true;
                     }

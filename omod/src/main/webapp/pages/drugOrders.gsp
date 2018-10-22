@@ -209,8 +209,7 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                   <td style="width:35%;">Current {{regimen.program}} Regimen:{{regimen.name}}</td>
                   <td>
                       <button ng-click="refillRegimen(regimen)" class="refill-regimen">Refill</button>
-                      <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#{{regimen.program}}">
-                      <img src="/openmrs/ms/uiframework/resource/kenyaui/images/glyphs/edit.png">
+                      <button type="button" class="fa fa-ellipsis-h" data-toggle="collapse" data-target="#{{regimen.program}}">
                       </button>
                         <div id="{{regimen.program}}" class="collapse">
                           <button class="change-regimen" ng-click="changeRegimen(regimen)">Change</button>
@@ -219,7 +218,7 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                   </td>
                   </tr>
                   </table>
-                  <span ng-show="regimenStatus=='absent'"> Regimen: Never on ARVs</span>
+                  <span ng-show="patientRegimens.length==0"> Regimen: Never on Regimen</span>
                    <div ng-show="showRegimenPanel" style="margin-top:2px;">
                       ${ ui.includeFragment("orderentryui", "patientdashboard/regimenDispensation", ["patient": patient]) }
                    </div>

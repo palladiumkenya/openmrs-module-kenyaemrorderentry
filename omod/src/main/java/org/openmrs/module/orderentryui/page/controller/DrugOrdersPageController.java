@@ -135,11 +135,11 @@ public class DrugOrdersPageController {
     }
     private String computeCurrentRegimen(){
         String currentRegimen="{\n" +
-                "  \"regimenstatus\": \"stopped\",\n" +
                 "  \"patientregimens\": [\n" +
                 "    {\n" +
                 "      \"program\": \"HIV\",\n" +
                 "      \"name\": \"TDF + 3TC + NVP (300mg OD/150mg BD/200mg BD)\",\n" +
+                "      \"regimenstatus\": \"stopped\",\n" +
                 "      \"components\": [\n" +
                 "        {\n" +
                 "          \"dose\": \"300.0\",\n" +
@@ -173,6 +173,7 @@ public class DrugOrdersPageController {
                 "    {\n" +
                 "      \"program\": \"TB\",\n" +
                 "      \"name\": \"RHZE (150mg/75mg/400mg/275mg x 1 tabs)\",\n" +
+                "      \"regimenstatus\": \"stopped\",\n" +
                 "      \"components\": [\n" +
                 "        {\n" +
                 "          \"name\": \"R150\",\n" +
