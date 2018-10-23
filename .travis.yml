@@ -5,9 +5,7 @@ script:
 - mvn clean install --batch-mode
 matrix:
 - jdk: oraclejdk8
-branches:
-  only:
-  - master
+
 after_success:
 - mvn jacoco:report coveralls:report
 notifications:
