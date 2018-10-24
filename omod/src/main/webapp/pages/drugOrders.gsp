@@ -212,7 +212,7 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                   <tr ng-repeat="regimen in patientRegimens" style="font-size:16px;font-weight:bold;">
                   <td style="width:35%;">Current {{regimen.program}} Regimen:{{regimen.name}}</td>
                   <td>
-                      <button ng-click="refillRegimen(regimen)" class="refill-regimen">Refill</button>
+                      <button ng-click="matchRegimenNames(regimen.name)" class="refill-regimen">Refill</button>
                       <button type="button" data-toggle="collapse" data-target="#{{regimen.program}}">
                       ...
                       </button>

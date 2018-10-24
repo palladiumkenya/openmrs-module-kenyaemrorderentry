@@ -137,77 +137,12 @@ public class DrugOrdersPageController {
         String currentRegimen="{\n" +
                 "  \"patientregimens\": [\n" +
                 "    {\n" +
-                "      \"program\": \"HIV\",\n" +
                 "      \"name\": \"TDF + 3TC + NVP (300mg OD/150mg BD/200mg BD)\",\n" +
-                "      \"regimenstatus\": \"stopped\",\n" +
-                "      \"components\": [\n" +
-                "        {\n" +
-                "          \"dose\": \"300.0\",\n" +
-                "          \"drug_id\": 15,\n" +
-                "          \"quantity\": 60,\n" +
-                "          \"name\": \"TDF\",\n" +
-                "          \"order_id\": 199,\n" +
-                "          \"units_uuid\": \"161553AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\",\n" +
-                "          \"frequency\": \"067ac6ea-a396-37dc-b324-2c3943e2d1ce\"\n" +
-                "        },\n" +
-                "        {\n" +
-                "          \"dose\": \"150.0\",\n" +
-                "          \"drug_id\": 14,\n" +
-                "          \"quantity\": 120,\n" +
-                "          \"name\": \"3TC\",\n" +
-                "          \"order_id\": 200,\n" +
-                "          \"units_uuid\": \"161553AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\",\n" +
-                "          \"frequency\": \"9159cc28-3443-3265-9e79-503caecb69bd\"\n" +
-                "        },\n" +
-                "        {\n" +
-                "          \"dose\": \"200.0\",\n" +
-                "          \"drug_id\": 16,\n" +
-                "          \"quantity\": 120,\n" +
-                "          \"name\": \"NVP\",\n" +
-                "          \"order_id\": 201,\n" +
-                "          \"units_uuid\": \"161553AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\",\n" +
-                "          \"frequency\": \"9159cc28-3443-3265-9e79-503caecb69bd\"\n" +
-                "        }\n" +
-                "      ]\n" +
+                "      \"regimenstatus\": \"stopped\"\n" +
                 "    },\n" +
                 "    {\n" +
-                "      \"program\": \"TB\",\n" +
-                "      \"name\": \"RHZE (150mg/75mg/400mg/275mg x 1 tabs)\",\n" +
-                "      \"regimenstatus\": \"stopped\",\n" +
-                "      \"components\": [\n" +
-                "        {\n" +
-                "          \"name\": \"R150\",\n" +
-                "          \"dose\": \"1\",\n" +
-                "          \"units\": \"tab\",\n" +
-                "          \"units_uuid\": \"1513AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\",\n" +
-                "          \"frequency\": \"067ac6ea-a396-37dc-b324-2c3943e2d1ce\",\n" +
-                "          \"drug_id\": \"3\"\n" +
-                "        },\n" +
-                "        {\n" +
-                "          \"name\": \"H75\",\n" +
-                "          \"dose\": \"1\",\n" +
-                "          \"units\": \"tab\",\n" +
-                "          \"units_uuid\": \"1513AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\",\n" +
-                "          \"frequency\": \"067ac6ea-a396-37dc-b324-2c3943e2d1ce\",\n" +
-                "          \"drug_id\": \"1\"\n" +
-                "        },\n" +
-                "        {\n" +
-                "          \"name\": \"Z400\",\n" +
-                "          \"dose\": \"1\",\n" +
-                "          \"units\": \"tab\",\n" +
-                "          \"units_uuid\": \"1513AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\",\n" +
-                "          \"frequency\": \"067ac6ea-a396-37dc-b324-2c3943e2d1ce\",\n" +
-                "          \"drug_id\": \"4\"\n" +
-                "        },\n" +
-                "        {\n" +
-                "          \"name\": \"E275\",\n" +
-                "          \"dose\": \"1\",\n" +
-                "          \"units\": \"tab\",\n" +
-                "          \"units_uuid\": \"1513AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\",\n" +
-                "          \"frequency\": \"067ac6ea-a396-37dc-b324-2c3943e2d1ce\",\n" +
-                "          \"drug_id\": \"8\"\n" +
-                "        }\n" +
-                "      ]\n" +
+                "      \"name\": \"RH (60mg/30mg)\",\n" +
+                "      \"regimenstatus\": \"stopped\"\n" +
                 "    }\n" +
                 "  ]\n" +
                 "}";

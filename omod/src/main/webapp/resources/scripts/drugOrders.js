@@ -331,7 +331,43 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                 });
                 });
             }
+        $scope.matchRegimenNames=function(name){
+        _.map(programRegimens.programs, function(program) {
+               _.map(program.regimen_lines, function(regimenLine) {
+                    _.map(regimenLine.regimens, function(regimen) {
+                    if(regimen.name===name){
+                    $scope.programs=[];
+                    var programs_array=[];
+                    var program_object={};
+                    program_object.name=program.name;
+                    var regimen_line_object={};
+                    regimen_line_object.name=regimenLine.name;
 
+                    var regimen_object={};
+                    regimen_object.name=name;
+                    regimen_object.components=regimen.components;
+                    regimen_line_object.regimens=[];
+                    regimen_line_object.regimens.push(regimen_object);
+                    program_object.regimen_lines=[];
+                    program_object.regimen_lines.push(regimen_line_object);
+                    programs_array.push(program_object);
+                    $scope.programs={"programs":programs_array};
+                    $scope.regimenLines=[];
+                    $scope.activeRegimens=[];
+                    $scope.regimenLines.push(regimen_line_object);
+                    $scope.activeRegimens.push(regimen_object);
+                    console.log("contrived programs+++++++++++++++++++"+JSON.stringify($scope.programs));
+
+                    $scope.components=[];
+                    $scope.components=regimen.components;
+                    orderSetId=regimen.orderSetId;
+                    $scope.regimenStatus='active';
+                    $scope.showRegimenPanel=true;
+                    }
+                    });
+               });
+          });
+        }
         $scope.createDrugsArrayFromPayload=function (components){
         var drugs=[];
         var i;
