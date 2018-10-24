@@ -210,7 +210,7 @@
                     </execution>
                 </executions>
             </plugin>-->
-            <plugin>
+            <!--<plugin>
                 <groupId>de.saumya.mojo</groupId>
                 <artifactId>gem-maven-plugin</artifactId>
                 <extensions>true</extensions>
@@ -226,7 +226,7 @@
                     <jrubyVersion>1.7.10</jrubyVersion>
                     <execArgs>${project.build.directory}/rubygems/bin/compass compile ${basedir}/src/main/compass</execArgs>
                 </configuration>
-            </plugin>
+            </plugin>-->
         </plugins>
 	</build>
 
