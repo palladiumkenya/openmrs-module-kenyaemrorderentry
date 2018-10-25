@@ -15,8 +15,8 @@ import org.openmrs.ui.framework.UiUtils;
 import org.openmrs.ui.framework.annotation.SpringBean;
 import org.openmrs.ui.framework.page.PageModel;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.openmrs.module.orderentryui.api.PatientCurrentRegimen;
-import org.openmrs.module.orderentryui.api.PatientCurrentRegimenService;
+import org.openmrs.module.orderentryui.api.DrugRegimenHistory;
+import org.openmrs.module.orderentryui.api.DrugRegimenHistoryService;
 
 import java.util.*;
 

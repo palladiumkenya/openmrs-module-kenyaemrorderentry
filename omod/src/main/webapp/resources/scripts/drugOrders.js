@@ -85,7 +85,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                     $scope.patientRegimens=currentRegimens.patientregimens;
                     $scope.regimenStatus="absent";
                     if($scope.patientRegimens.length==0){
-                      $scope.showRegimenPanel=true;
+                      $scope.showRegimenPanel=false;
                     }
 
                 });
