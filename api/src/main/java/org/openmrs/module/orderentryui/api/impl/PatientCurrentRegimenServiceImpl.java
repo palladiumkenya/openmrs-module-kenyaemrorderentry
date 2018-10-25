@@ -40,11 +40,11 @@ public class PatientCurrentRegimenServiceImpl extends BaseOpenmrsService impleme
         return patientCurrentRegimenDAO.getPatientCurrentRegimenByPatient(patient);
     }
 
-    public void setPatientContactDAO(HibernatePatientCurrentRegimenDAO patientCurrentRegimenDAO) {
+    public void setPatientCurrentRegimenDAO(HibernatePatientCurrentRegimenDAO patientCurrentRegimenDAO) {
         this.patientCurrentRegimenDAO = patientCurrentRegimenDAO;
     }
 
-    public HibernatePatientCurrentRegimenDAO getPatientContactDAO() {
+    public HibernatePatientCurrentRegimenDAO getPatientCurrentRegimenDAO() {
         return patientCurrentRegimenDAO;
     }
 

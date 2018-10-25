@@ -41,8 +41,13 @@ public class LabOrdersPageController {
 
         EncounterType labOrderEncounterType = encounterService.getEncounterTypeByUuid(OrderType.TEST_ORDER_TYPE_UUID);
         EncounterRole encounterRoles = encounterService.getAllEncounterRoles(false).get(0);
-       // List<PatientCurrentRegimen> ls = patientCurrentRegimenService.getPatientCurrentRegimenByPatient(patient);
-       // System.out.println("ls========" +ls);
+        PatientCurrentRegimenService currentRegService = Context.getService(PatientCurrentRegimenService.class);
+        List<PatientCurrentRegimen> ls = currentRegService.getPatientCurrentRegimenByPatient(patient);
+
+        for (PatientCurrentRegimen reg : ls) {
+            System.out.println("ls========" +reg.getRegimenName());
+
+        }
 
 
         List<CareSetting> careSettings = orderService.getCareSettings(false);
