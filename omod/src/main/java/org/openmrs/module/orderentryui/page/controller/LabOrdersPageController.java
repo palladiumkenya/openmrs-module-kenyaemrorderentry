@@ -6,6 +6,8 @@ import org.openmrs.*;
 import org.openmrs.api.*;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appui.UiSessionContext;
+import org.openmrs.module.orderentryui.api.PatientCurrentRegimen;
+import org.openmrs.module.orderentryui.api.PatientCurrentRegimenService;
 import org.openmrs.module.webservices.rest.web.ConversionUtil;
 import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.ui.framework.UiUtils;
@@ -39,6 +41,13 @@ public class LabOrdersPageController {
 
         EncounterType labOrderEncounterType = encounterService.getEncounterTypeByUuid(OrderType.TEST_ORDER_TYPE_UUID);
         EncounterRole encounterRoles = encounterService.getAllEncounterRoles(false).get(0);
+        PatientCurrentRegimenService currentRegService = Context.getService(PatientCurrentRegimenService.class);
+        List<PatientCurrentRegimen> ls = currentRegService.getPatientCurrentRegimenByPatient(patient);
+
+        for (PatientCurrentRegimen reg : ls) {
+            System.out.println("ls========" +reg.getRegimenName());
+
+        }
 
 
         List<CareSetting> careSettings = orderService.getCareSettings(false);
