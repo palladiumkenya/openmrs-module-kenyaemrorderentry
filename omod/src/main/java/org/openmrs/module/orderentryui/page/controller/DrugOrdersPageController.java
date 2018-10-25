@@ -137,17 +137,17 @@ public class DrugOrdersPageController {
         return object == null ? null : ConversionUtil.convertToRepresentation(object, Representation.FULL);
     }
     private JSONObject computeCurrentRegimen(Patient patient){
-        PatientCurrentRegimenService currentRegService = Context.getService(PatientCurrentRegimenService.class);
-        List<PatientCurrentRegimen> regimenList = currentRegService.getPatientCurrentRegimenByPatient(patient);
+        DrugRegimenHistoryService currentRegService = Context.getService(DrugRegimenHistoryService.class);
+        List<DrugRegimenHistory> regimenList = currentRegService.getPatientCurrentRegimenByPatient(patient);
         JSONObject patientRegimen=new JSONObject();
         JSONArray regimens=new JSONArray();
         JSONObject regimen;
-        for (PatientCurrentRegimen reg : regimenList) {
+        for (DrugRegimenHistory reg : regimenList) {
             regimen=new JSONObject();
             regimen.put("name",reg.getRegimenName());
             regimens.add(regimen);
         }
-        patientRegimen.put("patientregimens",regimens);
+        patientRegimen.put("patientregimens", regimens);
         return patientRegimen;
     }
 }
