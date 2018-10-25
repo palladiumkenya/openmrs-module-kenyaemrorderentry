@@ -7,7 +7,7 @@ import org.openmrs.Patient;
 import java.util.Date;
 import java.util.UUID;
 
-public class PatientCurrentRegimen extends BaseOpenmrsData {
+public class DrugRegimenHistory extends BaseOpenmrsData {
 
     private Integer id;
     private String regimenName;
@@ -16,13 +16,13 @@ public class PatientCurrentRegimen extends BaseOpenmrsData {
     private Patient patient;
 
 
-    public PatientCurrentRegimen() {
+    public DrugRegimenHistory() {
         prePersist();
     }
 
-    public PatientCurrentRegimen(String regimenName, String status,
-                                 Integer orderGroupId,  Date dateCreated,
-                                 Integer changedBy, Date dateChanged, boolean voided, Integer voidedBy, Date dateVoided, String voidedReason) {
+    public DrugRegimenHistory(String regimenName, String status,
+                              Integer orderGroupId, Date dateCreated,
+                              Integer changedBy, Date dateChanged, boolean voided, Integer voidedBy, Date dateVoided, String voidedReason) {
 
 
         this.regimenName = regimenName;

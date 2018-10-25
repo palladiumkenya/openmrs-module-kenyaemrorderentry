@@ -14,15 +14,15 @@
 package org.openmrs.module.orderentryui.api.db;
 
 import org.openmrs.Patient;
-import org.openmrs.module.orderentryui.api.PatientCurrentRegimen;
+import org.openmrs.module.orderentryui.api.DrugRegimenHistory;
 
 import java.util.List;
 
 
-public interface PatientCurrentRegimenDAO {
-    //public PatientCurrentRegimen savePatientCurrentRegimen(PatientCurrentRegimen patientCurrentRegimen);
-    public List<PatientCurrentRegimen> getPatientCurrentRegimenByPatient(Patient patient);
-   // public List<PatientCurrentRegimen> getPatientCurrentRegimen();
+public interface DrugRegimenHistoryDAO {
+    //public DrugRegimenHistory savePatientCurrentRegimen(DrugRegimenHistory patientCurrentRegimen);
+    public List<DrugRegimenHistory> getPatientCurrentRegimenByPatient(Patient patient);
+   // public List<DrugRegimenHistory> getPatientCurrentRegimen();
    // public void voidPatientCurrentRegimen(int theId);
 
 }

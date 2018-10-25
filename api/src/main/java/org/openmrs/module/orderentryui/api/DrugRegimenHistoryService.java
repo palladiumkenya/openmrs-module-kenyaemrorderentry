@@ -24,15 +24,15 @@ import java.util.List;
  * <p>
  * It can be accessed only via Context:<br>
  * <code>
- * Context.getService(HTSService.class).someMethod();
+ * Context.getService(DrugRegimenHistoryService.class).someMethod();
  * </code>
  *
  * @see org.openmrs.api.context.Context
  */
 @Transactional
-public interface PatientCurrentRegimenService extends OpenmrsService {
+public interface DrugRegimenHistoryService extends OpenmrsService {
 
-    public List<PatientCurrentRegimen> getPatientCurrentRegimenByPatient(Patient patient);
+    public List<DrugRegimenHistory> getPatientCurrentRegimenByPatient(Patient patient);
 
 
 }

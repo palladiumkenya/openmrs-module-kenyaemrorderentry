@@ -19,19 +19,19 @@ import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.openmrs.Patient;
-import org.openmrs.module.orderentryui.api.PatientCurrentRegimen;
-import org.openmrs.module.orderentryui.api.db.PatientCurrentRegimenDAO;
+import org.openmrs.module.orderentryui.api.DrugRegimenHistory;
+import org.openmrs.module.orderentryui.api.db.DrugRegimenHistoryDAO;
 
 import java.util.List;
 
 
 
-public class HibernatePatientCurrentRegimenDAO implements PatientCurrentRegimenDAO {
+public class HibernateDrugRegimenHistoryDAO implements DrugRegimenHistoryDAO {
     protected final Log log = LogFactory.getLog(this.getClass());
 
     private SessionFactory sessionFactory;
     /**
-     * @Autowired private PatientCurrentRegimenDAO patientCurrentRegimenDAO;
+     * @Autowired private DrugRegimenHistoryDAO drugRegimenHistoryDAO;
      */
 
     /**
@@ -51,8 +51,8 @@ public class HibernatePatientCurrentRegimenDAO implements PatientCurrentRegimenD
 
 
     @Override
-    public List<PatientCurrentRegimen> getPatientCurrentRegimenByPatient(Patient patient) {
-        Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(PatientCurrentRegimen.class);
+    public List<DrugRegimenHistory> getPatientCurrentRegimenByPatient(Patient patient) {
+        Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(DrugRegimenHistory.class);
         criteria.add(Restrictions.eq("patient", patient));
         return criteria.list();
     }
