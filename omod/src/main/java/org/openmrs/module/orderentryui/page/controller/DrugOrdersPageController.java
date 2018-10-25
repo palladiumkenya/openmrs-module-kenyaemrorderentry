@@ -15,6 +15,8 @@ import org.openmrs.ui.framework.UiUtils;
 import org.openmrs.ui.framework.annotation.SpringBean;
 import org.openmrs.ui.framework.page.PageModel;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.openmrs.module.orderentryui.api.PatientCurrentRegimen;
+import org.openmrs.module.orderentryui.api.PatientCurrentRegimenService;
 
 import java.util.*;
 
@@ -90,9 +92,10 @@ public class DrugOrdersPageController {
                     components.add(component);
                     OrderSet orderSet=order.getOrderGroup().getOrderSet();
                     orderObj.put("name",orderSet.getName());
-                    orderObj.put("date",order.getDateActivated().toString());
+                    orderObj.put("date",order.getDateCreated().toString());
                     orderObj.put("orderGroupUuId",order.getOrderGroup().getUuid());
                     orderObj.put("orderSetId",orderSet.getOrderSetId());
+                    orderObj.put("instructions",order.getInstructions());
                     orderObj.put("components", components);
                     orderGroupArray.add(orderObj);
                     previousOrderGroupId=order.getOrderGroup().getOrderGroupId();
@@ -104,7 +107,7 @@ public class DrugOrdersPageController {
                 orderObj.put("orderNumber", order.getOrderNumber());
                 orderObj.put("concept", convertToFull(order.getConcept()));
                 orderObj.put("careSetting", convertToFull(order.getCareSetting()));
-                orderObj.put("dateActivated", order.getDateActivated().toString());
+                orderObj.put("dateActivated", order.getDateCreated().toString());
                 orderObj.put("encounter", convertToFull(order.getEncounter()));
                 orderObj.put("orderer", convertToFull(order.getOrderer()));
                 orderObj.put("drug", convertToFull(drugOrder.getDrug()));
@@ -122,6 +125,8 @@ public class DrugOrdersPageController {
         activeOrdersResponse.put("order_groups",orderGroupArray);
         activeOrdersResponse.put("single_drugs",orderArray);
         model.put("activeOrdersResponse",ui.toJson(activeOrdersResponse));
+        model.put("currentRegimens",ui.toJson(computeCurrentRegimen(patient)));
+
     }
 
     private Object convertTo(Object object, Representation rep) {
@@ -131,5 +136,18 @@ public class DrugOrdersPageController {
     private Object convertToFull(Object object) {
         return object == null ? null : ConversionUtil.convertToRepresentation(object, Representation.FULL);
     }
-
+    private JSONObject computeCurrentRegimen(Patient patient){
+        DrugRegimenHistoryService currentRegService = Context.getService(DrugRegimenHistoryService.class);
+        List<DrugRegimenHistory> regimenList = currentRegService.getPatientCurrentRegimenByPatient(patient);
+        JSONObject patientRegimen=new JSONObject();
+        JSONArray regimens=new JSONArray();
+        JSONObject regimen;
+        for (DrugRegimenHistory reg : regimenList) {
+            regimen=new JSONObject();
+            regimen.put("name",reg.getRegimenName());
+            regimens.add(regimen);
+        }
+        patientRegimen.put("patientregimens", regimens);
+        return patientRegimen;
+    }
 }

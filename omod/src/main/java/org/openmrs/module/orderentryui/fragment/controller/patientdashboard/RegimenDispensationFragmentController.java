@@ -13,9 +13,11 @@ import org.openmrs.ui.framework.fragment.FragmentConfiguration;
 import org.openmrs.ui.framework.fragment.FragmentModel;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class RegimenDispensationFragmentController {
 
@@ -36,7 +38,25 @@ public class RegimenDispensationFragmentController {
         Object object=parser.parse(payload);
         JSONObject orderContext=(JSONObject)object;
         OrderGroup orderGroup;
-        if(orderContext.get("activeOrderGroupUuId") !=null) {
+        String patientUuid=orderContext.get("patient").toString();
+        String providerUuid=orderContext.get("provider").toString();
+        String dosingInstructions="";
+        if(orderContext.get("regimenDosingInstructions") !=null){
+            dosingInstructions=orderContext.get("regimenDosingInstructions").toString();
+        }
+        Date date=null;
+        if(!orderContext.get("orderDate").toString().trim().isEmpty()){
+            String orderDate=orderContext.get("orderDate").toString();
+            date=new SimpleDateFormat("dd-MMM-yyyy", Locale.US).parse(orderDate);
+        }
+        else{
+            date=new Date();
+        }
+        JSONArray drugGroupOrder=(JSONArray)orderContext.get("drugs");
+        Patient patient = patientService.getPatientByUuid(patientUuid);
+        String orderSetId=orderContext.get("orderSetId").toString();
+        Provider provider = providerService.getProviderByUuid(providerUuid);
+        if(orderContext.get("activeOrderGroupUuId") !=null){
             String orderGroupUuId=orderContext.get("activeOrderGroupUuId").toString();
             orderGroup=orderService.getOrderGroupByUuid(orderGroupUuId);
             orderGroupExists=true;
@@ -44,20 +64,13 @@ public class RegimenDispensationFragmentController {
         else{
             orderGroup=new OrderGroup();
         }
-        String patientUuid=orderContext.get("patient").toString();
-        String providerUuid=orderContext.get("provider").toString();
-        JSONArray drugGroupOrder=(JSONArray)orderContext.get("drugs");
-        Patient patient = patientService.getPatientByUuid(patientUuid);
-        String orderSetId=orderContext.get("orderSetId").toString();
-
         Encounter encounter = new Encounter();
         EncounterType encounterType=encounterService.getEncounterTypeByUuid("7df67b83-1b84-4fe2-b1b7-794b4e9bfcc3");
         encounter.setEncounterType(encounterType);
         encounter.setPatient(patient);
-        Date today=new Date();
-        encounter.setEncounterDatetime(today);
+        encounter.setEncounterDatetime(date);
+        encounter.setDateCreated(date);
         encounterService.saveEncounter(encounter);
-        Provider provider = providerService.getProviderByUuid(providerUuid);
         ArrayList<Order> orderList=new ArrayList<Order>();
         for(int i=0; i<drugGroupOrder.size();i++) {
             JSONObject drugOrderJson=(JSONObject)drugGroupOrder.get(i);
@@ -76,17 +89,20 @@ public class RegimenDispensationFragmentController {
                 drugOrder.setDoseUnits(doseUnitConcept);
                 drugOrder.setQuantity(quantity);
                 drugOrder.setQuantityUnits(quantityUnitConcept);
-                drugOrder.setInstructions("Take after a meal");
+                drugOrder.setInstructions(dosingInstructions);
                 drugOrder.setOrderer(provider);
                 drugOrder.setEncounter(encounter);
+                drugOrder.setDateCreated(date);
                 orderList.add(drugOrder);
             }
             else{
                 drugOrder=new DrugOrder();
                 drugOrder.setPatient(patient);
                 drugOrder.setEncounter(encounter);
+                drugOrder.setDateCreated(date);
                 Drug drug = conceptService.getDrugByNameOrId(drugId);
                 drugOrder.setDrug(drug);
+                drugOrder.setInstructions(dosingInstructions);
                 drugOrder.setOrderer(provider);
                 drugOrder.setDose(dose);
                 Concept doseUnitConcept = conceptService.getConceptByUuid(doseUnitConceptUuiId);
@@ -123,34 +139,46 @@ public class RegimenDispensationFragmentController {
                                        @SpringBean("providerService") ProviderService providerService,
                                        @SpringBean("orderSetService") OrderSetService orderSetService,
                                        @RequestParam("payload") String payload) throws Exception {
-        System.out.println("payload++++++++++++++++++++++++++++++"+payload.toString());
-        JSONParser parser=new JSONParser();
-        Object object=parser.parse(payload);
-        JSONObject orderContext=(JSONObject)object;
-        if(orderContext.get("discontinueOrderUuId") !=null){
-
-            String patientUuid=orderContext.get("patient").toString();
-            String providerUuid=orderContext.get("provider").toString();
-            JSONArray drugGroupOrder=(JSONArray)orderContext.get("drugs");
-            Patient patient = patientService.getPatientByUuid(patientUuid);
-
-            Encounter encounter = new Encounter();
-            EncounterType encounterType=encounterService.getEncounterTypeByUuid("7df67b83-1b84-4fe2-b1b7-794b4e9bfcc3");
-            encounter.setEncounterType(encounterType);
-            encounter.setPatient(patient);
-            Date today=new Date();
-            encounter.setEncounterDatetime(today);
-            encounterService.saveEncounter(encounter);
-            Provider provider = providerService.getProviderByUuid(providerUuid);
-            ArrayList<Order> orderList=new ArrayList<Order>();
-
-            for(int i=0; i<drugGroupOrder.size();i++) {
-                JSONObject drugOrderJson = (JSONObject) drugGroupOrder.get(i);
-                DrugOrder drugOrder=(DrugOrder)orderService.getOrder(Integer.valueOf(drugOrderJson.get("order_id").toString()));
-                DrugOrder orderToDiscontinue = (DrugOrder)orderService.discontinueOrder(drugOrder, "order fulfilled", null, provider, encounter);
-                orderList.add(orderToDiscontinue);
-            }
+        System.out.println("payload++++++++++++++++++++++++++++++" + payload.toString());
+        JSONParser parser = new JSONParser();
+        Object object = parser.parse(payload);
+        JSONObject orderContext = (JSONObject) object;
+        String patientUuid = orderContext.get("patient").toString();
+        String providerUuid = orderContext.get("provider").toString();
+        JSONArray drugGroupOrder = (JSONArray) orderContext.get("drugs");
+        Patient patient = patientService.getPatientByUuid(patientUuid);
+        Provider provider = providerService.getProviderByUuid(providerUuid);
+        Date date=null;
+        if(!orderContext.get("orderDate").toString().trim().isEmpty()){
+            String orderDate=orderContext.get("orderDate").toString();
+            date=new SimpleDateFormat("dd-MMM-yyyy", Locale.US).parse(orderDate);
         }
+        else{
+            date=new Date();
+        }
+        discontinueOrder(patient,provider,drugGroupOrder,encounterService,orderService,date);
+    }
+    private void discontinueOrder(Patient patient,Provider provider,JSONArray drugs,
+        EncounterService encounterService,OrderService orderService,Date orderDate){
+        Encounter encounter = new Encounter();
+        EncounterType encounterType=encounterService.getEncounterTypeByUuid("7df67b83-1b84-4fe2-b1b7-794b4e9bfcc3");
+        encounter.setEncounterType(encounterType);
+        encounter.setPatient(patient);
+        encounter.setEncounterDatetime(orderDate);
+        encounterService.saveEncounter(encounter);
+        ArrayList<Order> orderList=new ArrayList<Order>();
+        for(int i=0; i<drugs.size();i++) {
+            JSONObject drugOrderJson = (JSONObject) drugs.get(i);
+            DrugOrder drugOrder=(DrugOrder)orderService.getOrder(Integer.valueOf(drugOrderJson.get("order_id").toString()));
+            DrugOrder orderToDiscontinue = null;
+            try {
+                orderToDiscontinue = (DrugOrder)orderService.discontinueOrder(drugOrder, "order fulfilled", null, provider, encounter);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            orderList.add(orderToDiscontinue);
+        }
+
     }
 
 }

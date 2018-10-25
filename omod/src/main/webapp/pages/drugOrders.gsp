@@ -28,6 +28,10 @@
     ui.includeCss("uicommons", "styleguide/jquery-ui-1.9.2.custom.min.css")
     ui.includeCss("orderentryui", "index.css")
     ui.includeCss("orderentryui", "bootstrap.min.css")
+    ui.includeCss("orderentryui", "font-awesome.css")
+    ui.includeCss("orderentryui", "font-awesome.min.css")
+    ui.includeCss("orderentryui", "font-awesome.css.map")
+    ui.includeCss("orderentryui", "fontawesome-webfont.svg")
 %>
 <style type="text/css">
 #new-order input {
@@ -78,6 +82,7 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
     window.OpenMRS.drugOrdersConfig = ${ jsonConfig };
     window.sessionContext = {'locale':'en_GB'}
     window.OpenMRS.activeOrdersPayload=${activeOrdersResponse};
+    window.OpenMRS.currentRegimens=${currentRegimens};
 </script>
 
 <div class="ke-page-content">
@@ -95,10 +100,10 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
          <h3>Drug Orders</h3>
          <div id="program-tabs" class="ke-tabs">
             <div class="ke-tabmenu">
-               <div class="ke-tabmenu-item" data-tabid="active_drug_orders">Active Orders</div>
+               <div class="ke-tabmenu-item disable-on-regimen-change" data-tabid="active_drug_orders">Active Orders</div>
                <div class="ke-tabmenu-item new-order" data-tabid="standard_regimen_orders">Standard Regimen Order</div>
-               <div class="ke-tabmenu-item single-order" data-tabid="new_drug_orders">Other Drugs Order</div>
-               <div class="ke-tabmenu-item" data-tabid="past_drug_orders">Past Drug Orders</div>
+               <div class="ke-tabmenu-item single-order disable-on-regimen-change" data-tabid="new_drug_orders">Other Drugs Order</div>
+               <div class="ke-tabmenu-item disable-on-regimen-change" data-tabid="past_drug_orders">Past Drug Orders</div>
             </div>
             <div class="ke-tab single-order-section" data-tabid="new_drug_orders">
                <div class="card">
@@ -199,11 +204,29 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                <div class="card">
                   <div class = "card-header">
                      <h4 class = "card-title">
-                        Drug Order Sets
+                       Standard Regimens
                      </h4>
                   </div>
                   <div class="card-body">
-                   <div>
+                  <table ng-show="patientRegimens.length > 0">
+                  <tr ng-repeat="regimen in patientRegimens" style="font-size:16px;font-weight:bold;">
+                  <td style="width:35%;">Current {{regimen.program}} Regimen:{{regimen.name}}</td>
+                  <td>
+                      <button ng-click="matchRegimenNames(regimen.name)" class="refill-regimen">Refill</button>
+                      <!--
+                      <button type="button" data-toggle="collapse" data-target="#{{regimen.program}}">
+                      ...
+                      </button>
+                        <div id="{{regimen.program}}" class="collapse">
+                          <button class="change-regimen" ng-click="changeRegimen(regimen)">Change</button>
+                          <button ng-click="discontinueOrderGroup(regimen.components)" class="stopOrder">Stop</button>
+                        </div>
+                       -->
+                  </td>
+                  </tr>
+                  </table>
+                  <span ng-show="patientRegimens.length==0"> Regimen: Never on Regimen</span>
+                   <div ng-show="showRegimenPanel" style="margin-top:2px;">
                       ${ ui.includeFragment("orderentryui", "patientdashboard/regimenDispensation", ["patient": patient]) }
                    </div>
                   </div>
@@ -234,7 +257,7 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                            </td>
                            <td>
                               <button ng-click="editOrderGroup(order)" class="edit-order">Edit</button>
-                              <button ng-click="dispenseOrderGroup(order)" class="dispenseOrder">Dispense</button>
+                              <button ng-click="discontinueOrderGroup(order.components)" class="dispenseOrder">Dispense</button>
                            </td>
                         </tr>
                      </table>
@@ -305,10 +328,6 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
       </div>
    </div>
 </div>
-
-
-
-
 <script type="text/javascript">
     // manually bootstrap angular app, in case there are multiple angular apps on a page
     angular.bootstrap('#drug-orders-app', ['drugOrders']);
