@@ -213,6 +213,7 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                   <td style="width:35%;">Current {{regimen.program}} Regimen:{{regimen.name}}</td>
                   <td>
                       <button ng-click="matchRegimenNames(regimen.name)" class="refill-regimen">Refill</button>
+                      <!--
                       <button type="button" data-toggle="collapse" data-target="#{{regimen.program}}">
                       ...
                       </button>
@@ -220,6 +221,7 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                           <button class="change-regimen" ng-click="changeRegimen(regimen)">Change</button>
                           <button ng-click="discontinueOrderGroup(regimen.components)" class="stopOrder">Stop</button>
                         </div>
+                       -->
                   </td>
                   </tr>
                   </table>
