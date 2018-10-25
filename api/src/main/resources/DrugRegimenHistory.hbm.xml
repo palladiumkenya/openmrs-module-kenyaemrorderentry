@@ -5,8 +5,8 @@
 
 <hibernate-mapping package="org.openmrs.module.orderentryui">
 
-	<class name="org.openmrs.module.orderentryui.api.PatientCurrentRegimen"
-		table="kenyaemr_current_regimen">
+	<class name="org.openmrs.module.orderentryui.api.DrugRegimenHistory"
+		table="kenyaemr_drug_regimen_history">
 		<id name="id" type="int" column="id" unsaved-value="0">
 			<generator class="native" />
 		</id>

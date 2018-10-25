@@ -7,15 +7,15 @@
 
     <!--  Current regimen table DESIGN SCHEMA -->
 
-    <changeSet id="kenyaemr_current_regimen_001" author="kmakombe">
+    <changeSet id="kenyaemr_drug_regimen_history_001" author="kmakombe">
 
         <preConditions onFail="MARK_RAN">
-            <not><tableExists tableName="kenyaemr_current_regimen" /></not>
+            <not><tableExists tableName="kenyaemr_drug_regimen_history" /></not>
         </preConditions>
         <comment>
             Create table to hold current regimen of a  patient
         </comment>
-        <createTable tableName="kenyaemr_current_regimen">
+        <createTable tableName="kenyaemr_drug_regimen_history">
             <column name="id" autoIncrement="true" type="int">
                 <constraints nullable="false" primaryKey="true" />
             </column>
@@ -43,7 +43,7 @@
             <column name="date_voided" type="datetime"/>
             <column name="voided_reason" type="varchar(255)"/>
         </createTable>
-        <addForeignKeyConstraint baseTableName="kenyaemr_current_regimen" baseColumnNames="patient_id" constraintName="kemr_patient_id" referencedTableName="patient" referencedColumnNames="patient_id" />
+        <addForeignKeyConstraint baseTableName="kenyaemr_drug_regimen_history" baseColumnNames="patient_id" constraintName="kemr_patient_id" referencedTableName="patient" referencedColumnNames="patient_id" />
 
     </changeSet>
 

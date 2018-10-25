@@ -36,7 +36,7 @@
 	
 	<!-- Maps hibernate file's, if present -->
 	<mappingFiles>
-		PatientCurrentRegimen.hbm.xml
+		DrugRegimenHistory.hbm.xml
 	</mappingFiles>
 
 	<!-- Internationalization -->
