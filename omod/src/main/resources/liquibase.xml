@@ -31,6 +31,12 @@
             <column name="status" type="varchar(255)">
                 <constraints nullable="true" />
             </column>
+            <column name="program" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="order_set_id" type="int">
+                <constraints nullable="true" />
+            </column>
             <column name="date_created" type="datetime">
                 <constraints nullable="false"/>
             </column>

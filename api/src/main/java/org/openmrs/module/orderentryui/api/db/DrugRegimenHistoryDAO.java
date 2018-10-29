@@ -20,9 +20,7 @@ import java.util.List;
 
 
 public interface DrugRegimenHistoryDAO {
-    //public DrugRegimenHistory savePatientCurrentRegimen(DrugRegimenHistory patientCurrentRegimen);
     public List<DrugRegimenHistory> getPatientCurrentRegimenByPatient(Patient patient);
-   // public List<DrugRegimenHistory> getPatientCurrentRegimen();
-   // public void voidPatientCurrentRegimen(int theId);
+    public DrugRegimenHistory saveDrugRegimenHistory(DrugRegimenHistory drugRegimenHistory);
 
 }

@@ -39,20 +39,14 @@ public class DrugRegimenHistoryServiceImpl extends BaseOpenmrsService implements
     public List<DrugRegimenHistory> getPatientCurrentRegimenByPatient(Patient patient) {
         return drugRegimenHistoryDAO.getPatientCurrentRegimenByPatient(patient);
     }
+    @Override
+    public DrugRegimenHistory saveDrugRegimenHistory(DrugRegimenHistory drugRegimenHistory) {
+        return drugRegimenHistoryDAO.saveDrugRegimenHistory(drugRegimenHistory);
+    }
 
     public void setDrugRegimenHistoryDAO(HibernateDrugRegimenHistoryDAO patientCurrentRegimenDAO) {
         this.drugRegimenHistoryDAO = patientCurrentRegimenDAO;
     }
-
-    public HibernateDrugRegimenHistoryDAO getDrugRegimenHistoryDAO() {
-        return drugRegimenHistoryDAO;
-    }
-
-    public HibernateDrugRegimenHistoryDAO getDao() {
-        return drugRegimenHistoryDAO;
-    }
-
-
 
 
 }
