@@ -122,7 +122,7 @@ public class DrugOrdersPageController {
         JSONObject activeOrdersResponse=new JSONObject();
         activeOrdersResponse.put("order_groups",orderGroupArray);
         activeOrdersResponse.put("single_drugs",orderArray);
-       // saveDrugRegimenHistorys(patient);
+       //saveDrugRegimenHistorys(patient);
         model.put("activeOrdersResponse",ui.toJson(activeOrdersResponse));
         model.put("currentRegimens",ui.toJson(computeCurrentRegimen(patient)));
 
@@ -152,7 +152,7 @@ public class DrugOrdersPageController {
     }
     private  void saveDrugRegimenHistorys(Patient patient) {
         DrugRegimenHistory drugRegimenHistory = new DrugRegimenHistory();
-        drugRegimenHistory.setRegimenName("3TC");
+        drugRegimenHistory.setRegimenName("TDF + 3TC + NVP (300mg OD/150mg BD/200mg BD)");
         drugRegimenHistory.setPatient(patient);
         drugRegimenHistory.setOrderGroupId(23);
         drugRegimenHistory.setStatus("active");
