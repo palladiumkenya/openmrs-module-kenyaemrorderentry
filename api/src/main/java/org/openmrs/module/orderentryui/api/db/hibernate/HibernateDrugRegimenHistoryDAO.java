@@ -54,9 +54,8 @@ public class HibernateDrugRegimenHistoryDAO implements DrugRegimenHistoryDAO {
     public List<DrugRegimenHistory> getPatientCurrentRegimenByPatient(Patient patient) {
         Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(DrugRegimenHistory.class);
         criteria.add(Restrictions.eq("patient", patient));
+        criteria.add(Restrictions.eq("status", "active"));
         return criteria.list();
     }
-
-
 
 }
