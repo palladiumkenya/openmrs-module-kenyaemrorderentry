@@ -14,13 +14,15 @@ public class DrugRegimenHistory extends BaseOpenmrsData {
     private String status;
     private Integer orderGroupId;
     private Patient patient;
+    private String program;
+    private Integer orderSetId;
 
 
     public DrugRegimenHistory() {
         prePersist();
     }
 
-    public DrugRegimenHistory(String regimenName, String status,
+    public DrugRegimenHistory(String regimenName, String status, String program, Integer orderSetId,
                               Integer orderGroupId, Date dateCreated,
                               Integer changedBy, Date dateChanged, boolean voided, Integer voidedBy, Date dateVoided, String voidedReason) {
 
@@ -28,6 +30,8 @@ public class DrugRegimenHistory extends BaseOpenmrsData {
         this.regimenName = regimenName;
         this.status = status;
         this.orderGroupId = orderGroupId;
+        this.program = program;
+        this.orderSetId = orderSetId;
 
     }
 
@@ -76,6 +80,18 @@ public class DrugRegimenHistory extends BaseOpenmrsData {
 
     public void setPatient(Patient patient) {
         this.patient = patient;
+    }
+
+    public String getProgram() {return program;}
+    public void setProgram(String program) {
+        this.program = program;
+    }
+    public Integer getOrderSetId() {
+        return orderSetId;
+    }
+
+    public void setOrderSetId(Integer orderSetId) {
+        this.orderSetId = orderSetId;
     }
 }
 

@@ -2,12 +2,12 @@ package org.openmrs.module.orderentryui.page.controller;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.openmrs.*;
 import org.openmrs.api.*;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appui.UiSessionContext;
+import org.openmrs.module.orderentryui.api.DrugRegimenHistory;
+import org.openmrs.module.orderentryui.api.DrugRegimenHistoryService;
 import org.openmrs.module.webservices.rest.web.ConversionUtil;
 import org.openmrs.module.webservices.rest.web.representation.NamedRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.Representation;
@@ -15,8 +15,6 @@ import org.openmrs.ui.framework.UiUtils;
 import org.openmrs.ui.framework.annotation.SpringBean;
 import org.openmrs.ui.framework.page.PageModel;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.openmrs.module.orderentryui.api.DrugRegimenHistory;
-import org.openmrs.module.orderentryui.api.DrugRegimenHistoryService;
 
 import java.util.*;
 
@@ -124,6 +122,7 @@ public class DrugOrdersPageController {
         JSONObject activeOrdersResponse=new JSONObject();
         activeOrdersResponse.put("order_groups",orderGroupArray);
         activeOrdersResponse.put("single_drugs",orderArray);
+       // saveDrugRegimenHistorys(patient);
         model.put("activeOrdersResponse",ui.toJson(activeOrdersResponse));
         model.put("currentRegimens",ui.toJson(computeCurrentRegimen(patient)));
 
@@ -150,5 +149,19 @@ public class DrugOrdersPageController {
         }
         patientRegimen.put("patientregimens", regimens);
         return patientRegimen;
+    }
+    private  void saveDrugRegimenHistorys(Patient patient) {
+        DrugRegimenHistory drugRegimenHistory = new DrugRegimenHistory();
+        drugRegimenHistory.setRegimenName("3TC");
+        drugRegimenHistory.setPatient(patient);
+        drugRegimenHistory.setOrderGroupId(23);
+        drugRegimenHistory.setStatus("active");
+        drugRegimenHistory.setProgram("HIV");
+        drugRegimenHistory.setOrderSetId(22);
+
+        DrugRegimenHistoryService drugRegService = Context.getService(DrugRegimenHistoryService.class);
+        drugRegService.saveDrugRegimenHistory(drugRegimenHistory);
+
+
     }
 }

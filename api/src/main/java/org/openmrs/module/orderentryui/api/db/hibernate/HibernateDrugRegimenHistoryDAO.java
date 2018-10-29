@@ -19,6 +19,7 @@ import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.openmrs.Patient;
+import org.openmrs.api.db.DAOException;
 import org.openmrs.module.orderentryui.api.DrugRegimenHistory;
 import org.openmrs.module.orderentryui.api.db.DrugRegimenHistoryDAO;
 
@@ -56,6 +57,13 @@ public class HibernateDrugRegimenHistoryDAO implements DrugRegimenHistoryDAO {
         criteria.add(Restrictions.eq("patient", patient));
         criteria.add(Restrictions.eq("status", "active"));
         return criteria.list();
+    }
+    @Override
+    public DrugRegimenHistory saveDrugRegimenHistory(DrugRegimenHistory drugRegimenHistory) throws DAOException {
+
+        sessionFactory.getCurrentSession().saveOrUpdate(drugRegimenHistory);
+        return drugRegimenHistory;
+
     }
 
 }

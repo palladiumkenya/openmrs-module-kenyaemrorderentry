@@ -33,6 +33,7 @@ import java.util.List;
 public interface DrugRegimenHistoryService extends OpenmrsService {
 
     public List<DrugRegimenHistory> getPatientCurrentRegimenByPatient(Patient patient);
+    public DrugRegimenHistory saveDrugRegimenHistory(DrugRegimenHistory drugRegimenHistory);
 
 
 }
