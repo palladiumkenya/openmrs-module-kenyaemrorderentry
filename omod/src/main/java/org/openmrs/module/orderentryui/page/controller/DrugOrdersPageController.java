@@ -145,6 +145,7 @@ public class DrugOrdersPageController {
         for (DrugRegimenHistory reg : regimenList) {
             regimen=new JSONObject();
             regimen.put("name",reg.getRegimenName());
+            regimen.put("program",reg.getProgram());
             regimens.add(regimen);
         }
         patientRegimen.put("patientregimens", regimens);
