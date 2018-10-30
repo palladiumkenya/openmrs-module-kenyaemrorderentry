@@ -16,6 +16,9 @@ public class DrugRegimenHistory extends BaseOpenmrsData {
     private Patient patient;
     private String program;
     private Integer orderSetId;
+    private String reason;
+    private Date dateStarted;
+    private Date dateStopped;
 
 
     public DrugRegimenHistory() {
@@ -92,6 +95,30 @@ public class DrugRegimenHistory extends BaseOpenmrsData {
 
     public void setOrderSetId(Integer orderSetId) {
         this.orderSetId = orderSetId;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
+
+    public Date getDateStarted() {
+        return dateStarted;
+    }
+
+    public void setDateStarted(Date dateStarted) {
+        this.dateStarted = dateStarted;
+    }
+
+    public Date getDateStopped() {
+        return dateStopped;
+    }
+
+    public void setDateStopped(Date dateStopped) {
+        this.dateStopped = dateStopped;
     }
 }
 
