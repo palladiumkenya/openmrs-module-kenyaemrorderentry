@@ -11,7 +11,7 @@
  *
  * Copyright (C) OpenMRS, LLC.  All Rights Reserved.
  */
-package org.openmrs.module.orderentryui;
+package org.openmrs.module.kenyaemrorderentry;
 
 
 import org.apache.commons.lang.StringUtils;
@@ -31,7 +31,7 @@ import org.openmrs.util.OpenmrsConstants;
 /**
  * This class contains the logic that is run every time this module is either started or stopped.
  */
-public class OrderEntryUiActivator extends BaseModuleActivator {
+public class KenyaEMROrderEntryActivator extends BaseModuleActivator {
 
 	protected Log log = LogFactory.getLog(getClass());
 

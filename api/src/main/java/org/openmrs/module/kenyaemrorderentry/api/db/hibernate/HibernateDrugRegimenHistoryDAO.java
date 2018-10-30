@@ -11,7 +11,7 @@
  * <p>
  * Copyright (C) OpenMRS, LLC.  All Rights Reserved.
  */
-package org.openmrs.module.orderentryui.api.db.hibernate;
+package org.openmrs.module.kenyaemrorderentry.api.db.hibernate;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -20,8 +20,8 @@ import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.openmrs.Patient;
 import org.openmrs.api.db.DAOException;
-import org.openmrs.module.orderentryui.api.DrugRegimenHistory;
-import org.openmrs.module.orderentryui.api.db.DrugRegimenHistoryDAO;
+import org.openmrs.module.kenyaemrorderentry.api.DrugRegimenHistory;
+import org.openmrs.module.kenyaemrorderentry.api.db.DrugRegimenHistoryDAO;
 
 import java.util.List;
 

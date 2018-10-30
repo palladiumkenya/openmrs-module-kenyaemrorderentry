@@ -1,4 +1,4 @@
-package org.openmrs.module.orderentryui.api;
+package org.openmrs.module.kenyaemrorderentry.api;
 
 
 import org.openmrs.BaseOpenmrsData;

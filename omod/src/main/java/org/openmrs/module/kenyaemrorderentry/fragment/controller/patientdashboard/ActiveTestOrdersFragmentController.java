@@ -1,4 +1,4 @@
-package org.openmrs.module.orderentryui.fragment.controller.patientdashboard;
+package org.openmrs.module.kenyaemrorderentry.fragment.controller.patientdashboard;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.json.simple.JSONArray;

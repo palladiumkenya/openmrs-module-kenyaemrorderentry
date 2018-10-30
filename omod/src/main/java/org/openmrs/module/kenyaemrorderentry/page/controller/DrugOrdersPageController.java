@@ -1,4 +1,4 @@
-package org.openmrs.module.orderentryui.page.controller;
+package org.openmrs.module.kenyaemrorderentry.page.controller;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -6,8 +6,8 @@ import org.openmrs.*;
 import org.openmrs.api.*;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appui.UiSessionContext;
-import org.openmrs.module.orderentryui.api.DrugRegimenHistory;
-import org.openmrs.module.orderentryui.api.DrugRegimenHistoryService;
+import org.openmrs.module.kenyaemrorderentry.api.DrugRegimenHistory;
+import org.openmrs.module.kenyaemrorderentry.api.DrugRegimenHistoryService;
 import org.openmrs.module.webservices.rest.web.ConversionUtil;
 import org.openmrs.module.webservices.rest.web.representation.NamedRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.Representation;

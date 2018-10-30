@@ -52,7 +52,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
             if (!replacementOrder) {
                 return "";
             }
-            return emr.message("orderentryui.pastAction." + replacementOrder.action) + ", " + serverDateFilter(replacementOrder.dateActivated);
+            return emr.message("kenyaemrorderentry.pastAction." + replacementOrder.action) + ", " + serverDateFilter(replacementOrder.dateActivated);
         }
     }]).
 

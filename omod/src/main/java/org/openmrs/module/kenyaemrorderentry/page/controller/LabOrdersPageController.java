@@ -1,4 +1,4 @@
-package org.openmrs.module.orderentryui.page.controller;
+package org.openmrs.module.kenyaemrorderentry.page.controller;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;

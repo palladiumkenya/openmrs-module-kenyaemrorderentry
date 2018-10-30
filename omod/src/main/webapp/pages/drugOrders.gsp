@@ -18,20 +18,20 @@
     ui.includeJavascript("uicommons", "directives/select-concept-from-list.js")
     ui.includeJavascript("uicommons", "directives/select-order-frequency.js")
     ui.includeJavascript("uicommons", "directives/select-drug.js")
-    ui.includeJavascript("orderentryui", "order-model.js")
-    ui.includeJavascript("orderentryui", "order-entry.js")
-    ui.includeJavascript("orderentryui", "drugOrders.js")
-    ui.includeJavascript("orderentryui", "bootstrap.min.js")
+    ui.includeJavascript("kenyaemrorderentry", "order-model.js")
+    ui.includeJavascript("kenyaemrorderentry", "order-entry.js")
+    ui.includeJavascript("kenyaemrorderentry", "drugOrders.js")
+    ui.includeJavascript("kenyaemrorderentry", "bootstrap.min.js")
 
     ui.includeCss("uicommons", "ngDialog/ngDialog.min.css")
-    ui.includeCss("orderentryui", "drugOrders.css")
+    ui.includeCss("kenyaemrorderentry", "drugOrders.css")
     ui.includeCss("uicommons", "styleguide/jquery-ui-1.9.2.custom.min.css")
-    ui.includeCss("orderentryui", "index.css")
-    ui.includeCss("orderentryui", "bootstrap.min.css")
-    ui.includeCss("orderentryui", "font-awesome.css")
-    ui.includeCss("orderentryui", "font-awesome.min.css")
-    ui.includeCss("orderentryui", "font-awesome.css.map")
-    ui.includeCss("orderentryui", "fontawesome-webfont.svg")
+    ui.includeCss("kenyaemrorderentry", "index.css")
+    ui.includeCss("kenyaemrorderentry", "bootstrap.min.css")
+    ui.includeCss("kenyaemrorderentry", "font-awesome.css")
+    ui.includeCss("kenyaemrorderentry", "font-awesome.min.css")
+    ui.includeCss("kenyaemrorderentry", "font-awesome.css.map")
+    ui.includeCss("kenyaemrorderentry", "fontawesome-webfont.svg")
 %>
 <style type="text/css">
 #new-order input {
@@ -74,8 +74,8 @@ li.active {
 
 ${ ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator") }
 ${ ui.includeFragment("appui", "messages", [ codes: [
-        "orderentryui.pastAction.REVISE",
-        "orderentryui.pastAction.DISCONTINUE"
+        "kenyaemrorderentry.pastAction.REVISE",
+        "kenyaemrorderentry.pastAction.DISCONTINUE"
 ] ])}
 <script type="text/javascript">
     window.OpenMRS = window.OpenMRS || {};
@@ -227,7 +227,7 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                   </table>
                   <span ng-show="patientRegimens.length==0"> Regimen: Never on Regimen</span>
                    <div ng-show="showRegimenPanel" style="margin-top:2px;">
-                      ${ ui.includeFragment("orderentryui", "patientdashboard/regimenDispensation", ["patient": patient]) }
+                      ${ ui.includeFragment("kenyaemrorderentry", "patientdashboard/regimenDispensation", ["patient": patient]) }
                    </div>
                   </div>
                </div>

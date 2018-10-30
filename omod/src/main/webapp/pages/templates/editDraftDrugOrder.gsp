@@ -1,6 +1,6 @@
 <form id="new-order" class="sized-inputs css-form" name="newOrderForm" novalidate>
     <h4>
-        {{ draftOrder.action | omrs.display:"orderentryui.action." }}:
+        {{ draftOrder.action | omrs.display:"kenyaemrorderentry.action." }}:
         {{ draftOrder.drug | omrs.display}}
     </h4>
 

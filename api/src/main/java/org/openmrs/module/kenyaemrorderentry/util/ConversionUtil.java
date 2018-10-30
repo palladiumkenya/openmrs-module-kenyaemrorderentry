@@ -1,4 +1,4 @@
-package org.openmrs.module.orderentryui.util;
+package org.openmrs.module.kenyaemrorderentry.util;
 import java.util.regex.Pattern;
 public class ConversionUtil {
     private static Pattern onlyDigits = Pattern.compile("\\d+");
