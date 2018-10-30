@@ -1,9 +1,9 @@
 [
     { // adds drug orders section to patient dashboard
-        "id": "orderentryui.patientDashboard.activeDrugOrders",
+        "id": "kenyaemrorderentry.patientDashboard.activeDrugOrders",
         "extensionPointId": "patientDashboard.secondColumnFragments",
         "extensionParams": {
-            "provider": "orderentryui",
+            "provider": "kenyaemrorderentry",
             "fragment": "patientdashboard/activeDrugOrders"
         }
     }

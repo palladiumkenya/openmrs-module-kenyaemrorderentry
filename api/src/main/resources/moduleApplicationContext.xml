@@ -8,16 +8,16 @@
 	<bean parent="serviceContext">
 		<property name="moduleService">
 			<list>
-				<value>org.openmrs.module.orderentryui.api.DrugRegimenHistoryService</value>
+				<value>org.openmrs.module.kenyaemrorderentry.api.DrugRegimenHistoryService</value>
 				<bean
 						class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
 					<property name="transactionManager">
 						<ref bean="transactionManager" />
 					</property>
 					<property name="target">
-						<bean class="org.openmrs.module.orderentryui.api.impl.DrugRegimenHistoryServiceImpl">
+						<bean class="org.openmrs.module.kenyaemrorderentry.api.impl.DrugRegimenHistoryServiceImpl">
 							<property name="drugRegimenHistoryDAO">
-								<bean class="org.openmrs.module.orderentryui.api.db.hibernate.HibernateDrugRegimenHistoryDAO">
+								<bean class="org.openmrs.module.kenyaemrorderentry.api.db.hibernate.HibernateDrugRegimenHistoryDAO">
 
 									<property name="sessionFactory">
 										<ref bean="sessionFactory" />

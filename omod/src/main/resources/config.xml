@@ -31,7 +31,7 @@
     </require_modules>
 
     <!-- Module Activator -->
-	<activator>${project.parent.groupId}.${project.parent.artifactId}.OrderEntryUiActivator</activator>
+	<activator>${project.parent.groupId}.${project.parent.artifactId}.KenyaEMROrderEntryActivator</activator>
 	
 	
 	<!-- Maps hibernate file's, if present -->

@@ -11,16 +11,29 @@
  *
  * Copyright (C) OpenMRS, LLC.  All Rights Reserved.
  */
-package org.openmrs.module.orderentryui.api.db;
+package org.openmrs.module.kenyaemrorderentry.api;
 
 import org.openmrs.Patient;
-import org.openmrs.module.orderentryui.api.DrugRegimenHistory;
+import org.openmrs.api.OpenmrsService;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/**
+ * This service exposes module's core functionality. It is a Spring managed bean which is configured in moduleApplicationContext.xml.
+ * <p>
+ * It can be accessed only via Context:<br>
+ * <code>
+ * Context.getService(DrugRegimenHistoryService.class).someMethod();
+ * </code>
+ *
+ * @see org.openmrs.api.context.Context
+ */
+@Transactional
+public interface DrugRegimenHistoryService extends OpenmrsService {
 
-public interface DrugRegimenHistoryDAO {
     public List<DrugRegimenHistory> getPatientCurrentRegimenByPatient(Patient patient);
     public DrugRegimenHistory saveDrugRegimenHistory(DrugRegimenHistory drugRegimenHistory);
+
 
 }

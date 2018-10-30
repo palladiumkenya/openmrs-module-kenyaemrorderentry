@@ -4,14 +4,14 @@
 
 	<parent>
 		<groupId>org.openmrs.module</groupId>
-		<artifactId>orderentryui</artifactId>
+		<artifactId>kenyaemrorderentry</artifactId>
 		<version>1.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>orderentryui-omod</artifactId>
+	<artifactId>kenyaemrorderentry-omod</artifactId>
 	<packaging>jar</packaging>
-	<name>Order Entry UI Module OMOD</name>
-	<description>OMOD project for OrderEntryUI</description>
+	<name>Kenyaemrorderentry Module OMOD</name>
+	<description>OMOD project for KenyaEMR Drug and Lab Orders</description>
 
 	<dependencies>
 		<dependency>

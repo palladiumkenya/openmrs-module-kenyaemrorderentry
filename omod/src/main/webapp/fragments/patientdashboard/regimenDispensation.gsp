@@ -1,7 +1,7 @@
 <%
 ui.decorateWith("kenyaui", "panel", [ heading: "Ordering set" ])
 
-ui.includeJavascript("orderentryui", "regimenDispensation.js")
+ui.includeJavascript("kenyaemrorderentry", "regimenDispensation.js")
 
 
 %>
@@ -48,7 +48,7 @@ payload = {
             "orderDate":jq("#orderDate_date").val(),
             "regimenDosingInstructions":regimenDosingInstructions
         };
-jq.getJSON('${ ui.actionLink("orderentryui", "patientdashboard/regimenDispensation", "saveOrderGroup") }',
+jq.getJSON('${ ui.actionLink("kenyaemrorderentry", "patientdashboard/regimenDispensation", "saveOrderGroup") }',
     {
         'payload': JSON.stringify(payload)
     })
@@ -107,7 +107,7 @@ payload = {
             "discontinueOrderUuId":discontinueOrderUuId,
             "orderDate":jq("#orderDate_date").val()
         };
-jq.getJSON('${ ui.actionLink("orderentryui", "patientdashboard/regimenDispensation", "discontintueOrderGroup") }',
+jq.getJSON('${ ui.actionLink("kenyaemrorderentry", "patientdashboard/regimenDispensation", "discontintueOrderGroup") }',
     {
         'payload': JSON.stringify(payload)
     })

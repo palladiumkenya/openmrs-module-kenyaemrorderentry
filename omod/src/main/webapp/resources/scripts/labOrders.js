@@ -52,7 +52,7 @@ filter('replacement', ['serverDateFilter', function(serverDateFilter) {
         if (!replacementOrder) {
             return "";
         }
-        return emr.message("orderentryui.pastAction." + replacementOrder.action) + ", " + serverDateFilter(replacementOrder.dateActivated);
+        return emr.message("kenyaemrorderentry.pastAction." + replacementOrder.action) + ", " + serverDateFilter(replacementOrder.dateActivated);
     }
 }]).
 

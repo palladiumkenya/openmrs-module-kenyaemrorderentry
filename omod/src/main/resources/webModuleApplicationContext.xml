@@ -6,8 +6,8 @@
   		    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
     <bean class="org.openmrs.ui.framework.StandardModuleUiConfiguration">
-        <property name="moduleId" value="orderentryui"/>
+        <property name="moduleId" value="kenyaemrorderentry"/>
     </bean>
-    <bean id="kenyaemrDrugRegimenHistory" class="org.openmrs.module.orderentryui.api.DrugRegimenHistory"/>
+    <bean id="kenyaemrDrugRegimenHistory" class="org.openmrs.module.kenyaemrorderentry.api.DrugRegimenHistory"/>
 
 </beans>

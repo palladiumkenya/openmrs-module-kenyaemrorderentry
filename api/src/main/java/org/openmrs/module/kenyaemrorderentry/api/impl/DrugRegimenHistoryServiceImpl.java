@@ -11,15 +11,15 @@
  * <p>
  * Copyright (C) OpenMRS, LLC.  All Rights Reserved.
  */
-package org.openmrs.module.orderentryui.api.impl;
+package org.openmrs.module.kenyaemrorderentry.api.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Patient;
 import org.openmrs.api.impl.BaseOpenmrsService;
-import org.openmrs.module.orderentryui.api.DrugRegimenHistory;
-import org.openmrs.module.orderentryui.api.DrugRegimenHistoryService;
-import org.openmrs.module.orderentryui.api.db.hibernate.HibernateDrugRegimenHistoryDAO;
+import org.openmrs.module.kenyaemrorderentry.api.DrugRegimenHistory;
+import org.openmrs.module.kenyaemrorderentry.api.DrugRegimenHistoryService;
+import org.openmrs.module.kenyaemrorderentry.api.db.hibernate.HibernateDrugRegimenHistoryDAO;
 
 import java.util.List;
 /**
