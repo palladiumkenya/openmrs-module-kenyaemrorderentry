@@ -1,0 +1,113 @@
+/* line 4, ../../../compass/sass/drugOrders.scss */
+.care-setting.active {
+  font-weight: bold;
+}
+
+/* line 9, ../../../compass/sass/drugOrders.scss */
+.will-replace {
+  color: #7b7b7b;
+}
+
+/* line 14, ../../../compass/sass/drugOrders.scss */
+form.css-form input.ng-invalid.ng-touched {
+  background-color: #FA787E;
+}
+/* line 16, ../../../compass/sass/drugOrders.scss */
+form.css-form input.ng-invalid.ng-touched:focus {
+  background-color: white;
+}
+/* line 21, ../../../compass/sass/drugOrders.scss */
+form.css-form input[type="number"] {
+  width: 100px;
+}
+
+/* line 26, ../../../compass/sass/drugOrders.scss */
+.ui-tabs .ui-tabs-panel ul {
+  background-color: white;
+}
+
+/* line 30, ../../../compass/sass/drugOrders.scss */
+td.actions {
+  width: 50px;
+}
+
+/* line 34, ../../../compass/sass/drugOrders.scss */
+div.actions {
+  padding: 5px;
+}
+
+/* line 38, ../../../compass/sass/drugOrders.scss */
+form#new-order {
+  background-color: white;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+/* line 44, ../../../compass/sass/drugOrders.scss */
+form#new-order .dosing-type span {
+  margin-right: 15px;
+}
+/* line 47, ../../../compass/sass/drugOrders.scss */
+form#new-order .dosing-type a {
+  font-size: 0.9em;
+  display: inline-block;
+  padding-right: 15px;
+}
+/* line 51, ../../../compass/sass/drugOrders.scss */
+form#new-order .dosing-type a.active {
+  font-family: "OpenSansBold";
+  font-weight: normal;
+}
+/* line 59, ../../../compass/sass/drugOrders.scss */
+form#new-order label.disabled {
+  color: #bbbbbb;
+}
+
+/* line 65, ../../../compass/sass/drugOrders.scss */
+#draft-orders {
+  border: 1px #f3f3f3 solid;
+  background-color: #fffdf7;
+  padding: 5px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+/* line 72, ../../../compass/sass/drugOrders.scss */
+#draft-orders .signature {
+  text-align: right;
+  color: #7b7b7b;
+}
+
+/* line 78, ../../../compass/sass/drugOrders.scss */
+#past-drug-orders {
+  font-size: 0.9em;
+}
+
+/* line 83, ../../../compass/sass/drugOrders.scss */
+.css-form .ng-dirty.ng-invalid {
+  background-color: #ff6666;
+}
+/* line 85, ../../../compass/sass/drugOrders.scss */
+.css-form .ng-dirty.ng-invalid:focus {
+  background-color: white;
+}
+
+/* line 92, ../../../compass/sass/drugOrders.scss */
+form.sized-inputs input {
+  min-width: 0%;
+  display: inline;
+}
+/* line 96, ../../../compass/sass/drugOrders.scss */
+form.sized-inputs label {
+  display: inline;
+}
+/* line 99, ../../../compass/sass/drugOrders.scss */
+form.sized-inputs label.heading {
+  display: block;
+}
+
+/* line 105, ../../../compass/sass/drugOrders.scss */
+div.editing-draft-order {
+  border: 1px #bbbbbb solid;
+  background-color: #f3f3f3;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}

@@ -4,14 +4,14 @@
 
 	<parent>
 		<groupId>org.openmrs.module</groupId>
-		<artifactId>orderentryui</artifactId>
+		<artifactId>kenyaemrorderentry</artifactId>
 		<version>1.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>orderentryui-omod</artifactId>
+	<artifactId>kenyaemrorderentry-omod</artifactId>
 	<packaging>jar</packaging>
-	<name>Order Entry UI Module OMOD</name>
-	<description>OMOD project for OrderEntryUI</description>
+	<name>Kenyaemrorderentry Module OMOD</name>
+	<description>OMOD project for KenyaEMR Drug and Lab Orders</description>
 
 	<dependencies>
 		<dependency>
@@ -22,6 +22,8 @@
 		<dependency>
 			<groupId>org.openmrs.web</groupId>
 			<artifactId>openmrs-web</artifactId>
+			<version>1.12.0</version>
+			<scope>provided</scope>
 			<type>jar</type>
 		</dependency>
 		<dependency>
@@ -208,7 +210,7 @@
                     </execution>
                 </executions>
             </plugin>-->
-            <plugin>
+            <!--<plugin>
                 <groupId>de.saumya.mojo</groupId>
                 <artifactId>gem-maven-plugin</artifactId>
                 <extensions>true</extensions>
@@ -224,7 +226,7 @@
                     <jrubyVersion>1.7.10</jrubyVersion>
                     <execArgs>${project.build.directory}/rubygems/bin/compass compile ${basedir}/src/main/compass</execArgs>
                 </configuration>
-            </plugin>
+            </plugin>-->
         </plugins>
 	</build>
 

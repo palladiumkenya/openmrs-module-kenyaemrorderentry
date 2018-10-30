@@ -52,11 +52,11 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
             if (!replacementOrder) {
                 return "";
             }
-            return emr.message("orderentryui.pastAction." + replacementOrder.action) + ", " + serverDateFilter(replacementOrder.dateActivated);
+            return emr.message("kenyaemrorderentry.pastAction." + replacementOrder.action) + ", " + serverDateFilter(replacementOrder.dateActivated);
         }
     }]).
 
-    controller('DrugOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'OrderService', 'EncounterService', 'SessionInfo', "OrderEntryService",
+    controller('DrugOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'OrderService', 'EncounterService', 'SessionInfo', 'OrderEntryService',
         function($scope, $window, $location, $timeout, OrderService, EncounterService, SessionInfo, OrderEntryService) {
 
             var orderContext = {};
@@ -66,7 +66,9 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
             });
 
             // TODO changing dosingType of a draft order should reset defaults (and discard non-defaulted properties)
-
+            var programRegimens=OpenMRS.kenyaemrRegimenJsonPayload;
+            var currentRegimens=OpenMRS.currentRegimens;
+            $scope.showRegimenPanel=false;
             function loadExistingOrders() {
                 $scope.activeDrugOrders = { loading: true };
                 OrderService.getOrders({
@@ -75,7 +77,17 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                     patient: config.patient.uuid,
                     careSetting: $scope.careSetting.uuid
                 }).then(function(results) {
-                    $scope.activeDrugOrders = _.map(results, function(item) { return new OpenMRS.DrugOrderModel(item) });
+                    $scope.activeDrugOrders = _.map(OpenMRS.activeOrdersPayload.single_drugs, function(item) {
+                    return new OpenMRS.DrugOrderModel(item) });
+                    $scope.programs=programRegimens;
+                    $scope.regimenLines=$scope.programs.programs[0].regimen_lines;
+                    $scope.patientActiveDrugOrders=OpenMRS.activeOrdersPayload;
+                    $scope.patientRegimens=currentRegimens.patientregimens;
+                    $scope.regimenStatus="absent";
+                    if($scope.patientRegimens.length==0){
+                      $scope.showRegimenPanel=false;
+                    }
+
                 });
 
                 $scope.pastDrugOrders = { loading: true };
@@ -128,8 +140,6 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                     angular.element('#new-order input[type=text]').first().focus();
                 });
             }
-
-
             // functions that affect the overall state of the page
 
             $scope.setCareSetting = function(careSetting) {
@@ -233,6 +243,152 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                 $timeout(function() {
                     angular.element('#draft-orders input.dc-reason').last().focus();
                 });
-            })
+            });
+            $scope.activeRegimens=[];
+            $scope.components=[];
+            $scope.components.quantity=[];
+            $scope.setProgramRegimens=function(regimens){
+            $scope.activeRegimens=[];
+            $scope.oldComponents=[];
+            $scope.regimenDosingInstructions="";
+             $scope.activeRegimens=regimens;
+            }
+            $scope.setRegimenMembers=function(regimen){
+            console.log("regimen selected++++++++++++++++++++"+JSON.stringify(regimen));
+              $scope.components=[];
+              $scope.components=regimen.components;
+              orderSetId=regimen.orderSetId;
+            }
+            $scope.setRegimenLines=function(regimenLine){
+              $scope.regimenLines=[];
+              $scope.activeRegimens=[];
+              $scope.regimenLines=regimenLine;
+            }
+            window.drugOrderMembers=[];
+            window.orderSetSelected={};
+            window.regimenDosingInstructions=null;
+            $scope.saveOrderSet=function(orderset){
+            drugOrderMembers=orderset;
+            regimenDosingInstructions=$scope.regimenDosingInstructions;
+            console.log("regimendosinginstructions+++++++++++++++++++++++++++++++"+$scope.regimenDosingInstructions);
+            }
+            window.activeOrderGroupUuId=null;
+            window.discontinueOrderUuId=null;
+            $scope.editOrderGroup=function(orderGroup){
+                _.map($scope.programs.programs, function(program) {
+                _.map(program.regimen_lines, function(regimenLine) {
+                    _.map(regimenLine.regimens, function(regimen) {
+                       if(regimen.name===orderGroup.name){
+                        console.log("regimen to edit++++++++++++++++++++"+JSON.stringify(orderGroup));
+                        $scope.components=orderGroup.components;
+                        orderSetId=regimen.orderSetId;
+                        activeOrderGroupUuId=orderGroup.orderGroupUuId;
+                        $scope.regimenDosingInstructions=orderGroup.instructions;
+                        $scope.showRegimenPanel=true;
+                        $scope.regimenStatus='edit';
+                       }
+                    });
+                });
 
+                });
+            }
+            $scope.discontinueOrderGroup=function(components){
+                drugOrderMembers=components;
+                orderSetId=null;
+                discontinueOrderUuId=null;
+            }
+            $scope.changeRegimen=function(currentRegimen){
+              console.log("components to be changed++++++++++++++++++++"+JSON.stringify(currentRegimen));
+              $scope.regimenStatus='change';
+              $scope.showRegimenPanel=true;
+            }
+            $scope.stopRegimen=function(regimen){
+            console.log("regimen to stop++++++++++++++++++++"+JSON.stringify(regimen));
+              $scope.components=[];
+              $scope.components=regimen.components;
+              $scope.regimenStatus='stopped';
+            }
+            $scope.refillRegimen=function(regimen){
+            console.log("regimen selected++++++++++++++++++++"+JSON.stringify(regimen));
+              $scope.components=[];
+              $scope.components=regimen.components;
+              orderSetId=regimen.orderSetId;
+              $scope.regimenStatus='active';
+              $scope.showRegimenPanel=true;
+              $scope.matchSetMembers(regimen.components);
+            }
+            $scope.matchSetMembers=function(members){
+            _.map($scope.programs.programs, function(program) {
+            _.map(program.regimen_lines, function(regimenLine) {
+                _.map(regimenLine.regimens, function(regimen) {
+                 var drugsFromOrderSet=$scope.createDrugsArrayFromPayload(regimen.components);
+                 var drugsFromCurrentRegimen=$scope.createDrugsArrayFromPayload(members);
+                 if($scope.arraysEqual(drugsFromOrderSet,drugsFromCurrentRegimen)){
+                console.log("current regimen matches this order set+++++"+JSON.stringify(regimen));
+                orderSetId=regimen.orderSetId;
+                 }
+                });
+                });
+                });
+            }
+        $scope.matchRegimenNames=function(name){
+        _.map(programRegimens.programs, function(program) {
+               _.map(program.regimen_lines, function(regimenLine) {
+                    _.map(regimenLine.regimens, function(regimen) {
+                    if(regimen.name===name){
+                    $scope.programs=[];
+                    var programs_array=[];
+                    var program_object={};
+                    program_object.name=program.name;
+                    var regimen_line_object={};
+                    regimen_line_object.name=regimenLine.name;
+
+                    var regimen_object={};
+                    regimen_object.name=name;
+                    regimen_object.components=regimen.components;
+                    regimen_line_object.regimens=[];
+                    regimen_line_object.regimens.push(regimen_object);
+                    program_object.regimen_lines=[];
+                    program_object.regimen_lines.push(regimen_line_object);
+                    programs_array.push(program_object);
+                    $scope.programs={"programs":programs_array};
+                    $scope.regimenLines=[];
+                    $scope.activeRegimens=[];
+                    $scope.regimenLines.push(regimen_line_object);
+                    $scope.activeRegimens.push(regimen_object);
+                    console.log("contrived programs+++++++++++++++++++"+JSON.stringify($scope.programs));
+
+                    $scope.components=[];
+                    $scope.components=regimen.components;
+                    orderSetId=regimen.orderSetId;
+                    $scope.regimenStatus='active';
+                    $scope.showRegimenPanel=true;
+                    }
+                    });
+               });
+          });
+        }
+        $scope.createDrugsArrayFromPayload=function (components){
+        var drugs=[];
+        var i;
+        for(i=0;i<components.length;i++){
+        var drug_id=components[i].drug_id;
+        if(typeof drug_id=="string"){
+        drug_id=parseInt(drug_id);
+        }
+        drugs.push(drug_id);
+        }
+        drugs.sort(function(a, b){return a - b});
+        return drugs;
+        }
+        $scope.arraysEqual=function (arr1, arr2) {
+            if(arr1.length !== arr2.length)
+                return false;
+            for(var i = arr1.length; i--;) {
+                if(arr1[i] !== arr2[i])
+                    return false;
+            }
+
+            return true;
+        }
         }]);
