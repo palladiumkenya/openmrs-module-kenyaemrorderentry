@@ -52,5 +52,15 @@
         <addForeignKeyConstraint baseTableName="kenyaemr_drug_regimen_history" baseColumnNames="patient_id" constraintName="kemr_patient_id" referencedTableName="patient" referencedColumnNames="patient_id" />
 
     </changeSet>
-
+    <changeSet author="ellymakuba" id="kenyaemrorderentry-30-10-2018:2:30">
+        <addColumn tableName="kenyaemr_drug_regimen_history">
+            <column name="reason" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="ellymakuba" id="kenyaemrorderentry-30-10-2018:3:59">
+        <addColumn tableName="kenyaemr_drug_regimen_history">
+            <column name="date_started" type="datetime"/>
+            <column name="date_stopped" type="datetime"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

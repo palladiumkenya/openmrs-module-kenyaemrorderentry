@@ -24,8 +24,9 @@
 		<many-to-one name="voidedBy" class ="org.openmrs.User" column="voided_by"/>
 		<property name="dateVoided" type ="java.util.Date" column ="date_voided" length="19"/>
 		<property name="voidReason" type="java.lang.String" column="voided_reason" length="255"/>
-
-
+		<property name="reason" type="java.lang.String" column="reason" length="255"/>
+		<property name="dateStarted" type ="java.util.Date" column ="date_started" length="19"/>
+		<property name="dateStopped" type ="java.util.Date" column ="date_stopped" length="19"/>
 	</class>
 
 </hibernate-mapping>
