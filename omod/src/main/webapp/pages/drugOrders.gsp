@@ -82,7 +82,6 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
     window.OpenMRS.drugOrdersConfig = ${ jsonConfig };
     window.sessionContext = {'locale':'en_GB'}
     window.OpenMRS.activeOrdersPayload=${activeOrdersResponse};
-   // window.OpenMRS.currentRegimens=${currentRegimens};
 </script>
 
 <div class="ke-page-content">
@@ -240,9 +239,14 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                      </h4>
                   </div>
                   <div class = "card-body">
-                     <h5 style="margin:5px;">Standard Regimen Orders</h5>
+
+                      <div class="card">
+                          <div class="card-body">
+                              <h5 class="card-title">Standard Regimen Orders</h5>
+
                      <span ng-show="patientActiveDrugOrders.order_groups.length==0">None</span>
-                     <table ng-show="patientActiveDrugOrders.order_groups.length > 0" class="ke-table-vertical">
+                      <div class="table-responsive">
+                     <table ng-show="patientActiveDrugOrders.order_groups.length > 0" class="table table-striped">
                         <tr>
                            <th width="30%">Dates</th>
                            <th width="50%">Instructions</th>
@@ -261,10 +265,19 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                            </td>
                         </tr>
                      </table>
-                     <h5 style="margin:5px;">Other Drug Orders</h5>
+                      </div>
+                          </div>
+                      </div>
+                      <div style="padding-top: 45px">
+                      <div class="card">
+                          <div class="card-body">
+                              <h5 class="card-title">Other Drug Orders</h5>
+
+
                      <span ng-show="activeDrugOrders.loading">${ ui.message("uicommons.loading.placeholder") }</span>
                      <span ng-show="activeDrugOrders.length == 0">None</span>
-                     <table ng-show="activeDrugOrders.length > 0" class="ke-table-vertical">
+                      <div class="table-responsive">
+                     <table ng-show="activeDrugOrders.length > 0" class="table table-striped">
                         <tr>
                            <th width="30%">Dates</th>
                            <th width="50%">Instructions</th>
@@ -277,7 +290,7 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                            <td ng-class="{ 'will-replace': replacementFor(order) }">
                               {{ order | instructions }}
                            </td>
-                           <td class="actions">
+                           <td >
                               <a ng-show="!replacementFor(order)" ng-click="reviseOrder(order)" class="edit-single-drug">
                               <button>Edit</button>
                               </a>
@@ -290,7 +303,13 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                            </td>
                         </tr>
                      </table>
+                      </div>
+                      </div>
+
+                      </div>
+                      </div>
                   </div>
+
                </div>
             </div>
             <div class="ke-tab" data-tabid="past_drug_orders">
@@ -303,10 +322,11 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                   <div class = "card-body">
                      <span ng-show="pastDrugOrders.loading">${ ui.message("uicommons.loading.placeholder") }</span>
                      <span ng-hide="pastDrugOrders.loading || pastDrugOrders.length > 0">None</span>
-                     <table id="past-drug-orders" ng-hide="pastDrugOrders.loading" class="ke-table-vertical">
+                      <div class="table-responsive">
+                     <table id="past-drug-orders" ng-hide="pastDrugOrders.loading" class="table table-striped">
                         <tr>
-                           <th width="10%">Replacement</th>
-                           <th width="20%">Dates</th>
+                           <th>Replacement</th>
+                           <th>Dates</th>
                            <th>Instructions</th>
                         </tr>
                         <tr ng-repeat="order in pastDrugOrders">
@@ -321,12 +341,14 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                            </td>
                         </tr>
                      </table>
+                      </div>
                   </div>
                </div>
             </div>
          </div>
       </div>
    </div>
+</div>
 </div>
 <script type="text/javascript">
     // manually bootstrap angular app, in case there are multiple angular apps on a page
