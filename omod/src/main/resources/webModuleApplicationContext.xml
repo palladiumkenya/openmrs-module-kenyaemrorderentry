@@ -8,6 +8,5 @@
     <bean class="org.openmrs.ui.framework.StandardModuleUiConfiguration">
         <property name="moduleId" value="kenyaemrorderentry"/>
     </bean>
-    <bean id="kenyaemrDrugRegimenHistory" class="org.openmrs.module.kenyaemrorderentry.api.DrugRegimenHistory"/>
 
 </beans>

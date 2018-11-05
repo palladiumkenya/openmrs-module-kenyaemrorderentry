@@ -82,7 +82,7 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
     window.OpenMRS.drugOrdersConfig = ${ jsonConfig };
     window.sessionContext = {'locale':'en_GB'}
     window.OpenMRS.activeOrdersPayload=${activeOrdersResponse};
-    window.OpenMRS.currentRegimens=${currentRegimens};
+   // window.OpenMRS.currentRegimens=${currentRegimens};
 </script>
 
 <div class="ke-page-content">
