@@ -313,32 +313,26 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
             }
             window.activeOrderGroupUuId=null;
             window.discontinueOrderUuId=null;
-            $scope.editOrderGroup = function(orderGroup){
+            $scope.editOrderGroup = function(orderGroup) {
                 $scope.components = orderGroup.components;
-                $scope.regimenLines = "First linge";
                 $scope.regimenNames = orderGroup.name;
-                $scope.programName = "ARV";
+                activeOrderGroupUuId = orderGroup.orderGroupUuId;
                 $scope.regimenStatus = "edit";
                 $scope.orderSetId = orderGroup.orderSetId;
                 $scope.regimenDosingInstructions=orderGroup.instructions;
-                $scope.showRegimenPanel = true;
-                console.log("orderGroup==========",orderGroup);
-                /*_.map($scope.programs.programs, function(program) {
-                _.map(program.regimen_lines, function(regimenLine) {
-                    _.map(regimenLine.regimens, function(regimen) {
-                       if(regimen.name===orderGroup.name){
-                        $scope.components=orderGroup.components;
-                        orderSetId=regimen.orderSetId;
-                        activeOrderGroupUuId=orderGroup.orderGroupUuId;
-                        $scope.regimenDosingInstructions=orderGroup.instructions;
-                        $scope.showRegimenPanel=true;
-                        $scope.regimenStatus='edit';
-                       }
-                    });
-                });
 
-                });*/
+
+                _.map($scope.patientRegimens, function(regimen) {
+                    if(regimen.regimenName === orderGroup.name) {
+                        $scope.regimenLines = regimen.groupCodeName;
+                        $scope.programName = regimen.program;
+
+                        $scope.showRegimenPanel = true;
+                    }
+
+                });
             }
+
             $scope.discontinueOrderGroup = function(components){
                 drugOrderMembers=components;
                 orderSetId=null;
