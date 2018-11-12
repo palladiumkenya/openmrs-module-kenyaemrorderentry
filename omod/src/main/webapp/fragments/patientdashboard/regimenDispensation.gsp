@@ -27,7 +27,6 @@ jq(document).on("click", "li.regimen-item", function() {
   jq("#drug-order-group").removeClass("hide-section");
 });
 jq(document).on("click", ".edit-order", function() {
-    console.log("edit order clicked+++++++++++++++++++++++++++");
     jq("#drug-order-group").removeClass("hide-section");
     jq(".ke-tabmenu-item-active").removeClass("ke-tabmenu-item-active");
     jq(".new-order").addClass("ke-tabmenu-item-active");
@@ -38,6 +37,7 @@ jq(document).on("click", ".edit-order", function() {
 });
 jq('.saveOrder').click(function(){
 console.log("drugOrderMembers+++++++++++++++++++++++"+JSON.stringify(drugOrderMembers));
+console.log("orderSetId===",orderSetId);
 payload = {
             "patient": patient,
             "provider":provider,
@@ -127,7 +127,6 @@ jq(document).on("click", ".edit-single-drug,.dispense-single-drug", function() {
     jq("div.single-order-section").css("display","block");
 });
 jq(document).on("click", ".change-regimen", function() {
-    console.log("change regimen++++++++++++++++++++++++++++");
     jq(".disable-on-regimen-change").hide();
     jq("#drug-order-group").addClass("hide-section");
 });
@@ -138,28 +137,25 @@ jq(document).on("click", ".refill-regimen", function() {
 </script>
 <div class="row panel panel-default">
   <div class="program panel-body">
-  <h3>Programs</h3>
+  <h3>Program</h3>
       <ul class="list-group">
-      <li class="program-line button" ng-click="setRegimenLines(program.regimen_lines)"
-      ng-repeat="program in programs.programs" style="margin:2px;">{{program.name}}</li>
+      <li class=" button"
+      style="margin:2px;">{{programName}}</li>
       </ul>
   </div>
   <div class="regimen panel-body">
   Date: ${ ui.includeFragment("kenyaui", "field/java.util.Date", [ id: "orderDate", formFieldName: "orderDate"]) }
   <div style="margin-top:5px;";></div>
-  <div ng-show="regimenLines.length > 0" style="border-style:solid;border-color:gray;padding:10px;" id="regimen-lines">
-  <h3>Regimen Lines</h3>
+  <div ng-show="regimenLines.length > 0" style="border-style:solid;border-color:gray;padding:10px;">
+  <h3>Regimen Line</h3>
       <ul class="list-group" style="display:inline;">
-      <li class="button regimen-line" ng-repeat="regimen_line in regimenLines" style="margin:2px;"
-      ng-click="setProgramRegimens(regimen_line.regimens)">{{regimen_line.name}}</li>
+      <li class="button "  style="margin:2px;">{{regimenLines}}</li>
       </ul>
   </div>
-  <div ng-show="activeRegimens.length > 0" style="border-style:solid;border-color:gray;padding:10px;margin-top:10px;" id="active-regimens">
-  <h3 style="margin-top:5px;">Regimens</h3>
+  <div style="border-style:solid;border-color:gray;padding:10px;margin-top:10px;">
+  <h3 style="margin-top:5px;">Regimen</h3>
       <ul class="list-group" style="display:inline;">
-      <li class="button regimen-item" ng-repeat="regimen in activeRegimens" style="margin:2px;width:200px;"
-      ng-click="setRegimenMembers(regimen)">
-      {{regimen.name}}
+          <li class="button " style="margin:2px;">{{regimenNames}}</li>
       </li>
       </ul>
   </div>
@@ -185,7 +181,7 @@ jq(document).on("click", ".refill-regimen", function() {
       <button ng-click="saveOrderSet(components)" class="saveOrder" style="width:250px;">Start Regimen</button>
   </div>
   <div style="padding-top: 10px" ng-show="regimenStatus=='active'">
-    <button ng-click="saveOrderSet(components)" class="saveOrder" style="width:250px;">Refill Regimen</button>
+    <button ng-click="saveOrderSet(components)" class="saveOrder" style="width:250px;">Order Regimen</button>
 </div>
   <div style="padding-top: 10px" ng-show="regimenStatus=='stopped'">
     <button ng-click="saveOrderSet(components)" class="saveOrder" style="width:250px;">Restart Regimen</button>
@@ -209,7 +205,7 @@ style="font-size:16px;">
         </button>
       </div>
       <div class="modal-body" style="color:green;">
-        Regimen saved successfully
+        Order saved successfully
       </div>
     </div>
   </div>

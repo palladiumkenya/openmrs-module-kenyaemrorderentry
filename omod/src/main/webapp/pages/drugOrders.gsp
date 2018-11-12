@@ -82,6 +82,7 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
     window.OpenMRS.drugOrdersConfig = ${ jsonConfig };
     window.sessionContext = {'locale':'en_GB'}
     window.OpenMRS.activeOrdersPayload=${activeOrdersResponse};
+    window.OpenMRS.currentRegimens=${currentRegimens};
 </script>
 
 <div class="ke-page-content">
@@ -207,24 +208,17 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                      </h4>
                   </div>
                   <div class="card-body">
-                  <table ng-show="patientRegimens.length > 0">
-                  <tr ng-repeat="regimen in patientRegimens" style="font-size:16px;font-weight:bold;">
-                  <td style="width:35%;">Current {{regimen.program}} Regimen:{{regimen.name}}</td>
+                      <div class="table-responsive">
+                  <table ng-show="patientRegimens.length > 0" class="table table-striped">
+                  <tr ng-repeat="regimen in patientRegimens">
+                  <td style="width:35%;"><b>Current {{regimen.program}} Regimen: </b> {{regimen.regimenName}}</td>
                   <td>
-                      <button ng-click="matchRegimenNames(regimen.name)" class="refill-regimen">Refill</button>
-                      <!--
-                      <button type="button" data-toggle="collapse" data-target="#{{regimen.program}}">
-                      ...
-                      </button>
-                        <div id="{{regimen.program}}" class="collapse">
-                          <button class="change-regimen" ng-click="changeRegimen(regimen)">Change</button>
-                          <button ng-click="discontinueOrderGroup(regimen.components)" class="stopOrder">Stop</button>
-                        </div>
-                       -->
+                      <button ng-click="getCurrentRegimen(regimen)" class="refill-regimen">Refill</button>
                   </td>
                   </tr>
                   </table>
-                  <span ng-show="patientRegimens.length==0"> Regimen: Never on Regimen</span>
+                      </div>
+                  <span ng-show="patientRegimens.length==0"> Patient is not on any regimen</span>
                    <div ng-show="showRegimenPanel" style="margin-top:2px;">
                       ${ ui.includeFragment("kenyaemrorderentry", "patientdashboard/regimenDispensation", ["patient": patient]) }
                    </div>
@@ -323,7 +317,7 @@ ${ ui.includeFragment("appui", "messages", [ codes: [
                      <span ng-show="pastDrugOrders.loading">${ ui.message("uicommons.loading.placeholder") }</span>
                      <span ng-hide="pastDrugOrders.loading || pastDrugOrders.length > 0">None</span>
                       <div class="table-responsive">
-                     <table id="past-drug-orders" ng-hide="pastDrugOrders.loading" class="table table-striped">
+                     <table ng-hide="pastDrugOrders.loading" class="table table-striped">
                         <tr>
                            <th>Replacement</th>
                            <th>Dates</th>

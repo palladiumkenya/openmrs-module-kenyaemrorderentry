@@ -4,6 +4,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.openmrs.*;
 import org.openmrs.api.*;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.appui.UiSessionContext;
 import org.openmrs.module.webservices.rest.web.ConversionUtil;
 import org.openmrs.module.webservices.rest.web.representation.NamedRepresentation;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.*;
 
 public class DrugOrdersPageController {
+    public static final Locale LOCALE = Locale.ENGLISH;
 
     public void get(@RequestParam("patient") Patient patient,
                     @RequestParam(value = "careSetting", required = false) CareSetting careSetting,
@@ -27,7 +29,8 @@ public class DrugOrdersPageController {
                     @SpringBean("orderSetService") OrderSetService orderSetService,
                     @SpringBean("patientService")PatientService patientService,
                     @SpringBean("conceptService") ConceptService conceptService,
-                    @SpringBean("providerService") ProviderService providerService) {
+                    @SpringBean("providerService") ProviderService providerService,
+                    @SpringBean("obsService") ObsService obsService) {
 
         // HACK
         EncounterType drugOrderEncounterType = encounterService.getAllEncounterTypes(false).get(0);
@@ -120,6 +123,7 @@ public class DrugOrdersPageController {
         activeOrdersResponse.put("order_groups",orderGroupArray);
         activeOrdersResponse.put("single_drugs",orderArray);
         model.put("activeOrdersResponse",ui.toJson(activeOrdersResponse));
+        model.put("currentRegimens",ui.toJson(computeCurrentRegimen(patient)));
 
     }
 
@@ -129,5 +133,25 @@ public class DrugOrdersPageController {
 
     private Object convertToFull(Object object) {
         return object == null ? null : ConversionUtil.convertToRepresentation(object, Representation.FULL);
+    }
+    private JSONObject computeCurrentRegimen(Patient patient) {
+        ConceptService cs = Context.getConceptService();
+        ObsService obsService = Context.getObsService();
+        List<Obs> regimenName = obsService.getObservationsByPersonAndConcept(patient,cs.getConcept(1193));
+
+        JSONObject patientRegimen=new JSONObject();
+        JSONArray regimens=new JSONArray();
+        JSONObject regimen;
+        String ls = "TDF + 3TC + NVP (300mg OD/150mg BD/200mg BD)";
+        String prog ="ARV";
+        for (Obs reg : regimenName) {
+            regimen=new JSONObject();
+            regimen.put("name",ls);
+            regimen.put("program",prog);
+            regimens.add(regimen);
+        }
+        patientRegimen.put("patientregimens", regimens);
+        System.out.println("patientRegimen"+patientRegimen);
+        return patientRegimen;
     }
 }
