@@ -56,8 +56,8 @@ filter('replacement', ['serverDateFilter', function(serverDateFilter) {
     }
 }]).
 
-controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'OrderService', 'EncounterService', 'SessionInfo', 'OrderEntryService',
-    function($scope, $window, $location, $timeout, OrderService, EncounterService, SessionInfo, OrderEntryService) {
+controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$timeout', 'OrderService', 'EncounterService', 'SessionInfo', 'OrderEntryService',
+    function($scope, $window,$rootScope, $location, $timeout, OrderService, EncounterService, SessionInfo, OrderEntryService) {
 
         var orderContext = {};
         SessionInfo.get().$promise.then(function(info) {
@@ -98,6 +98,7 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
 
                 $scope.labOrders = labs;
                 $scope.panelListResults = customiseHivViralLoadObj(panelList);
+                $scope.InspireList = $rootScope.matrixList($scope.panelListResults, 2);
 
             });
 
@@ -412,6 +413,7 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
             OrderEntryService.signAndSave({ draftOrders: $scope.lOrdersPayload }, encounterContext)
                 .$promise.then(function(result) {
                 $('#spinner').modal('hide');
+                loadExistingOrders();
                 $window.location.reload();
               //  location.href = location.href;
             }, function(errorResponse) {
@@ -810,5 +812,18 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
                 angular.element('#draft-orders input.dc-reason').last().focus();
             });
         });
+
+        $rootScope.matrixList = function(data, n) {
+            var grid = [], i = 0, x = data.length, col, row = -1;
+            for (var i = 0; i < x; i++) {
+                col = i % n;
+                if (col === 0) {
+                    grid[++row] = [];
+                }
+                grid[row][col] = data[i];
+            }
+            return grid;
+        };
+
 
     }]);
