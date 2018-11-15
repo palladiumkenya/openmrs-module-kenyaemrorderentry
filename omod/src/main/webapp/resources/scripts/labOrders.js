@@ -97,7 +97,18 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 });
 
                 $scope.labOrders = labs;
-                $scope.panelListResults = customiseHivViralLoadObj(panelList);
+
+
+            });
+
+            OrderService.getOrders({
+                t: 'testorder',
+                v: 'full',
+                patient: config.patient.uuid,
+                careSetting: $scope.careSetting.uuid
+            }).then(function(results) {
+                $scope.pList = panelList;
+                $scope.panelListResults = customiseHivViralLoadObj($scope.pList);
                 $scope.InspireList = $rootScope.matrixList($scope.panelListResults, 2);
 
             });
@@ -504,7 +515,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                     }
 
                 discontinueLabTestOrders($scope.discontinueFilledOrders);
-                $('#spinner').modal('hide');
+                $('#spinnerSave').modal('hide');
 
 
                 location.href = location.href;
