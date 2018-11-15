@@ -124,7 +124,7 @@ public class PastLabOrdersFragmentController {
                 }
             }
         }
-        model.put("labObsResults", labOrdersList.toString());
+        model.put("pastLabOrdersResults", labOrdersList.toString());
     }
 
 }

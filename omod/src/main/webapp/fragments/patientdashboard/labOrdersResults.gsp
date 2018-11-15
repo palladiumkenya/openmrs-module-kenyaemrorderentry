@@ -31,7 +31,7 @@
 
     window.OpenMRS = window.OpenMRS || {};
     window.OpenMRS.drugOrdersConfig = ${ jsonConfig };
-    window.OpenMRS.panelList =${panelList}
+    window.OpenMRS.enterLabOrderResults =${enterLabOrderResults}
 
 
 </script>

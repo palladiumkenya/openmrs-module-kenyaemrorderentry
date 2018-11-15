@@ -107,9 +107,11 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 patient: config.patient.uuid,
                 careSetting: $scope.careSetting.uuid
             }).then(function(results) {
-                $scope.pList = panelList;
-                $scope.panelListResults = customiseHivViralLoadObj($scope.pList);
-                $scope.InspireList = $rootScope.matrixList($scope.panelListResults, 2);
+                $scope.pList = enterLabOrderResults;
+                if($scope.pList) {
+                    $scope.panelListResults = customiseHivViralLoadObj($scope.pList);
+                    $scope.InspireList = $rootScope.matrixList($scope.panelListResults, 2);
+                }
 
             });
 
@@ -124,20 +126,22 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 $scope.OrderUuid = '';
                 $scope.limit = 12;
                 $scope.pastLabOrders = pastOrders;
-                // _.map(results, function(item) { return new OpenMRS.TestOrderModel(item) });
-                $scope.pastLabOrders = filterDuplicates($scope.pastLabOrders);
-                $scope.pastLabOrders = renameNotDetectedToLDL($scope.pastLabOrders);
-                $scope.pastLabOrders.sort(function(a, b) {
-                    var key1 = a.dateActivated;
-                    var key2 = b.dateActivated;
-                    if (key1 > key2) {
-                        return -1;
-                    } else if (key1 === key2) {
-                        return 0;
-                    } else {
-                        return 1;
-                    }
-                });
+                if($scope.pastLabOrders ) {
+                    // _.map(results, function(item) { return new OpenMRS.TestOrderModel(item) });
+                    $scope.pastLabOrders = filterDuplicates($scope.pastLabOrders);
+                    $scope.pastLabOrders = renameNotDetectedToLDL($scope.pastLabOrders);
+                    $scope.pastLabOrders.sort(function (a, b) {
+                        var key1 = a.dateActivated;
+                        var key2 = b.dateActivated;
+                        if (key1 > key2) {
+                            return -1;
+                        } else if (key1 === key2) {
+                            return 0;
+                        } else {
+                            return 1;
+                        }
+                    });
+                }
             });
         }
         function renameNotDetectedToLDL(res) {
@@ -278,8 +282,8 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
         var config = OpenMRS.drugOrdersConfig;
         var labs = OpenMRS.labTestJsonPayload;
-        var panelList = OpenMRS.panelList;
-        var pastOrders = OpenMRS.labObsResults;
+        var enterLabOrderResults = OpenMRS.enterLabOrderResults;
+        var pastOrders = OpenMRS.pastLabOrdersResults;
 
         // labObsResults
         $scope.init = function() {
@@ -793,6 +797,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             $('#dateOrder').modal('hide');
             $('#orderUrgency').modal('hide');
             $('#generalMessage').modal('hide');
+            $('#voidOrdersModal').modal('hide');
         };
         $scope.setOrderDate = function() {
             $scope.orderDate = angular.element('#orderDate').val();

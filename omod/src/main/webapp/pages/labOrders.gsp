@@ -63,7 +63,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
 ]])}
 
 <div class="ke-page-content">
-    <div id="lab-orders-app" data-ng-controller="LabOrdersCtrl" ng-init='init()'>
+    <div id="lab-orders-app">
         <div class="ui-tabs">
 
 

@@ -125,7 +125,7 @@ public class LabOrdersResultsFragmentController {
             panelList.add(labOrderObject);
 
         }
-        model.put("panelList", panelList.toString());
+        model.put("enterLabOrderResults", panelList.toString());
     }
 
     private JSONArray constructBooleanAnswers() {

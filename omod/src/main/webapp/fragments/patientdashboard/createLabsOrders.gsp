@@ -171,9 +171,9 @@
     <div class="modal fade" id="dateOrder" tabindex="-1" role="dialog" aria-labelledby="dateModalCenterTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
-                <div class="modal-header">
+                <div class="modal-header modal-header-primary">
                     <h5 class="modal-title" id="dateModalCenterTitle"></h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close" data-dismiss="modal2" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -184,7 +184,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button"   ng-click="closeModal()">Close</button>
+                    <button type="button" data-dismiss="modal2"   ng-click="closeModal()">Close</button>
                     <button type="button" ng-click="setOrderDate()">
                         <img src="${ ui.resourceLink("kenyaui", "images/glyphs/ok.png") }" /> Save</button>
                 </div>
@@ -195,13 +195,13 @@
     <div class="modal fade" id="orderUrgency" tabindex="-1" role="dialog" aria-labelledby="urgencyModalCenterTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
-                <div class="modal-header">
+                <div class="modal-header modal-header-primary">
                     <h5 class="modal-title" id="urgencyModalCenterTitle"></h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close" data-dismiss="modal2" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body ">
                     <label >Order Urgency</label>
                     <div>
                         <select id="ddlOrderUrgency" class="form-control">
@@ -212,7 +212,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button"   ng-click="closeModal()">Close</button>
+                    <button type="button" data-dismiss="modal2"   ng-click="closeModal()">Close</button>
                     <button type="button" ng-click="setOrderUrgency()">
                         <img src="${ ui.resourceLink("kenyaui", "images/glyphs/ok.png") }" /> Save</button>
                 </div>
@@ -242,7 +242,7 @@
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header modal-header-warning">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close" data-dismiss="modal2" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -253,7 +253,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button"  data-dismiss="modal" ng-click="closeModal()">Close</button>
+                    <button type="button"  data-dismiss="modal2" ng-click="closeModal()">Close</button>
                 </div>
             </div>
         </div>
