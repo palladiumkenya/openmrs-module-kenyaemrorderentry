@@ -109,8 +109,8 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                 <div class="list-group">
                                                     <div class="list-group-item" ng-repeat="lab in labOrders"
                                                          ng-click="loadLabPanels(lab)">
-                                                        <div class="link-item">
-                                                            <a class="formLink">
+                                                        <div class="link-item" style="cursor: pointer;">
+                                                            <a class="formLink" >
                                                                 {{lab.name}}
                                                             </a>
                                                         </div>
@@ -234,6 +234,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                 </div>
 
                                                 <div class="card-body">
+                                                    <span ng-show="InspireList[0].length ===1">No Lab orders to enter results for</span>
                                                     <div class="row" ng-repeat="items in InspireList">
                                                         <div class="col" ng-repeat="control in items" >
 
@@ -334,13 +335,14 @@ ${ui.includeFragment("appui", "messages", [codes: [
 
                                                     </div>
 
-                                                </div>
 
-                                                <div style="padding-left: 50%; padding-bottom: 20px"
+
+                                                <div style="padding-left: 50%; padding-bottom: 20px" ng-show="InspireList[0].length >1"
                                                      >
                                                     <button type="button" ng-click="postLabOrderResults()" data-toggle="modal"
                                                             data-target="#spinner">
                                                         <img src="${ ui.resourceLink("kenyaui", "images/glyphs/ok.png") }" />  Save</button>
+                                                </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -363,7 +365,8 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                 </div>
 
                                 <div class="card-body">
-                                    <div class="table-responsive">
+                                    <span ng-show="activeTestOrders.length==0">No active lab orders</span>
+                                    <div class="table-responsive" ng-show="activeTestOrders.length > 0">
                                         <table ng-hide="activeTestOrders.loading" class="table table-striped">
                                             <tr>
                                                 <th>Order Date</th>
@@ -411,7 +414,8 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                 </div>
 
                                 <div class="card-body">
-                                    <div class="table-responsive">
+                                    <span ng-show="pastLabOrders.length==0">No previous lab orders</span>
+                                    <div class="table-responsive" ng-show="pastLabOrders.length > 0">
                                         <table ng-hide="activeTestOrders.loading" class="table table-striped">
                                             <tr>
                                                 <th>Order Date</th>

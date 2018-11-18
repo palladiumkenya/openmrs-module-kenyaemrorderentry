@@ -79,7 +79,6 @@ li.active {
 }
 </style>
 
-${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator")}
 ${ui.includeFragment("appui", "messages", [codes: [
         "kenyaemrorderentry.pastAction.REVISE",
         "kenyaemrorderentry.pastAction.DISCONTINUE"

@@ -385,7 +385,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
         }
 
         $scope.postLabOrdersEncounters = function() {
-            var uuid = {uuid:"b2d06302-0901-41a6-8045-dfa32e36b105"};
+            var uuid = {uuid:"e1406e88-e9a9-11e8-9f32-f2801f1b9fd1"};
             $scope.OrderUuid = '';
 
             $scope.lOrders = createLabOrdersPaylaod($scope.filteredOrders);
@@ -488,7 +488,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 delete $scope.obsPayload[i].name;
                 delete $scope.obsPayload[i].dateActivated;
             }
-            var uuid = {uuid:"b2d06302-0901-41a6-8045-dfa32e36b105"};
+            var uuid = {uuid:"e1406e88-e9a9-11e8-9f32-f2801f1b9fd1"};
             var encounterContext = {
                 patient: config.patient,
                 encounterType: uuid,
@@ -688,7 +688,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 delete $scope.lOrders[i].hivVl;
             }
 
-            var uuid = {uuid:"b2d06302-0901-41a6-8045-dfa32e36b105"};
+            var uuid = {uuid:"e1406e88-e9a9-11e8-9f32-f2801f1b9fd1"};
             var encounterContext = {
                 patient: config.patient,
                 encounterType: uuid,
