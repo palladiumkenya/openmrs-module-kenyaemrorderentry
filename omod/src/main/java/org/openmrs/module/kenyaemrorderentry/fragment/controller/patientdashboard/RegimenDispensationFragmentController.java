@@ -1,22 +1,16 @@
 package org.openmrs.module.kenyaemrorderentry.fragment.controller.patientdashboard;
 
-import org.apache.commons.beanutils.PropertyUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.openmrs.*;
 import org.openmrs.api.*;
-import org.openmrs.ui.framework.annotation.FragmentParam;
 import org.openmrs.ui.framework.annotation.SpringBean;
-import org.openmrs.ui.framework.fragment.FragmentConfiguration;
-import org.openmrs.ui.framework.fragment.FragmentModel;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 
 public class RegimenDispensationFragmentController {
@@ -33,7 +27,7 @@ public class RegimenDispensationFragmentController {
                                @SpringBean("orderSetService") OrderSetService orderSetService,
                                @RequestParam("payload") String payload) throws Exception {
         boolean orderGroupExists=false;
-        System.out.println("payload++++++++++++++++++++++++++++++"+payload.toString());
+        System.out.println("payload++++++++++thisi pay++++++++++++++++++"+payload.toString());
         JSONParser parser=new JSONParser();
         Object object=parser.parse(payload);
         JSONObject orderContext=(JSONObject)object;

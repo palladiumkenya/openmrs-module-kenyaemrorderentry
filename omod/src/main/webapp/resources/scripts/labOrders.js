@@ -56,8 +56,8 @@ filter('replacement', ['serverDateFilter', function(serverDateFilter) {
     }
 }]).
 
-controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'OrderService', 'EncounterService', 'SessionInfo', 'OrderEntryService',
-    function($scope, $window, $location, $timeout, OrderService, EncounterService, SessionInfo, OrderEntryService) {
+controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$timeout', 'OrderService', 'EncounterService', 'SessionInfo', 'OrderEntryService',
+    function($scope, $window,$rootScope, $location, $timeout, OrderService, EncounterService, SessionInfo, OrderEntryService) {
 
         var orderContext = {};
         SessionInfo.get().$promise.then(function(info) {
@@ -98,6 +98,7 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
 
                 $scope.labOrders = labs;
                 $scope.panelListResults = customiseHivViralLoadObj(panelList);
+                $scope.InspireList = $rootScope.matrixList($scope.panelListResults, 2);
 
             });
 
@@ -384,7 +385,7 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
         }
 
         $scope.postLabOrdersEncounters = function() {
-            var uuid = {uuid:"b2d06302-0901-41a6-8045-dfa32e36b105"};
+            var uuid = {uuid:"e1406e88-e9a9-11e8-9f32-f2801f1b9fd1"};
             $scope.OrderUuid = '';
 
             $scope.lOrders = createLabOrdersPaylaod($scope.filteredOrders);
@@ -412,6 +413,7 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
             OrderEntryService.signAndSave({ draftOrders: $scope.lOrdersPayload }, encounterContext)
                 .$promise.then(function(result) {
                 $('#spinner').modal('hide');
+                loadExistingOrders();
                 $window.location.reload();
               //  location.href = location.href;
             }, function(errorResponse) {
@@ -486,7 +488,7 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
                 delete $scope.obsPayload[i].name;
                 delete $scope.obsPayload[i].dateActivated;
             }
-            var uuid = {uuid:"b2d06302-0901-41a6-8045-dfa32e36b105"};
+            var uuid = {uuid:"e1406e88-e9a9-11e8-9f32-f2801f1b9fd1"};
             var encounterContext = {
                 patient: config.patient,
                 encounterType: uuid,
@@ -686,7 +688,7 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
                 delete $scope.lOrders[i].hivVl;
             }
 
-            var uuid = {uuid:"b2d06302-0901-41a6-8045-dfa32e36b105"};
+            var uuid = {uuid:"e1406e88-e9a9-11e8-9f32-f2801f1b9fd1"};
             var encounterContext = {
                 patient: config.patient,
                 encounterType: uuid,
@@ -810,5 +812,18 @@ controller('LabOrdersCtrl', ['$scope', '$window', '$location', '$timeout', 'Orde
                 angular.element('#draft-orders input.dc-reason').last().focus();
             });
         });
+
+        $rootScope.matrixList = function(data, n) {
+            var grid = [], i = 0, x = data.length, col, row = -1;
+            for (var i = 0; i < x; i++) {
+                col = i % n;
+                if (col === 0) {
+                    grid[++row] = [];
+                }
+                grid[row][col] = data[i];
+            }
+            return grid;
+        };
+
 
     }]);

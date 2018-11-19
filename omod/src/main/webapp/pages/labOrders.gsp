@@ -101,33 +101,36 @@ ${ui.includeFragment("appui", "messages", [codes: [
                             <div class="card-body">
                                 <form>
                                     <table class="table col-lg-12">
-                                        <tbody>
+
+
                                         <tr>
-                                            <td class="col-lg-3">
+                                            <td class="col-lg-3" style="width: 25%">
+                                                <div class="card border-dark">
                                                 <div class="list-group">
                                                     <div class="list-group-item" ng-repeat="lab in labOrders"
                                                          ng-click="loadLabPanels(lab)">
-                                                        <div class="link-item">
-                                                            <a class="formLink">
+                                                        <div class="link-item" style="cursor: pointer;">
+                                                            <a class="formLink" >
                                                                 {{lab.name}}
                                                             </a>
                                                         </div>
 
                                                     </div>
                                                 </div>
+                                                </div>
 
                                                 <div style="padding-top:10px">
-                                                    <div class="card">
+                                                    <div class="card border-dark" >
                                                         <div class="card-header">
                                                             <h5 class="card-title">
                                                                 Selected Order(s)
                                                             </h5>
                                                         </div>
 
-                                                        <div class="card-body">
+                                                        <div class="card-body " >
                                                             <div ng-show="selectedOrders.length === 0">{{noOrderSelected}}</div>
 
-                                                            <div class="list-group">
+                                                            <div class="list-group ">
                                                                 <div class="list-group-item"
                                                                      ng-repeat="order in filteredOrders">
                                                                     <div class="link-item">
@@ -153,7 +156,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td class="col-lg-12">
+                                            <td class="col-lg-9" style="width: 75%">
                                                 <div class="col-lg-12">
                                                     <fieldset class="col-lg-12 scheduler-border">
                                                         <legend class="col-lg-12 scheduler-border">Panels | <span style="background-color: pink">{{sampleTypeName}}</span></legend>
@@ -163,9 +166,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                                 <ul>
                                                                     <li ng-repeat="panel in labPanels"
                                                                         ng-click="loadLabPanelTests(panel)">
-                                                                        <button type="button" class="column"
-                                                                                ng-click="toggle = !toggle"
-                                                                                ng-class="{'blue' : toggle}">
+                                                                        <button type="button" class="column">
                                                                             {{panel.name}}</button>
                                                                     </li>
                                                                 </ul>
@@ -204,8 +205,6 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                             </td>
 
                                         </tr>
-
-                                        </tbody>
                                     </table>
 
                                     <div style="padding-left: 50%">
@@ -235,8 +234,9 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                 </div>
 
                                                 <div class="card-body">
-                                                    <div ng-repeat="control in panelListResults">
-                                                        <div class="column">
+                                                    <span ng-show="InspireList[0].length ===1">No Lab orders to enter results for</span>
+                                                    <div class="row" ng-repeat="items in InspireList">
+                                                        <div class="col" ng-repeat="control in items" >
 
                                                             <div ng-if="control.rendering === 'select'">
                                                                 <div class="form-group row">
@@ -294,7 +294,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                                 </div>
                                                             </div>
 
-                                                            <div>
+
                                                                 <div class="form-group row" ng-if="control.hvVl">
                                                                     <label class="col-lg-3"><b>HIV viral load:</b>
                                                                         <p>  <span >Date Ordered:{{control.hvVl[0].dateActivated | date:'dd-MM-yyyy'}}</span>
@@ -307,7 +307,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
 
                                                                         <div>
                                                                             <div ng-if="vl.rendering ==='checkbox'" class="form-group form-check">
-                                                                                <input class="form-check-input"
+                                                                                <input class="form-check-input "
                                                                                        type="checkbox" id="vl"
                                                                                        name="feature"
                                                                                        ng-checked="fag"
@@ -318,12 +318,10 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                                             </div>
 
 
-                                                                        <div ng-if="vl.rendering === 'inputnumeric'" >
+                                                                        <div ng-if="vl.rendering === 'inputnumeric'">
                                                                             <input class="form-control" type="number" id="vload"
                                                                                    ng-model="hivViralValues[vl.orderId]"
-                                                                                   ng-disabled="ischecked ==='yes'"
-
-                                                                            >
+                                                                                   ng-disabled="ischecked ==='yes'">
                                                                         </div>
 
                                                                         </div>
@@ -332,17 +330,19 @@ ${ui.includeFragment("appui", "messages", [codes: [
 
 
                                                                 </div>
-                                                            </div>
+
                                                         </div>
 
                                                     </div>
-                                                </div>
 
-                                                <div style="padding-left: 50%; padding-bottom: 20px"
+
+
+                                                <div style="padding-left: 50%; padding-bottom: 20px" ng-show="InspireList[0].length >1"
                                                      >
                                                     <button type="button" ng-click="postLabOrderResults()" data-toggle="modal"
                                                             data-target="#spinner">
                                                         <img src="${ ui.resourceLink("kenyaui", "images/glyphs/ok.png") }" />  Save</button>
+                                                </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -365,7 +365,8 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                 </div>
 
                                 <div class="card-body">
-                                    <div class="table-responsive">
+                                    <span ng-show="activeTestOrders.length==0">No active lab orders</span>
+                                    <div class="table-responsive" ng-show="activeTestOrders.length > 0">
                                         <table ng-hide="activeTestOrders.loading" class="table table-striped">
                                             <tr>
                                                 <th>Order Date</th>
@@ -413,7 +414,8 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                 </div>
 
                                 <div class="card-body">
-                                    <div class="table-responsive">
+                                    <span ng-show="pastLabOrders.length==0">No previous lab orders</span>
+                                    <div class="table-responsive" ng-show="pastLabOrders.length > 0">
                                         <table ng-hide="activeTestOrders.loading" class="table table-striped">
                                             <tr>
                                                 <th>Order Date</th>

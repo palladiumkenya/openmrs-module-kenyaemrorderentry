@@ -4,6 +4,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.openmrs.*;
 import org.openmrs.api.*;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.appui.UiSessionContext;
 import org.openmrs.module.webservices.rest.web.ConversionUtil;
 import org.openmrs.module.webservices.rest.web.representation.NamedRepresentation;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.*;
 
 public class DrugOrdersPageController {
+    public static final Locale LOCALE = Locale.ENGLISH;
 
     public void get(@RequestParam("patient") Patient patient,
                     @RequestParam(value = "careSetting", required = false) CareSetting careSetting,
@@ -27,7 +29,8 @@ public class DrugOrdersPageController {
                     @SpringBean("orderSetService") OrderSetService orderSetService,
                     @SpringBean("patientService")PatientService patientService,
                     @SpringBean("conceptService") ConceptService conceptService,
-                    @SpringBean("providerService") ProviderService providerService) {
+                    @SpringBean("providerService") ProviderService providerService,
+                    @SpringBean("obsService") ObsService obsService) {
 
         // HACK
         EncounterType drugOrderEncounterType = encounterService.getAllEncounterTypes(false).get(0);
@@ -69,8 +72,10 @@ public class DrugOrdersPageController {
         for(Order order:activeDrugOrders){
             DrugOrder drugOrder=(DrugOrder)order;
             if(order.getOrderGroup()!=null){
+
+
                 component=new JSONObject();
-                component.put("name", drugOrder.getDrug().getName());
+                component.put("name", drugOrder.getDrug().getConcept().getShortNameInLocale(LOCALE) != null ? drugOrder.getDrug().getConcept().getShortNameInLocale(LOCALE).getName() : drugOrder.getDrug().getConcept().getName(LOCALE).getName());
                 component.put("dose", drugOrder.getDose().toString());
                 component.put("units_uuid", drugOrder.getDoseUnits().getUuid());
                 component.put("frequency", drugOrder.getFrequency().getUuid());
