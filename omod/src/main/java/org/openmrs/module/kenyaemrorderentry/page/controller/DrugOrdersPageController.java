@@ -72,8 +72,10 @@ public class DrugOrdersPageController {
         for(Order order:activeDrugOrders){
             DrugOrder drugOrder=(DrugOrder)order;
             if(order.getOrderGroup()!=null){
+
+
                 component=new JSONObject();
-                component.put("name", drugOrder.getDrug().getName());
+                component.put("name", drugOrder.getDrug().getConcept().getShortNameInLocale(LOCALE) != null ? drugOrder.getDrug().getConcept().getShortNameInLocale(LOCALE).getName() : drugOrder.getDrug().getConcept().getName(LOCALE).getName());
                 component.put("dose", drugOrder.getDose().toString());
                 component.put("units_uuid", drugOrder.getDoseUnits().getUuid());
                 component.put("frequency", drugOrder.getFrequency().getUuid());
@@ -123,7 +125,6 @@ public class DrugOrdersPageController {
         activeOrdersResponse.put("order_groups",orderGroupArray);
         activeOrdersResponse.put("single_drugs",orderArray);
         model.put("activeOrdersResponse",ui.toJson(activeOrdersResponse));
-        model.put("currentRegimens",ui.toJson(computeCurrentRegimen(patient)));
 
     }
 
@@ -133,25 +134,5 @@ public class DrugOrdersPageController {
 
     private Object convertToFull(Object object) {
         return object == null ? null : ConversionUtil.convertToRepresentation(object, Representation.FULL);
-    }
-    private JSONObject computeCurrentRegimen(Patient patient) {
-        ConceptService cs = Context.getConceptService();
-        ObsService obsService = Context.getObsService();
-        List<Obs> regimenName = obsService.getObservationsByPersonAndConcept(patient,cs.getConcept(1193));
-
-        JSONObject patientRegimen=new JSONObject();
-        JSONArray regimens=new JSONArray();
-        JSONObject regimen;
-        String ls = "TDF + 3TC + NVP (300mg OD/150mg BD/200mg BD)";
-        String prog ="ARV";
-        for (Obs reg : regimenName) {
-            regimen=new JSONObject();
-            regimen.put("name",ls);
-            regimen.put("program",prog);
-            regimens.add(regimen);
-        }
-        patientRegimen.put("patientregimens", regimens);
-        System.out.println("patientRegimen"+patientRegimen);
-        return patientRegimen;
     }
 }

@@ -1,5 +1,5 @@
 <%
-    ui.decorateWith("kenyaui", "panel", [heading: "Ordering set"])
+    ui.decorateWith("kenyaui", "panel", [heading: "Standard Regimen"])
 
     ui.includeJavascript("kenyaemrorderentry", "regimenDispensation.js")
 
@@ -194,7 +194,7 @@
             </div>
 
             <div style="padding-top: 10px" ng-show="regimenStatus=='active'">
-                <button ng-click="saveOrderSet(components)" class="saveOrder"
+                <button ng-click="saveOrderSet(components)"
                         style="width:250px;">Order Regimen</button>
             </div>
 
@@ -211,8 +211,13 @@
             <div style="padding-top: 10px" ng-show="regimenStatus=='edit'">
                 <button ng-click="saveOrderSet(components)" class="saveOrder" style="width:250px;">Edit Regimen</button>
             </div>
+
         </div>
-        <!-- Success Modal -->
+        <!-- Success
+        <div style="padding-top: 10px" class="pull-right">
+                <button ng-click="cancelView()" style="width:250px;">Cancel</button>
+            </div>
+        Modal -->
         <div class="modal fade" id="order-group-success" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
              aria-hidden="true"
              style="font-size:16px;">

@@ -56,47 +56,8 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
         });
 
         // TODO changing dosingType of a draft order should reset defaults (and discard non-defaulted properties)
-        //  var programRegimens=OpenMRS.kenyaemrRegimenJsonPayload;
+          var programRegimens = OpenMRS.kenyaemrRegimenJsonPayload;
         // var currentRegimens=OpenMRS.currentRegimens;
-        var mockedCurrentRegimen =
-            [
-                {
-                    "program": "ARV",
-                    "groupCodeName": "Adult first line---",
-                    "regimenName": "TDF + 3TC + NVP (300mg OD/150mg BD/200mg BD)",
-                    "conceptRef": "288282",
-                    "orderSetId": "2",
-                    "regimenStatus": "active",
-                    "orderSetComponents": [
-                        {
-                            "name": "TDF",
-                            "dose": "300",
-                            "frequency": "BD",
-                            "units": "mg",
-                            "drug_id": "13"
-                        },
-                        {
-                            "name": "3TC",
-                            "dose": "300",
-                            "frequency": "BD",
-                            "units": "mg",
-                            "drug_id": "14"
-                        },
-                        {
-                            "name": "NVP",
-                            "dose": "300",
-                            "frequency": "BD",
-                            "units": "mg",
-                            "drug_id": "15"
-                        }
-                    ]
-                },
-                {
-                    "program": "TB"
-                }
-
-
-            ];
         $scope.showRegimenPanel = false;
 
         function loadExistingOrders() {
@@ -110,9 +71,9 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                 $scope.activeDrugOrders = _.map(OpenMRS.activeOrdersPayload.single_drugs, function (item) {
                     return new OpenMRS.DrugOrderModel(item)
                 });
+
                 $scope.patientActiveDrugOrders = OpenMRS.activeOrdersPayload;
-                console.log("$scope.patientActiveDrugOrders", $scope.patientActiveDrugOrders);
-                $scope.patientRegimens = mockedCurrentRegimen;
+                $scope.patientRegimens = addRegimenStatus(programRegimens);
                 $scope.regimenStatus = "absent";
                 if ($scope.patientRegimens.length == 0) {
                     $scope.showRegimenPanel = false;
@@ -133,6 +94,21 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                 });
                 console.log("$scope.pastDrugOrders", $scope.pastDrugOrders)
             });
+        }
+
+        function addRegimenStatus(completedFields) {
+            var reg = [];
+            for (var i = 0; i < completedFields.length; ++i) {
+                var data = completedFields[i];
+
+                for (var r in data) {
+                    if (data.hasOwnProperty(r)) {
+                        data['regimenStatus'] = "active";
+                    }
+                }
+                reg.push(data);
+            }
+            return reg
         }
 
 
@@ -371,6 +347,9 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
             $scope.regimenStatus = res.regimenStatus;
             $scope.orderSetId = res.orderSetId;
             $scope.showRegimenPanel = true;
+        }
+        $scope.cancelView = function() {
+
         }
 
         $scope.createDrugsArrayFromPayload = function (components) {

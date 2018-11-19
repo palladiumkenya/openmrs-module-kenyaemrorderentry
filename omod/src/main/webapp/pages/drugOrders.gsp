@@ -83,12 +83,12 @@ ${ui.includeFragment("appui", "messages", [codes: [
         "kenyaemrorderentry.pastAction.REVISE",
         "kenyaemrorderentry.pastAction.DISCONTINUE"
 ]])}
+${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: patient])}
 <script type="text/javascript">
     window.OpenMRS = window.OpenMRS || {};
     window.OpenMRS.drugOrdersConfig = ${ jsonConfig };
     window.sessionContext = {'locale': 'en_GB'}
     window.OpenMRS.activeOrdersPayload =${activeOrdersResponse};
-    window.OpenMRS.currentRegimens =${currentRegimens};
 </script>
 
 <div class="ke-page-content">
@@ -389,7 +389,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                 <span ng-show="pastDrugOrders.loading">${ui.message("uicommons.loading.placeholder")}</span>
                                 <span ng-hide="pastDrugOrders.loading || pastDrugOrders.length > 0">None</span>
 
-                                <div class="table-responsive">
+                                <div class="table-responsive" ng-show="pastDrugOrders.length > 0">
                                     <table ng-hide="pastDrugOrders.loading" class="table table-striped">
                                         <tr>
                                             <th>Replacement</th>
