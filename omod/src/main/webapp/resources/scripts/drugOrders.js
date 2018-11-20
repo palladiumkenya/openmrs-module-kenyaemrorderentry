@@ -92,7 +92,6 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                 $scope.pastDrugOrders = _.map(results, function (item) {
                     return new OpenMRS.DrugOrderModel(item)
                 });
-                console.log("$scope.pastDrugOrders", $scope.pastDrugOrders)
             });
         }
 

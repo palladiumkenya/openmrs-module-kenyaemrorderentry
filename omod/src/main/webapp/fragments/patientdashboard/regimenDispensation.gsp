@@ -10,40 +10,11 @@
     var provider = OpenMRS.drugOrdersConfig.provider.uuid;
 
     jq(document).ready(function () {
-        /*jq(document).on("click", "li.program-line", function () {
-            jq("li.program-line").removeClass("active");
-            jq(this).addClass("active");
-            jq("#drug-order-group").addClass("hide-section");
-            jq("#regimen-lines,#active-regimens").removeClass("hide-section");
-        });
-        jq(document).on("click", "li.regimen-line", function () {
-            jq("li.regimen-line").removeClass("active");
-            jq(this).addClass("active");
-            jq("#drug-order-group").addClass("hide-section");
-        });
-        jq(document).on("click", "li.regimen-item", function () {
-            jq("li.regimen-item").removeClass("active");
-            jq(this).addClass("active");
-            jq("#drug-order-group").removeClass("hide-section");
-        });*/
         jq(document).on("click", ".edit-order", function () {
-           // jq(".new-order").addClass("ke-tabmenu-item-active");
-          //  jq("#drug-order-group").removeClass("hide-section");
-           // jq(".ke-tabmenu-item-active").removeClass("ke-tabmenu-item-active");
-
-           // jq("div.ke-tab").css("display", "none");
             jq("div.new-order-section").css("display", "block");
-           // jq("#regimen-lines,#active-regimens").addClass("hide-section");
-            //jq(".disable-on-regimen-change").hide();
         });
         jq(document).on("click", ".cancel-order", function () {
-           // jq("#drug-order-group").addClass("hide-section");
-           // jq(".ke-tabmenu-item-active").addClass("ke-tabmenu-item-active");
-           // jq(".new-order").addClass("ke-tabmenu-item-active");
-           // jq("div.ke-tab").css("display", "none");
             jq("div.new-order-section").css("display", "none");
-           // jq("#regimen-lines,#active-regimens").addClass("hide-section");
-           // jq(".disable-on-regimen-change").hide();
         });
         jq('.saveOrder').click(function () {
             payload = {
@@ -233,9 +204,6 @@
 
         </div>
         <!-- Success
-        <div style="padding-top: 10px" class="pull-right">
-                <button ng-click="cancelView()" style="width:250px;">Cancel</button>
-            </div>
         Modal -->
         <div class="modal fade" id="order-group-success" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
              aria-hidden="true"
