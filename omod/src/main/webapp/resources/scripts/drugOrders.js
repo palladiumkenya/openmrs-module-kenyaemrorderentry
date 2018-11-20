@@ -283,6 +283,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
         window.activeOrderGroupUuId = null;
         window.discontinueOrderUuId = null;
         $scope.editOrderGroup = function (orderGroup) {
+            $scope.showRegimenPanel = true;
             $scope.components = orderGroup.components;
             $scope.regimenNames = orderGroup.name;
             activeOrderGroupUuId = orderGroup.orderGroupUuId;
@@ -300,6 +301,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                 }
 
             });
+
         }
 
         $scope.discontinueOrderGroup = function (components) {
@@ -347,8 +349,12 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
             $scope.regimenStatus = res.regimenStatus;
             $scope.orderSetId = res.orderSetId;
             $scope.showRegimenPanel = true;
+            $scope.disableButton = true
+
         }
         $scope.cancelView = function() {
+            $scope.showRegimenPanel = false;
+            $scope.disableButton = false;
 
         }
 

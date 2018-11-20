@@ -46,7 +46,8 @@ th, td {
     float: left;
     width: 20%;
     padding: 10px;
-    border-style: solid;
+    border-style:groove;
+    border-width:2px;
     border-color: gray;
     margin-left: auto;
 }
@@ -261,7 +262,7 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
                                          ng-repeat="regimen in patientRegimens">
                                         <div class="link-item" >
                                             <b>Current {{regimen.program}} Regimen:</b> {{regimen.regimenName}}
-                                            <button ng-click="getCurrentRegimen(regimen)"
+                                            <button ng-click="getCurrentRegimen(regimen)" ng-disabled="disableButton"
                                                     class="refill-regimen pull-right">Refill</button>
                                         </div>
                                     </div>

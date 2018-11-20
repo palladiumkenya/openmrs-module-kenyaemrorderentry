@@ -147,14 +147,14 @@
         Date: ${ui.includeFragment("kenyaui", "field/java.util.Date", [id: "orderDate", formFieldName: "orderDate"])}
         <div style="margin-top:5px;" ;></div>
 
-        <div ng-show="regimenLines.length > 0" style="border-style:solid;border-color:gray;padding:10px;">
+        <div ng-show="regimenLines.length > 0" style="border-style:groove; border-width:2px;border-color:gray;padding:10px;">
             <h3>Regimen Line</h3>
             <ul class="list-group" style="display:inline;">
                 <li class="button " style="margin:2px;">{{regimenLines}}</li>
             </ul>
         </div>
 
-        <div style="border-style:solid;border-color:gray;padding:10px;margin-top:10px;">
+        <div style="border-style:groove; border-width:2px; border-color:gray;padding:10px;margin-top:10px;">
             <h3 style="margin-top:5px;">Regimen</h3>
             <ul class="list-group" style="display:inline;">
                 <li class="button " style="margin:2px;">{{regimenNames}}</li>
@@ -163,7 +163,7 @@
         </div>
 
         <div id="drug-order-group" ng-show="components.length > 0"
-             style="border-style:solid;border-color:gray;padding:10px;margin-top:10px;">
+             style="border-style:groove; border-width:2px;border-color:gray;padding:10px;margin-top:10px;">
             <h3 style="margin-top:5px;">Standard Regimen Drugs</h3>
 
             <div ng-repeat="component in components" class="box-body" style="padding-top: 10px">
@@ -193,10 +193,7 @@
                         style="width:250px;">Start Regimen</button>
             </div>
 
-            <div style="padding-top: 10px" ng-show="regimenStatus=='active'">
-                <button ng-click="saveOrderSet(components)"
-                        style="width:250px;">Order Regimen</button>
-            </div>
+
 
             <div style="padding-top: 10px" ng-show="regimenStatus=='stopped'">
                 <button ng-click="saveOrderSet(components)" class="saveOrder"
@@ -208,9 +205,18 @@
                         style="width:250px;">Change Regimen</button>
             </div>
 
-            <div style="padding-top: 10px" ng-show="regimenStatus=='edit'">
-                <button ng-click="saveOrderSet(components)" class="saveOrder" style="width:250px;">Edit Regimen</button>
-            </div>
+
+
+        </div>
+        <div style="padding-top: 10px" >
+
+                <button ng-click="saveOrderSet(components)" ng-show="regimenStatus=='active'"
+                        >Order Regimen</button>
+                <button ng-click="saveOrderSet(components)" ng-show="regimenStatus=='edit'"
+                        class="saveOrder" >Edit Regimen</button>
+
+                <button ng-click="cancelView()" >Cancel</button>
+
 
         </div>
         <!-- Success
