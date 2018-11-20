@@ -92,7 +92,6 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                 $scope.pastDrugOrders = _.map(results, function (item) {
                     return new OpenMRS.DrugOrderModel(item)
                 });
-                console.log("$scope.pastDrugOrders", $scope.pastDrugOrders)
             });
         }
 
@@ -128,6 +127,12 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
         $scope.pastDrugOrders = {loading: true};
         $scope.draftDrugOrders = [];
         $scope.dosingTypes = OpenMRS.dosingTypes;
+        $scope.showCurrentRegimenView = true;
+        $scope.showActiveTabs = true;
+        $scope.showPastDrugTabs= true;
+        $scope.showOtherDrugs = true;
+        $scope.showStandardRegimenTab = true;
+
 
         var config = OpenMRS.drugOrdersConfig;
         $scope.init = function () {
@@ -283,6 +288,14 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
         window.activeOrderGroupUuId = null;
         window.discontinueOrderUuId = null;
         $scope.editOrderGroup = function (orderGroup) {
+            $scope.showStandardRegimenTab = true;
+            $scope.showRegimenPanel = true;
+            $scope.showActiveTabs= false;
+            $scope.showPastDrugTabs= false;
+            $scope.showOtherDrugs = false;
+            $scope.editRegimenTitle ="Edit Regimen Order";
+
+            $scope.showCurrentRegimenView = false;
             $scope.components = orderGroup.components;
             $scope.regimenNames = orderGroup.name;
             activeOrderGroupUuId = orderGroup.orderGroupUuId;
@@ -300,6 +313,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                 }
 
             });
+
         }
 
         $scope.discontinueOrderGroup = function (components) {
@@ -347,8 +361,28 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
             $scope.regimenStatus = res.regimenStatus;
             $scope.orderSetId = res.orderSetId;
             $scope.showRegimenPanel = true;
+            $scope.disableButton = true
+
         }
         $scope.cancelView = function() {
+            $scope.showRegimenPanel = false;
+            $scope.disableButton = false;
+            $scope.showActiveTabs = true;
+            $scope.showPastDrugTabs= true;
+            $scope.showOtherDrugs = true;
+            $scope.showStandardRegimenTab = true;
+            $scope.showCurrentRegimenView = true;
+
+        }
+
+        $scope.cancelViewOrderRegimen = function() {
+            $scope.showRegimenPanel = false;
+            $scope.disableButton = false;
+            $scope.showActiveTabs = true;
+            $scope.showPastDrugTabs= true;
+            $scope.showOtherDrugs = true;
+            $scope.showStandardRegimenTab = true;
+            $scope.showCurrentRegimenView = true;
 
         }
 

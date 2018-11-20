@@ -10,30 +10,11 @@
     var provider = OpenMRS.drugOrdersConfig.provider.uuid;
 
     jq(document).ready(function () {
-        jq(document).on("click", "li.program-line", function () {
-            jq("li.program-line").removeClass("active");
-            jq(this).addClass("active");
-            jq("#drug-order-group").addClass("hide-section");
-            jq("#regimen-lines,#active-regimens").removeClass("hide-section");
-        });
-        jq(document).on("click", "li.regimen-line", function () {
-            jq("li.regimen-line").removeClass("active");
-            jq(this).addClass("active");
-            jq("#drug-order-group").addClass("hide-section");
-        });
-        jq(document).on("click", "li.regimen-item", function () {
-            jq("li.regimen-item").removeClass("active");
-            jq(this).addClass("active");
-            jq("#drug-order-group").removeClass("hide-section");
-        });
         jq(document).on("click", ".edit-order", function () {
-            jq("#drug-order-group").removeClass("hide-section");
-            jq(".ke-tabmenu-item-active").removeClass("ke-tabmenu-item-active");
-            jq(".new-order").addClass("ke-tabmenu-item-active");
-            jq("div.ke-tab").css("display", "none");
             jq("div.new-order-section").css("display", "block");
-            jq("#regimen-lines,#active-regimens").addClass("hide-section");
-            jq(".disable-on-regimen-change").hide();
+        });
+        jq(document).on("click", ".cancel-order", function () {
+            jq("div.new-order-section").css("display", "none");
         });
         jq('.saveOrder').click(function () {
             payload = {
@@ -147,14 +128,14 @@
         Date: ${ui.includeFragment("kenyaui", "field/java.util.Date", [id: "orderDate", formFieldName: "orderDate"])}
         <div style="margin-top:5px;" ;></div>
 
-        <div ng-show="regimenLines.length > 0" style="border-style:solid;border-color:gray;padding:10px;">
+        <div ng-show="regimenLines.length > 0" style="border-style:groove; border-width:2px;border-color:gray;padding:10px;">
             <h3>Regimen Line</h3>
             <ul class="list-group" style="display:inline;">
                 <li class="button " style="margin:2px;">{{regimenLines}}</li>
             </ul>
         </div>
 
-        <div style="border-style:solid;border-color:gray;padding:10px;margin-top:10px;">
+        <div style="border-style:groove; border-width:2px; border-color:gray;padding:10px;margin-top:10px;">
             <h3 style="margin-top:5px;">Regimen</h3>
             <ul class="list-group" style="display:inline;">
                 <li class="button " style="margin:2px;">{{regimenNames}}</li>
@@ -163,7 +144,7 @@
         </div>
 
         <div id="drug-order-group" ng-show="components.length > 0"
-             style="border-style:solid;border-color:gray;padding:10px;margin-top:10px;">
+             style="border-style:groove; border-width:2px;border-color:gray;padding:10px;margin-top:10px;">
             <h3 style="margin-top:5px;">Standard Regimen Drugs</h3>
 
             <div ng-repeat="component in components" class="box-body" style="padding-top: 10px">
@@ -193,10 +174,7 @@
                         style="width:250px;">Start Regimen</button>
             </div>
 
-            <div style="padding-top: 10px" ng-show="regimenStatus=='active'">
-                <button ng-click="saveOrderSet(components)"
-                        style="width:250px;">Order Regimen</button>
-            </div>
+
 
             <div style="padding-top: 10px" ng-show="regimenStatus=='stopped'">
                 <button ng-click="saveOrderSet(components)" class="saveOrder"
@@ -208,15 +186,24 @@
                         style="width:250px;">Change Regimen</button>
             </div>
 
-            <div style="padding-top: 10px" ng-show="regimenStatus=='edit'">
-                <button ng-click="saveOrderSet(components)" class="saveOrder" style="width:250px;">Edit Regimen</button>
-            </div>
+
+
+        </div>
+        <div style="padding-top: 10px" >
+
+                <button ng-click="saveOrderSet(components)" ng-show="regimenStatus=='active'" class="saveOrder"
+                        >Order Regimen</button>
+                <button ng-click="saveOrderSet(components)" ng-show="regimenStatus=='edit'"  class="saveOrder"
+                        class="saveOrder" >Edit Regimen</button>
+
+                <button ng-click="cancelView()" class="cancel-order" ng-show="regimenStatus=='edit'">Cancel</button>
+                <button ng-click="cancelViewOrderRegimen()" ng-show="regimenStatus=='active'" >Cancel</button>
+
+
+
 
         </div>
         <!-- Success
-        <div style="padding-top: 10px" class="pull-right">
-                <button ng-click="cancelView()" style="width:250px;">Cancel</button>
-            </div>
         Modal -->
         <div class="modal fade" id="order-group-success" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
              aria-hidden="true"

@@ -46,7 +46,8 @@ th, td {
     float: left;
     width: 20%;
     padding: 10px;
-    border-style: solid;
+    border-style:groove;
+    border-width:2px;
     border-color: gray;
     margin-left: auto;
 }
@@ -92,7 +93,7 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
 </script>
 
 <div class="ke-page-content">
-    <div id="drug-orders-app" ng-controller="DrugOrdersCtrl" ng-init='init()'>
+    <div id="drug-orders-app" ng-controller="DrugOrdersCtrl" ng-init='init()' class="divIDClass">
         <div class="ui-tabs">
             <ul class="ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header">
                 <li ng-repeat="setting in careSettings" class="ui-state-default ui-corner-top"
@@ -108,16 +109,16 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
 
                 <div id="program-tabs" class="ke-tabs">
                     <div class="ke-tabmenu">
-                        <div class="ke-tabmenu-item disable-on-regimen-change"
+                        <div class="ke-tabmenu-item disable-on-regimen-change" ng-show="showActiveTabs"
                              data-tabid="active_drug_orders">Active Orders</div>
 
-                        <div class="ke-tabmenu-item new-order"
+                        <div class="ke-tabmenu-item new-order"  ng-show="showStandardRegimenTab"
                              data-tabid="standard_regimen_orders">Standard Regimen Order</div>
 
-                        <div class="ke-tabmenu-item single-order disable-on-regimen-change"
+                        <div class="ke-tabmenu-item single-order disable-on-regimen-change" ng-show="showOtherDrugs"
                              data-tabid="new_drug_orders">Other Drugs Order</div>
 
-                        <div class="ke-tabmenu-item disable-on-regimen-change"
+                        <div class="ke-tabmenu-item disable-on-regimen-change" ng-show="showPastDrugTabs"
                              data-tabid="past_drug_orders">Past Drug Orders</div>
                     </div>
 
@@ -247,7 +248,7 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
                         </div>
                     </div>
 
-                    <div class="ke-tab new-order-section" data-tabid="standard_regimen_orders">
+                    <div class="ke-tab new-order-section" data-tabid="standard_regimen_orders" ng-show="showStandardRegimenTab">
                         <div class="card">
                             <div class="card-header">
                                 <h4 class="card-title">
@@ -256,15 +257,17 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
                             </div>
 
                             <div class="card-body">
+                                <div ng-show="showCurrentRegimenView">
                                 <div class="list-group " ng-show="patientRegimens.length > 0">
                                     <div class="list-group-item" style="margin-bottom: 4px; border-left: 5px solid #80D651; font-size: 16px"
                                          ng-repeat="regimen in patientRegimens">
                                         <div class="link-item" >
                                             <b>Current {{regimen.program}} Regimen:</b> {{regimen.regimenName}}
-                                            <button ng-click="getCurrentRegimen(regimen)"
+                                            <button ng-click="getCurrentRegimen(regimen)" ng-disabled="disableButton"
                                                     class="refill-regimen pull-right">Refill</button>
                                         </div>
                                     </div>
+                                </div>
                                 </div>
 
                                 <span ng-show="patientRegimens.length==0">Patient is not on any regimen</span>
@@ -276,7 +279,7 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
                         </div>
                     </div>
 
-                    <div class="ke-tab" data-tabid="active_drug_orders">
+                    <div class="ke-tab" data-tabid="active_drug_orders" id="tabActive" ng-show="showActiveTabs">
                         <div class="card">
                             <div class="card-header">
                                 <h4 class="card-title">
@@ -377,7 +380,7 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
                         </div>
                     </div>
 
-                    <div class="ke-tab" data-tabid="past_drug_orders">
+                    <div class="ke-tab" data-tabid="past_drug_orders" ng-show="showPastDrugTabs">
                         <div class="card">
                             <div class="card-header">
                                 <h4 class="card-title">
