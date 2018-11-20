@@ -128,6 +128,12 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
         $scope.pastDrugOrders = {loading: true};
         $scope.draftDrugOrders = [];
         $scope.dosingTypes = OpenMRS.dosingTypes;
+        $scope.showCurrentRegimenView = true;
+        $scope.showActiveTabs = true;
+        $scope.showPastDrugTabs= true;
+        $scope.showOtherDrugs = true;
+        $scope.showStandardRegimenTab = true;
+
 
         var config = OpenMRS.drugOrdersConfig;
         $scope.init = function () {
@@ -283,7 +289,14 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
         window.activeOrderGroupUuId = null;
         window.discontinueOrderUuId = null;
         $scope.editOrderGroup = function (orderGroup) {
+            $scope.showStandardRegimenTab = true;
             $scope.showRegimenPanel = true;
+            $scope.showActiveTabs= false;
+            $scope.showPastDrugTabs= false;
+            $scope.showOtherDrugs = false;
+            $scope.editRegimenTitle ="Edit Regimen Order";
+
+            $scope.showCurrentRegimenView = false;
             $scope.components = orderGroup.components;
             $scope.regimenNames = orderGroup.name;
             activeOrderGroupUuId = orderGroup.orderGroupUuId;
@@ -355,6 +368,22 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
         $scope.cancelView = function() {
             $scope.showRegimenPanel = false;
             $scope.disableButton = false;
+            $scope.showActiveTabs = true;
+            $scope.showPastDrugTabs= true;
+            $scope.showOtherDrugs = true;
+            $scope.showStandardRegimenTab = true;
+            $scope.showCurrentRegimenView = true;
+
+        }
+
+        $scope.cancelViewOrderRegimen = function() {
+            $scope.showRegimenPanel = false;
+            $scope.disableButton = false;
+            $scope.showActiveTabs = true;
+            $scope.showPastDrugTabs= true;
+            $scope.showOtherDrugs = true;
+            $scope.showStandardRegimenTab = true;
+            $scope.showCurrentRegimenView = true;
 
         }
 

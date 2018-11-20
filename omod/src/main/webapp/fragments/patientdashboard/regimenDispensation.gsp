@@ -10,7 +10,7 @@
     var provider = OpenMRS.drugOrdersConfig.provider.uuid;
 
     jq(document).ready(function () {
-        jq(document).on("click", "li.program-line", function () {
+        /*jq(document).on("click", "li.program-line", function () {
             jq("li.program-line").removeClass("active");
             jq(this).addClass("active");
             jq("#drug-order-group").addClass("hide-section");
@@ -25,15 +25,25 @@
             jq("li.regimen-item").removeClass("active");
             jq(this).addClass("active");
             jq("#drug-order-group").removeClass("hide-section");
-        });
+        });*/
         jq(document).on("click", ".edit-order", function () {
-            jq("#drug-order-group").removeClass("hide-section");
-            jq(".ke-tabmenu-item-active").removeClass("ke-tabmenu-item-active");
-            jq(".new-order").addClass("ke-tabmenu-item-active");
-            jq("div.ke-tab").css("display", "none");
+           // jq(".new-order").addClass("ke-tabmenu-item-active");
+          //  jq("#drug-order-group").removeClass("hide-section");
+           // jq(".ke-tabmenu-item-active").removeClass("ke-tabmenu-item-active");
+
+           // jq("div.ke-tab").css("display", "none");
             jq("div.new-order-section").css("display", "block");
-            jq("#regimen-lines,#active-regimens").addClass("hide-section");
-            jq(".disable-on-regimen-change").hide();
+           // jq("#regimen-lines,#active-regimens").addClass("hide-section");
+            //jq(".disable-on-regimen-change").hide();
+        });
+        jq(document).on("click", ".cancel-order", function () {
+           // jq("#drug-order-group").addClass("hide-section");
+           // jq(".ke-tabmenu-item-active").addClass("ke-tabmenu-item-active");
+           // jq(".new-order").addClass("ke-tabmenu-item-active");
+           // jq("div.ke-tab").css("display", "none");
+            jq("div.new-order-section").css("display", "none");
+           // jq("#regimen-lines,#active-regimens").addClass("hide-section");
+           // jq(".disable-on-regimen-change").hide();
         });
         jq('.saveOrder').click(function () {
             payload = {
@@ -210,12 +220,15 @@
         </div>
         <div style="padding-top: 10px" >
 
-                <button ng-click="saveOrderSet(components)" ng-show="regimenStatus=='active'"
+                <button ng-click="saveOrderSet(components)" ng-show="regimenStatus=='active'" class="saveOrder"
                         >Order Regimen</button>
-                <button ng-click="saveOrderSet(components)" ng-show="regimenStatus=='edit'"
+                <button ng-click="saveOrderSet(components)" ng-show="regimenStatus=='edit'"  class="saveOrder"
                         class="saveOrder" >Edit Regimen</button>
 
-                <button ng-click="cancelView()" >Cancel</button>
+                <button ng-click="cancelView()" class="cancel-order" ng-show="regimenStatus=='edit'">Cancel</button>
+                <button ng-click="cancelViewOrderRegimen()" ng-show="regimenStatus=='active'" >Cancel</button>
+
+
 
 
         </div>
