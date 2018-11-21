@@ -1,5 +1,6 @@
-package org.openmrs.module.kenyaemrorderentry.page.controller;
+package org.openmrs.module.kenyaemrorderentry.fragment.controller.patientdashboard;
 
+import org.apache.commons.beanutils.PropertyUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.openmrs.*;
@@ -10,29 +11,39 @@ import org.openmrs.module.webservices.rest.web.ConversionUtil;
 import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.ui.framework.UiUtils;
 import org.openmrs.ui.framework.annotation.SpringBean;
+import org.openmrs.ui.framework.fragment.FragmentConfiguration;
 import org.openmrs.ui.framework.fragment.FragmentModel;
-import org.openmrs.ui.framework.page.PageModel;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.*;
 
-public class LabOrdersPageController {
+public class CreateLabsOrdersFragmentController {
     public static final Locale LOCALE = Locale.ENGLISH;
     ConceptService concService = Context.getConceptService();
-    public void get(@RequestParam("patient") Patient patient,
-                    @RequestParam(value = "careSetting", required = false) CareSetting careSetting,
-                    @SpringBean("encounterService") EncounterService encounterService,
-                    @SpringBean("orderService") OrderService orderService,
-                    UiSessionContext sessionContext,
-                    UiUtils ui,
-                    PageModel model,
-                    @SpringBean("orderSetService") OrderSetService orderSetService,
-                    @SpringBean("patientService") PatientService patientService,
-                    @SpringBean("conceptService") ConceptService conceptService,
-                    @SpringBean("providerService") ProviderService providerService,
-                    @SpringBean("obsService") ObsService obsService) {
 
-
+    public void controller(FragmentConfiguration config,
+                          // @RequestParam("patient") Patient patient,
+                           @RequestParam(value = "careSetting", required = false) CareSetting careSetting,
+                           @SpringBean("encounterService") EncounterService encounterService,
+                           @SpringBean("orderService") OrderService orderService,
+                           UiSessionContext sessionContext,
+                           UiUtils ui,
+                           FragmentModel model,
+                           @SpringBean("orderSetService") OrderSetService orderSetService,
+                           @SpringBean("patientService") PatientService patientService,
+                           @SpringBean("conceptService") ConceptService conceptService,
+                           @SpringBean("providerService") ProviderService providerService,
+                           @SpringBean("obsService") ObsService obsService) throws Exception {
+        config.require("patient|patientId");
+        Patient patient;
+        Object pt = config.getAttribute("patient");
+        if (pt == null) {
+            patient = patientService.getPatient((Integer) config.getAttribute("patientId"));
+        }
+        else {
+            // in case we are passed a PatientDomainWrapper (but this module doesn't know about emrapi)
+            patient = (Patient) (pt instanceof Patient ? pt : PropertyUtils.getProperty(pt, "patient"));
+        }
         EncounterType labOrderEncounterType = encounterService.getEncounterTypeByUuid(OrderType.TEST_ORDER_TYPE_UUID);
         EncounterRole encounterRoles = encounterService.getAllEncounterRoles(false).get(0);
 
@@ -49,13 +60,10 @@ public class LabOrdersPageController {
             jsonConfig.put("intialCareSetting", careSetting.getUuid());
         }
 
-
         model.put("patient", patient);
         model.put("jsonConfig", ui.toJson(jsonConfig));
         labOrdersConceptPanels(conceptService, sessionContext, ui, model);
-
     }
-
     private Object convertTo(Object object, Representation rep) {
         return object == null ? null : ConversionUtil.convertToRepresentation(object, rep);
     }
@@ -63,10 +71,12 @@ public class LabOrdersPageController {
     private Object convertToFull(Object object) {
         return object == null ? null : ConversionUtil.convertToRepresentation(object, Representation.FULL);
     }
+
+
     public void labOrdersConceptPanels(@SpringBean("conceptService") ConceptService conceptService,
                                        UiSessionContext sessionContext,
                                        UiUtils ui,
-                                       PageModel model) {
+                                       FragmentModel model) {
 
         // Define sample type
         Map<String, List<Concept>> sampleTypes = new HashMap<String, List<Concept>>();
@@ -237,5 +247,8 @@ public class LabOrdersPageController {
             }
         }    return value;
     }
+
+
+
 
 }
