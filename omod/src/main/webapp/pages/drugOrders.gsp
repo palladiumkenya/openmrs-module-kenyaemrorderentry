@@ -257,6 +257,11 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
                             </div>
 
                             <div class="card-body">
+                                <span ng-if="editRegimenTitle">
+                                    <h3>{{editRegimenTitle}}</h3>
+                                    <hr>
+                                </span>
+
                                 <div ng-show="showCurrentRegimenView">
                                 <div class="list-group " ng-show="patientRegimens.length > 0">
                                     <div class="list-group-item" style="margin-bottom: 4px; border-left: 5px solid #80D651; font-size: 16px"
@@ -291,7 +296,7 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
 
                                 <div class="card">
                                     <div class="card-body">
-                                        <div class="card-header" style="background-color: #87cefa;">
+                                        <div class="card-header" style="background-color: #87ceeb;">
                                         <h5 class="card-title">Standard Regimen Orders</h5>
                                         </div>
                                         <div class="card-body">
@@ -329,7 +334,7 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
                                 <div style="padding-top: 45px">
                                     <div class="card">
                                         <div class="card-body">
-                                            <div class="card-header" style="background-color: #87cefa;">
+                                            <div class="card-header" style="background-color: #87ceeb;">
                                             <h5 class="card-title">Other Drug Orders</h5>
                                             </div>
                                             <div class="card-body">
@@ -348,7 +353,7 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
                                                     </tr>
                                                     <tr ng-repeat="order in activeDrugOrders">
                                                         <td ng-class="{ 'will-replace': replacementFor(order) }">
-                                                            {{ order | dates }}
+                                                            {{ order.dateActivated | date:'dd-MM-yyyy' }}
                                                         </td>
                                                         <td ng-class="{ 'will-replace': replacementFor(order) }">
                                                             {{ order | instructions }}

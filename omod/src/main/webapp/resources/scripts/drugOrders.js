@@ -57,7 +57,6 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
 
         // TODO changing dosingType of a draft order should reset defaults (and discard non-defaulted properties)
           var programRegimens = OpenMRS.kenyaemrRegimenJsonPayload;
-        // var currentRegimens=OpenMRS.currentRegimens;
         $scope.showRegimenPanel = false;
 
         function loadExistingOrders() {
@@ -71,6 +70,18 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                 $scope.activeDrugOrders = _.map(OpenMRS.activeOrdersPayload.single_drugs, function (item) {
                     return new OpenMRS.DrugOrderModel(item)
                 });
+                $scope.activeDrugOrders.sort(function(a, b) {
+                    var key1 = a.dateActivated;
+                    var key2 = b.dateActivated;
+                    if (key1 > key2) {
+                        return -1;
+                    } else if (key1 === key2) {
+                        return 0;
+                    } else {
+                        return 1;
+                    }
+                });
+
 
                 $scope.patientActiveDrugOrders = OpenMRS.activeOrdersPayload;
                 $scope.patientRegimens = addRegimenStatus(programRegimens);
@@ -91,6 +102,17 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
             }).then(function (results) {
                 $scope.pastDrugOrders = _.map(results, function (item) {
                     return new OpenMRS.DrugOrderModel(item)
+                });
+                $scope.pastDrugOrders.sort(function(a, b) {
+                    var key1 = a.dateActivated;
+                    var key2 = b.dateActivated;
+                    if (key1 > key2) {
+                        return -1;
+                    } else if (key1 === key2) {
+                        return 0;
+                    } else {
+                        return 1;
+                    }
                 });
             });
         }
