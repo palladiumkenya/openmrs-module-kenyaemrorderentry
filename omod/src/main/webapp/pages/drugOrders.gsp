@@ -104,6 +104,7 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
                 </li>
             </ul>
 
+
             <div class="ui-tabs-panel ui-widget-content">
                 <h3>Drug Orders</h3>
 
@@ -257,10 +258,6 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
                             </div>
 
                             <div class="card-body">
-                                <span ng-if="editRegimenTitle">
-                                    <h3>{{editRegimenTitle}}</h3>
-                                    <hr>
-                                </span>
 
                                 <div ng-show="showCurrentRegimenView">
                                 <div class="list-group " ng-show="patientRegimens.length > 0">
@@ -296,7 +293,7 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
 
                                 <div class="card">
                                     <div class="card-body">
-                                        <div class="card-header" style="background-color: #87ceeb;">
+                                        <div class="card-header" style="background-color: #d1d0c9;">
                                         <h5 class="card-title">Standard Regimen Orders</h5>
                                         </div>
                                         <div class="card-body">
@@ -334,7 +331,7 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
                                 <div style="padding-top: 45px">
                                     <div class="card">
                                         <div class="card-body">
-                                            <div class="card-header" style="background-color: #87ceeb;">
+                                            <div class="card-header" style="background-color: #d1d0c9;">
                                             <h5 class="card-title">Other Drug Orders</h5>
                                             </div>
                                             <div class="card-body">
@@ -424,7 +421,7 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
             </div>
         </div>
     </div>
-</div>
+
 <script type="text/javascript">
     // manually bootstrap angular app, in case there are multiple angular apps on a page
     angular.bootstrap('#drug-orders-app', ['drugOrders']);
