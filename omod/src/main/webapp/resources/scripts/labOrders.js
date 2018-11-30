@@ -364,7 +364,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
         }
         $scope.labOrdersTests = [];
         $scope.selectedOrders = [];
-        $scope.noOrderSelected ='Selected orders is empty';
+        $scope.noOrderSelected ='None';
         $scope.getSelectedTests = function(tests) {
             if(tests.selected === true) {
                 checkIfSelectedTestIsActiveOrder(tests);

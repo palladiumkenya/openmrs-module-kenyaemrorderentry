@@ -43,36 +43,6 @@ body {
     padding : 10px ;
 
 }
-
-#exTab1 .tab-content {
-    color : white;
-    background-color: #428bca;
-    padding : 5px 15px;
-}
-
-#exTab2 h3 {
-    color : white;
-    background-color: #428bca;
-    padding : 5px 15px;
-}
-
-/* remove border radius for the tab */
-
-#exTab1 .nav-pills > li > a {
-    border-radius: 0;
-}
-
-/* change border radius for the tab , apply corners on top*/
-
-#exTab3 .nav-pills > li > a {
-    border-radius: 4px 4px 0 0 ;
-}
-
-#exTab3 .tab-content {
-    color : white;
-    background-color: #428bca;
-    padding : 5px 15px;
-}
 .selected {
     background-color:black;
     color:white;
@@ -135,4 +105,31 @@ body {
 
 .dropdown:hover .dropbtn {
     background-color: transparent;
+}
+.ke-toolbar-item a {
+
+    font-weight: bold;
+    color: white !important ;
+    text-decoration: none;
+
+}
+#orderHeader {
+    vertical-align: center !important;
+    text-align: center;
+    padding-left: 30%;
+}
+#orderBack {
+    float: left;
+    width: 12%;
+    height: 5px !important;
+}
+
+.ke-menu-item {
+
+    display: block;
+    border-top: 1px solid #FFF;
+    border-bottom: 1px solid #CCC;
+    padding: 1px !important;
+    min-height: 32px;
+
 }
