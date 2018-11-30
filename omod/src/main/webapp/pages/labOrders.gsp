@@ -1,5 +1,8 @@
 <%
     ui.decorateWith("kenyaemr", "standardPage", [patient: patient])
+    def menuItems = [
+            [label: "Back to home", iconProvider: "kenyaui", icon: "buttons/back.png", label: "Back to Client home", href: ui.pageLink("kenyaemr", "clinician/clinicianViewPatient", [patient: patient, patientId: patient])]
+    ]
     ui.includeJavascript("uicommons", "emr.js")
     ui.includeJavascript("uicommons", "angular.min.js")
     ui.includeJavascript("uicommons", "angular-app.js")
@@ -66,12 +69,16 @@ ${ui.includeFragment("appui", "messages", [codes: [
     <div id="lab-orders-app">
         <div class="ui-tabs">
 
-
-
             <div class="ui-tabs-panel ui-widget-content">
-                <h3>Lab Orders</h3>
 
-                <div id="program-tabs" class="ke-tabs">
+                <div>
+                    <label id="orderBack">
+                        ${ui.includeFragment("kenyaui", "widget/panelMenu", [ items: menuItems])}
+                </label>
+                    <label id="orderHeader"> <h3>Lab Orders</h3></label>
+                </div>
+
+                <div id="program-tabs" class="ke-tabs" style="padding-top: 10px">
                     <div class="ke-tabmenu">
                         <div class="ke-tabmenu-item" data-tabid="active_orders">Active Order(s)</div>
 

@@ -1,5 +1,8 @@
 <%
     ui.decorateWith("kenyaemr", "standardPage", [patient: patient])
+    def menuItems = [
+            [label: "Back to home", iconProvider: "kenyaui", icon: "buttons/back.png", label: "Back to Client home", href: ui.pageLink("kenyaemr", "clinician/clinicianViewPatient", [patient: patient, patientId: patient])]
+    ]
     ui.includeJavascript("uicommons", "emr.js")
     ui.includeJavascript("uicommons", "angular.min.js")
     ui.includeJavascript("uicommons", "angular-app.js")
@@ -91,6 +94,11 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
     window.sessionContext = {'locale': 'en_GB'}
     window.OpenMRS.activeOrdersPayload =${activeOrdersResponse};
 </script>
+<div class="ke-page-sidebar">
+    <div class="ke-panel-frame">
+        ${ui.includeFragment("kenyaui", "widget/panelMenu", [heading: "Navigation", items: menuItems])}
+    </div>
+</div>
 
 <div class="ke-page-content">
     <div id="drug-orders-app" ng-controller="DrugOrdersCtrl" ng-init='init()' class="divIDClass">
@@ -117,7 +125,7 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
                              data-tabid="standard_regimen_orders">Standard Regimen Order</div>
 
                         <div class="ke-tabmenu-item single-order disable-on-regimen-change" ng-show="showOtherDrugs"
-                             data-tabid="new_drug_orders">Other Drugs Order</div>
+                             data-tabid="new_drug_orders">Other Drug Orders</div>
 
                         <div class="ke-tabmenu-item disable-on-regimen-change" ng-show="showPastDrugTabs"
                              data-tabid="past_drug_orders">Past Drug Orders</div>
@@ -293,7 +301,7 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
 
                                 <div class="card">
                                     <div class="card-body">
-                                        <div class="card-header" style="background-color: #d1d0c9;">
+                                        <div class="card-header" style="background-color: #d1d0c9;height: 2.5rem;">
                                         <h5 class="card-title">Standard Regimen Orders</h5>
                                         </div>
                                         <div class="card-body">
@@ -331,7 +339,7 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
                                 <div style="padding-top: 45px">
                                     <div class="card">
                                         <div class="card-body">
-                                            <div class="card-header" style="background-color: #d1d0c9;">
+                                            <div class="card-header" style="background-color: #d1d0c9;height: 2.5rem;">
                                             <h5 class="card-title">Other Drug Orders</h5>
                                             </div>
                                             <div class="card-body">
@@ -421,6 +429,7 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
             </div>
         </div>
     </div>
+</div>
 
 <script type="text/javascript">
     // manually bootstrap angular app, in case there are multiple angular apps on a page

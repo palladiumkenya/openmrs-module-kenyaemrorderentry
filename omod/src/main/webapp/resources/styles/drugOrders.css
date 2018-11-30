@@ -111,3 +111,10 @@ div.editing-draft-order {
   margin-top: 5px;
   margin-bottom: 5px;
 }
+.ke-toolbar-item a {
+
+  font-weight: bold;
+  color: white !important ;
+  text-decoration: none;
+
+}
