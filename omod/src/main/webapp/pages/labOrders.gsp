@@ -3,6 +3,7 @@
     def menuItems = [
             [label: "Back to home", iconProvider: "kenyaui", icon: "buttons/back.png", label: "Back to Client home", href: ui.pageLink("kenyaemr", "clinician/clinicianViewPatient", [patient: patient, patientId: patient])]
     ]
+
     ui.includeJavascript("uicommons", "emr.js")
     ui.includeJavascript("uicommons", "angular.min.js")
     ui.includeJavascript("uicommons", "angular-app.js")
@@ -52,10 +53,17 @@ th, td {
 </style>
 <script type="text/javascript">
 
+
     window.OpenMRS = window.OpenMRS || {};
     window.OpenMRS.drugOrdersConfig = ${ jsonConfig };
     window.OpenMRS.labTestJsonPayload = ${labTestJsonPayload}
+    patientId = ${ patient.patientId };
 
+    jq(document).ready(function() {
+        jq("#btnBack").click(function(){
+           window.location="http://localhost:8080/openmrs/kenyaemr/clinician/clinicianViewPatient.page?patientId=" +patientId +'&'
+        });
+    });
 
 
 </script>
@@ -72,11 +80,12 @@ ${ui.includeFragment("appui", "messages", [codes: [
             <div class="ui-tabs-panel ui-widget-content">
 
                 <div>
-                    <label id="orderBack">
-                        ${ui.includeFragment("kenyaui", "widget/panelMenu", [ items: menuItems])}
-                </label>
+                    <button type="button" class="fa fa-arrow-left " style="float: left" id="btnBack">
+                        Back to client home
+                    </button>
                     <label id="orderHeader"> <h3>Lab Orders</h3></label>
                 </div>
+                
 
                 <div id="program-tabs" class="ke-tabs" style="padding-top: 10px">
                     <div class="ke-tabmenu">
