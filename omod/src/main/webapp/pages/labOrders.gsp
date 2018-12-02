@@ -61,7 +61,8 @@ th, td {
 
     jq(document).ready(function() {
         jq("#btnBack").click(function(){
-           window.location="http://localhost:8080/openmrs/kenyaemr/clinician/clinicianViewPatient.page?patientId=" +patientId +'&'
+            ui.navigate('${ ui.pageLink("kenyaemr", "clinician/clinicianViewPatient", [patient: patient, patientId: patient]) }');
+           //window.location="http://localhost:8080/openmrs/kenyaemr/clinician/clinicianViewPatient.page?patientId=" +patientId +'&'
         });
     });
 
