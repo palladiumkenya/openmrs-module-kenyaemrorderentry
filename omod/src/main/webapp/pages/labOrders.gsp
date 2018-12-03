@@ -150,7 +150,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                                                     data-toggle="modal" data-target="#dateOrder"
                                                                                     ng-click="orderSelectedToAddDateActivated(order)"></button>
                                                                             <button type="button" class="fa fa-warning fa-1x"
-                                                                                    data-placement="top" title="Urgency"
+                                                                                    data-placement="top" title="Urgency | Reason"
                                                                                     data-toggle="modal" data-target="#orderUrgency"
                                                                                     ng-click="orderSelectedToAddDateActivated(order)"
                                                                             ></button>
@@ -255,23 +255,35 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                 </div>
                             </div>
                         </div>
-                        <!-- Modal urgency for lab orders -->
+                        <!-- Modal urgency  and reason for lab orders -->
                         <div class="modal fade" id="orderUrgency" tabindex="-1" role="dialog" aria-labelledby="urgencyModalCenterTitle" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered" role="document">
                                 <div class="modal-content">
                                     <div class="modal-header modal-header-primary">
-                                        <h5 class="modal-title" id="urgencyModalCenterTitle"></h5>
+                                        <h5 class="modal-title" id="urgencyModalCenterTitle"> Order Urgency | Reason(s)</h5>
                                         <button type="button" class="close" data-dismiss="modal2" ng-click="closeModal()">&times;
                                         </button>
                                     </div>
-                                    <div class="modal-body ">
-                                        <label >Order Urgency</label>
+                                    <div class="modal-body" >
+                                        <label ><b>Order Urgency</b></label>
                                         <div>
                                             <select id="ddlOrderUrgency" class="form-control">
-                                                <option value="ROUTINE"selected="selected">ROUTINE</option>
+                                                <option value="ROUTINE" selected="selected">ROUTINE</option>
                                                 <option value="STAT" >IMMEDIATELY</option>
                                             </select>
 
+                                        </div>
+                                        <div style="padding-top: 5px">
+                                        <label ><b>Order Reason </b></label>
+                                        <div>
+                                            Reason:
+                                            <select id="ddlOrderReason" class="form-control" ng-model="orderReasonCoded" >
+                                            <option value="{{r.uuid}}" ng-repeat=" r in OrderReason">{{r.name}}</option>
+
+                                            </select>
+                                            Reason(other):
+                                            <input class="form-control" type="text" ng-model="orderReasonNonCoded">
+                                        </div>
                                         </div>
                                     </div>
                                     <div class="modal-footer">

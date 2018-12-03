@@ -209,6 +209,18 @@
                         </select>
 
                     </div>
+                    <div style="padding-top: 5px">
+                        <label ><b>Order Reason </b></label>
+                    <div>
+                        Reason:
+                        <select id="ddlOrderReason" class="form-control" ng-model="orderReasonCoded" >
+                            <option value="{{r.uuid}}" ng-repeat=" r in OrderReason">{{r.name}}</option>
+
+                        </select>
+                        Reason(other):
+                        <input class="form-control" type="text" ng-model="orderReasonNonCoded">
+                    </div>
+                </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" data-dismiss="modal2"   ng-click="closeModal()">Close</button>
