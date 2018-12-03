@@ -97,6 +97,24 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 });
 
                 $scope.labOrders = labs;
+                $scope.OrderReason = [
+                    {
+                        name:'Clinical treatment failure',
+                        uuid:'843AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+                    },
+                    {
+                        name:'Pregnancy',
+                        uuid:'1434AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+                    },
+                    {
+                        name:'Baseline',
+                        uuid:'162080AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+                    },
+                    {
+                        name:'Follow up',
+                        uuid:'162081AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+                    }
+                ];
 
 
             });
@@ -285,6 +303,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
         var enterLabOrderResults = OpenMRS.enterLabOrderResults;
         var pastOrders = OpenMRS.pastLabOrdersResults;
 
+
         // labObsResults
         $scope.init = function() {
             $scope.routes = config.routes;
@@ -460,7 +479,9 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                             careSetting:$scope.careSetting.uuid,
                             type:"testorder",
                             concept:"1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-                            concept_id: 1305
+                            concept_id: 1305,
+                            orderReasonNonCoded:$scope.orderReasonNonCoded,
+                            orderReason:$scope.orderReasonCoded
 
                         }
                     }
@@ -811,11 +832,15 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             $('#orderUrgency').modal('hide');
 
         };
+        $scope.orderReasonNonCoded = '';
+        $scope.orderReasonCoded = '';
 
         $scope.setOrderUrgency = function() {
 
             var e = document.getElementById("ddlOrderUrgency");
             $scope.orderUrgency['urgency'] =  e.options[e.selectedIndex].value;
+            $scope.orderUrgency['orderReasonNonCoded'] =  $scope.orderReasonNonCoded;
+            $scope.orderUrgency['orderReason'] =  $scope.orderReasonCoded;
             $scope.filteredOrders.push($scope.orderUrgency);
             $scope.filteredOrders = _.uniq($scope.filteredOrders);
             $('#orderUrgency').modal('hide');
@@ -840,6 +865,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             }
             return grid;
         };
+
 
 
     }]);

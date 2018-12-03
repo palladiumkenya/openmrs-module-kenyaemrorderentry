@@ -49,15 +49,15 @@ body {
     font-weight:bold;
 }
 .modal-header-primary {
-    color:#fff;
+    color:black;
 
-    background-color: #87cefa;
+    background-color: #ebebeb;
 
 }
 
 .modal-header-warning {
     color:#fff;
-    background-color: #f0ad4e;
+    background-color: #ebebeb;
 
 }
 .modal-lg {
