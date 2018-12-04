@@ -273,7 +273,7 @@ angular.module("orderEntry", ['orderService', 'encounterService', 'session'])
             saveVoidedOrders: function(orderContext, uuid, successCallback, errorCallback) {
                 var req = {
                     method: 'DELETE',
-                    url: 'http://localhost:8080/openmrs/ws/rest/v1/order/' + uuid +'?!purge',
+                    url: '/openmrs/ws/rest/v1/order/' + uuid +'?!purge',
                     headers: {
                         'Content-Type': undefined
                     },
