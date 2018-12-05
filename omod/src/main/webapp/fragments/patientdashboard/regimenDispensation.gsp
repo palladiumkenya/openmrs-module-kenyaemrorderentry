@@ -211,7 +211,7 @@
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel" style="color:green;">Success</h5>
+                        <h5 class="modal-title" id="exampleModalLabel" style="color:#ebebeb;">Success</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -228,7 +228,7 @@
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel" style="color:red;">Server Error</h5>
+                        <h5 class="modal-title" id="exampleModalLabel" style="color:#ebebeb;">Server Error</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
