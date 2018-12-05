@@ -419,8 +419,13 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
         }
 
         $scope.postLabOrdersEncounters = function() {
+            if(config.provider === '' || config.provider === undefined || config.provider === null) {
+                $('#orderError').modal('show');
+                return;
+            }
             var uuid = {uuid:"e1406e88-e9a9-11e8-9f32-f2801f1b9fd1"};
             $scope.OrderUuid = '';
+            $('#spinner').modal('show');
 
             $scope.lOrders = createLabOrdersPaylaod($scope.filteredOrders);
             $scope.lOrdersPayload = angular.copy( $scope.lOrders);
@@ -451,6 +456,8 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 $window.location.reload();
               //  location.href = location.href;
             }, function(errorResponse) {
+                $('#orderError').modal('show');
+                $('#spinner').modal('hide');
                 console.log('errorResponse.data.error.message',errorResponse.data.error);
                 emr.errorMessage(errorResponse.data.error.message);
                 $scope.loading = false;

@@ -210,14 +210,14 @@
              style="font-size:16px;">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel" style="color:#ebebeb;">Success</h5>
+                    <div class="modal-header modal-header-primary">
+                        <h5 class="modal-title" id="exampleModalLabel">Success</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
 
-                    <div class="modal-body" style="color:green;">
+                    <div class="modal-body">
                         Order saved successfully
                     </div>
                 </div>
@@ -227,8 +227,8 @@
         <div class="modal fade" id="order-group-error" tabindex="-1" role="dialog" style="font-size:16px;">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel" style="color:#ebebeb;">Server Error</h5>
+                    <div class="modal-header modal-header-primary">
+                        <h5 class="modal-title" id="exampleModalLabel">Server Error</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
