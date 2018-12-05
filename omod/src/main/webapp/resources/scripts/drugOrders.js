@@ -89,6 +89,9 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                 if ($scope.patientRegimens.length == 0) {
                     $scope.showRegimenPanel = false;
                 }
+                if ($scope.patientActiveDrugOrders.order_groups.length > 0) {
+                    $scope.disableButton = true
+                }
 
             });
 

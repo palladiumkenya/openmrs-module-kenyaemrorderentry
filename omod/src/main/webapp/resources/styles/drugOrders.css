@@ -118,3 +118,10 @@ div.editing-draft-order {
   text-decoration: none !important;
 
 }
+
+.modal-header-primary {
+  color:black;
+
+  background-color: #ebebeb;
+
+}
