@@ -58,7 +58,7 @@
                                         <div ng-if="control.rendering === 'select'">
                                             <div class="form-group row">
                                                 <label class="col-lg-3"><b>{{control.label}}:</b>
-                                                    <p>  <span >Date Ordered:{{control.dateActivated | date:'dd-MM-yyyy'}}</span>
+                                                    <p>  <span >({{control.dateActivated | date:'dd-MM-yyyy'}})</span>
                                                     </p></label>
 
                                                 <div class="col-lg-4">
@@ -75,7 +75,7 @@
                                         <div ng-if="control.rendering === 'inputtext'">
                                             <div class="form-group row">
                                                 <label class="col-lg-3"><b>{{control.label}}:</b>
-                                                    <p>  <span >Date Ordered:{{control.dateActivated | date:'dd-MM-yyyy'}}</span>
+                                                    <p>  <span >({{control.dateActivated | date:'dd-MM-yyyy'}})</span>
                                                     </p></label>
 
                                                 <div class="col-lg-4">
@@ -88,7 +88,7 @@
                                         <div ng-if="control.rendering === 'inputnumeric'">
                                             <div class="form-group row">
                                                 <label class="col-lg-3"><b>{{control.label}}:</b>
-                                                    <p>  <span >Date Ordered:{{control.dateActivated | date:'dd-MM-yyyy'}}</span>
+                                                    <p>  <span >({{control.dateActivated | date:'dd-MM-yyyy'}})</span>
                                                     </p></label>
 
                                                 <div class="col-lg-4">
@@ -101,7 +101,7 @@
                                         <div ng-if="control.rendering === 'textarea'">
                                             <div class="form-group row">
                                                 <label class="col-lg-3"><b>{{control.label}}:</b>
-                                                    <p>  <span >Date Ordered:{{control.dateActivated | date:'dd-MM-yyyy'}}</span>
+                                                    <p>  <span >({{control.dateActivated | date:'dd-MM-yyyy'}})</span>
                                                     </p></label>
 
                                                 <div class="col-lg-4">
@@ -113,8 +113,8 @@
 
 
                                         <div class="form-group row" ng-if="control.hvVl">
-                                            <label class="col-lg-3"><b>HIV viral load:</b>
-                                                <p>  <span >Date Ordered:{{control.hvVl[0].dateActivated | date:'dd-MM-yyyy'}}</span>
+                                            <label class="col-lg-2"><b>HIV viral load:</b>
+                                                <p>  <span >({{control.hvVl[0].dateActivated | date:'dd-MM-yyyy'}})</span>
                                                 </p></label>
 
                                             <div ng-repeat="vl in control.hvVl">

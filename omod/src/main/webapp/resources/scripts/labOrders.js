@@ -128,6 +128,9 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 $scope.pList = enterLabOrderResults;
                 if($scope.pList) {
                     $scope.panelListResults = customiseHivViralLoadObj($scope.pList);
+                    $scope.labResultsRaw =$scope.panelListResults;
+                    $scope.panelListResults =removeHivVl($scope.panelListResults);
+                    $scope.panelListResults =removeHivLdl($scope.panelListResults);
                     $scope.InspireList = $rootScope.matrixList($scope.panelListResults, 2);
                 }
 
@@ -518,7 +521,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
         $scope.postLabOrderResults = function() {
 
-            $scope.obsPayload = createLabResultsObsPaylaod($scope.panelListResults);
+            $scope.obsPayload = createLabResultsObsPaylaod($scope.labResultsRaw);
             $scope.discontinueFilledOrders = angular.copy($scope.obsPayload);
             for (var i = 0; i < $scope.obsPayload.length; ++i) {
                 delete $scope.obsPayload[i].label;
@@ -872,6 +875,20 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             }
             return grid;
         };
+
+        function removeHivVl(result) {
+            return _.filter(result, function(o) {
+
+                return o.concept !== '856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
+            });
+        }
+        function removeHivLdl(result) {
+            return _.filter(result, function(o) {
+
+                return o.concept !== '1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
+            });
+        }
+
 
 
 
