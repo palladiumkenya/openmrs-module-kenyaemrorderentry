@@ -82,9 +82,14 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                     }
                 });
 
-
-                $scope.patientActiveDrugOrders = OpenMRS.activeOrdersPayload;
                 $scope.patientRegimens = addRegimenStatus(programRegimens);
+                $scope.patientActiveDrugOrders = OpenMRS.activeOrdersPayload;
+                if($scope.patientActiveDrugOrders) {
+                    if($scope.patientActiveDrugOrders.order_groups[0]) {
+                        $scope.patientRegimenInstruction =formatDisplayOfRegimenInstructions($scope.patientActiveDrugOrders.order_groups[0].components);
+                    }
+                }
+
                 $scope.regimenStatus = "absent";
                 if ($scope.patientRegimens.length == 0) {
                     $scope.showRegimenPanel = false;
@@ -370,7 +375,6 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                         var drugsFromOrderSet = $scope.createDrugsArrayFromPayload(regimen.components);
                         var drugsFromCurrentRegimen = $scope.createDrugsArrayFromPayload(members);
                         if ($scope.arraysEqual(drugsFromOrderSet, drugsFromCurrentRegimen)) {
-                            console.log("current regimen matches this order set+++++" + JSON.stringify(regimen));
                             orderSetId = regimen.orderSetId;
                         }
                     });
@@ -435,5 +439,30 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
             }
 
             return true;
+        }
+
+        function formatDisplayOfRegimenInstructions(res) {
+            var orders = [];
+            var instructionDesc = [];
+            for (var i = 0; i < res.length; ++i) {
+                var data = res[i];
+
+                for (var r in data) {
+                    if (data.hasOwnProperty(r)) {
+                        data['instructionDetails'] = data.name +"(" +'Dose:' + data.dose + " "+data.units_name +',' + data.frequency_name
+                        +','+'Quantity:' +data.quantity +' ' +data.quantity_units_name+")" ;
+                    }
+
+                }
+                orders.push(data);
+
+            }
+            var str = orders.map(function(elem){
+                return elem.instructionDetails;
+            }).join(" + ");
+            instructionDesc.push({instructionDetailsFinal:str});
+
+            return instructionDesc;
+
         }
     }]);
