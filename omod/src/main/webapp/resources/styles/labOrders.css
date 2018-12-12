@@ -133,3 +133,12 @@ body {
     min-height: 32px;
 
 }
+.label {
+    min-width: 220px !important;
+}
+.set-width {
+    width: 220px;
+}
+.set-width-vl {
+    width: 190px;
+}

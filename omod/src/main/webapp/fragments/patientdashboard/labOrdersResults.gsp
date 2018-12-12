@@ -1,31 +1,31 @@
 <%
-   // ui.decorateWith("kenyaemr", "standardPage", [patient: patient])
+    // ui.decorateWith("kenyaemr", "standardPage", [patient: patient])
     ui.includeCss("kenyaemrorderentry", "labOrders.css")
-   ui.includeJavascript("uicommons", "emr.js")
-   ui.includeJavascript("uicommons", "angular.min.js")
-   ui.includeJavascript("uicommons", "angular-app.js")
-   ui.includeJavascript("uicommons", "angular-resource.min.js")
-   ui.includeJavascript("uicommons", "angular-common.js")
-   ui.includeJavascript("uicommons", "angular-ui/ui-bootstrap-tpls-0.11.2.js")
-   ui.includeJavascript("uicommons", "ngDialog/ngDialog.js")
-   ui.includeJavascript("kenyaemrorderentry", "bootstrap.min.js")
-   ui.includeCss("kenyaemrorderentry", "bootstrap.min.css")
+    ui.includeJavascript("uicommons", "emr.js")
+    ui.includeJavascript("uicommons", "angular.min.js")
+    ui.includeJavascript("uicommons", "angular-app.js")
+    ui.includeJavascript("uicommons", "angular-resource.min.js")
+    ui.includeJavascript("uicommons", "angular-common.js")
+    ui.includeJavascript("uicommons", "angular-ui/ui-bootstrap-tpls-0.11.2.js")
+    ui.includeJavascript("uicommons", "ngDialog/ngDialog.js")
+    ui.includeJavascript("kenyaemrorderentry", "bootstrap.min.js")
+    ui.includeCss("kenyaemrorderentry", "bootstrap.min.css")
 
 
-   ui.includeJavascript("uicommons", "filters/display.js")
-   ui.includeJavascript("uicommons", "filters/serverDate.js")
-   ui.includeJavascript("uicommons", "services/conceptService.js")
-   ui.includeJavascript("uicommons", "services/drugService.js")
-   ui.includeJavascript("uicommons", "services/encounterService.js")
-   ui.includeJavascript("uicommons", "services/orderService.js")
-   ui.includeJavascript("uicommons", "services/session.js")
+    ui.includeJavascript("uicommons", "filters/display.js")
+    ui.includeJavascript("uicommons", "filters/serverDate.js")
+    ui.includeJavascript("uicommons", "services/conceptService.js")
+    ui.includeJavascript("uicommons", "services/drugService.js")
+    ui.includeJavascript("uicommons", "services/encounterService.js")
+    ui.includeJavascript("uicommons", "services/orderService.js")
+    ui.includeJavascript("uicommons", "services/session.js")
 
-   ui.includeJavascript("uicommons", "directives/select-concept-from-list.js")
-   ui.includeJavascript("uicommons", "directives/select-order-frequency.js")
-   ui.includeJavascript("uicommons", "directives/select-drug.js")
-   ui.includeJavascript("kenyaemrorderentry", "order-model.js")
-   ui.includeJavascript("kenyaemrorderentry", "order-entry.js")
-   ui.includeJavascript("kenyaemrorderentry", "labOrders.js")
+    ui.includeJavascript("uicommons", "directives/select-concept-from-list.js")
+    ui.includeJavascript("uicommons", "directives/select-order-frequency.js")
+    ui.includeJavascript("uicommons", "directives/select-drug.js")
+    ui.includeJavascript("kenyaemrorderentry", "order-model.js")
+    ui.includeJavascript("kenyaemrorderentry", "order-entry.js")
+    ui.includeJavascript("kenyaemrorderentry", "labOrders.js")
 %>
 <script type="text/javascript">
 
@@ -57,12 +57,12 @@
 
                                         <div ng-if="control.rendering === 'select'">
                                             <div class="form-group row">
-                                                <label class="col-lg-3"><b>{{control.label}}:</b>
+                                                <label class="label label-md "><b>{{control.label}}:</b>
                                                     <p>  <span >({{control.dateActivated | date:'dd-MM-yyyy'}})</span>
                                                     </p></label>
 
-                                                <div class="col-lg-4">
-                                                    <select class="form-control"
+                                                <div >
+                                                    <select class="form-control set-width"
                                                             ng-model="typeValues[control.orderId]">
                                                         <option ng-repeat=" o in control.answers"
                                                                 ng-value="o.concept">{{o.label}}
@@ -72,27 +72,27 @@
                                             </div>
                                         </div>
 
-                                        <div ng-if="control.rendering === 'inputtext'">
+                                        <div ng-if="control.rendering === 'inputtext'" class="label">
                                             <div class="form-group row">
-                                                <label class="col-lg-3"><b>{{control.label}}:</b>
+                                                <label class="label label-md" ><b>{{control.label}}:</b>
                                                     <p>  <span >({{control.dateActivated | date:'dd-MM-yyyy'}})</span>
                                                     </p></label>
 
-                                                <div class="col-lg-4">
-                                                    <input class="form-control" type="text"
+                                                <div >
+                                                    <input class="form-control set-width" type="text"
                                                            ng-model="typeValues[control.orderId]">
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <div ng-if="control.rendering === 'inputnumeric'">
+                                        <div ng-if="control.rendering === 'inputnumeric'" class="label">
                                             <div class="form-group row">
-                                                <label class="col-lg-3"><b>{{control.label}}:</b>
+                                                <label class="label label-md" ><b>{{control.label}}:</b>
                                                     <p>  <span >({{control.dateActivated | date:'dd-MM-yyyy'}})</span>
                                                     </p></label>
 
-                                                <div class="col-lg-4">
-                                                    <input class="form-control" type="number"
+                                                <div>
+                                                    <input class="form-control set-width" type="number"
                                                            ng-model="typeValues[control.orderId]">
                                                 </div>
                                             </div>
@@ -100,11 +100,11 @@
 
                                         <div ng-if="control.rendering === 'textarea'">
                                             <div class="form-group row">
-                                                <label class="col-lg-3"><b>{{control.label}}:</b>
+                                                <label class="label label-md"><b>{{control.label}}:</b>
                                                     <p>  <span >({{control.dateActivated | date:'dd-MM-yyyy'}})</span>
                                                     </p></label>
 
-                                                <div class="col-lg-4">
+                                                <div >
                                                     <textarea class="form-control" ng-model="typeValues[control.orderId]">
                                                     </textarea>
                                                 </div>
@@ -112,40 +112,31 @@
                                         </div>
 
 
-                                        <div class="form-group row" ng-if="control.hvVl">
-                                            <label class="col-lg-2"><b>HIV viral load:</b>
-                                                <p>  <span >({{control.hvVl[0].dateActivated | date:'dd-MM-yyyy'}})</span>
-                                                </p></label>
+                                        <div ng-if="control.hvVl">
+                                            <div class="form-group row">
+                                                <label class="label label-md "><b>HIV viral load:</b>
+                                                    <p>  <span >({{control.hvVl[0].dateActivated | date:'dd-MM-yyyy'}})</span>
+                                                    </p></label>
 
-                                            <div ng-repeat="vl in control.hvVl">
-                                                <div ng-if="vl.concept ==='1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' ||
-                                                                            vl.concept ==='856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'"></div>
-
-
-                                                <div>
-                                                    <div ng-if="vl.rendering ==='checkbox'" class="form-group form-check">
-                                                        <input class="form-check-input "
-                                                               type="checkbox" id="vl"
-                                                               name="feature"
-                                                               ng-checked="fag"
-                                                               ng-model="hivViralValuesLDL[vl.orderId]"
-                                                               ng-click="toggleSelection(vl.orderId)"
-                                                               value="'1302AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'">
-                                                        <label class="form-check-label">LDL</label>
-                                                    </div>
+                                                <div ng-repeat="vl in control.hvVl">
+                                                    <input class="form-control set-width-vl" type="number" id="vload" ng-if="vl.rendering === 'inputnumeric'"
+                                                           ng-model="hivViralValues[vl.orderId]"
+                                                           ng-disabled="ischecked ==='yes'">
 
 
-                                                    <div ng-if="vl.rendering === 'inputnumeric'">
-                                                        <input class="form-control" type="number" id="vload"
-                                                               ng-model="hivViralValues[vl.orderId]"
-                                                               ng-disabled="ischecked ==='yes'">
-                                                    </div>
+                                                    <input class="form-check-input " ng-if="vl.rendering ==='checkbox'"
+                                                           type="checkbox" id="vl"
+                                                           name="feature"
+                                                           ng-checked="fag"
+                                                           ng-model="hivViralValuesLDL[vl.orderId]"
+                                                           ng-click="toggleSelection(vl.orderId)"
+                                                           value="'1302AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'">
+                                                    <label class="form-check-label" ng-if="vl.rendering ==='checkbox'">LDL</label>
 
                                                 </div>
 
+
                                             </div>
-
-
                                         </div>
 
                                     </div>

@@ -78,10 +78,13 @@ public class DrugOrdersPageController {
                 component.put("name", drugOrder.getDrug().getConcept().getShortNameInLocale(LOCALE) != null ? drugOrder.getDrug().getConcept().getShortNameInLocale(LOCALE).getName() : drugOrder.getDrug().getConcept().getName(LOCALE).getName());
                 component.put("dose", drugOrder.getDose().toString());
                 component.put("units_uuid", drugOrder.getDoseUnits().getUuid());
+                component.put("units_name", drugOrder.getDoseUnits().getName(LOCALE).getName());
                 component.put("frequency", drugOrder.getFrequency().getUuid());
+                component.put("frequency_name", drugOrder.getFrequency().getName());
                 component.put("drug_id", drugOrder.getDrug().getDrugId());
                 component.put("order_id",order.getOrderId());
                 component.put("quantity",drugOrder.getQuantity());
+                component.put("quantity_units_name",drugOrder.getQuantityUnits().getName(LOCALE).getName());
                 if(order.getOrderGroup().getOrderGroupId()==previousOrderGroupId){
                     components.add(component);
                     continue;

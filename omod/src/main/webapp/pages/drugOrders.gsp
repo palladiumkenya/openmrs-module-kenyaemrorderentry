@@ -312,16 +312,16 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
                                             <table ng-show="patientActiveDrugOrders.order_groups.length > 0"
                                                    class="table table-striped">
                                                 <tr>
-                                                    <th width="30%">Dates</th>
-                                                    <th width="50%">Instructions</th>
+                                                    <th width="20%">Dates</th>
+                                                    <th width="60%">Instructions</th>
                                                     <th width="20%">Action</th>
                                                 </tr>
                                                 <tr ng-repeat="order in patientActiveDrugOrders.order_groups">
                                                     <td ng-class="{ 'will-replace': replacementFor(order) }">
                                                         {{ order.date }}
                                                     </td>
-                                                    <td ng-class="{ 'will-replace': replacementFor(order) }">
-                                                        {{ order.name}}
+                                                    <td ng-repeat="com in patientRegimenInstruction">
+                                                        {{ com.instructionDetailsFinal}}
                                                     </td>
                                                     <td>
                                                         <button ng-click="editOrderGroup(order)"
@@ -352,8 +352,8 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
                                                 <table ng-show="activeDrugOrders.length > 0"
                                                        class="table table-striped">
                                                     <tr>
-                                                        <th width="30%">Dates</th>
-                                                        <th width="50%">Instructions</th>
+                                                        <th width="20%">Dates</th>
+                                                        <th width="60%">Instructions</th>
                                                         <th width="20%">Action</th>
                                                     </tr>
                                                     <tr ng-repeat="order in activeDrugOrders">
