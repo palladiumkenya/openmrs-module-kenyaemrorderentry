@@ -449,7 +449,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
 
                 for (var r in data) {
                     if (data.hasOwnProperty(r)) {
-                        data['instructionDetails'] = data.name +"(" +'Dose:' + data.dose + " "+data.units_name +',' + data.frequency_name
+                        data['instructionDetails'] = data.name +"(" + data.dose + " "+data.units_name +',' + data.frequency_name
                         +','+'Quantity:' +data.quantity +' ' +data.quantity_units_name+")" ;
                     }
 
