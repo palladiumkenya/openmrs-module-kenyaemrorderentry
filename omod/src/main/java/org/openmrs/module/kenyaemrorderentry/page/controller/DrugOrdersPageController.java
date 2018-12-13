@@ -128,8 +128,91 @@ public class DrugOrdersPageController {
         activeOrdersResponse.put("order_groups",orderGroupArray);
         activeOrdersResponse.put("single_drugs",orderArray);
         model.put("activeOrdersResponse",ui.toJson(activeOrdersResponse));
+        getPastDrugOrders(orderService, conceptService,careSetting,ui, patient, model,obsService);
 
     }
+
+    public void getPastDrugOrders(@SpringBean("orderService") OrderService orderService, @SpringBean("conceptService")
+            ConceptService conceptService,
+                             @SpringBean("careSetting")
+                                     CareSetting careSetting,
+                                  UiUtils ui,
+                             Patient patient, PageModel model,@SpringBean("obsService") ObsService obsService) {
+        OrderType drugType = orderService.getOrderTypeByUuid(OrderType.DRUG_ORDER_TYPE_UUID);
+        CareSetting careset = orderService.getCareSetting(1);
+        List<Order> pastOrders = orderService.getOrders(patient, careset, drugType, false);
+
+        JSONObject orderObj,component;
+        JSONArray orderGroupArray = new JSONArray();
+        JSONArray orderArray = new JSONArray();
+        JSONArray components =  new JSONArray();
+        int previousOrderGroupId=0;
+        for(Order order:pastOrders){
+            DrugOrder drugOrder=(DrugOrder)order;
+            if(order.getOrderGroup()!= null) {
+                if(order.getDateStopped() != null) {
+
+
+                component = new JSONObject();
+                component.put("name", drugOrder.getDrug().getConcept().getShortNameInLocale(LOCALE) != null ? drugOrder.getDrug().getConcept().getShortNameInLocale(LOCALE).getName() : drugOrder.getDrug().getConcept().getName(LOCALE).getName());
+                component.put("dose", drugOrder.getDose().toString());
+                component.put("units_uuid", drugOrder.getDoseUnits().getUuid());
+                component.put("units_name", drugOrder.getDoseUnits().getName(LOCALE).getName());
+                component.put("frequency", drugOrder.getFrequency().getUuid());
+                component.put("frequency_name", drugOrder.getFrequency().getName());
+                component.put("drug_id", drugOrder.getDrug().getDrugId());
+                component.put("dateActivated", order.getDateCreated().toString());
+                component.put("dateStopped", order.getDateStopped().toString());
+                component.put("order_group_id", order.getOrderGroup().getOrderGroupId());
+                component.put("quantity", drugOrder.getQuantity());
+                component.put("quantity_units_name", drugOrder.getQuantityUnits().getName(LOCALE).getName());
+
+
+
+                    if (order.getOrderGroup().getOrderGroupId() == previousOrderGroupId) {
+                    components.add(component);
+                    continue;
+                } else {
+                    orderObj = new JSONObject();
+                    components = new JSONArray();
+                    components.add(component);
+                    OrderSet orderSet = order.getOrderGroup().getOrderSet();
+                    orderObj.put("name", orderSet.getName());
+                    orderObj.put("date", order.getDateCreated().toString());
+                    orderObj.put("dateStopped", order.getDateStopped().toString());
+                    orderObj.put("orderSetId", orderSet.getOrderSetId());
+                    orderObj.put("instructions", order.getInstructions());
+                    orderObj.put("components", components);
+                    orderGroupArray.add(orderObj);
+                     previousOrderGroupId=order.getOrderGroup().getOrderGroupId();
+                }
+            }
+            }
+            else {
+                if(order.getDateStopped() != null) {
+                    orderObj = new JSONObject();
+                    orderObj.put("uuid", order.getUuid());
+                    orderObj.put("concept", order.getConcept());
+                    orderObj.put("dateActivated", order.getDateCreated().toString());
+                    orderObj.put("dateStopped", order.getDateStopped().toString());
+                    orderObj.put("drug", drugOrder.getDrug().getFullName(LOCALE));
+                    orderObj.put("dose", drugOrder.getDose());
+                    orderObj.put("doseUnits", drugOrder.getDoseUnits().getName(LOCALE).getName());
+                    orderObj.put("frequency", drugOrder.getFrequency().toString());
+                    orderObj.put("quantity", drugOrder.getQuantity());
+                    orderObj.put("quantityUnits", drugOrder.getQuantityUnits().getName(LOCALE).getName());
+                    orderObj.put("route", drugOrder.getRoute().getName(LOCALE).getName());
+                    orderArray.add(orderObj);
+                }
+
+            }
+        }
+        JSONObject pastDrugOrders=new JSONObject();
+        pastDrugOrders.put("pastOrder_groups",orderGroupArray);
+        pastDrugOrders.put("pastSingle_drugs",orderArray);
+        model.put("pastDrugOrdersPayload", pastDrugOrders.toString());
+    }
+
 
     private Object convertTo(Object object, Representation rep) {
         return object == null ? null : ConversionUtil.convertToRepresentation(object, rep);
