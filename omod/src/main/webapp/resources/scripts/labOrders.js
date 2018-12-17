@@ -148,7 +148,6 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 $scope.limit = 12;
                 $scope.pastLabOrders = pastOrders;
                 if($scope.pastLabOrders ) {
-                    // _.map(results, function(item) { return new OpenMRS.TestOrderModel(item) });
                     $scope.pastLabOrders = filterDuplicates($scope.pastLabOrders);
                     $scope.pastLabOrders = renameNotDetectedToLDL($scope.pastLabOrders);
                     $scope.pastLabOrders.sort(function (a, b) {
@@ -273,11 +272,17 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
                 return Object.keys(o).length !== 0;
             });
-            finalVl['hvVl'] = vls;
-            finalVl['name'] ='HIV viral load';
 
-            orders.push(finalVl);
-            return orders;
+            if(!_.isEmpty(vls)) {
+                finalVl['hvVl'] = vls;
+                finalVl['name'] ='HIV viral load';
+                orders.push(finalVl);
+                return orders;
+            } else {
+                return  panelList
+            }
+
+
 
         }
 
