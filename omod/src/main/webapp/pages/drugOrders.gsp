@@ -93,6 +93,7 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
     window.OpenMRS.drugOrdersConfig = ${ jsonConfig };
     window.sessionContext = {'locale': 'en_GB'}
     window.OpenMRS.activeOrdersPayload =${activeOrdersResponse};
+    window.OpenMRS.pastDrugOrdersPayload =${pastDrugOrdersPayload};
 </script>
 <div class="ke-page-sidebar">
     <div class="ke-panel-frame">
@@ -399,25 +400,25 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
                             </div>
 
                             <div class="card-body">
-                                <span ng-show="pastDrugOrders.loading">${ui.message("uicommons.loading.placeholder")}</span>
-                                <span ng-hide="pastDrugOrders.loading || pastDrugOrders.length > 0">None</span>
+                                <span ng-show="pastOrders.loading">${ui.message("uicommons.loading.placeholder")}</span>
+                                <span ng-hide="pastOrders.loading || pastOrders.length > 0">None</span>
 
-                                <div class="table-responsive" ng-show="pastDrugOrders.length > 0">
-                                    <table ng-hide="pastDrugOrders.loading" class="table table-striped">
+                                <div class="table-responsive" ng-show="pastOrders.length > 0">
+                                    <table ng-hide="pastOrders.loading" class="table table-striped">
                                         <tr>
-                                            <th>Replacement</th>
-                                            <th>Dates</th>
-                                            <th>Instructions</th>
+                                            <th width="10%">Replacement</th>
+                                            <th width="25%">Dates</th>
+                                            <th width="65%">Instructions</th>
                                         </tr>
-                                        <tr ng-repeat="order in pastDrugOrders">
+                                        <tr ng-repeat="order in pastOrders">
                                             <td>
                                                 {{ replacementForPastOrder(order) | replacement }}
                                             </td>
                                             <td>
-                                                {{ order | dates }}
+                                                {{ order.dateActivated }} - {{order.dateStopped}}
                                             </td>
                                             <td>
-                                                {{ order | instructions }}
+                                                {{ order.instructionDetailsFinal }}
                                             </td>
                                         </tr>
                                     </table>

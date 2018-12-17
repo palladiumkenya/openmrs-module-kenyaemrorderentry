@@ -108,20 +108,27 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                 careSetting: $scope.careSetting.uuid,
                 status: 'inactive'
             }).then(function (results) {
-                $scope.pastDrugOrders = _.map(results, function (item) {
-                    return new OpenMRS.DrugOrderModel(item)
-                });
-                $scope.pastDrugOrders.sort(function(a, b) {
-                    var key1 = a.dateActivated;
-                    var key2 = b.dateActivated;
-                    if (key1 > key2) {
-                        return -1;
-                    } else if (key1 === key2) {
-                        return 0;
-                    } else {
-                        return 1;
+
+                $scope.patientPastDrugOrders = OpenMRS.pastDrugOrdersPayload;
+                if($scope.patientPastDrugOrders) {
+                    $scope.patientPastSingleDrugInstruction = formatDisplayOfPastSingleDrugInstructions($scope.patientPastDrugOrders.pastSingle_drugs);
+
+                    if($scope.patientPastDrugOrders.pastOrder_groups) {
+                        $scope.pastOrders = formatDisplayOfPastRegimenInstructions($scope.patientPastDrugOrders.pastOrder_groups);
+                       Array.prototype.push.apply($scope.pastOrders,$scope.patientPastSingleDrugInstruction);
+                        $scope.pastOrders.sort(function(a, b) {
+                            var key1 = a.dateActivated;
+                            var key2 = b.dateActivated;
+                            if (key1 > key2) {
+                                return -1;
+                            } else if (key1 === key2) {
+                                return 0;
+                            } else {
+                                return 1;
+                            }
+                        });
                     }
-                });
+                }
             });
         }
 
@@ -243,7 +250,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
         }
 
         $scope.replacementForPastOrder = function (pastOrder) {
-            var candidates = _.union($scope.activeDrugOrders, $scope.pastDrugOrders)
+            var candidates = _.union($scope.activeDrugOrders, $scope.pastDrugOrders);
             return _.find(candidates, function (item) {
                 return item.previousOrder && item.previousOrder.uuid === pastOrder.uuid;
             });
@@ -464,5 +471,70 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
 
             return instructionDesc;
 
+        }
+        function formatDisplayOfPastRegimenInstructions(res) {
+
+            var orders = [];
+            var instructionDesc = [];
+            for (var i = 0; i < res.length; ++i) {
+                var dat = res[i].components;
+                for (var t = 0; t < dat.length; ++t) {
+                    var data = dat[t];
+                    for (var r in data) {
+                        if (data.hasOwnProperty(r)) {
+                            data['instructionDetails'] = data.name + "(" + data.dose + " " + data.units_name + ',' + data.frequency_name
+                                + ',' + 'Quantity:' + data.quantity + ' ' + data.quantity_units_name + ")";
+                            data['a']
+                        }
+
+                    }
+                    orders.push(data);
+                }
+            }
+
+            // group orders using order group id
+            var grouped = _.groupBy(orders, function (o) {
+                return o.order_group_id;
+            });
+
+            var valueForGroupedOrder = [];
+            if (grouped) {
+
+                Object.keys(grouped).forEach(function (key) {
+                    valueForGroupedOrder = grouped[key];
+                    var dateActivated = valueForGroupedOrder[0].dateActivated;
+                    var dateStopped = valueForGroupedOrder[0].dateStopped;
+                    var str = valueForGroupedOrder.map(function (elem) {
+                        return elem.instructionDetails;
+                    }).join(" + ");
+                    instructionDesc.push({
+                        instructionDetailsFinal: str,
+                        dateActivated: dateActivated,
+                        dateStopped: dateStopped
+                    });
+
+                })
+            }
+
+            return instructionDesc;
+
+        }
+
+        function formatDisplayOfPastSingleDrugInstructions(res) {
+            var orders = [];
+            for (var i = 0; i < res.length; ++i) {
+                var data = res[i];
+
+                for (var r in data) {
+                    if (data.hasOwnProperty(r)) {
+                        data['instructionDetailsFinal'] = data.drug +"(" + data.dose + " "+data.doseUnits +',' + data.frequency
+                            +','+'Quantity:' +data.quantity +' ' +data.quantityUnits+")" ;
+                    }
+
+                }
+                orders.push(data);
+
+            }
+            return orders;
         }
     }]);
