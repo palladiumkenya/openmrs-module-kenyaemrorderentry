@@ -51,7 +51,7 @@
                             </div>
 
                             <div class="card-body">
-                                <span ng-show="InspireList[0].length ===1">No Lab orders to enter results for</span>
+                                <span ng-show="InspireList.length ===0">No Lab orders to enter results for</span>
                                 <div class="row" ng-repeat="items in InspireList">
                                     <div class="col" ng-repeat="control in items" >
 
@@ -145,7 +145,7 @@
 
                             </div>
 
-                            <div style="padding-left: 50%; padding-bottom: 20px" ng-show="InspireList[0].length >1"
+                            <div style="padding-left: 50%; padding-bottom: 20px" ng-show="InspireList.length >0"
                             >
                                 <button type="button" ng-click="postLabOrderResults()" data-toggle="modal"
                                         data-target="#spinnerSave">
