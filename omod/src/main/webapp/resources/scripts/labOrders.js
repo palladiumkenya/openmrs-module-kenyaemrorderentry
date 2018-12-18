@@ -115,6 +115,13 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                         uuid:'162081AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
                     }
                 ];
+                $scope.OrderReason =  _.filter($scope.OrderReason, function(o) {
+                    if(config.patient.person.gender !== 'F') {
+                        return o.uuid !== '1434AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
+                    } else {
+                        return o;
+                    }
+                });
 
 
             });
