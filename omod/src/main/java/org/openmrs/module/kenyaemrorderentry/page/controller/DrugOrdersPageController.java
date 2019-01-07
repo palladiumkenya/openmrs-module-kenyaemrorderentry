@@ -195,7 +195,7 @@ public class DrugOrdersPageController {
                     orderObj.put("concept", order.getConcept());
                     orderObj.put("dateActivated", order.getDateCreated().toString());
                     orderObj.put("dateStopped", order.getDateStopped().toString());
-                    orderObj.put("drug", drugOrder.getDrug().getFullName(LOCALE));
+                    orderObj.put("drug", drugOrder.getDrug().getFullName(LOCALE) != null ? drugOrder.getDrug().getFullName(LOCALE) : drugOrder.getDrug().getConcept().getName(LOCALE).getName());
                     orderObj.put("dose", drugOrder.getDose());
                     orderObj.put("doseUnits", drugOrder.getDoseUnits().getName(LOCALE).getName());
                     orderObj.put("frequency", drugOrder.getFrequency().toString());
