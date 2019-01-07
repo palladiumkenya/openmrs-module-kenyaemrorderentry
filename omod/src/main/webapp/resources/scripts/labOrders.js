@@ -444,7 +444,6 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
             $scope.lOrders = createLabOrdersPaylaod($scope.filteredOrders);
             $scope.lOrdersPayload = angular.copy( $scope.lOrders);
-
             for (var i = 0; i < $scope.lOrdersPayload.length; ++i) {
                 $scope.encounterDatetime = $scope.lOrdersPayload[i].encounterDatetime;
                 delete $scope.lOrdersPayload[i].concept_id;
@@ -453,7 +452,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 delete $scope.lOrdersPayload[i].selected;
                 delete $scope.lOrdersPayload[i].encounterDatetime;
             }
-
+            
             var encounterContext = {
                 patient: config.patient,
                 encounterType: uuid,
@@ -461,17 +460,55 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 encounterDatetime: $scope.encounterDatetime,
                 encounterRole: config.encounterRole
             };
+            var newOrders = _.filter($scope.lOrdersPayload, function(o) {
+                return !o.dateActivated;
+            });
 
+            _.each($scope.lOrdersPayload, function(o) {
+
+                if (o.dateActivated) {
+                    var encounterContextOldOrders = {};
+                    $scope.oldOrdrs = [];
+                    for (var property in o) {
+                        if (o.hasOwnProperty(property)) {
+                            if(property ==='dateActivated') {
+                                encounterContextOldOrders = {
+                                    patient: config.patient,
+                                    encounterType: uuid,
+                                    location: null, // TODO
+                                    encounterDatetime: o.dateActivated,
+                                    encounterRole: config.encounterRole
+                                };
+                                $scope.oldOrdrs.push(o);
+                                OrderEntryService.signAndSave({ draftOrders: $scope.oldOrdrs }, encounterContextOldOrders)
+                                    .$promise.then(function(result) {
+                                    $('#spinner').modal('hide');
+                                    loadExistingOrders();
+                                    $window.location.reload();
+                                    //  location.href = location.href;
+                                }, function(errorResponse) {
+                                    $('#spinner').modal('hide');
+                                    console.log('errorResponse.data.error.message',errorResponse.data.error);
+                                    emr.errorMessage(errorResponse.data.error.message);
+                                    $scope.loading = false;
+                                });
+                            }
+
+                        }
+                    }
+
+                }
+
+            });
 
             $scope.loading = true;
-            OrderEntryService.signAndSave({ draftOrders: $scope.lOrdersPayload }, encounterContext)
+            OrderEntryService.signAndSave({ draftOrders: newOrders }, encounterContext)
                 .$promise.then(function(result) {
                 $('#spinner').modal('hide');
                 loadExistingOrders();
                 $window.location.reload();
               //  location.href = location.href;
             }, function(errorResponse) {
-                $('#orderError').modal('show');
                 $('#spinner').modal('hide');
                 console.log('errorResponse.data.error.message',errorResponse.data.error);
                 emr.errorMessage(errorResponse.data.error.message);
