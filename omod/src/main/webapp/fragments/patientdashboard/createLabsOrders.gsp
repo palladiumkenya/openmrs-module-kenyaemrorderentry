@@ -281,7 +281,9 @@
                 </div>
 
                 <div class="modal-body" style="color:red;" id="modal-text">
-                    You are not login as provider, please contact System Administrator
+                    {{showErrorToast}}                </div>
+                <div class="modal-footer">
+                    <button type="button"  data-dismiss="modal2" ng-click="closeModal()">Close</button>
                 </div>
             </div>
         </div>
