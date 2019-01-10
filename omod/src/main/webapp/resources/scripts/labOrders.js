@@ -312,6 +312,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
         $scope.dosingTypes = OpenMRS.dosingTypes;
         $scope.showFields = false;
         $scope.showTestFields = false;
+        // $scope.showErrorToast ='';
 
         var config = OpenMRS.drugOrdersConfig;
         var labs = OpenMRS.labTestJsonPayload;
@@ -435,12 +436,13 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
         $scope.postLabOrdersEncounters = function() {
             if(config.provider === '' || config.provider === undefined || config.provider === null) {
+                $scope.showErrorToast ='You are not login as provider, please contact System Administrator';
                 $('#orderError').modal('show');
                 return;
             }
             var uuid = {uuid:"e1406e88-e9a9-11e8-9f32-f2801f1b9fd1"};
             $scope.OrderUuid = '';
-            $('#spinner').modal('show');
+
 
             $scope.lOrders = createLabOrdersPaylaod($scope.filteredOrders);
             $scope.lOrdersPayload = angular.copy( $scope.lOrders);
@@ -452,7 +454,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 delete $scope.lOrdersPayload[i].selected;
                 delete $scope.lOrdersPayload[i].encounterDatetime;
             }
-            
+
             var encounterContext = {
                 patient: config.patient,
                 encounterType: uuid,
@@ -460,6 +462,60 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 encounterDatetime: $scope.encounterDatetime,
                 encounterRole: config.encounterRole
             };
+
+            var checkVlOrderReason = _.filter($scope.lOrdersPayload, function(o) {
+                return o.concept ==='856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+                    || o.concept ==='1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
+            });
+            var checkCd4OrderReason = _.filter($scope.lOrdersPayload, function(o) {
+                return o.concept ==='730AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+
+            });
+
+            var checkCd4CountOrderReason = _.filter($scope.lOrdersPayload, function(o) {
+                return o.concept ==='5497AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+
+            });
+
+
+            if(checkVlOrderReason && checkVlOrderReason[0]) {
+                if ((checkVlOrderReason[0].orderReasonNonCoded === '' || checkVlOrderReason[0].orderReasonNonCoded === null
+                    || checkVlOrderReason[0].orderReasonNonCoded === undefined) && (checkVlOrderReason[0].orderReason === ''
+                    || checkVlOrderReason[0].orderReason === null || checkVlOrderReason[0].orderReason === undefined)) {
+                    $scope.showErrorToast = 'Order reason for HIV viral load is required';
+
+                    $('#orderError').modal('show');
+                    return;
+                }
+            }
+
+            if(checkCd4CountOrderReason && checkCd4CountOrderReason[0]) {
+                if ((checkCd4CountOrderReason[0].orderReasonNonCoded === '' || checkCd4CountOrderReason[0].orderReasonNonCoded === null ||
+                    checkCd4CountOrderReason[0].orderReasonNonCoded === undefined) && (checkCd4CountOrderReason[0].orderReason === ''
+                    || checkCd4CountOrderReason[0].orderReason === null || checkCd4CountOrderReason[0].orderReason === undefined)) {
+
+                    $scope.showErrorToast = 'Order reason for CD4 Count is required';
+
+                    $('#orderError').modal('show');
+                    return;
+                }
+            }
+
+            if(checkCd4OrderReason && checkCd4OrderReason[0]) {
+                if ((checkCd4OrderReason[0].orderReasonNonCoded === '' || checkCd4OrderReason[0].orderReasonNonCoded === null
+                    || checkCd4OrderReason[0].orderReasonNonCoded === undefined) && (checkCd4OrderReason[0].orderReason === ''
+                    || checkCd4OrderReason[0].orderReason === null || checkCd4OrderReason[0].orderReason === undefined)) {
+
+                    $scope.showErrorToast = 'Order reason for CD4% is required';
+
+                    $('#orderError').modal('show');
+                    return;
+                }
+            }
+
+
+            $('#spinner').modal('show');
+
             var newOrders = _.filter($scope.lOrdersPayload, function(o) {
                 return !o.dateActivated;
             });
@@ -870,6 +926,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             });
 
         };
+
         $scope.closeModal = function() {
             $scope.voidOrders = '';
             $scope.orderDate = '';
@@ -878,7 +935,9 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             $('#orderUrgency').modal('hide');
             $('#generalMessage').modal('hide');
             $('#voidOrdersModal').modal('hide');
+            $('#orderError').modal('hide');
         };
+
         $scope.setOrderDate = function() {
             $scope.orderDate = angular.element('#orderDate').val();
             $scope.orderSel['dateActivated'] =  $scope.orderDate.substring(0, 10);
