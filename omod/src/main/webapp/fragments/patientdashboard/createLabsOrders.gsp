@@ -271,7 +271,7 @@
 
     <!--Error Modal -->
     <div class="modal fade" id="orderError" tabindex="-1" role="dialog" style="font-size:16px;">
-        <div class="modal-dialog" role="document">
+        <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header modal-header-primary">
                     <h5 class="modal-title" id="exampleModalLabel">Server Error</h5>
