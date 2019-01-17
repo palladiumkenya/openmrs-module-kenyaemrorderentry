@@ -113,6 +113,22 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                     {
                         name:'Follow up',
                         uuid:'162081AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+                    },
+                    {
+                        name:'Single Drug Substitution',
+                        uuid:'1259AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+                    },
+                    {
+                        name:'Breastfeeding',
+                        uuid:'159882AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+                    },
+                    {
+                        name:'Clinical failure',
+                        uuid:'163523AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+                    },
+                    {
+                        name:'Routine',
+                        uuid:'161236AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
                     }
                 ];
                 $scope.OrderReason =  _.filter($scope.OrderReason, function(o) {
