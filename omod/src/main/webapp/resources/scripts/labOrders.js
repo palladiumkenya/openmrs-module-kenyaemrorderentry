@@ -410,6 +410,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             });
             $scope.filteredOrders = unchecked;
             $scope.selectedOrders = $scope.filteredOrders;
+            $scope.generateLabOrdersSummaryView();
 
 
         }
@@ -417,11 +418,12 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
         $scope.selectedOrders = [];
         $scope.noOrderSelected ='None';
         $scope.getSelectedTests = function(tests) {
+
             if(tests.selected === true) {
                 checkIfSelectedTestIsActiveOrder(tests);
                 $scope.selectedOrders.push(tests);
                 $scope.filteredOrders = _.uniq($scope.selectedOrders);
-
+                $scope.filteredOrders = addDefaultDateAndUrgency($scope.filteredOrders);
 
             }
 
@@ -449,6 +451,43 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
 
         }
+        function addDefaultDateAndUrgency(res) {
+            var today = new Date();
+            var dd = today.getDate();
+            var mm = today.getMonth() + 1; //January is 0!
+            var yyyy = today.getFullYear();
+
+            if (dd < 10) {
+                dd = '0' + dd;
+            }
+
+            if (mm < 10) {
+                mm = '0' + mm;
+            }
+
+            today = yyyy + '-' + mm + '-' + dd;
+            var orders = [];
+            for (var i = 0; i < res.length; ++i) {
+                var data = res[i];
+
+                for (var r in data) {
+                    if (data.hasOwnProperty(r)) {
+
+                        if (data.concept_id ) {
+                            data['dateActivated'] =  today.toString();
+                            data['encounterDatetime'] =  today.toString();
+                            data['urgency'] = 'ROUTINE';
+                        }
+
+                    }
+
+                }
+                orders.push(data);
+
+            }
+            return orders;
+
+        }
 
         $scope.postLabOrdersEncounters = function() {
             if(config.provider === '' || config.provider === undefined || config.provider === null) {
@@ -466,6 +505,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 $scope.encounterDatetime = $scope.lOrdersPayload[i].encounterDatetime;
                 delete $scope.lOrdersPayload[i].concept_id;
                 delete $scope.lOrdersPayload[i].name;
+                delete $scope.lOrdersPayload[i].orderReasonCodedName;
                 delete $scope.lOrdersPayload[i].$$hashKey;
                 delete $scope.lOrdersPayload[i].selected;
                 delete $scope.lOrdersPayload[i].encounterDatetime;
@@ -529,7 +569,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 }
             }
 
-
+            $('#confirmation-dailog').modal('hide');
             $('#spinner').modal('show');
 
             var newOrders = _.filter($scope.lOrdersPayload, function(o) {
@@ -631,6 +671,9 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
         }
 
         $scope.orderSelectedToAddDateActivated = function(order) {
+            $scope.orderReasonNonCoded = '';
+            $scope.orderReasonCoded = '';
+            $scope.orderDate = '';
             $scope.orderSel = order;
             $scope.orderUrgency = order;
 
@@ -961,9 +1004,9 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
             $scope.filteredOrders.push($scope.orderSel);
             $scope.filteredOrders = _.uniq($scope.filteredOrders);
+            $scope.generateLabOrdersSummaryView();
 
             $('#dateOrder').modal('hide');
-            $('#orderUrgency').modal('hide');
 
         };
         $scope.orderReasonNonCoded = '';
@@ -975,8 +1018,18 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             $scope.orderUrgency['urgency'] =  e.options[e.selectedIndex].value;
             $scope.orderUrgency['orderReasonNonCoded'] =  $scope.orderReasonNonCoded;
             $scope.orderUrgency['orderReason'] =  $scope.orderReasonCoded;
+
+            _.each($scope.OrderReason, function(o) {
+                if (o.uuid === $scope.orderReasonCoded) {
+                    $scope.name = o.name;
+
+                }
+                $scope.orderUrgency['orderReasonCodedName'] = $scope.name + ',' + $scope.orderReasonNonCoded;
+
+            });
             $scope.filteredOrders.push($scope.orderUrgency);
             $scope.filteredOrders = _.uniq($scope.filteredOrders);
+            $scope.generateLabOrdersSummaryView();
             $('#orderUrgency').modal('hide');
 
         };
@@ -1012,6 +1065,15 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 return o.concept !== '1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
             });
         }
+
+        $scope.generateLabOrdersSummaryView = function () {
+            $scope.viewSummaryLabs= $scope.filteredOrders;
+        }
+
+        $scope.closeConfirmationDialogModal = function() {
+            $('#confirmation-dailog').modal('hide');
+        };
+
 
 
 

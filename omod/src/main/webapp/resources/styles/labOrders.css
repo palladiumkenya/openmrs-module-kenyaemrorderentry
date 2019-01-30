@@ -94,6 +94,10 @@ body {
     display: inline-block;
 
 }
+.cancel-button {
+    background-color: red !important;
+    text-decoration-color: white !important;
+}
 
 .dropdown-content a:hover {
 
