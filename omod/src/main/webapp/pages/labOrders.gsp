@@ -218,9 +218,11 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                     </table>
 
                                     <div style="padding-left: 50%">
-                                        <button type="button" ng-click="postLabOrdersEncounters()"
+                                        <button type="button"
+                                                data-toggle="modal" data-target="#confirmation-dailog"
+                                            ng-click="generateLabOrdersSummaryView()"
                                                 ng-disabled="selectedOrders.length === 0"><img src="${ ui.resourceLink("kenyaui", "images/glyphs/ok.png") }" />
-                                            Save orders</button>
+                                            Confirm</button>
                                     </div>
 
                                 </form>
@@ -229,6 +231,75 @@ ${ui.includeFragment("appui", "messages", [codes: [
 
 
                         </div>
+                            <!-- confirmation dialog -->
+                            <div class="modal fade" id="confirmation-dailog" tabindex="-1" role="dialog" aria-labelledby="confirmationMessageModalCenterTitle" aria-hidden="true">
+                                <div class="modal-dialog modal-lg" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header modal-header-primary">
+                                            <h5 class="modal-title" id="confirmationModalCenterTitle">Confirm Orders</h5>
+                                            <button type="button" class="close" data-dismiss="modal" ng-click="closeConfirmationDialogModal()">&times;
+
+                                            </button>
+                                        </div>
+
+                                        <div class="modal-body">
+                                            <div class="table-responsive">
+                                                <table class="table table-striped">
+                                                    <tr>
+                                                        <th>Order Date</th>
+                                                        <th>Test Name</th>
+                                                        <th>Order Reason</th>
+                                                        <th>Order Urgency</th>
+                                                        <th>Actions</th>
+                                                    </tr>
+                                                    <tr ng-repeat="testSummary in viewSummaryLabs">
+                                                        <td>
+                                                            {{testSummary.dateActivated}}
+                                                        </td>
+                                                        <td>
+                                                            {{testSummary.name}}
+                                                        </td>
+                                                        <td>
+                                                            {{testSummary.orderReasonCodedName}}
+
+                                                        </td>
+                                                        <td>
+                                                            {{testSummary.urgency}}
+
+                                                        </td>
+                                                        <td>
+                                                            <div  role="group" aria-label="Basic example">
+                                                                <button type="button" class="fa fa-calendar fa-1x"
+                                                                        data-toggle="modal" data-target="#dateOrder"
+                                                                        ng-click="orderSelectedToAddDateActivated(testSummary)"></button>
+                                                                <button type="button" class="fa fa-warning fa-1x"
+                                                                        data-placement="top" title="Urgency | Reason"
+                                                                        data-toggle="modal" data-target="#orderUrgency"
+                                                                        ng-click="orderSelectedToAddDateActivated(testSummary)"
+                                                                ></button>
+                                                                <button type="button" class="fa fa-remove fa-1x"
+                                                                        ng-click="deselectedOrder(testSummary)" style="color:#9D0101;cursor: pointer"></button>
+                                                            </div>
+                                                        </td>
+
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="mr-auto"   data-dismiss="modal" ng-click="closeConfirmationDialogModal()"
+                                            >Cancel</button>
+
+                                            <div>
+                                                <button type="button" ng-click="postLabOrdersEncounters()"
+                                                        ng-disabled="selectedOrders.length === 0">Save</button>
+                                            </div>
+
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
                         <!-- Modal date for lab orders -->
                         <div class="modal fade" id="dateOrder" tabindex="-1" role="dialog" aria-labelledby="dateModalCenterTitle" aria-hidden="true">
@@ -352,6 +423,8 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                 </div>
                             </div>
                         </div>
+
+
                         </div>
                     </div>
 
