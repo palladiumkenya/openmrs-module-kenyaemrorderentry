@@ -84,6 +84,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 $scope.activeTestOrders = _.map(results, function(item) { return new OpenMRS.TestOrderModel(item) });
                 $scope.activeTestOrdersForHvVl = $scope.activeTestOrders;
                 $scope.activeTestOrders = customizeActiveOrdersToDisplaySingHivVl($scope.activeTestOrders);
+                mapGeneXpertActiveTestName($scope.activeTestOrders);
                 $scope.activeTestOrders.sort(function(a, b) {
                     var key1 = a.dateActivated;
                     var key2 = b.dateActivated;
@@ -227,10 +228,33 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
 
         function customizeActiveOrdersToDisplaySingHivVl(result) {
+
             return _.filter(result, function(o) {
+
 
                 return o.display !== 'HIV VIRAL LOAD, QUALITATIVE';
             });
+        }
+
+        function mapGeneXpertActiveTestName(result) {
+
+            var orders = [];
+            for (var i = 0; i < result.length; ++i) {
+                var data = result[i];
+
+                for (var r in data) {
+                    if (data.hasOwnProperty(r)) {
+
+                        if (data.display ==='Tuberculosis polymerase chain reaction with rifampin resistance checking' ) {
+                            data['display'] =  'GeneXpert';
+                        }
+                    }
+
+                }
+                orders.push(data);
+
+            }
+            return orders;
         }
 
         function customiseHivViralLoadObj(panelList) {
@@ -246,6 +270,9 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                     if (data.hasOwnProperty(r)) {
                         if (data.dateActivated ) {
                             data['dateActivated'] = new Date(data.dateActivated );
+                        }
+                        if (data.label ==='Tuberculosis polymerase chain reaction with rifampin resistance checking' ) {
+                            data['label'] =  'GeneXpert';
                         }
 
                     if(data.concept ==='856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
@@ -402,6 +429,30 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             $scope.panelTypeName = tests.name;
             $scope.showTestFields = true;
             $scope.panelTests = tests.tests
+            $scope.panelTests = mapGeneXpertName($scope.panelTests);
+
+        }
+
+        function mapGeneXpertName (res) {
+            var orders = [];
+            for (var i = 0; i < res.length; ++i) {
+                var data = res[i];
+
+                for (var r in data) {
+                    if (data.hasOwnProperty(r)) {
+
+                        if (data.name ==='Tuberculosis polymerase chain reaction with rifampin resistance checking' ) {
+                            data['name'] =  'GeneXpert';
+                        }
+
+                    }
+
+                }
+                orders.push(data);
+
+            }
+            return orders;
+
         }
         $scope.deselectedOrder = function(order) {
             order.selected = false;
