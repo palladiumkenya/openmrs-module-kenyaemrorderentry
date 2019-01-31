@@ -188,7 +188,8 @@ public class LabOrdersPageController {
         JSONArray sputumTb = buildTestPanelWithoutPanelConcept("Sputum", labTestJsonPayload,
                 "TB MONITORING", Arrays.asList(
                         concService.getConcept(307),
-                        concService.getConcept(1465)
+                        concService.getConcept(1465),
+                        concService.getConcept(162202) // GeneXpert MTB/RIF
                 ));
 
         model.put("labTestJsonPayload", labTestJsonPayload.toString());
