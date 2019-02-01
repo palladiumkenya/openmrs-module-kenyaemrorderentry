@@ -4,6 +4,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.openmrs.*;
 import org.openmrs.api.*;
+import org.openmrs.DrugOrder;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appui.UiSessionContext;
 import org.openmrs.module.webservices.rest.web.ConversionUtil;
@@ -148,24 +149,35 @@ public class DrugOrdersPageController {
         JSONArray components =  new JSONArray();
         int previousOrderGroupId=0;
         for(Order order:pastOrders){
-            DrugOrder drugOrder=(DrugOrder)order;
+
             if(order.getOrderGroup()!= null) {
                 if(order.getDateStopped() != null) {
-
+                    DrugOrder drugOrder=(DrugOrder)order.cloneForRevision();
 
                 component = new JSONObject();
                 component.put("name", drugOrder.getDrug().getConcept().getShortNameInLocale(LOCALE) != null ? drugOrder.getDrug().getConcept().getShortNameInLocale(LOCALE).getName() : drugOrder.getDrug().getConcept().getName(LOCALE).getName());
-                component.put("dose", drugOrder.getDose().toString());
-                component.put("units_uuid", drugOrder.getDoseUnits().getUuid());
-                component.put("units_name", drugOrder.getDoseUnits().getName(LOCALE).getName());
-                component.put("frequency", drugOrder.getFrequency().getUuid());
-                component.put("frequency_name", drugOrder.getFrequency().getName());
+                if(drugOrder.getDose() != null || drugOrder.getDoseUnits() != null || drugOrder.getFrequency() != null) {
+                    component.put("dose", drugOrder.getDose().toString());
+                    component.put("units_uuid", drugOrder.getDoseUnits().getUuid());
+                    component.put("units_name", drugOrder.getDoseUnits().getName(LOCALE).getName());
+                    component.put("frequency", drugOrder.getFrequency().getUuid());
+                    component.put("frequency_name", drugOrder.getFrequency().getName());
+                }
+
+                if(drugOrder.getQuantity() != null || drugOrder.getQuantityUnits()!= null) {
+                    component.put("quantity", drugOrder.getQuantity());
+                    component.put("quantity_units_name", drugOrder.getQuantityUnits().getName(LOCALE).getName());
+
+                }
+
+
+
+
                 component.put("drug_id", drugOrder.getDrug().getDrugId());
                 component.put("dateActivated", order.getDateCreated().toString());
                 component.put("dateStopped", order.getDateStopped().toString());
                 component.put("order_group_id", order.getOrderGroup().getOrderGroupId());
-                component.put("quantity", drugOrder.getQuantity());
-                component.put("quantity_units_name", drugOrder.getQuantityUnits().getName(LOCALE).getName());
+
 
 
 
@@ -190,18 +202,25 @@ public class DrugOrdersPageController {
             }
             else {
                 if(order.getDateStopped() != null) {
+                    DrugOrder drugOrder=(DrugOrder)order.cloneForRevision();
                     orderObj = new JSONObject();
                     orderObj.put("uuid", order.getUuid());
                     orderObj.put("concept", order.getConcept());
                     orderObj.put("dateActivated", order.getDateCreated().toString());
                     orderObj.put("dateStopped", order.getDateStopped().toString());
-                    orderObj.put("drug", drugOrder.getDrug().getFullName(LOCALE) != null ? drugOrder.getDrug().getFullName(LOCALE) : drugOrder.getDrug().getConcept().getName(LOCALE).getName());
-                    orderObj.put("dose", drugOrder.getDose());
-                    orderObj.put("doseUnits", drugOrder.getDoseUnits().getName(LOCALE).getName());
-                    orderObj.put("frequency", drugOrder.getFrequency().toString());
-                    orderObj.put("quantity", drugOrder.getQuantity());
-                    orderObj.put("quantityUnits", drugOrder.getQuantityUnits().getName(LOCALE).getName());
-                    orderObj.put("route", drugOrder.getRoute().getName(LOCALE).getName());
+
+                    if((drugOrder.getDose()!= null || drugOrder.getQuantity() != null || drugOrder.getDoseUnits() != null
+                    || drugOrder.getFrequency() != null || drugOrder.getQuantityUnits() != null || drugOrder.getRoute()!= null
+                    ) && drugOrder.getDrug() != null ) {
+                        orderObj.put("dose", drugOrder.getDose());
+                        orderObj.put("quantity", drugOrder.getQuantity());
+                        orderObj.put("doseUnits", drugOrder.getDoseUnits().getName(LOCALE).getName());
+                        orderObj.put("frequency", drugOrder.getFrequency().toString());
+                        orderObj.put("drug", drugOrder.getDrug().getFullName(LOCALE));
+                        orderObj.put("quantityUnits", drugOrder.getQuantityUnits().getName(LOCALE).getName());
+                        orderObj.put("route", drugOrder.getRoute().getName(LOCALE).getName());
+
+                    }
                     orderArray.add(orderObj);
                 }
 
@@ -210,7 +229,7 @@ public class DrugOrdersPageController {
         JSONObject pastDrugOrders=new JSONObject();
         pastDrugOrders.put("pastOrder_groups",orderGroupArray);
         pastDrugOrders.put("pastSingle_drugs",orderArray);
-        model.put("pastDrugOrdersPayload", pastDrugOrders.toString());
+        model.put("pastDrugOrdersPayload",pastDrugOrders.toString() );
     }
 
 
