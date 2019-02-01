@@ -482,9 +482,10 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                     var data = dat[t];
                     for (var r in data) {
                         if (data.hasOwnProperty(r)) {
-                            data['instructionDetails'] = data.name + "(" + data.dose + " " + data.units_name + ',' + data.frequency_name
-                                + ',' + 'Quantity:' + data.quantity + ' ' + data.quantity_units_name + ")";
-                            data['a']
+                            if(data.drug_id) {
+                                data['instructionDetails'] = data.name + "(" + data.dose + " " + data.units_name + ',' + data.frequency_name
+                                    + ',' + 'Quantity:' + data.quantity + ' ' + data.quantity_units_name + ")";
+                            }
                         }
 
                     }
@@ -492,7 +493,6 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                 }
             }
 
-            // group orders using order group id
             var grouped = _.groupBy(orders, function (o) {
                 return o.order_group_id;
             });
