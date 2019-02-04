@@ -307,7 +307,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                 <div class="modal-content">
                                     <div class="modal-header modal-header-primary">
                                         <h5 class="modal-title" id="dateModalCenterTitle"></h5>
-                                        <button type="button" class="close" data-dismiss="modal2" ng-click="closeModal()">&times;
+                                        <button type="button" class="close" data-dismiss="modal2" ng-click="closeDateOrderModal()">&times;
 
                                         </button>
                                     </div>
@@ -318,7 +318,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                         </div>
                                     </div>
                                     <div class="modal-footer">
-                                        <button type="button" data-dismiss="modal2"   ng-click="closeModal()">Close</button>
+                                        <button type="button" data-dismiss="modal2"   ng-click="closeDateOrderModal()">Close</button>
                                         <button type="button" ng-click="setOrderDate()">
                                             <img src="${ ui.resourceLink("kenyaui", "images/glyphs/ok.png") }" /> Save</button>
                                     </div>

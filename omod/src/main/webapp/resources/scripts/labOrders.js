@@ -1039,17 +1039,31 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
         $scope.closeModal = function() {
             $scope.voidOrders = '';
-            $scope.orderDate = '';
-            angular.element('#orderDate').val('');
-            $('#dateOrder').modal('hide');
+
             $('#orderUrgency').modal('hide');
             $('#generalMessage').modal('hide');
             $('#voidOrdersModal').modal('hide');
             $('#orderError').modal('hide');
         };
+        $scope.closeDateOrderModal = function () {
+            $scope.orderDate = '';
+            angular.element('#orderDate').val('');
+            $('#dateOrder').modal('hide');
+        }
+
 
         $scope.setOrderDate = function() {
             $scope.orderDate = angular.element('#orderDate').val();
+            var CurrentDate = new Date();
+            $scope.GivenDate = new Date($scope.orderDate);
+
+            if($scope.GivenDate > CurrentDate){
+                $scope.showErrorToast = 'Selected date is greater than the current date.';
+
+                $('#orderError').modal('show');
+                return;
+            }
+
             $scope.orderSel['dateActivated'] =  $scope.orderDate.substring(0, 10);
             $scope.orderSel['encounterDatetime'] =  $scope.orderDate.substring(0, 10);
 
