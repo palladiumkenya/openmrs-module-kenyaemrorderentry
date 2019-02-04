@@ -55,6 +55,7 @@
                             <th>Tests Ordered</th>
                             <th>Result Date</th>
                             <th>Results</th>
+                            <th>Actions</th>
                         </tr>
                         <tr ng-repeat="past in pastLabOrders | limitTo:limit">
                             <td>
@@ -79,6 +80,11 @@
 
 
                             </td>
+                            <td>
+                                <button type="button" class="fa fa-edit fa-1x"
+                                        data-toggle="modal" data-target="#editOrderResults"
+                                        ng-click="editOrderResultsDialog(past)" style="cursor: pointer">Edit</button>
+                            </td>
 
                         </tr>
                     </table>
@@ -86,6 +92,46 @@
             </div>
         </div>
     </form>
+
+    <!--Edit Results Modal -->
+    <div class="modal fade" id="editOrderResults" tabindex="-1" role="dialog" style="font-size:16px;">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header modal-header-primary">
+                    <h5 class="modal-title" id="exampleModalLabel">Edit Lab Results</h5>
+                    <button type="button" aria-label="Close" ng-click="closeEditResultsDialogModal()">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body" style="color:red;" id="modal-text">
+                    <label class="label label-md "><b>{{orderName}}:</b></label>
+                    <div ng-if="valueNumericResults">
+                        <input class="form-control" type="number" ng-model="obsValue" id="numericResults">
+                    </div>
+                    <div ng-if="valueTextResults">
+                        <input class="form-control" type="text" ng-model="obsValue" id="textResults">
+                    </div>
+
+
+                    <div ng-if="valueCodedResults">
+                        <select class="form-control set-width" id="singleSelect"
+                                ng-model="data.singleSelect">
+                            <option ng-repeat=" o in answers"
+                                    ng-value="o.uuid">{{o.display}}
+                            </option>
+                        </select>
+                    </div>
+
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" ng-click="closeEditResultsDialogModal()">Close</button>
+                    <button type="button"  data-dismiss="modal2" ng-click="updateLabResults()">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
 </div>

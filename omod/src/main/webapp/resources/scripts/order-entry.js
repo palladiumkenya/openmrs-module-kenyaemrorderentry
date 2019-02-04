@@ -283,6 +283,36 @@ angular.module("orderEntry", ['orderService', 'encounterService', 'session'])
                 return $http(req).then(function (value) {
 
                 })
+            },
+
+            updateLabResults: function(orderContext, uuid, successCallback, errorCallback) {
+                var req = {
+                    method: 'POST',
+                    url: '/openmrs/ws/rest/v1/obs/' + uuid ,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    data: orderContext
+                };
+
+                return $http(req).then(function (value) {
+
+                })
+            },
+
+            getConceptAnswers: function( uuid, successCallback, errorCallback) {
+                    var deferred = $q.defer();
+
+                    // get posts form backend
+                    $http.get('/openmrs/ws/rest/v1/concept/' + uuid)
+                        .then(function (result) {
+                                deferred.resolve(result.data);
+
+                        }, function (error) {
+                            deferred.reject(error);
+                        });
+                    return deferred.promise;
             }
+
         }
     }]);
