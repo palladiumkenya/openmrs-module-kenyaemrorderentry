@@ -125,3 +125,8 @@ div.editing-draft-order {
   background-color: #ebebeb;
 
 }
+#orderHeader {
+  vertical-align: center !important;
+  text-align: center;
+  padding-left: 30%;
+}
