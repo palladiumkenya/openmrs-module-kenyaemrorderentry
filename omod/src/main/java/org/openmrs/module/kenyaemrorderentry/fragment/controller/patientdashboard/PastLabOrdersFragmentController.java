@@ -110,6 +110,9 @@ public class PastLabOrdersFragmentController {
                                     obsObj.put("name", con.getName(LOCALE).getName());
                                     obsObj.put("obsId", obs.getId());
                                     obsObj.put("OrderId", obs.getOrder().getOrderId());
+                                    obsObj.put("obsUuid", obs.getUuid());
+                                    obsObj.put("concept", obs.getConcept().getUuid());
+                                    obsObj.put("concept_id", obs.getConcept().getId());
                                     obsObj.put("dateActivated", orderService.getOrder(orderId).getDateActivated().toString());
                                     obsObj.put("resultDate", obs.getObsDatetime().toString());
                                     labOrdersList.add(obsObj);

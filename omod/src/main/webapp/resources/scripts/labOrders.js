@@ -1139,6 +1139,75 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             $('#confirmation-dailog').modal('hide');
         };
 
+        $scope.editOrderResultsDialog = function (res) {
+            $scope.obsValue = '';
+            $scope.data = {};
+            $scope.ObsUuid = res.obsUuid;
+            $scope.obsConcept = res.concept;
+            $scope.obsDatetime = res.resultDate;
+            $scope.orderName = res.name;
+            $scope.valueCodedResults = res.valueCoded;
+            $scope.valueNumericResults = res.valueNumeric;
+            $scope.valueTextResults = res.valueText;
+            if($scope.valueCodedResults) {
+                fetchConceptAnswers(res.concept);
+            }
+
+        }
+        function fetchConceptAnswers(res) {
+            $scope.answers = [];
+                OrderEntryService.getConceptAnswers(res)
+                    .then(function(posts) {
+                        $scope.answers = posts.answers;
+                    });
+
+        }
+
+        $scope.closeEditResultsDialogModal = function() {
+            $scope.answers = [];
+            $scope.obsConcept = '';
+            $('#editOrderResults').modal('hide');
+        };
+        $scope.data = {
+            singleSelect: null
+        };
+        $scope.obsValue = '';
+
+        $scope.updateLabResults = function() {
+            if($scope.valueNumericResults) {
+                $scope.obsValue = angular.element('#numericResults').val();
+            }
+            if($scope.valueTextResults) {
+                $scope.obsValue = angular.element('#textResults').val();
+            }
+            if($scope.data.singleSelect) {
+                $scope.obsValue = $scope.data.singleSelect;
+            }
+            var obsPayload = {
+                obsDatetime:$scope.obsDatetime,
+                value:$scope.obsValue.toString(),
+                concept:$scope.obsConcept,
+                person:config.patient.uuid
+            };
+
+            JSON.stringify(obsPayload);
+            $scope.loading = true;
+            OrderEntryService.updateLabResults(obsPayload, $scope.ObsUuid)
+                .then(function(result) {
+
+                    $('#editOrderResults').modal('hide');
+
+                    location.href = location.href;
+                }, function(errorResponse) {
+                    $('#editOrderResults').modal('hide');
+                  //  location.href = location.href;
+                    console.log('errorResponse.data.error.message',errorResponse.data);
+                    emr.errorMessage(errorResponse.data.error.message);
+                    $scope.loading = false;
+                });
+
+        };
+
 
 
 
