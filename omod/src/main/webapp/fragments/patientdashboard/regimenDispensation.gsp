@@ -152,8 +152,8 @@
             </select>
                 Quantity: <input ng-model="component.quantity" size="5">
                 Units:<select ng-model="component.quantity_units">
-                <option>Select</option>
-                <option ng-repeat="unit in doseUnits" value="{{unit.uuid}}">{{unit.display}}</option>
+                <option ng-repeat="unit in quantityUnits" ng-selected="component.quantity_units==unit.uuid"
+                        value="{{unit.uuid}}">{{unit.display}}</option>
             </select>
             </div>
 
