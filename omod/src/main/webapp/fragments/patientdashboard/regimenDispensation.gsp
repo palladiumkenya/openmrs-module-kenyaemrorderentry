@@ -129,23 +129,15 @@
         <div style="margin-top:5px;" ;></div>
 
         <div ng-show="regimenLines.length > 0" style="border-style:groove; border-width:2px;border-color:gray;padding:10px;">
-            <h3>Regimen Line</h3>
-            <ul class="list-group" style="display:inline;">
-                <li class="button " style="margin:2px;">{{regimenLines}}</li>
-            </ul>
-        </div>
+            <div style="font-size: 16px">
+                <b>Regimen Line:</b>{{regimenLines}} | <b>Regimen:</b>{{regimenNames}}
+            </div>
 
-        <div style="border-style:groove; border-width:2px; border-color:gray;padding:10px;margin-top:10px;">
-            <h3 style="margin-top:5px;">Regimen</h3>
-            <ul class="list-group" style="display:inline;">
-                <li class="button " style="margin:2px;">{{regimenNames}}</li>
-            </li>
-            </ul>
         </div>
 
         <div id="drug-order-group" ng-show="components.length > 0"
              style="border-style:groove; border-width:2px;border-color:gray;padding:10px;margin-top:10px;">
-            <h3 style="margin-top:5px;">Standard Regimen Drugs</h3>
+            <h4 style="margin-top:5px;">Standard Regimen Drugs</h4>
 
             <div ng-repeat="component in components" class="box-body" style="padding-top: 10px">
                 Drug: <input ng-model="component.name" readonly="">
@@ -191,13 +183,14 @@
         </div>
         <div style="padding-top: 10px" >
 
-                <button ng-click="saveOrderSet(components)" ng-show="regimenStatus=='active'" class="saveOrder"
-                        >Order Regimen</button>
+
                 <button ng-click="saveOrderSet(components)" ng-show="regimenStatus=='edit'"  class="saveOrder"
                         class="saveOrder" >Edit Regimen</button>
 
                 <button ng-click="cancelView()" class="cancel-order" ng-show="regimenStatus=='edit'">Cancel</button>
                 <button ng-click="cancelViewOrderRegimen()" ng-show="regimenStatus=='active'" >Cancel</button>
+            <button ng-click="saveOrderSet(components)" ng-show="regimenStatus=='active'" class="saveOrder"
+            >Order Regimen</button>
 
 
 
