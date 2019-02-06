@@ -9,17 +9,17 @@
 
 	<bean id="kenyaemr.app.drugorder" factory-bean="kenyacore.appFactoryBean" factory-method="createInstance">
 		<constructor-arg value="kenyaemr.drugorder" />
-		<constructor-arg value="Drug Order" />
+		<constructor-arg value="Drug Prescriptions" />
 		<constructor-arg value="kenyaemrorderentry/orders/drugOrderHome.page" />
-		<constructor-arg value="kenyaui:apps/clinician.png" />
+		<constructor-arg value="kenyaemrorderentry:drug_prescriptions.png" />
 		<constructor-arg value="350" />
 	</bean>
 
 	<bean id="kenyaemr.app.laborder" factory-bean="kenyacore.appFactoryBean" factory-method="createInstance">
 		<constructor-arg value="kenyaemr.laborder" />
-		<constructor-arg value="Lab Order" />
+		<constructor-arg value="Lab Requests" />
 		<constructor-arg value="kenyaemrorderentry/orders/labOrderHome.page" />
-		<constructor-arg value="kenyaui:apps/clinician.png" />
+		<constructor-arg value="kenyaemrorderentry:lab_request.png" />
 		<constructor-arg value="355" />
 	</bean>
 
