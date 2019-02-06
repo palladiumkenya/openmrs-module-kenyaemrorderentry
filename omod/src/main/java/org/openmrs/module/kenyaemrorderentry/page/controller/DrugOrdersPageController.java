@@ -102,7 +102,9 @@ public class DrugOrdersPageController {
 
 
                 component=new JSONObject();
-                component.put("name", drugOrder.getDrug().getConcept().getShortNameInLocale(LOCALE) != null ? drugOrder.getDrug().getConcept().getShortNameInLocale(LOCALE).getName() : drugOrder.getDrug().getConcept().getName(LOCALE).getName());
+                component.put("name", mapConceptNamesToShortNames(drugOrder.getDrug().getConcept().getUuid()));
+                component.put("conceptUuid", drugOrder.getDrug().getConcept().getUuid());
+            //    component.put("name", drugOrder.getDrug().getConcept().getShortNameInLocale(LOCALE) != null ? drugOrder.getDrug().getConcept().getShortNameInLocale(LOCALE).getName() : drugOrder.getDrug().getConcept().getName(LOCALE).getName());
                 component.put("dose", drugOrder.getDose().toString());
                 component.put("units_uuid", drugOrder.getDoseUnits().getUuid());
                 component.put("units_name", drugOrder.getDoseUnits().getName(LOCALE).getName());
@@ -112,6 +114,7 @@ public class DrugOrdersPageController {
                 component.put("order_id",order.getOrderId());
                 component.put("quantity",drugOrder.getQuantity());
                 component.put("quantity_units_name",drugOrder.getQuantityUnits().getName(LOCALE).getName());
+                component.put("quantity_units",drugOrder.getQuantityUnits().getUuid());
                 if(order.getOrderGroup().getOrderGroupId()==previousOrderGroupId){
                     components.add(component);
                     continue;
@@ -186,7 +189,8 @@ public class DrugOrdersPageController {
                     DrugOrder drugOrder=(DrugOrder)order.cloneForRevision();
 
                 component = new JSONObject();
-                component.put("name", drugOrder.getDrug().getConcept().getShortNameInLocale(LOCALE) != null ? drugOrder.getDrug().getConcept().getShortNameInLocale(LOCALE).getName() : drugOrder.getDrug().getConcept().getName(LOCALE).getName());
+                component.put("name", mapConceptNamesToShortNames(drugOrder.getDrug().getConcept().getUuid()));
+              //  component.put("name", drugOrder.getDrug().getConcept().getShortNameInLocale(LOCALE) != null ? drugOrder.getDrug().getConcept().getShortNameInLocale(LOCALE).getName() : drugOrder.getDrug().getConcept().getName(LOCALE).getName());
                 if(drugOrder.getDose() != null || drugOrder.getDoseUnits() != null || drugOrder.getFrequency() != null) {
                     component.put("dose", drugOrder.getDose().toString());
                     component.put("units_uuid", drugOrder.getDoseUnits().getUuid());
@@ -198,6 +202,8 @@ public class DrugOrdersPageController {
                 if(drugOrder.getQuantity() != null || drugOrder.getQuantityUnits()!= null) {
                     component.put("quantity", drugOrder.getQuantity());
                     component.put("quantity_units_name", drugOrder.getQuantityUnits().getName(LOCALE).getName());
+                    component.put("quantity_units",drugOrder.getQuantityUnits().getUuid());
+
 
                 }
 
@@ -270,5 +276,59 @@ public class DrugOrdersPageController {
 
     private Object convertToFull(Object object) {
         return object == null ? null : ConversionUtil.convertToRepresentation(object, Representation.FULL);
+    }
+    public  String name = null;
+    private String mapConceptNamesToShortNames(String conceptUuid) {
+
+        if(conceptUuid.equalsIgnoreCase("84797AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
+            name = "TDF";
+        }
+       else if(conceptUuid.equalsIgnoreCase("84309AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
+            name = "D4T";
+        }
+       else if(conceptUuid.equalsIgnoreCase("86663AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
+            name = "AZT";
+        }
+      else   if(conceptUuid.equalsIgnoreCase("78643AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
+            name = "3TC";
+        }
+      else   if(conceptUuid.equalsIgnoreCase("70057AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
+            name = "ABC";
+        }
+      else   if(conceptUuid.equalsIgnoreCase("75628AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
+            name = "FTC";
+        }
+      else   if(conceptUuid.equalsIgnoreCase("74807AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
+            name = "DDI";
+        }
+      else   if(conceptUuid.equalsIgnoreCase("80586AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
+            name = "NVP";
+        }
+      else   if(conceptUuid.equalsIgnoreCase("75523AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
+            name = "EFV";
+        }
+       else if(conceptUuid.equalsIgnoreCase("79040AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
+            name = "LPV";
+        }
+       else if(conceptUuid.equalsIgnoreCase("83412AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
+            name = "RTV";
+        }
+       else if(conceptUuid.equalsIgnoreCase("71648AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
+            name = "ATV";
+        }
+       else if(conceptUuid.equalsIgnoreCase("159810AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
+            name = "ETR";
+        }
+       else if(conceptUuid.equalsIgnoreCase("154378AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
+            name = "RAL";
+        }
+       else if(conceptUuid.equalsIgnoreCase("74258AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
+            name = "DRV";
+        }
+       else if(conceptUuid.equalsIgnoreCase("d1fd0e18-e0b9-46ae-ac0e-0452a927a94b")) {
+            name = "DTG";
+        }
+        return name;
+
     }
 }

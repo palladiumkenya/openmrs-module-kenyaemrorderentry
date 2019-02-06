@@ -110,6 +110,18 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
             }).then(function (results) {
 
                 $scope.patientPastDrugOrders = OpenMRS.pastDrugOrdersPayload;
+                $scope.addQuantity = $scope.patientPastDrugOrders.pastOrder_groups;
+                $scope.addQuantity.sort(function(a, b) {
+                    var key1 = a.date;
+                    var key2 = b.date;
+                    if (key1 > key2) {
+                        return -1;
+                    } else if (key1 === key2) {
+                        return 0;
+                    } else {
+                        return 1;
+                    }
+                });
                 if($scope.patientPastDrugOrders) {
                     $scope.patientPastSingleDrugInstruction = formatDisplayOfPastSingleDrugInstructions($scope.patientPastDrugOrders.pastSingle_drugs);
 
@@ -133,6 +145,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
         }
 
         function addRegimenStatus(completedFields) {
+
             var reg = [];
             for (var i = 0; i < completedFields.length; ++i) {
                 var data = completedFields[i];
@@ -143,6 +156,29 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                     }
                 }
                 reg.push(data);
+            }
+            return reg
+        }
+
+        function addQuantityAndQuantityUnits(completedFields) {
+            var pastOrders = $scope.addQuantity[0].components;
+            var reg = [];
+            for (var i = 0; i < completedFields.length; ++i) {
+                var data = completedFields[i];
+                for (var t =0; t<pastOrders.length; ++t) {
+                    if(i === t) {
+                        for (var r in data) {
+                            if (data.hasOwnProperty(r)) {
+                                data['quantity_units'] = pastOrders[t].quantity_units;
+                                data['quantity'] = pastOrders[t].quantity;
+                            }
+                        }
+                        reg.push(data);
+
+                    }
+
+                }
+
             }
             return reg
         }
@@ -390,7 +426,11 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
         }
 
         $scope.getCurrentRegimen = function (res) {
-            $scope.components = res.orderSetComponents;
+            if($scope.addQuantity && $scope.addQuantity[0] !== undefined) {
+                $scope.components = addQuantityAndQuantityUnits(res.orderSetComponents);
+            }else {
+                $scope.components = res.orderSetComponents
+            }
             $scope.regimenLines = res.groupCodeName;
             $scope.regimenNames = res.regimenName;
             $scope.programName = res.program;
