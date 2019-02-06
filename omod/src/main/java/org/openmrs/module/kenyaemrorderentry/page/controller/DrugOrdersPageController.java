@@ -2,36 +2,62 @@ package org.openmrs.module.kenyaemrorderentry.page.controller;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.openmrs.*;
-import org.openmrs.api.*;
+import org.openmrs.CareSetting;
+import org.openmrs.Concept;
 import org.openmrs.DrugOrder;
-import org.openmrs.api.context.Context;
+import org.openmrs.EncounterRole;
+import org.openmrs.EncounterType;
+import org.openmrs.Order;
+import org.openmrs.OrderSet;
+import org.openmrs.OrderType;
+import org.openmrs.Patient;
+import org.openmrs.api.ConceptService;
+import org.openmrs.api.EncounterService;
+import org.openmrs.api.ObsService;
+import org.openmrs.api.OrderService;
+import org.openmrs.api.OrderSetService;
+import org.openmrs.api.PatientService;
+import org.openmrs.api.ProviderService;
 import org.openmrs.module.appui.UiSessionContext;
+import org.openmrs.module.kenyaemrorderentry.util.OrderEntryUIUtils;
+import org.openmrs.module.kenyaui.annotation.AppPage;
 import org.openmrs.module.webservices.rest.web.ConversionUtil;
 import org.openmrs.module.webservices.rest.web.representation.NamedRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.ui.framework.UiUtils;
 import org.openmrs.ui.framework.annotation.SpringBean;
+import org.openmrs.ui.framework.page.PageContext;
 import org.openmrs.ui.framework.page.PageModel;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
+@AppPage("kenyaemr.drugorder")
 public class DrugOrdersPageController {
     public static final Locale LOCALE = Locale.ENGLISH;
 
-    public void get(@RequestParam("patient") Patient patient,
+    public void get(@RequestParam("patientId") Patient patient,
                     @RequestParam(value = "careSetting", required = false) CareSetting careSetting,
                     @SpringBean("encounterService") EncounterService encounterService,
                     @SpringBean("orderService") OrderService orderService,
                     UiSessionContext sessionContext,
                     UiUtils ui,
                     PageModel model,
+                    PageContext pageContext,
                     @SpringBean("orderSetService") OrderSetService orderSetService,
                     @SpringBean("patientService")PatientService patientService,
                     @SpringBean("conceptService") ConceptService conceptService,
                     @SpringBean("providerService") ProviderService providerService,
                     @SpringBean("obsService") ObsService obsService) {
+
+
+
+        OrderEntryUIUtils.setDrugOrderPageAttributes(pageContext, OrderEntryUIUtils.APP_DRUG_ORDER);
 
         // HACK
         EncounterType drugOrderEncounterType = encounterService.getAllEncounterTypes(false).get(0);
@@ -125,10 +151,15 @@ public class DrugOrdersPageController {
                 orderArray.add(orderObj);
             }
         }
+
+        //AppDescriptor app = new AppDescriptor("kenyaemr.drugorder", null, "Drug Order", "kenyaemrorderentry/orders/drugOrderHome.page", null, null, 350, null, null);
+
         JSONObject activeOrdersResponse=new JSONObject();
         activeOrdersResponse.put("order_groups",orderGroupArray);
         activeOrdersResponse.put("single_drugs",orderArray);
         model.put("activeOrdersResponse",ui.toJson(activeOrdersResponse));
+        //model.put("currentApp",app);
+        //model.addAttribute("appHomepageUrl", app.getUrl());
         getPastDrugOrders(orderService, conceptService,careSetting,ui, patient, model,obsService);
 
     }

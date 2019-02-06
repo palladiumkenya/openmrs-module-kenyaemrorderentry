@@ -52,6 +52,9 @@
         <htmlformentry19extVersion>1.5</htmlformentry19extVersion>
         <htmlformentryuiVersion>1.2</htmlformentryuiVersion>
         <coreappsVersion>1.6</coreappsVersion>
+        <kenyaemrVersion>15.1.4</kenyaemrVersion>
+        <kenyacoreVersion>2.2</kenyacoreVersion>
+        <kenyauiVersion>2.1-SNAPSHOT</kenyauiVersion>
         <webservices.restVersion>2.11</webservices.restVersion>
 
 <!--
@@ -530,6 +533,31 @@
                 <scope>provided</scope>
                 <type>zip</type>
             </dependency>
+
+            <!-- kenyaemer specific-->
+
+            <dependency>
+                <groupId>org.openmrs.module</groupId>
+                <artifactId>kenyacore-api</artifactId>
+                <version>${kenyacoreVersion}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.openmrs.module</groupId>
+                <artifactId>kenyacore-test</artifactId>
+                <version>${kenyacoreVersion}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.openmrs.module</groupId>
+                <artifactId>kenyaui-api</artifactId>
+                <version>${kenyauiVersion}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <!-- end of kenyaemr-->
         <dependency>
             <groupId>org.openmrs.api</groupId>
             <artifactId>openmrs-api</artifactId>
