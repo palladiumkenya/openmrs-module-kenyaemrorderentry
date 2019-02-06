@@ -19,7 +19,7 @@
 		<constructor-arg value="kenyaemr.laborder" />
 		<constructor-arg value="Lab Requests" />
 		<constructor-arg value="kenyaemrorderentry/orders/labOrderHome.page" />
-		<constructor-arg value="kenyaemrorderentry:lab_request.png" />
+		<constructor-arg value="kenyaemrorderentry:lab_request1.png" />
 		<constructor-arg value="355" />
 	</bean>
 
