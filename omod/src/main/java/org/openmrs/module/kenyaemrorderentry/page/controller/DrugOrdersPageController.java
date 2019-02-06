@@ -15,9 +15,6 @@ import org.openmrs.api.ConceptService;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.ObsService;
 import org.openmrs.api.OrderService;
-import org.openmrs.api.OrderSetService;
-import org.openmrs.api.PatientService;
-import org.openmrs.api.ProviderService;
 import org.openmrs.module.appui.UiSessionContext;
 import org.openmrs.module.kenyaemrorderentry.util.OrderEntryUIUtils;
 import org.openmrs.module.kenyaui.annotation.AppPage;
@@ -49,10 +46,7 @@ public class DrugOrdersPageController {
                     UiUtils ui,
                     PageModel model,
                     PageContext pageContext,
-                    @SpringBean("orderSetService") OrderSetService orderSetService,
-                    @SpringBean("patientService")PatientService patientService,
                     @SpringBean("conceptService") ConceptService conceptService,
-                    @SpringBean("providerService") ProviderService providerService,
                     @SpringBean("obsService") ObsService obsService) {
 
 
