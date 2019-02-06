@@ -426,7 +426,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
         }
 
         $scope.getCurrentRegimen = function (res) {
-            if($scope.addQuantity) {
+            if($scope.addQuantity && $scope.addQuantity[0] !== undefined) {
                 $scope.components = addQuantityAndQuantityUnits(res.orderSetComponents);
             }else {
                 $scope.components = res.orderSetComponents
