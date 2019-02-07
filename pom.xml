@@ -52,7 +52,6 @@
         <htmlformentry19extVersion>1.5</htmlformentry19extVersion>
         <htmlformentryuiVersion>1.2</htmlformentryuiVersion>
         <coreappsVersion>1.6</coreappsVersion>
-        <kenyaemrVersion>15.1.4</kenyaemrVersion>
         <kenyacoreVersion>2.2</kenyacoreVersion>
         <kenyauiVersion>2.1-SNAPSHOT</kenyauiVersion>
         <webservices.restVersion>2.11</webservices.restVersion>
