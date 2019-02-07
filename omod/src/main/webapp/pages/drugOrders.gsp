@@ -248,7 +248,7 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
                                         <div class="signature">
                                             Signing as ${ui.format(sessionContext.currentProvider)} on (auto-generated timestamp)
                                             <img ng-show="loading"
-                                                 src="${ui.resourceLink("uicommons", "images/spinner.gif")}"/>
+                                                 src="${ui.resourceLink("uicommons", "resources.images/spinner.gif")}"/>
                                         </div>
                                         <button class="confirm right" ng-disabled="loading"
                                                 ng-click="signAndSaveDraftDrugOrders()">Sign and Save</button>

@@ -221,7 +221,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                         <button type="button"
                                                 data-toggle="modal" data-target="#confirmation-dailog"
                                             ng-click="generateLabOrdersSummaryView()"
-                                                ng-disabled="selectedOrders.length === 0"><img src="${ ui.resourceLink("kenyaui", "images/glyphs/ok.png") }" />
+                                                ng-disabled="selectedOrders.length === 0"><img src="${ ui.resourceLink("kenyaui", "resources.images/glyphs/ok.png") }" />
                                             Confirm</button>
                                     </div>
 
@@ -320,7 +320,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                     <div class="modal-footer">
                                         <button type="button" data-dismiss="modal2"   ng-click="closeDateOrderModal()">Close</button>
                                         <button type="button" ng-click="setOrderDate()">
-                                            <img src="${ ui.resourceLink("kenyaui", "images/glyphs/ok.png") }" /> Save</button>
+                                            <img src="${ ui.resourceLink("kenyaui", "resources.images/glyphs/ok.png") }" /> Save</button>
                                     </div>
                                 </div>
                             </div>
@@ -359,7 +359,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                     <div class="modal-footer">
                                         <button type="button" data-dismiss="modal2"   ng-click="closeModal()">Close</button>
                                         <button type="button" ng-click="setOrderUrgency()">
-                                            <img src="${ ui.resourceLink("kenyaui", "images/glyphs/ok.png") }" /> Save</button>
+                                            <img src="${ ui.resourceLink("kenyaui", "resources.images/glyphs/ok.png") }" /> Save</button>
                                     </div>
                                 </div>
                             </div>

@@ -133,7 +133,7 @@ public class RegimenDispensationFragmentController {
                                        @SpringBean("providerService") ProviderService providerService,
                                        @SpringBean("orderSetService") OrderSetService orderSetService,
                                        @RequestParam("payload") String payload) throws Exception {
-        System.out.println("payload++++++++++++++++++++++++++++++" + payload.toString());
+        //System.out.println("payload++++++++++++++++++++++++++++++" + payload.toString());
         JSONParser parser = new JSONParser();
         Object object = parser.parse(payload);
         JSONObject orderContext = (JSONObject) object;

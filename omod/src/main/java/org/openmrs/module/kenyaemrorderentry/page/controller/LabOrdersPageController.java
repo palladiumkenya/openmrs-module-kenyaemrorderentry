@@ -2,36 +2,47 @@ package org.openmrs.module.kenyaemrorderentry.page.controller;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.openmrs.*;
-import org.openmrs.api.*;
+import org.openmrs.CareSetting;
+import org.openmrs.Concept;
+import org.openmrs.EncounterRole;
+import org.openmrs.EncounterType;
+import org.openmrs.OrderType;
+import org.openmrs.Patient;
+import org.openmrs.api.ConceptService;
+import org.openmrs.api.EncounterService;
+import org.openmrs.api.OrderService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appui.UiSessionContext;
+import org.openmrs.module.kenyaemrorderentry.util.OrderEntryUIUtils;
 import org.openmrs.module.webservices.rest.web.ConversionUtil;
 import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.ui.framework.UiUtils;
 import org.openmrs.ui.framework.annotation.SpringBean;
-import org.openmrs.ui.framework.fragment.FragmentModel;
+import org.openmrs.ui.framework.page.PageContext;
 import org.openmrs.ui.framework.page.PageModel;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 public class LabOrdersPageController {
     public static final Locale LOCALE = Locale.ENGLISH;
     ConceptService concService = Context.getConceptService();
-    public void get(@RequestParam("patient") Patient patient,
+    public void get(@RequestParam("patientId") Patient patient,
                     @RequestParam(value = "careSetting", required = false) CareSetting careSetting,
                     @SpringBean("encounterService") EncounterService encounterService,
                     @SpringBean("orderService") OrderService orderService,
                     UiSessionContext sessionContext,
                     UiUtils ui,
                     PageModel model,
-                    @SpringBean("orderSetService") OrderSetService orderSetService,
-                    @SpringBean("patientService") PatientService patientService,
-                    @SpringBean("conceptService") ConceptService conceptService,
-                    @SpringBean("providerService") ProviderService providerService,
-                    @SpringBean("obsService") ObsService obsService) {
+                    PageContext pageContext,
+                    @SpringBean("conceptService") ConceptService conceptService) {
 
+        OrderEntryUIUtils.setDrugOrderPageAttributes(pageContext, OrderEntryUIUtils.APP_LAB_ORDER);
 
         EncounterType labOrderEncounterType = encounterService.getEncounterTypeByUuid(OrderType.TEST_ORDER_TYPE_UUID);
         EncounterRole encounterRoles = encounterService.getAllEncounterRoles(false).get(0);
