@@ -55,6 +55,7 @@
                             <th>Tests Ordered</th>
                             <th>Result Date</th>
                             <th>Results</th>
+                            <th>Order Reason</th>
                             <th>Actions</th>
                         </tr>
                         <tr ng-repeat="past in pastLabOrders | limitTo:limit">
@@ -78,6 +79,12 @@
                                     {{past.valueText}}
                                 </span>
 
+
+                            </td>
+                            <td>
+                                <span ng-if="past.orderReasonCoded || past.orderReasonNonCoded">
+                                    {{past.orderReasonCoded}} ,{{orderReasonNonCoded}}
+                                </span>
 
                             </td>
                             <td>

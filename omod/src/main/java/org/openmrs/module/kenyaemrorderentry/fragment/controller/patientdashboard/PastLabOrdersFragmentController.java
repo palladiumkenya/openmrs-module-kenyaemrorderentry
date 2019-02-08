@@ -110,6 +110,11 @@ public class PastLabOrdersFragmentController {
                                     obsObj.put("name", con.getName(LOCALE).getName());
                                     obsObj.put("obsId", obs.getId());
                                     obsObj.put("OrderId", obs.getOrder().getOrderId());
+                                    if(order.getOrderReason() != null) {
+                                        obsObj.put("orderReasonCoded", order.getOrderReason().getUuid());
+                                    }
+
+                                    obsObj.put("orderReasonNonCoded", order.getOrderReasonNonCoded());
                                     obsObj.put("obsUuid", obs.getUuid());
                                     obsObj.put("concept", obs.getConcept().getUuid());
                                     obsObj.put("concept_id", obs.getConcept().getId());
