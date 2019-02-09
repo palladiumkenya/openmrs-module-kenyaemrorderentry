@@ -442,7 +442,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
         }
         $scope.cancelView = function() {
             $scope.showRegimenPanel = false;
-            $scope.disableButton = false;
+            $scope.disableButton = true;
             $scope.showActiveTabs = true;
             $scope.showPastDrugTabs= true;
             $scope.showOtherDrugs = true;
