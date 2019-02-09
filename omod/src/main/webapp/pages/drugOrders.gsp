@@ -54,7 +54,7 @@ th, td {
 
 .regimen {
     float: left;
-    width: 78%;
+    width: 96%;
     padding: 10px;
     display: block;
     margin: auto;
@@ -121,7 +121,7 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
                 </div>
 
 
-                <div id="program-tabs" class="ke-tabs" style="padding-top: 10px">
+                <div id="program-tabs" class="ke-tabs" style="padding-top: 3px">
                     <div class="ke-tabmenu">
                         <div class="ke-tabmenu-item disable-on-regimen-change" ng-show="showActiveTabs"
                              data-tabid="active_drug_orders">Active Orders</div>
@@ -265,29 +265,23 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
                     <div class="ke-tab new-order-section" data-tabid="standard_regimen_orders" ng-show="showStandardRegimenTab">
                         <div class="card">
                             <div class="card-header">
-                                <h4 class="card-title">
-                                    Standard Regimens
-                                </h4>
-                            </div>
-
-                            <div class="card-body">
-
                                 <div ng-show="showCurrentRegimenView">
-                                <div class="list-group " ng-show="patientRegimens.length > 0">
-                                    <div class="list-group-item" style="margin-bottom: 4px; border-left: 5px solid #80D651; font-size: 16px"
-                                         ng-repeat="regimen in patientRegimens">
-                                        <div class="link-item" >
-                                            <b>Current {{regimen.program}} Regimen:</b> {{regimen.regimenName}}
-                                            <button ng-click="getCurrentRegimen(regimen)" ng-disabled="disableButton"
-                                                    class="refill-regimen pull-right">Refill</button>
+                                    <div class="list-group " ng-show="patientRegimens.length > 0">
+                                        <div class="list-group-item" style="margin-bottom: 2px; border-left: 5px solid #80D651; font-size: 16px"
+                                             ng-repeat="regimen in patientRegimens">
+                                            <div class="link-item" >
+                                                <b>Current {{regimen.program}} Regimen:</b> {{regimen.regimenName}}
+                                                <button ng-click="getCurrentRegimen(regimen)" ng-disabled="disableButton"
+                                                        class="refill-regimen pull-right">Refill</button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                                </div>
-
+                            </div>
+                            <div class="card-body">
                                 <span ng-show="patientRegimens.length==0">Patient is not on any regimen</span>
 
-                                <div ng-show="showRegimenPanel" style="margin-top:2px;">
+                                <div ng-show="showRegimenPanel">
                                     ${ui.includeFragment("kenyaemrorderentry", "patientdashboard/regimenDispensation", ["patient": patient])}
                                 </div>
                             </div>

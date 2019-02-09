@@ -116,13 +116,7 @@
 </script>
 
 <div class="row panel panel-default">
-    <div class="program panel-body">
-        <h3>Program</h3>
-        <ul class="list-group">
-            <li class=" button"
-                style="margin:2px;">{{programName}}</li>
-        </ul>
-    </div>
+
 
     <div class="regimen panel-body">
         Date: ${ui.includeFragment("kenyaui", "field/java.util.Date", [id: "orderDate", formFieldName: "orderDate"])}
@@ -130,7 +124,7 @@
 
         <div ng-show="regimenLines.length > 0" style="border-style:groove; border-width:2px;border-color:gray;padding:10px;">
             <div style="font-size: 16px">
-                <b>Regimen Line:</b>{{regimenLines}} | <b>Regimen:</b>{{regimenNames}}
+                <b>Program:</b>{{programName}} | <b>Regimen Line:</b>{{regimenLines}} | <b>Regimen:</b>{{regimenNames}}
             </div>
 
         </div>
@@ -183,11 +177,9 @@
         </div>
         <div style="padding-top: 10px" >
 
-
-                <button ng-click="saveOrderSet(components)" ng-show="regimenStatus=='edit'"  class="saveOrder"
-                        class="saveOrder" >Edit Regimen</button>
-
-                <button ng-click="cancelView()" class="cancel-order" ng-show="regimenStatus=='edit'">Cancel</button>
+            <button ng-click="cancelView()" class="cancel-order" ng-show="regimenStatus=='edit'">Cancel</button>
+            <button ng-click="saveOrderSet(components)" ng-show="regimenStatus=='edit'"  class="saveOrder"
+                    class="saveOrder" >Edit Regimen</button>
                 <button ng-click="cancelViewOrderRegimen()" ng-show="regimenStatus=='active'" >Cancel</button>
             <button ng-click="saveOrderSet(components)" ng-show="regimenStatus=='active'" class="saveOrder"
             >Order Regimen</button>
