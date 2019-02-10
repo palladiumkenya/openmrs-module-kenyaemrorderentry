@@ -1,5 +1,8 @@
 <%
     ui.decorateWith("kenyaemr", "standardPage", [patient: patient])
+    def menuItems = [
+            [label: "Back to home", iconProvider: "kenyaui", icon: "buttons/back.png", label: "Back to Client home", href: ui.pageLink("kenyaemr", "clinician/clinicianViewPatient", [patient: patient, patientId: patient])]
+    ]
     ui.includeJavascript("uicommons", "emr.js")
     ui.includeJavascript("uicommons", "angular.min.js")
     ui.includeJavascript("uicommons", "angular-app.js")
@@ -92,12 +95,13 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
     window.OpenMRS.activeOrdersPayload =${activeOrdersResponse};
     window.OpenMRS.pastDrugOrdersPayload =${pastDrugOrdersPayload};
 
-    jq(document).ready(function() {
-        jq("#btnBack").click(function(){
-            ui.navigate('${ ui.pageLink("kenyaemr", "clinician/clinicianViewPatient", [patient: patient, patientId: patient]) }');
-        });
-    });
+
 </script>
+<div class="ke-page-sidebar">
+    <div class="ke-panel-frame">
+        ${ui.includeFragment("kenyaui", "widget/panelMenu", [heading: "Navigation", items: menuItems])}
+    </div>
+</div>
 
 <div class="ke-page-content">
     <div id="drug-orders-app" ng-controller="DrugOrdersCtrl" ng-init='init()' class="divIDClass">
@@ -113,12 +117,7 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
 
 
             <div class="ui-tabs-panel ui-widget-content">
-                <div>
-                    <button type="button" class="fa fa-arrow-left " style="float: left" id="btnBack">
-                        Back to client home
-                    </button>
-                    <label id="orderHeader"> <h3>Drug Orders</h3></label>
-                </div>
+                
 
 
                 <div id="program-tabs" class="ke-tabs" style="padding-top: 3px">
