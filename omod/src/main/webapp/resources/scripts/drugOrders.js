@@ -314,6 +314,11 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
         // functions that affect existing active orders
 
         $scope.discontinueOrder = function (activeOrder) {
+            if(config.provider === '' || config.provider === undefined || config.provider === null) {
+                $scope.showErrorToast ='You are not login as provider, please contact System Administrator';
+                $('#orderError').modal('show');
+                return;
+            }
             var dcOrder = activeOrder.createDiscontinueOrder(orderContext);
             $scope.draftDrugOrders.push(dcOrder);
             $scope.$broadcast('added-dc-order', dcOrder);
@@ -354,10 +359,18 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
         window.orderSetSelected = {};
         window.regimenDosingInstructions = null;
         $scope.saveOrderSet = function (orderset) {
+            if(config.provider === '' || config.provider === undefined || config.provider === null) {
+                $scope.showErrorToast ='You are not login as provider, please contact System Administrator';
+                $('#orderError').modal('show');
+                return;
+            }
             drugOrderMembers = orderset;
             regimenDosingInstructions = $scope.regimenDosingInstructions;
             orderSetId = $scope.orderSetId;
         }
+        $scope.closeModal = function() {
+            $('#orderError').modal('hide');
+        };
         window.activeOrderGroupUuId = null;
         window.discontinueOrderUuId = null;
         $scope.editOrderGroup = function (orderGroup) {
@@ -390,6 +403,13 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
         }
 
         $scope.discontinueOrderGroup = function (components) {
+
+            /*if(config.provider === '' || config.provider === undefined || config.provider === null) {
+                console.log('Entering this zone of discontinue drugs',config.provider);
+                $scope.showErrorToast ='You are not login as provider, please contact System Administrator';
+                $('#orderError').modal('show');
+                return;
+            }*/
             drugOrderMembers = components;
             orderSetId = null;
             discontinueOrderUuId = null;

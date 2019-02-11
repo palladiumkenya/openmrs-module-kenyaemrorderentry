@@ -381,9 +381,32 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
 
                                     </div>
                                 </div>
+
                             </div>
 
+
                         </div>
+                        <!--Error Modal -->
+                        <div class="modal fade" id="orderError" tabindex="-1" role="dialog" style="font-size:16px;">
+                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header modal-header-primary">
+                                        <h5 class="modal-title" id="errorModalLabel">Server Error</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+
+                                    <div class="modal-body" style="color:red;" id="modalText">
+                                        {{showErrorToast}}
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button"  data-dismiss="modal2" ng-click="closeModal()">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
 
                     <div class="ke-tab" data-tabid="past_drug_orders" ng-show="showPastDrugTabs">
@@ -421,9 +444,11 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
                             </div>
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>
+
     </div>
 </div>
 
