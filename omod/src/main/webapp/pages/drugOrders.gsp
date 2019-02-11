@@ -117,8 +117,6 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
 
 
             <div class="ui-tabs-panel ui-widget-content">
-                
-
 
                 <div id="program-tabs" class="ke-tabs" style="padding-top: 3px">
                     <div class="ke-tabmenu">

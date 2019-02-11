@@ -131,24 +131,49 @@
 
         <div id="drug-order-group" ng-show="components.length > 0"
              style="border-style:groove; border-width:2px;border-color:gray;padding:10px;margin-top:10px;">
-            <h4 style="margin-top:5px;">Standard Regimen Drugs</h4>
+            <div class="table-responsive">
+                <table class="table table-striped tables">
+                    <tr>
+                        <th>Drug</th>
+                        <th>Dose</th>
+                        <th>Units</th>
+                        <th>Frequency</th>
+                        <th>Quantity</th>
+                        <th>Units</th>
+                    </tr>
+                    <tr ng-repeat="component in components">
+                        <td >
+                            <input ng-model="component.name" readonly="">
+                        </td>
+                        <td>
+                            <input ng-model="component.dose" size="5">
+                        </td>
+                        <td>
+                            <select ng-model="component.units_uuid">
+                                <option ng-repeat="unit in doseUnits" ng-selected="component.units_uuid==unit.uuid"
+                                        value="{{unit.uuid}}">{{unit.display}}</option>
+                            </select>
 
-            <div ng-repeat="component in components" class="box-body" style="padding-top: 10px">
-                Drug: <input ng-model="component.name" readonly="">
-                Dose:<input ng-model="component.dose" size="5">
-                Units:<select ng-model="component.units_uuid">
-                <option ng-repeat="unit in doseUnits" ng-selected="component.units_uuid==unit.uuid"
-                        value="{{unit.uuid}}">{{unit.display}}</option>
-            </select>
-                Frequency:<select ng-model="component.frequency">
-                <option ng-repeat="freq in frequencies" ng-selected="component.frequency==freq.uuid"
-                        value="{{freq.uuid}}">{{freq.display}}</option>
-            </select>
-                Quantity: <input ng-model="component.quantity" size="5">
-                Units:<select ng-model="component.quantity_units">
-                <option ng-repeat="unit in quantityUnits" ng-selected="component.quantity_units==unit.uuid"
-                        value="{{unit.uuid}}">{{unit.display}}</option>
-            </select>
+                        </td>
+                        <td>
+                            <select ng-model="component.frequency">
+                                <option ng-repeat="freq in frequencies" ng-selected="component.frequency==freq.uuid"
+                                        value="{{freq.uuid}}">{{freq.display}}</option>
+                            </select>
+
+                        </td>
+                        <td>
+                            <input ng-model="component.quantity" size="5">
+                        </td>
+                        <td>
+                            <select ng-model="component.quantity_units">
+                                <option ng-repeat="unit in quantityUnits" ng-selected="component.quantity_units==unit.uuid"
+                                        value="{{unit.uuid}}">{{unit.display}}</option>
+                            </select>
+                        </td>
+
+                    </tr>
+                </table>
             </div>
 
             <div style="margin-top:5px;"><textarea ng-model="regimenDosingInstructions" rows="2" cols="80"

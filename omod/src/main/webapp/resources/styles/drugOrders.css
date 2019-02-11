@@ -130,3 +130,12 @@ div.editing-draft-order {
   text-align: center;
   padding-left: 30%;
 }
+.table th {
+
+  padding: .5rem !important;
+
+}
+.tables td {
+
+  padding: .5rem !important;;
+}
