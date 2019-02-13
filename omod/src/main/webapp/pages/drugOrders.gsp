@@ -144,16 +144,23 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
                             <div class="card-body">
                                 <form id="new-order" class="sized-inputs css-form" name="newOrderForm" novalidate>
                                     <p>
+                                        <span>
+                                            <label>Date:</label>
+                                            <span style="padding-left: 57px">
+                                                ${ui.includeFragment("kenyaui", "field/java.util.Date", [id: "orderDate", formFieldName: "orderDate"])}
+
+                                            </span>
+
+                                        </span>
+                                    </p>
+                                    <p>
+
                                         <span ng-show="newDraftDrugOrder.action === 'NEW'">
                                             <label>New order for:</label>
                                             <select-drug ng-model="newDraftDrugOrder.drug" placeholder="Drug"
                                                          size="40"></select-drug>
                                         </span>
-                                        <span>
-                                            <label>Date:</label>
-                                            ${ui.includeFragment("kenyaui", "field/java.util.Date", [id: "orderDate", formFieldName: "orderDate"])}
 
-                                        </span>
                                         <strong ng-show="newDraftDrugOrder.action === 'REVISE'">
                                             Revised order for: {{ newDraftDrugOrder.drug.display }}
                                         </strong>
