@@ -149,6 +149,11 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
                                             <select-drug ng-model="newDraftDrugOrder.drug" placeholder="Drug"
                                                          size="40"></select-drug>
                                         </span>
+                                        <span>
+                                            <label>Date:</label>
+                                            ${ui.includeFragment("kenyaui", "field/java.util.Date", [id: "orderDate", formFieldName: "orderDate"])}
+
+                                        </span>
                                         <strong ng-show="newDraftDrugOrder.action === 'REVISE'">
                                             Revised order for: {{ newDraftDrugOrder.drug.display }}
                                         </strong>
