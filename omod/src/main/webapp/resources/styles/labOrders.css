@@ -146,3 +146,6 @@ body {
 .set-width-vl {
     width: 190px;
 }
+.list-group-decorator .list-group-item:hover {
+    background-color: rgb(221, 221, 221);
+}
