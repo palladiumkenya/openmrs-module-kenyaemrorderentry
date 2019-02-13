@@ -115,12 +115,12 @@ ${ui.includeFragment("appui", "messages", [codes: [
 
                                         <tr>
                                             <td class="col-lg-3" style="width: 25%">
-                                                <div class="card border-dark">
-                                                    <div class="list-group" >
+                                                <div class="card border-dark" >
+                                                    <div class="list-group list-group-decorator" >
                                                         <div class="list-group-item" ng-repeat="lab in labOrders" style="cursor: pointer"
                                                              ng-click="loadLabPanels(lab)">
                                                             <div class="link-item">
-                                                                <a href="" class="formLink">
+                                                                <a class="formLink">
                                                                     {{lab.name}}
                                                                 </a>
                                                             </div>
