@@ -160,7 +160,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
             return reg
         }
 
-        function addQuantityAndQuantityUnits(completedFields) {
+        function prefillDrugComponentsWithPastValues(completedFields) {
             var pastOrders = $scope.addQuantity[0].components;
             var reg = [];
             for (var i = 0; i < completedFields.length; ++i) {
@@ -171,6 +171,10 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                             if (data.hasOwnProperty(r)) {
                                 data['quantity_units'] = pastOrders[t].quantity_units;
                                 data['quantity'] = pastOrders[t].quantity;
+                                data['frequency'] = pastOrders[t].frequency;
+                                data['units_uuid'] = pastOrders[t].units_uuid;
+                                data['dose'] = pastOrders[t].dose;
+                                data['name'] = pastOrders[t].name;
                             }
                         }
                         reg.push(data);
@@ -447,7 +451,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
 
         $scope.getCurrentRegimen = function (res) {
             if($scope.addQuantity && $scope.addQuantity[0] !== undefined) {
-                $scope.components = addQuantityAndQuantityUnits(res.orderSetComponents);
+                $scope.components = prefillDrugComponentsWithPastValues(res.orderSetComponents);
             }else {
                 $scope.components = res.orderSetComponents
             }
