@@ -149,3 +149,6 @@ body {
 .list-group-decorator .list-group-item:hover {
     background-color: rgb(221, 221, 221);
 }
+.button-size {
+    width: 100%;
+}

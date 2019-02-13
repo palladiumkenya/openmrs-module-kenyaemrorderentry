@@ -144,18 +144,18 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                                 <div class="list-group-item"
                                                                      ng-repeat="order in filteredOrders">
                                                                     <div class="link-item">
-                                                                        <div class="btn-group" role="group" aria-label="Basic example">
-                                                                            <button type="button">{{order.name}}</button>
-                                                                            <button type="button" class="fa fa-calendar fa-1x"
+                                                                        <div class="btn-group button-size " role="group" aria-label="Basic example">
+                                                                            <button type="button" class="text-left" style="width: 76%">{{order.name}}</button>
+                                                                            <button type="button" class="fa fa-calendar fa-1x" style="width: 8%"
                                                                                     data-toggle="modal" data-target="#dateOrder"
                                                                                     ng-click="orderSelectedToAddDateActivated(order)"></button>
-                                                                            <button type="button" class="fa fa-warning fa-1x"
+                                                                            <button type="button" class="fa fa-warning fa-1x" style="width: 8%"
                                                                                     data-placement="top" title="Urgency | Reason"
                                                                                     data-toggle="modal" data-target="#orderUrgency"
                                                                                     ng-click="orderSelectedToAddDateActivated(order)"
                                                                             ></button>
                                                                             <button type="button" class="fa fa-remove fa-1x"
-                                                                                    ng-click="deselectedOrder(order)" style="color:#9D0101;cursor: pointer"></button>
+                                                                                    ng-click="deselectedOrder(order)" style="color:#9D0101;cursor: pointer; width: 8%"></button>
                                                                         </div>
 
                                                                     </div>
