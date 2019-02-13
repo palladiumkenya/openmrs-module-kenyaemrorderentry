@@ -120,7 +120,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                         <div class="list-group-item" ng-repeat="lab in labOrders" style="cursor: pointer"
                                                              ng-click="loadLabPanels(lab)">
                                                             <div class="link-item">
-                                                                <a class="formLink">
+                                                                <a href="" class="formLink">
                                                                     {{lab.name}}
                                                                 </a>
                                                             </div>
