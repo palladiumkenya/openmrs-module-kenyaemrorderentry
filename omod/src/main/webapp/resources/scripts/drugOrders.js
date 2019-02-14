@@ -249,9 +249,9 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
         $scope.addNewDraftOrder = function () {
             if ($scope.newDraftDrugOrder.getDosingType().validate($scope.newDraftDrugOrder)) {
                 $scope.newDraftDrugOrder.asNeeded = $scope.newDraftDrugOrder.asNeededCondition ? true : false;
-                $scope.orderDate = angular.element('#orderDate').val();
-                if($scope.orderDate) {
-                    $scope.newDraftDrugOrder['dateActivated'] = $scope.orderDate.substring(0, 10);
+                $scope.singleDrugorderDate = angular.element('#singleDrugorderDate').val();
+                if($scope.singleDrugorderDate) {
+                    $scope.newDraftDrugOrder['dateActivated'] = $scope.singleDrugorderDate.substring(0, 10);
                 }
                 $scope.draftDrugOrders.push($scope.newDraftDrugOrder);
                 $scope.newDraftDrugOrder = OpenMRS.createEmptyDraftOrder(orderContext);
@@ -307,8 +307,8 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                 location: null, // TODO
                 encounterRole: config.encounterRole
             };
-            if($scope.orderDate) {
-                encounterContext['encounterDatetime'] = $scope.orderDate.substring(0, 10);;
+            if($scope.singleDrugorderDate) {
+                encounterContext['encounterDatetime'] = $scope.singleDrugorderDate.substring(0, 10);;
             }
 
             $scope.loading = true;

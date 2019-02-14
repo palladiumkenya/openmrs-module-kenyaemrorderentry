@@ -147,7 +147,7 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
                                         <span>
                                             <label>Date:</label>
                                             <span style="padding-left: 57px">
-                                                ${ui.includeFragment("kenyaui", "field/java.util.Date", [id: "orderDate", formFieldName: "orderDate"])}
+                                                ${ui.includeFragment("kenyaui", "field/java.util.Date", [id: "singleDrugorderDate", formFieldName: "singleDrugorderDate"])}
 
                                             </span>
 
