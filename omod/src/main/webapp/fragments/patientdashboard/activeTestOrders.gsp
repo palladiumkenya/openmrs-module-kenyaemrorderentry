@@ -113,6 +113,6 @@
 </div>
 <script type="text/javascript">
     // manually bootstrap angular app, in case there are multiple angular apps on a page
-    angular.bootstrap('#active-lab-orders', ['labOrders']);
+   // angular.bootstrap('#active-lab-orders', ['labOrders']);
 
 </script>

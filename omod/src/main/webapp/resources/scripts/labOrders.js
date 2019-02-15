@@ -790,7 +790,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                     }
 
                 discontinueLabTestOrders($scope.discontinueFilledOrders);
-                $('#spinnerSave').modal('hide');
+                $('#spinner').modal('hide');
 
 
                 location.href = location.href;

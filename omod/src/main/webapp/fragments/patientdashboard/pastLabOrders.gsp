@@ -144,6 +144,6 @@
 </div>
 <script type="text/javascript">
     // manually bootstrap angular app, in case there are multiple angular apps on a page
-    angular.bootstrap('#past-orders-results', ['labOrders']);
+  //  angular.bootstrap('#past-orders-results', ['labOrders']);
 
 </script>

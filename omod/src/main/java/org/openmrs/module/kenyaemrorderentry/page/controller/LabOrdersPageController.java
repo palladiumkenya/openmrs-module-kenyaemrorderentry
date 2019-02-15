@@ -8,9 +8,15 @@ import org.openmrs.EncounterRole;
 import org.openmrs.EncounterType;
 import org.openmrs.OrderType;
 import org.openmrs.Patient;
+import org.openmrs.Obs;
+import org.openmrs.Encounter;
 import org.openmrs.api.ConceptService;
+import org.openmrs.ConceptAnswer;
 import org.openmrs.api.EncounterService;
+import org.openmrs.api.ObsService;
 import org.openmrs.api.OrderService;
+import org.openmrs.Order;
+
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appui.UiSessionContext;
 import org.openmrs.module.kenyaemrorderentry.util.OrderEntryUIUtils;
@@ -26,6 +32,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Map;
 
@@ -40,7 +47,8 @@ public class LabOrdersPageController {
                     UiUtils ui,
                     PageModel model,
                     PageContext pageContext,
-                    @SpringBean("conceptService") ConceptService conceptService) {
+                    @SpringBean("conceptService") ConceptService conceptService,
+                    @SpringBean("obsService") ObsService obsService) {
 
         OrderEntryUIUtils.setDrugOrderPageAttributes(pageContext, OrderEntryUIUtils.APP_LAB_ORDER);
 
@@ -64,6 +72,8 @@ public class LabOrdersPageController {
         model.put("patient", patient);
         model.put("jsonConfig", ui.toJson(jsonConfig));
         labOrdersConceptPanels(conceptService, sessionContext, ui, model);
+        getActiveLabOrders(orderService, conceptService, patient, model);
+        getPastLabOrders(orderService, conceptService,careSetting, patient, model,obsService);
 
     }
 
@@ -208,6 +218,138 @@ public class LabOrdersPageController {
 
 
     }
+
+    public void getActiveLabOrders(@SpringBean("orderService") OrderService orderService, @SpringBean("conceptService")
+            ConceptService conceptService,
+                                   Patient patient, PageModel model) {
+        OrderType labType = orderService.getOrderTypeByUuid(OrderType.TEST_ORDER_TYPE_UUID);
+        List<Order> activeOrders = orderService.getActiveOrders(patient, labType, null, null);
+
+        JSONArray panelList = new JSONArray();
+
+        for (Order order : activeOrders) {
+            Concept labTestConcept = order.getConcept();
+            String inputType = "";
+            String orderUuid = order.getUuid();
+            Integer orderId = order.getOrderId();
+            Encounter labTestEncounter = order.getEncounter();
+
+
+            JSONObject labOrderObject = new JSONObject();
+            // develop rendering for result
+            JSONArray testResultList = new JSONArray();
+
+            labOrderObject.put("label", labTestConcept.getName(LOCALE).getName());
+            labOrderObject.put("concept", labTestConcept.getUuid());
+            labOrderObject.put("orderUuid", orderUuid);
+            labOrderObject.put("orderId", orderId);
+            labOrderObject.put("encounter", labTestEncounter.getUuid());
+            labOrderObject.put("dateActivated", order.getDateActivated().toString());
+
+            if (labTestConcept.getDatatype().isCoded()) {
+                inputType = "select";
+                for (ConceptAnswer ans : labTestConcept.getAnswers()) {
+                    JSONObject testResultObject = new JSONObject();
+                    testResultObject.put("concept", ans.getAnswerConcept().getUuid());
+                    testResultObject.put("label", ans.getAnswerConcept().getName(LOCALE).getName());
+                    testResultList.add(testResultObject);
+                }
+
+                labOrderObject.put("answers", testResultList);
+
+
+            } else if (labTestConcept.getDatatype().isNumeric()) {
+                inputType = "inputnumeric";
+            } else if (labTestConcept.getDatatype().isText()) {
+                inputType = "inputtext";
+            } else if (labTestConcept.getDatatype().isBoolean()) {
+                inputType = "select";
+                labOrderObject.put("answers", constructBooleanAnswers());
+            }
+            labOrderObject.put("rendering", inputType);
+
+            panelList.add(labOrderObject);
+
+        }
+        model.put("enterLabOrderResults", panelList.toString());
+    }
+
+    public void getPastLabOrders(@SpringBean("orderService") OrderService orderService, @SpringBean("conceptService")
+            ConceptService conceptService,
+                             @SpringBean("careSetting")
+                                     CareSetting careSetting,
+                             Patient patient, PageModel model,@SpringBean("obsService") ObsService obsService) {
+        OrderType labType = orderService.getOrderTypeByUuid(OrderType.TEST_ORDER_TYPE_UUID);
+        CareSetting careset = orderService.getCareSetting(1);
+        List<Order> labOrders = orderService.getOrders(patient, careset, labType, false);
+
+        JSONArray labOrdersList = new JSONArray();
+
+        for (Order order : labOrders) {
+            Concept labConcept = order.getConcept();
+            if (order.getDateStopped() != null) {
+                List<Concept> labConcepts = new ArrayList<Concept>();
+                labConcepts.add(labConcept);
+                for (Concept con : labConcepts) {
+
+                    List<Obs> pastOrders = obsService.getObservationsByPersonAndConcept(patient, conceptService.getConcept(con.getConceptId()));
+
+                    if (pastOrders != null) {
+
+                        for (Obs obs : pastOrders) {
+                            JSONObject obsObj = new JSONObject();
+
+                            if (obs.getOrder() != null) {
+                                if (obs.getOrder().getOrderId() != null) {
+                                    Integer orderId = obs.getOrder().getOrderId();
+
+                                    if (obs.getValueCoded() != null) {
+                                        obsObj.put("valueCoded", obs.getValueCoded().getName(LOCALE).getName());
+                                    }
+                                    obsObj.put("valueNumeric", obs.getValueNumeric());
+                                    obsObj.put("valueText", obs.getValueText());
+                                    obsObj.put("name", con.getName(LOCALE).getName());
+                                    obsObj.put("obsId", obs.getId());
+                                    obsObj.put("OrderId", obs.getOrder().getOrderId());
+                                    if(order.getOrderReason() != null) {
+                                        obsObj.put("orderReasonCoded", order.getOrderReason().getUuid());
+                                    }
+
+                                    obsObj.put("orderReasonNonCoded", order.getOrderReasonNonCoded());
+                                    obsObj.put("obsUuid", obs.getUuid());
+                                    obsObj.put("concept", obs.getConcept().getUuid());
+                                    obsObj.put("concept_id", obs.getConcept().getId());
+                                    obsObj.put("dateActivated", orderService.getOrder(orderId).getDateActivated().toString());
+                                    obsObj.put("resultDate", obs.getObsDatetime().toString());
+                                    labOrdersList.add(obsObj);
+
+                                }
+                            }
+
+
+                        }
+                    }
+
+                }
+            }
+        }
+        model.put("pastLabOrdersResults", labOrdersList.toString());
+    }
+
+
+    private JSONArray constructBooleanAnswers() {
+        JSONArray ansList = new JSONArray();
+
+        for (Integer ans : Arrays.asList(1065, 1066)) {
+            Concept concept = concService.getConcept(ans);
+            JSONObject testResultObject = new JSONObject();
+            testResultObject.put("concept", concept.getUuid());
+            testResultObject.put("label", concept.getName(LOCALE).getName());
+            ansList.add(testResultObject);
+        }
+        return ansList;
+
+    }
     private JSONArray buildTestPanelWithoutPanelConcept(String sampleType, JSONArray sampleTypeArray, String panelName,
                                                         List<Concept> testConcepts) {
         if (null == panelName || panelName.equals("") || null == testConcepts || testConcepts.size() == 0)
@@ -249,5 +391,6 @@ public class LabOrdersPageController {
             }
         }    return value;
     }
+
 
 }
