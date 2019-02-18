@@ -292,6 +292,6 @@
 </div>
 <script type="text/javascript">
     // manually bootstrap angular app, in case there are multiple angular apps on a page
-    angular.bootstrap('#create-lab-orders', ['labOrders']);
+   // angular.bootstrap('#create-lab-orders', ['labOrders']);
 
 </script>
