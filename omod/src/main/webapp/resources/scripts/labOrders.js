@@ -153,8 +153,8 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 if($scope.pList) {
                     $scope.panelListResults = customiseHivViralLoadObj($scope.pList);
                     $scope.labResultsRaw =$scope.panelListResults;
-                    $scope.panelListResults =removeHivVl($scope.panelListResults);
-                    $scope.panelListResults =removeHivLdl($scope.panelListResults);
+                    $scope.panelListResults = removeHivVl($scope.panelListResults);
+                    $scope.panelListResults = removeHivLdl($scope.panelListResults);
                     $scope.InspireList = $rootScope.matrixList($scope.panelListResults, 2);
                 }
 
@@ -199,14 +199,16 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                         if (data.valueCoded === 'NOT DETECTED') {
                             data['valueCoded'] = "LDL";
                         }
-                        if (data.orderReasonCoded === '843AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' ) {
-                            data['orderReasonCoded'] = "Clinical treatment failure";
-                        }
+
                         if (data.resultDate ) {
                             data['resultDate'] = new Date(data.resultDate );
                         }
-                        if (data.dateActivated ) {
+                        /*if (data.dateActivated ) {
                             data['dateActivated'] = new Date(data.dateActivated );
+                        }*/
+
+                        if (data.orderReasonCoded === '843AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' ) {
+                            data['orderReasonCoded'] = "Clinical treatment failure";
                         }
                         if (data.orderReasonCoded === '1434AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' ) {
                             data['orderReasonCoded'] = "Pregnancy";
@@ -293,9 +295,9 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 for (var r in data) {
 
                     if (data.hasOwnProperty(r)) {
-                        if (data.dateActivated ) {
+                        /*if (data.dateActivated ) {
                             data['dateActivated'] = new Date(data.dateActivated );
-                        }
+                        }*/
                         if (data.label ==='Tuberculosis polymerase chain reaction with rifampin resistance checking' ) {
                             data['label'] =  'GeneXpert';
                         }
@@ -451,9 +453,10 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
         }
 
         $scope.loadLabPanelTests = function(tests) {
+            var test = filterTestWithDataTypeNA(tests.tests);
             $scope.panelTypeName = tests.name;
             $scope.showTestFields = true;
-            $scope.panelTests = tests.tests
+            $scope.panelTests = test;
             $scope.panelTests = mapGeneXpertName($scope.panelTests);
 
         }
@@ -580,6 +583,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             for (var i = 0; i < $scope.lOrdersPayload.length; ++i) {
                 $scope.encounterDatetime = $scope.lOrdersPayload[i].encounterDatetime;
                 delete $scope.lOrdersPayload[i].concept_id;
+                delete $scope.lOrdersPayload[i].dataType;
                 delete $scope.lOrdersPayload[i].name;
                 delete $scope.lOrdersPayload[i].orderReasonCodedName;
                 delete $scope.lOrdersPayload[i].$$hashKey;
@@ -651,7 +655,6 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             var newOrders = _.filter($scope.lOrdersPayload, function(o) {
                 return !o.dateActivated;
             });
-
             _.each($scope.lOrdersPayload, function(o) {
 
                 if (o.dateActivated) {
@@ -720,6 +723,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
                     }
                     if(data.concept ==='856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+
                         // create another object for LDL
                         vl = {
                             orderer:config.provider.uuid,
@@ -728,7 +732,8 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                             concept:"1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
                             concept_id: 1305,
                             orderReasonNonCoded:$scope.orderReasonNonCoded,
-                            orderReason:$scope.orderReasonCoded
+                            orderReason:$scope.orderReasonCoded,
+                            dateActivated: $scope.filteredOrders[0].dateActivated
 
                         }
                     }
@@ -1075,6 +1080,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             angular.element('#orderDate').val('');
             $('#dateOrder').modal('hide');
         }
+        $scope.dateActivatedForLdl = '';
 
 
         $scope.setOrderDate = function() {
@@ -1088,6 +1094,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 $('#orderError').modal('show');
                 return;
             }
+            $scope.dateActivatedForLdl = $scope.orderDate.substring(0, 10);
 
             $scope.orderSel['dateActivated'] =  $scope.orderDate.substring(0, 10);
             $scope.orderSel['encounterDatetime'] =  $scope.orderDate.substring(0, 10);
@@ -1346,6 +1353,14 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 console.log('errorResponse.data.error.message',errorResponse.data.error);
                 emr.errorMessage(errorResponse.data.error.message);
                 $scope.loading = false;
+            });
+
+        }
+
+        function filterTestWithDataTypeNA(test) {
+            return _.filter(test, function(o) {
+
+                return o.dataType !== "N/A";
             });
 
         }

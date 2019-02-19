@@ -168,6 +168,7 @@ public class LabOrdersPageController {
                     labTestObj = new JSONObject();
                     labTestObj.put("concept_id", labTest.getConceptId());
                     labTestObj.put("concept", labTest.getUuid());
+                    labTestObj.put("dataType", labTest.getDatatype().getName());
                     labTestObj.put("name", conceptService.getConcept(labTest.getConceptId()).getName(LOCALE).getName());
                     labTestArray.add(labTestObj);
 
@@ -321,7 +322,7 @@ public class LabOrdersPageController {
                                     obsObj.put("obsUuid", obs.getUuid());
                                     obsObj.put("concept", obs.getConcept().getUuid());
                                     obsObj.put("concept_id", obs.getConcept().getId());
-                                    obsObj.put("dateActivated", orderService.getOrder(orderId).getDateActivated().toString());
+                                    obsObj.put("dateActivated", order.getDateActivated().toString());
                                     obsObj.put("resultDate", obs.getObsDatetime().toString());
                                     labOrdersList.add(obsObj);
 
