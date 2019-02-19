@@ -1165,6 +1165,10 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
         };
 
         $scope.editOrderResultsDialog = function (res) {
+            $scope.orderUuid = res.orderUuid;
+            $scope.encounter = res.encounter;
+            $scope.isEditLdLResults = false;
+            $scope.dateActivated =res.dateActivated;
             $scope.obsValue = '';
             $scope.data = {};
             $scope.ObsUuid = res.obsUuid;
@@ -1176,6 +1180,15 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             $scope.valueTextResults = res.valueText;
             if($scope.valueCodedResults) {
                 fetchConceptAnswers(res.concept);
+            }
+            if(res.concept ==='1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                $scope.valueCodedResults = null;
+                $scope.isEditLdLResults = true
+
+            }
+            if(res.concept ==='856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                $scope.valueNumericResults = null;
+
             }
 
         }
@@ -1197,6 +1210,8 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             singleSelect: null
         };
         $scope.obsValue = '';
+        var editLdlPayload = {};
+
 
         $scope.updateLabResults = function() {
             if($scope.valueNumericResults) {
@@ -1208,30 +1223,132 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             if($scope.data.singleSelect) {
                 $scope.obsValue = $scope.data.singleSelect;
             }
-            var obsPayload = {
-                obsDatetime:$scope.obsDatetime,
-                value:$scope.obsValue.toString(),
-                concept:$scope.obsConcept,
-                person:config.patient.uuid
-            };
+            if($scope.isEditLdLResults === true) {
+                 editLdlPayload = {
+                    orderer: config.provider.uuid,
+                    careSetting: $scope.careSetting.uuid,
+                    type:"testorder",
+                    dateActivated:$scope.dateActivated,
+                    concept: '856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
 
-            JSON.stringify(obsPayload);
-            $scope.loading = true;
-            OrderEntryService.updateLabResults(obsPayload, $scope.ObsUuid)
-                .then(function(result) {
+                }
+                createAdhoViralLoadOrders(editLdlPayload);
+            } else {
+                var obsPayload = {
+                    obsDatetime:$scope.obsDatetime,
+                    value:$scope.obsValue.toString(),
+                    concept:$scope.obsConcept,
+                    person:config.patient.uuid
+                };
 
-                    $('#editOrderResults').modal('hide');
+                JSON.stringify(obsPayload);
+                $scope.loading = true;
+                OrderEntryService.updateLabResults(obsPayload, $scope.ObsUuid)
+                    .then(function(result) {
 
-                    location.href = location.href;
-                }, function(errorResponse) {
-                    $('#editOrderResults').modal('hide');
-                  //  location.href = location.href;
-                    console.log('errorResponse.data.error.message',errorResponse.data);
-                    emr.errorMessage(errorResponse.data.error.message);
-                    $scope.loading = false;
-                });
+                        $('#editOrderResults').modal('hide');
+
+                        location.href = location.href;
+                    }, function(errorResponse) {
+                        $('#editOrderResults').modal('hide');
+                          location.href = location.href;
+                        console.log('errorResponse.data.error.message',errorResponse.data);
+                        emr.errorMessage(errorResponse.data.error.message);
+                        $scope.loading = false;
+                    });
+
+            }
+
 
         };
+        var uuid = {uuid:"e1406e88-e9a9-11e8-9f32-f2801f1b9fd1"};
+        function createAdhoViralLoadOrders (o) {
+
+            $scope.oldOrdrs = [];
+
+
+            var encounterContextOldOrders = {
+                patient: config.patient,
+                encounterType: uuid,
+                location: null, // TODO
+                encounterDatetime: o.dateActivated,
+                encounterRole: config.encounterRole
+            };
+
+            $scope.oldOrdrs.push(o);
+
+            OrderEntryService.signAndSave({draftOrders: $scope.oldOrdrs}, encounterContextOldOrders)
+                .$promise.then(function (result) {
+                postAdhocViralResults(result);
+                $('#spinner').modal('hide');
+                 loadExistingOrders();
+                 $window.location.reload();
+                  location.href = location.href;
+            }, function (errorResponse) {
+                $('#spinner').modal('hide');
+                console.log('errorResponse.data.error.message', errorResponse.data.error);
+                emr.errorMessage(errorResponse.data.error.message);
+                $scope.loading = false;
+            });
+        }
+        $scope.obsVlValueToEdit = '';
+        function postAdhocViralResults(res) {
+            $scope.obsVlValueToEdit = angular.element('#numeriVl').val();
+            var obs = [];
+            $scope.discontinueOrdersForVil = [];
+            var obsPayload = {
+                obsDatetime:res.encounterDatetime,
+                value: $scope.obsVlValueToEdit.toString(),
+                concept: '856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+                person:config.patient.uuid,
+                encounter:res.uuid,
+                order:res.orders[0].uuid
+            };
+            var encounterContext = {
+                patient: config.patient,
+                encounterType: uuid,
+                location: null, // TODO
+                encounterDatetime: res.encounterDatetime,
+                encounterRole: config.encounterRole
+            };
+            obs.push(obsPayload);
+            JSON.stringify(obs);
+            OrderEntryService.signAndSave({ draftOrders: [] }, encounterContext,obs )
+                .$promise.then(function(result) {
+                var voidObsPayload ={
+                    voided: true
+                };
+
+                $scope.loading = true;
+                OrderEntryService.voidObs(voidObsPayload, $scope.ObsUuid)
+                    .then(function(result) {
+                        location.href = location.href;
+                    }, function(errorResponse) {
+                        location.href = location.href;
+                        console.log('errorResponse.data.error.message',errorResponse.data.error);
+                        emr.errorMessage(errorResponse.data.error.message);
+                        $scope.loading = false;
+                    });
+
+                $scope.discontinueOrdersForVil.push({
+                    orderUuid:res.orders[0].uuid,
+                    concept:'856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+                    encounter:res.uuid
+                });
+
+                discontinueLabTestOrders($scope.discontinueOrdersForVil);
+                $('#editOrderResults').modal('hide');
+                $('#spinner').modal('hide');
+
+
+                location.href = location.href;
+            }, function(errorResponse) {
+                console.log('errorResponse.data.error.message',errorResponse.data.error);
+                emr.errorMessage(errorResponse.data.error.message);
+                $scope.loading = false;
+            });
+
+        }
 
 
 

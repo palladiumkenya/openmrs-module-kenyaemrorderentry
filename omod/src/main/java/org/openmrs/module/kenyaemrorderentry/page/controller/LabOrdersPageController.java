@@ -311,6 +311,8 @@ public class LabOrdersPageController {
                                     obsObj.put("name", con.getName(LOCALE).getName());
                                     obsObj.put("obsId", obs.getId());
                                     obsObj.put("OrderId", obs.getOrder().getOrderId());
+                                    obsObj.put("orderUuid", order.getUuid());
+                                    obsObj.put("encounter", order.getEncounter().getUuid());
                                     if(order.getOrderReason() != null) {
                                         obsObj.put("orderReasonCoded", order.getOrderReason().getUuid());
                                     }

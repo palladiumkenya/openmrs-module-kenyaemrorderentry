@@ -714,6 +714,26 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                     <div ng-if="valueTextResults">
                                         <input class="form-control" type="text" ng-model="obsValue" id="textResults">
                                     </div>
+                                    <div ng-if="obsConcept ==='1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'">
+                                        <input class="form-control" type="number" ng-model="obsVlValueToEdit" id="numeriVl">
+
+                                    </div>
+                                    <div ng-if="obsConcept ==='856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'">
+                                        <input class="form-control set-width-vl" type="number" id="vload"
+                                               ng-model="hivViralValues[vl.orderId]"
+                                               ng-disabled="ischecked ==='yes'">
+
+
+                                        <input class="form-check-input float-left "
+                                               type="checkbox" id="vl"
+                                               name="feature"
+                                               ng-checked="fag"
+                                               ng-model="hivViralValuesLDL[vl.orderId]"
+                                               ng-click="toggleSelection(vl.orderId)"
+                                               value="'1302AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'">
+                                        <label class="form-check-label">LDL</label>
+
+                                    </div>
 
 
                                     <div ng-if="valueCodedResults">
