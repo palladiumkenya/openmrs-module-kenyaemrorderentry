@@ -822,8 +822,8 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
                 for (var r in data) {
                     if (data.hasOwnProperty(r)) {
-                        if(data.concept.uuid ==='1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' && data.dateActivated ===$scope.ldlDateActivated) {
-                            $scope.OrderUuidHvl =data.uuid;
+                        if(data.concept.uuid === '1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                            $scope.OrderUuidHvl = data.uuid;
                         }
 
                     }

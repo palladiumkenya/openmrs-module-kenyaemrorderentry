@@ -169,12 +169,18 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                     if(i === t) {
                         for (var r in data) {
                             if (data.hasOwnProperty(r)) {
-                                data['quantity_units'] = pastOrders[t].quantity_units;
-                                data['quantity'] = pastOrders[t].quantity;
-                                data['frequency'] = pastOrders[t].frequency;
-                                data['units_uuid'] = pastOrders[t].units_uuid;
-                                data['dose'] = pastOrders[t].dose;
-                                data['name'] = pastOrders[t].name;
+                                if(pastOrders[t].name === data.name ) {
+
+
+                                    data['quantity_units'] = pastOrders[t].quantity_units;
+                                    data['quantity'] = pastOrders[t].quantity;
+                                    data['frequency'] = pastOrders[t].frequency;
+                                    data['units_uuid'] = pastOrders[t].units_uuid;
+                                    data['dose'] = pastOrders[t].dose;
+                                    data['name'] = pastOrders[t].name;
+                                } else {
+                                    return completedFields;
+                                }
                             }
                         }
                         reg.push(data);
