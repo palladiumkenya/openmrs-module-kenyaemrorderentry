@@ -203,11 +203,11 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                         if (data.resultDate ) {
                             data['resultDate'] = new Date(data.resultDate );
                         }
-                        /*if (data.dateActivated ) {
+                        if (data.dateActivated ) {
                             data['dateActivated'] = new Date(data.dateActivated );
-                        }*/
+                        }
 
-                        if (data.orderReasonCoded === '843AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' ) {
+                        if (data.orderReasonCoded === '843AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
                             data['orderReasonCoded'] = "Clinical treatment failure";
                         }
                         if (data.orderReasonCoded === '1434AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' ) {
@@ -225,7 +225,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                         if (data.orderReasonCoded === '159882AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' ) {
                             data['orderReasonCoded'] = "Breastfeeding";
                         }
-                        if (data.orderReasonCoded === '163523AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' ) {
+                        if (data.orderReasonCoded === '163523AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
                             data['orderReasonCoded'] = "Clinical failure";
                         }
                         if (data.orderReasonCoded === '161236AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' ) {
@@ -295,9 +295,9 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 for (var r in data) {
 
                     if (data.hasOwnProperty(r)) {
-                        /*if (data.dateActivated ) {
+                        if (data.dateActivated ) {
                             data['dateActivated'] = new Date(data.dateActivated );
-                        }*/
+                        }
                         if (data.label ==='Tuberculosis polymerase chain reaction with rifampin resistance checking' ) {
                             data['label'] =  'GeneXpert';
                         }
@@ -382,7 +382,6 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
         $scope.dosingTypes = OpenMRS.dosingTypes;
         $scope.showFields = false;
         $scope.showTestFields = false;
-        // $scope.showErrorToast ='';
 
         var config = OpenMRS.drugOrdersConfig;
         var labs = OpenMRS.labTestJsonPayload;
@@ -676,7 +675,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                                     $('#spinner').modal('hide');
                                     loadExistingOrders();
                                     $window.location.reload();
-                                    //  location.href = location.href;
+                                    location.href = location.href;
                                 }, function(errorResponse) {
                                     $('#spinner').modal('hide');
                                     console.log('errorResponse.data.error.message',errorResponse.data.error);
@@ -732,8 +731,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                             concept:"1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
                             concept_id: 1305,
                             orderReasonNonCoded:$scope.orderReasonNonCoded,
-                            orderReason:$scope.orderReasonCoded,
-                            dateActivated: $scope.filteredOrders[0].dateActivated
+                            orderReason:$scope.orderReasonCoded
 
                         }
                     }
@@ -863,8 +861,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
                 for (var r in data) {
                     if (data.hasOwnProperty(r)) {
-                        data['order'] = data.orderUuid;
-                        data['value'] =  $scope.typeValues[data.orderId];
+
 
                         if(data.concept==='856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
                             data['order'] = data.orderUuid;
@@ -872,30 +869,17 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                             data['concept'] = data.concept;
                             data['encounter'] = data.encounter;
                         }
-                        if(data.concept==='1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                        else if(data.concept==='1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
                             data['order'] = data.orderUuid;
                             data['value'] = $scope.hivViralValuesLDL[data.orderId];
                             data['concept'] = data.concept;
                             data['encounter'] = data.encounter;
+                        } else {
+                            data['order'] = data.orderUuid;
+                            data['value'] =  $scope.typeValues[data.orderId];
                         }
+
                     }
-                    var hv =data.hvVl;
-                        for (var l in hv) {
-                            if (hv.hasOwnProperty(l)) {
-                                if(hv.concept==='856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                                    data['order'] = hv.orderUuid;
-                                    data['value'] = $scope.hivViralValues[hv.orderId];
-                                    data['concept'] = hv.concept;
-                                    data['encounter'] = hv.encounter;
-                                }
-                                if(hv.concept==='1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                                    data['order'] = hv.orderUuid;
-                                    data['value'] = $scope.hivViralValuesLDL[hv.orderId];
-                                    data['concept'] = hv.concept;
-                                    data['encounter'] = hv.encounter;
-                                }
-                            }
-                        }
 
                 }
                 if(data.value === true) {
@@ -1074,6 +1058,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             $('#generalMessage').modal('hide');
             $('#voidOrdersModal').modal('hide');
             $('#orderError').modal('hide');
+            $('#orderWarning').modal('hide');
         };
         $scope.closeDateOrderModal = function () {
             $scope.orderDate = '';
@@ -1173,9 +1158,11 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
         $scope.editOrderResultsDialog = function (res) {
             $scope.orderUuid = res.orderUuid;
-            $scope.encounter = res.encounter;
             $scope.isEditLdLResults = false;
+            $scope.isEditLdLOrVlResults = false;
             $scope.dateActivated =res.dateActivated;
+            $scope.orderReasonNonCoded = res.orderReasonNonCoded;
+            $scope.orderReasonCoded = res.orderReason;
             $scope.obsValue = '';
             $scope.data = {};
             $scope.ObsUuid = res.obsUuid;
@@ -1195,6 +1182,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             }
             if(res.concept ==='856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
                 $scope.valueNumericResults = null;
+                $scope.isEditLdLOrVlResults = true;
 
             }
 
@@ -1220,6 +1208,18 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
         var editLdlPayload = {};
 
 
+        $scope.isEditToggleSelection = function () {
+            if ($scope.flag === false || $scope.flag === undefined) {
+                $scope.flag = true;
+                $scope.ischecked='yes';
+                $scope.hivViralValues ={};
+            }else {
+                $scope.flag = false;
+                $scope.ischecked=' ';
+            }
+            $scope.ldlValue ='ldl';
+        }
+
         $scope.updateLabResults = function() {
             if($scope.valueNumericResults) {
                 $scope.obsValue = angular.element('#numericResults').val();
@@ -1230,17 +1230,37 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             if($scope.data.singleSelect) {
                 $scope.obsValue = $scope.data.singleSelect;
             }
+            if($scope.obsConcept ==='856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                $scope.obsValue = angular.element('#editVload').val();
+            }
             if($scope.isEditLdLResults === true) {
                  editLdlPayload = {
                     orderer: config.provider.uuid,
                     careSetting: $scope.careSetting.uuid,
                     type:"testorder",
-                    dateActivated:$scope.dateActivated,
-                    concept: '856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
-
+                    concept: '856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+                    orderReasonNonCoded:$scope.orderReasonNonCoded,
+                    orderReason:$scope.orderReasonCoded,
+                    dateActivated:$scope.dateActivated
                 }
-                createAdhoViralLoadOrders(editLdlPayload);
-            } else {
+                createAdhocViralLoadOrders(editLdlPayload);
+                 return
+            }
+            if($scope.isEditLdLOrVlResults === true && $scope.ldlValue ==='ldl') {
+                editLdlPayload = {
+                    orderer: config.provider.uuid,
+                    careSetting: $scope.careSetting.uuid,
+                    type:"testorder",
+                    concept: '1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+                    orderReasonNonCoded:$scope.orderReasonNonCoded,
+                    orderReason:$scope.orderReasonCoded,
+                    dateActivated:$scope.dateActivated
+                }
+                createAdhocViralLoadOrders(editLdlPayload);
+                return;
+
+            }
+
                 var obsPayload = {
                     obsDatetime:$scope.obsDatetime,
                     value:$scope.obsValue.toString(),
@@ -1264,16 +1284,12 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                         $scope.loading = false;
                     });
 
-            }
-
 
         };
         var uuid = {uuid:"e1406e88-e9a9-11e8-9f32-f2801f1b9fd1"};
-        function createAdhoViralLoadOrders (o) {
 
+        function createAdhocViralLoadOrders (o) {
             $scope.oldOrdrs = [];
-
-
             var encounterContextOldOrders = {
                 patient: config.patient,
                 encounterType: uuid,
@@ -1283,14 +1299,12 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             };
 
             $scope.oldOrdrs.push(o);
-
             OrderEntryService.signAndSave({draftOrders: $scope.oldOrdrs}, encounterContextOldOrders)
                 .$promise.then(function (result) {
                 postAdhocViralResults(result);
                 $('#spinner').modal('hide');
-                 loadExistingOrders();
                  $window.location.reload();
-                  location.href = location.href;
+                 location.href = location.href;
             }, function (errorResponse) {
                 $('#spinner').modal('hide');
                 console.log('errorResponse.data.error.message', errorResponse.data.error);
@@ -1299,18 +1313,12 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             });
         }
         $scope.obsVlValueToEdit = '';
+        var obsPayload = {};
+
         function postAdhocViralResults(res) {
             $scope.obsVlValueToEdit = angular.element('#numeriVl').val();
             var obs = [];
             $scope.discontinueOrdersForVil = [];
-            var obsPayload = {
-                obsDatetime:res.encounterDatetime,
-                value: $scope.obsVlValueToEdit.toString(),
-                concept: '856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
-                person:config.patient.uuid,
-                encounter:res.uuid,
-                order:res.orders[0].uuid
-            };
             var encounterContext = {
                 patient: config.patient,
                 encounterType: uuid,
@@ -1318,6 +1326,27 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 encounterDatetime: res.encounterDatetime,
                 encounterRole: config.encounterRole
             };
+            if($scope.isEditLdLResults === true) {
+                obsPayload = {
+                    obsDatetime:res.encounterDatetime,
+                    value: $scope.obsVlValueToEdit.toString(),
+                    concept: '856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+                    person:config.patient.uuid,
+                    encounter:res.uuid,
+                    order:res.orders[0].uuid
+                };
+            }else {
+                obsPayload = {
+                    obsDatetime:res.encounterDatetime,
+                    value: '1302AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+                    concept: '1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+                    person:config.patient.uuid,
+                    encounter:res.uuid,
+                    order:res.orders[0].uuid
+                };
+            }
+
+
             obs.push(obsPayload);
             JSON.stringify(obs);
             OrderEntryService.signAndSave({ draftOrders: [] }, encounterContext,obs )
@@ -1336,12 +1365,22 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                         emr.errorMessage(errorResponse.data.error.message);
                         $scope.loading = false;
                     });
+                if($scope.isEditLdLResults === true) {
+                    $scope.discontinueOrdersForVil.push({
+                        orderUuid:res.orders[0].uuid,
+                        concept:'856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+                        encounter:res.uuid
+                    });
+                }
+                if($scope.isEditLdLOrVlResults === true) {
+                    $scope.discontinueOrdersForVil.push({
+                        orderUuid:res.orders[0].uuid,
+                        concept:'1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+                        encounter:res.uuid
+                    });
+                }
 
-                $scope.discontinueOrdersForVil.push({
-                    orderUuid:res.orders[0].uuid,
-                    concept:'856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
-                    encounter:res.uuid
-                });
+
 
                 discontinueLabTestOrders($scope.discontinueOrdersForVil);
                 $('#editOrderResults').modal('hide');
@@ -1364,7 +1403,33 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             });
 
         }
+        $scope.deleteOrderResultsDialog = function (past) {
+            $scope.orderName = past.name;
 
+            $scope.showErrorToast ='You are about to delete Entry for' + ' ' +$scope.orderName+ ' '+
+                'results. Do you want to proceed?';
+            $scope.ObsUuid = past.obsUuid;
+
+
+        }
+
+        $scope.deleteLabOrderResults = function () {
+            var voidObsPayload ={
+                voided: true
+            };
+
+            $scope.loading = true;
+            OrderEntryService.voidObs(voidObsPayload, $scope.ObsUuid)
+                .then(function(result) {
+                    $('#orderWarning').modal('hide');
+                    location.href = location.href;
+                }, function(errorResponse) {
+                    location.href = location.href;
+                    console.log('errorResponse.data.error.message',errorResponse.data.error);
+                    emr.errorMessage(errorResponse.data.error.message);
+                    $scope.loading = false;
+                });
+        }
 
 
 
