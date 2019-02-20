@@ -485,7 +485,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                 </td>
                                                 <td>
                                                     <span ng-if="past.orderReasonCoded || past.orderReasonNonCoded">
-                                                        {{past.orderReasonCoded}} ,{{orderReasonNonCoded}}
+                                                        {{past.orderReasonCoded}}  {{orderReasonNonCoded}}
                                                     </span>
 
                                                 </td>
@@ -493,6 +493,8 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                     <button type="button" class="fa fa-edit fa-1x"
                                                             data-toggle="modal" data-target="#editOrderResults"
                                                             ng-click="editOrderResultsDialog(past)" style="cursor: pointer">Edit</button>
+                                                    <button type="button" class="fa fa-remove fa-1x" data-toggle="modal" data-target="#orderWarning"
+                                                            ng-click="deleteOrderResultsDialog(past)" style="color:#9D0101;cursor: pointer; width: 8%"></button>
                                                 </td>
 
                                             </tr>
@@ -671,6 +673,28 @@ ${ui.includeFragment("appui", "messages", [codes: [
                         </div>
                     </div>
 
+                    <!--Warning Modal -->
+                    <div class="modal fade" id="orderWarning" tabindex="-1" role="dialog" style="font-size:16px;">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header modal-header-primary">
+                                    <h5 class="modal-title" id="warningModalLabel">Warning!</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+
+                                <div class="modal-body" id="modal-text-waring">
+                                    {{showErrorToast}}
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button"  data-dismiss="modal2" ng-click="closeModal()">NO</button>
+                                    <button type="button"  data-dismiss="modal2" ng-click="deleteLabOrderResults()">Yes</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
 
                     <!-- general message modal -->
 
@@ -713,6 +737,26 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                     </div>
                                     <div ng-if="valueTextResults">
                                         <input class="form-control" type="text" ng-model="obsValue" id="textResults">
+                                    </div>
+                                    <div ng-if="obsConcept ==='1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'">
+                                        <input class="form-control" type="number" ng-model="obsVlValueToEdit" id="numeriVl">
+
+                                    </div>
+                                    <div ng-if="obsConcept ==='856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'">
+                                        <input class="form-control set-width-vl" type="number" id="editVload"
+                                               ng-model="editVload"
+                                               ng-disabled="ischecked ==='yes'">
+
+                                        <label class="form-check-label set-width-ldl">LDL</label>
+                                        <input class="form-check-input set-width-ldl"
+                                               type="checkbox" id="editLdl"
+                                               name="feature"
+                                               ng-checked="fag"
+                                               ng-model="hivViralValuesLDL[vl.orderId]"
+                                               ng-click="isEditToggleSelection()"
+                                               value="'1302AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'">
+
+
                                     </div>
 
 

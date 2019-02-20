@@ -168,6 +168,7 @@ public class LabOrdersPageController {
                     labTestObj = new JSONObject();
                     labTestObj.put("concept_id", labTest.getConceptId());
                     labTestObj.put("concept", labTest.getUuid());
+                    labTestObj.put("dataType", labTest.getDatatype().getName());
                     labTestObj.put("name", conceptService.getConcept(labTest.getConceptId()).getName(LOCALE).getName());
                     labTestArray.add(labTestObj);
 
@@ -285,7 +286,10 @@ public class LabOrdersPageController {
 
         JSONArray labOrdersList = new JSONArray();
 
+
         for (Order order : labOrders) {
+            if (order.getDateStopped() != null) {
+
             Concept labConcept = order.getConcept();
             if (order.getDateStopped() != null) {
                 List<Concept> labConcepts = new ArrayList<Concept>();
@@ -298,7 +302,6 @@ public class LabOrdersPageController {
 
                         for (Obs obs : pastOrders) {
                             JSONObject obsObj = new JSONObject();
-
                             if (obs.getOrder() != null) {
                                 if (obs.getOrder().getOrderId() != null) {
                                     Integer orderId = obs.getOrder().getOrderId();
@@ -310,28 +313,35 @@ public class LabOrdersPageController {
                                     obsObj.put("valueText", obs.getValueText());
                                     obsObj.put("name", con.getName(LOCALE).getName());
                                     obsObj.put("obsId", obs.getId());
-                                    obsObj.put("OrderId", obs.getOrder().getOrderId());
-                                    if(order.getOrderReason() != null) {
-                                        obsObj.put("orderReasonCoded", order.getOrderReason().getUuid());
-                                    }
+                                    obsObj.put("OrderId", orderId);
+                                    obsObj.put("orderUuid", obs.getOrder().getUuid());
+                                    obsObj.put("encounter", obs.getOrder().getEncounter().getUuid());
+                                    if(obs.getOrder() !=null && obs.getOrder().getOrderReason() != null) {
+                                        obsObj.put("orderReasonCoded", obs.getOrder().getOrderReason().getUuid());
+                                        obsObj.put("orderReason", obs.getOrder().getOrderReason().getUuid());
 
-                                    obsObj.put("orderReasonNonCoded", order.getOrderReasonNonCoded());
+                                    }
+                                    obsObj.put("orderReasonNonCoded", obs.getOrder().getOrderReasonNonCoded());
                                     obsObj.put("obsUuid", obs.getUuid());
                                     obsObj.put("concept", obs.getConcept().getUuid());
                                     obsObj.put("concept_id", obs.getConcept().getId());
-                                    obsObj.put("dateActivated", orderService.getOrder(orderId).getDateActivated().toString());
+                                    obsObj.put("dateActivated", obs.getOrder().getDateActivated().toString());
                                     obsObj.put("resultDate", obs.getObsDatetime().toString());
                                     labOrdersList.add(obsObj);
+
 
                                 }
                             }
 
 
                         }
+
+
                     }
 
                 }
             }
+        }
         }
         model.put("pastLabOrdersResults", labOrdersList.toString());
     }

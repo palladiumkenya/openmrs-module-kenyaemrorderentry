@@ -285,6 +285,21 @@ angular.module("orderEntry", ['orderService', 'encounterService', 'session'])
                 })
             },
 
+            voidObs: function(orderContext, uuid, successCallback, errorCallback) {
+                var req = {
+                    method: 'DELETE',
+                    url: '/openmrs/ws/rest/v1/obs/' + uuid +'?!purge',
+                    headers: {
+                        'Content-Type': undefined
+                    },
+                    data: orderContext
+                };
+
+                return $http(req).then(function (value) {
+
+                })
+            },
+
             updateLabResults: function(orderContext, uuid, successCallback, errorCallback) {
                 var req = {
                     method: 'POST',

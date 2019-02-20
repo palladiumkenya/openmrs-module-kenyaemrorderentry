@@ -146,6 +146,9 @@ body {
 .set-width-vl {
     width: 190px;
 }
+.set-width-ldl {
+    width: 40px;
+}
 .list-group-decorator .list-group-item:hover {
     background-color: rgb(221, 221, 221);
 }
