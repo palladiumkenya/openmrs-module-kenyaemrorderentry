@@ -731,7 +731,8 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                             concept:"1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
                             concept_id: 1305,
                             orderReasonNonCoded:$scope.orderReasonNonCoded,
-                            orderReason:$scope.orderReasonCoded
+                            orderReason:$scope.orderReasonCoded,
+                            dateActivated:data.dateActivated
 
                         }
                     }
