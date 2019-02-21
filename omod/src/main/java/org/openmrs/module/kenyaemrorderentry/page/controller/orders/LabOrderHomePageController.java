@@ -29,7 +29,7 @@ public class LabOrderHomePageController {
 		OrderEntryUIUtils.setDrugOrderPageAttributes(pageContext, OrderEntryUIUtils.APP_LAB_ORDER);
 
 		if (patient != null) {
-			return "redirect:" + ui.pageLink("kenyaemrorderentry", "labOrders", SimpleObject.create("patientId", patient.getPatientId(), "currentApp","kenyaemr.drugorder"));
+			return "redirect:" + ui.pageLink("kenyaemrorderentry", "labOrders", SimpleObject.create("patientId", patient.getPatientId(), "currentApp","kenyaemr.laborder"));
 		} else {
 			return null;
 		}

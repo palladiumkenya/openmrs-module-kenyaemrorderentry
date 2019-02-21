@@ -495,6 +495,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
         $scope.labOrdersTests = [];
         $scope.selectedOrders = [];
         $scope.noOrderSelected ='None';
+        $scope.filteredOrders = [];
         $scope.getSelectedTests = function(tests) {
 
             if(tests.selected === true) {
@@ -678,7 +679,6 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                                     location.href = location.href;
                                 }, function(errorResponse) {
                                     $('#spinner').modal('hide');
-                                    console.log('errorResponse.data.error.message',errorResponse.data.error);
                                     emr.errorMessage(errorResponse.data.error.message);
                                     $scope.loading = false;
                                 });
@@ -697,10 +697,9 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 $('#spinner').modal('hide');
                 loadExistingOrders();
                 $window.location.reload();
-              //  location.href = location.href;
+                location.href = location.href;
             }, function(errorResponse) {
                 $('#spinner').modal('hide');
-                console.log('errorResponse.data.error.message',errorResponse.data.error);
                 emr.errorMessage(errorResponse.data.error.message);
                 $scope.loading = false;
             });
@@ -751,6 +750,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
         }
 
         $scope.orderSelectedToAddDateActivated = function(order) {
+            $scope.titleDate ='Enter Date Order was made';
             $scope.orderReasonNonCoded = '';
             $scope.orderReasonCoded = '';
             $scope.orderDate = '';
@@ -762,10 +762,15 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
         // The start of test result rendering components
         $scope.typeValues = {};
-
         $scope.postLabOrderResults = function() {
-
             $scope.obsPayload = createLabResultsObsPaylaod($scope.labResultsRaw);
+            if ($scope.obsPayload.length === 0) {
+                $scope.showErrorToast = 'You have not filled any results to post';
+
+                $('#orderError').modal('show');
+                return;
+            }
+            $('#spinner').modal('show');
             $scope.discontinueFilledOrders = angular.copy($scope.obsPayload);
             for (var i = 0; i < $scope.obsPayload.length; ++i) {
                 delete $scope.obsPayload[i].label;
@@ -786,8 +791,52 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 // encounterDatetime: "2018-09-20",
                 encounterRole: config.encounterRole
             };
+            var newObs = _.filter($scope.obsPayload, function(o) {
+                return !o.obsDatetime;
+            });
+            _.each($scope.obsPayload, function(o) {
+
+                if (o.obsDatetime) {
+                    var encounterContextOldOrders = {};
+                    $scope.oldObResults = [];
+                    for (var property in o) {
+                        if (o.hasOwnProperty(property)) {
+                            if(property ==='obsDatetime') {
+                                encounterContextOldOrders = {
+                                    patient: config.patient,
+                                    encounterType: uuid,
+                                    location: null, // TODO
+                                    encounterDatetime: o.obsDatetime,
+                                    encounterRole: config.encounterRole
+                                };
+
+                                $scope.oldObResults.push(o);
+                                OrderEntryService.signAndSave({ draftOrders: [] }, encounterContextOldOrders,$scope.oldObResults)
+                                    .$promise.then(function(result) {
+                                    if($scope.OrderUuid) {
+                                        $scope.voidActiveLabOrders();
+                                    }
+
+                                    discontinueLabTestOrders($scope.discontinueFilledOrders);
+                                    $('#spinner').modal('hide');
+
+                                    $window.location.reload();
+                                    location.href = location.href;
+                                }, function(errorResponse) {
+                                    $('#spinner').modal('hide');
+                                    emr.errorMessage(errorResponse.data.error.message);
+                                    $scope.loading = false;
+                                });
+                            }
+
+                        }
+                    }
+
+                }
+
+            });
             $scope.loading = true;
-            OrderEntryService.signAndSave({ draftOrders: [] }, encounterContext, $scope.obsPayload)
+            OrderEntryService.signAndSave({ draftOrders: [] }, encounterContext, newObs)
                 .$promise.then(function(result) {
                     if($scope.OrderUuid) {
                         $scope.voidActiveLabOrders();
@@ -799,7 +848,6 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
                 location.href = location.href;
             }, function(errorResponse) {
-                console.log('errorResponse.data.error.message',errorResponse.data.error);
                 emr.errorMessage(errorResponse.data.error.message);
                 $scope.loading = false;
             });
@@ -846,7 +894,6 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                  location.href = location.href;
             }, function(errorResponse) {
                 location.href = location.href;
-                console.log('errorResponse.data.error.message',errorResponse.data.error);
                 emr.errorMessage(errorResponse.data.error.message);
                 $scope.loading = false;
             });
@@ -961,6 +1008,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 delete $scope.lOrders[i].value;
                 delete $scope.lOrders[i].name;
                 delete $scope.lOrders[i].dateActivated;
+                delete $scope.lOrders[i].obsDatetime;
                 delete $scope.lOrders[i].hivVl;
             }
 
@@ -979,7 +1027,6 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 .$promise.then(function(result) {
                 location.href = location.href;
             }, function(errorResponse) {
-                console.log('errorResponse.data.error.message',errorResponse.data.error.message);
                 emr.errorMessage(errorResponse.data.error.message);
                 $scope.loading = false;
             });
@@ -1045,7 +1092,6 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             }, function(errorResponse) {
                 $('#voidOrdersModal').modal('hide');
                 location.href = location.href;
-                console.log('errorResponse.data.error.message',errorResponse.data.error);
                 emr.errorMessage(errorResponse.data.error.message);
                 $scope.loading = false;
             });
@@ -1065,14 +1111,18 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             $scope.orderDate = '';
             angular.element('#orderDate').val('');
             $('#dateOrder').modal('hide');
+            $('#dateOrderVl').modal('hide');
         }
         $scope.dateActivatedForLdl = '';
 
-
+        $scope.orderSel = [];
+        $scope.orderResultSel = [];
+        $scope.labResultsRaw = [];
         $scope.setOrderDate = function() {
             $scope.orderDate = angular.element('#orderDate').val();
             var CurrentDate = new Date();
             $scope.GivenDate = new Date($scope.orderDate);
+            $scope.resultDateSelected = new Date($scope.dateOrderDone);
 
             if($scope.GivenDate > CurrentDate){
                 $scope.showErrorToast = 'Selected date is greater than the current date.';
@@ -1080,23 +1130,32 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 $('#orderError').modal('show');
                 return;
             }
-            $scope.dateActivatedForLdl = $scope.orderDate.substring(0, 10);
+            if($scope.GivenDate < $scope.resultDateSelected){
+                $scope.showErrorToast = 'Result date can not be before the order date.';
 
+                $('#orderError').modal('show');
+                return;
+            }
+
+            $scope.dateActivatedForLdl = $scope.orderDate.substring(0, 10);
             $scope.orderSel['dateActivated'] =  $scope.orderDate.substring(0, 10);
             $scope.orderSel['encounterDatetime'] =  $scope.orderDate.substring(0, 10);
+            $scope.orderResultSel['obsDatetime'] =  $scope.orderDate.substring(0, 10);
 
             $scope.filteredOrders.push($scope.orderSel);
+            $scope.labResultsRaw.push($scope.orderResultSel);
             $scope.filteredOrders = _.uniq($scope.filteredOrders);
+            $scope.labResultsRaw = _.uniq($scope.labResultsRaw);
             $scope.generateLabOrdersSummaryView();
 
             $('#dateOrder').modal('hide');
 
         };
+
         $scope.orderReasonNonCoded = '';
         $scope.orderReasonCoded = '';
 
         $scope.setOrderUrgency = function() {
-
             var e = document.getElementById("ddlOrderUrgency");
             $scope.orderUrgency['urgency'] =  e.options[e.selectedIndex].value;
             $scope.orderUrgency['orderReasonNonCoded'] =  $scope.orderReasonNonCoded;
@@ -1280,7 +1339,6 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                     }, function(errorResponse) {
                         $('#editOrderResults').modal('hide');
                           location.href = location.href;
-                        console.log('errorResponse.data.error.message',errorResponse.data);
                         emr.errorMessage(errorResponse.data.error.message);
                         $scope.loading = false;
                     });
@@ -1308,7 +1366,6 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                  location.href = location.href;
             }, function (errorResponse) {
                 $('#spinner').modal('hide');
-                console.log('errorResponse.data.error.message', errorResponse.data.error);
                 emr.errorMessage(errorResponse.data.error.message);
                 $scope.loading = false;
             });
@@ -1362,7 +1419,6 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                         location.href = location.href;
                     }, function(errorResponse) {
                         location.href = location.href;
-                        console.log('errorResponse.data.error.message',errorResponse.data.error);
                         emr.errorMessage(errorResponse.data.error.message);
                         $scope.loading = false;
                     });
@@ -1390,7 +1446,6 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
                 location.href = location.href;
             }, function(errorResponse) {
-                console.log('errorResponse.data.error.message',errorResponse.data.error);
                 emr.errorMessage(errorResponse.data.error.message);
                 $scope.loading = false;
             });
@@ -1426,10 +1481,75 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                     location.href = location.href;
                 }, function(errorResponse) {
                     location.href = location.href;
-                    console.log('errorResponse.data.error.message',errorResponse.data.error);
                     emr.errorMessage(errorResponse.data.error.message);
                     $scope.loading = false;
                 });
+        }
+
+
+        $scope.orderSelectedToAddResultsDate = function(order) {
+            $scope.dateOrderDone = order.dateActivated;
+            $scope.titleDate ='Enter Results Date';
+            $scope.orderResultSel = order;
+        }
+
+        $scope.orderSelectedToAddResultsDateForVl = function(order) {
+            $scope.dateOrderDone = order.dateActivated;
+            $scope.titleDate ='Enter Results Date';
+            $scope.orderResulForVl = order;
+        }
+
+        $scope.setResultDateForViralLoad = function () {
+            var orders = [];
+            $scope.orderDate = angular.element('#dateOrderVl').val();
+            var CurrentDate = new Date();
+            $scope.GivenDate = new Date($scope.orderDate);
+            $scope.resultDateSelected = new Date($scope.dateOrderDone);
+
+            if($scope.GivenDate > CurrentDate){
+                $scope.showErrorToast = 'Selected date is greater than the current date.';
+
+                $('#orderError').modal('show');
+                return;
+            }
+            if($scope.GivenDate < $scope.resultDateSelected){
+                $scope.showErrorToast = 'Result date can not be before the order date.';
+
+                $('#orderError').modal('show');
+                return;
+            }
+
+            if($scope.orderDate === ''){
+                $scope.showErrorToast = 'Result date is empty';
+
+                $('#orderError').modal('show');
+                return;
+            }
+            if($scope.orderDate) {
+
+                for (var i = 0; i < $scope.labResultsRaw.length; ++i) {
+                    var data = $scope.labResultsRaw[i];
+
+                    for (var r in data) {
+                        if (data.hasOwnProperty(r)) {
+
+                            if (data.concept === '856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                                data['obsDatetime'] = $scope.orderDate.substring(0, 10);
+
+                            }
+                            if (data.concept === '1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                                data['obsDatetime'] = $scope.orderDate.substring(0, 10);
+
+                            }
+
+                        }
+                    }
+                    orders.push(data);
+                }
+            }
+            $scope.labResultsRaw = orders;
+            $('#dateOrderVl').modal('hide');
+
         }
 
 

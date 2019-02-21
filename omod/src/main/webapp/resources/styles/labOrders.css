@@ -141,10 +141,10 @@ body {
     min-width: 220px !important;
 }
 .set-width {
-    width: 220px;
+    width: 250px;
 }
 .set-width-vl {
-    width: 190px;
+    width: 220px;
 }
 .set-width-ldl {
     width: 40px;
@@ -154,4 +154,12 @@ body {
 }
 .button-size {
     width: 100%;
+}
+.btn-xl {
+    width: 4%;
+    height: 4%;
+    padding-left: 15px;
+    padding-top: 15px;
+    padding-bottom: 15px;
+
 }
