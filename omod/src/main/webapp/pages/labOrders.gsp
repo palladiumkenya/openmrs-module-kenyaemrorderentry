@@ -272,6 +272,9 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                                             </option>
                                                                         </select>
                                                                     </div>
+                                                                    <span class="btn-xl fa fa-calendar fa-1x" style="cursor: pointer;"
+                                                                            data-toggle="modal" data-target="#dateOrder"
+                                                                            ng-click="orderSelectedToAddResultsDate(control)"></span>
                                                                 </div>
                                                             </div>
 
@@ -285,6 +288,10 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                                         <input class="form-control set-width" type="text"
                                                                                ng-model="typeValues[control.orderId]">
                                                                     </div>
+                                                                    <span class="btn-xl fa fa-calendar fa-1x" style="cursor: pointer;"
+                                                                            data-toggle="modal" data-target="#dateOrder"
+                                                                            ng-click="orderSelectedToAddResultsDate(control)"></span>
+
                                                                 </div>
                                                             </div>
 
@@ -298,6 +305,9 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                                         <input class="form-control set-width" type="number"
                                                                                ng-model="typeValues[control.orderId]">
                                                                     </div>
+                                                                    <span class="btn-xl fa fa-calendar fa-1x" style="cursor: pointer;"
+                                                                            data-toggle="modal" data-target="#dateOrder"
+                                                                            ng-click="orderSelectedToAddResultsDate(control)"></span>
                                                                 </div>
                                                             </div>
 
@@ -311,6 +321,10 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                                         <textarea class="form-control" ng-model="typeValues[control.orderId]">
                                                                         </textarea>
                                                                     </div>
+                                                                    <span class=" btn-xl fa fa-calendar fa-1x" style="cursor: pointer;"
+                                                                            data-toggle="modal" data-target="#dateOrder"
+                                                                            ng-click="orderSelectedToAddResultsDate(control)"></span>
+
                                                                 </div>
                                                             </div>
 
@@ -335,12 +349,16 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                                                ng-click="toggleSelection(vl.orderId)"
                                                                                value="'1302AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'">
                                                                         <label class="form-check-label" ng-if="vl.rendering ==='checkbox'">LDL</label>
+                                                                        <span class="float-left btn-xl fa fa-calendar fa-1x " style="cursor: pointer;" ng-if="vl.rendering ==='checkbox'"
+                                                                              data-toggle="modal" data-target="#dateOrderVl"
+                                                                              ng-click="orderSelectedToAddResultsDateForVl(vl)"></span>
 
                                                                     </div>
 
 
                                                                 </div>
                                                             </div>
+
 
                                                         </div>
 
@@ -350,8 +368,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
 
                                                 <div style="padding-left: 50%; padding-bottom: 20px" ng-show="InspireList.length >0"
                                                 >
-                                                    <button type="button" ng-click="postLabOrderResults()" data-toggle="modal"
-                                                            data-target="#spinner">
+                                                    <button type="button" ng-click="postLabOrderResults()" data-toggle="modal">
                                                         <img src="${ ui.resourceLink("kenyaui", "images/glyphs/ok.png") }" />  Save</button>
                                                 </div>
                                             </div>
@@ -586,7 +603,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                     </button>
                                 </div>
                                 <div class="modal-body">
-                                    <label >Enter Date Order was made</label>
+                                    <label >{{titleDate}}</label>
                                     <div>
                                         Date: ${ ui.includeFragment("kenyaui", "field/java.util.Date", [ id: "orderDate", formFieldName: "orderDate"]) }
                                     </div>
@@ -594,6 +611,31 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                 <div class="modal-footer">
                                     <button type="button" data-dismiss="modal2"   ng-click="closeDateOrderModal()">Close</button>
                                     <button type="button" ng-click="setOrderDate()">
+                                        <img src="${ ui.resourceLink("kenyaui", "images/glyphs/ok.png") }" /> Save</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal date for vl results -->
+                    <div class="modal fade" id="dateOrderVl" tabindex="-1" role="dialog" aria-labelledby="dateModalCenterTitle" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header modal-header-primary">
+                                    <h5 class="modal-title" id="dateVlModalCenterTitle"></h5>
+                                    <button type="button" class="close" data-dismiss="modal2" ng-click="closeDateOrderModal()">&times;
+
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <label >{{titleDate}}</label>
+                                    <div>
+                                        Date: ${ ui.includeFragment("kenyaui", "field/java.util.Date", [ id: "dateOrderVl", formFieldName: "dateOrderVl"]) }
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" data-dismiss="modal2"   ng-click="closeDateOrderModal()">Close</button>
+                                    <button type="button" ng-click="setResultDateForViralLoad()">
                                         <img src="${ ui.resourceLink("kenyaui", "images/glyphs/ok.png") }" /> Save</button>
                                 </div>
                             </div>
@@ -663,7 +705,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                     </button>
                                 </div>
 
-                                <div class="modal-body" style="color:red;" id="modal-text">
+                                <div class="modal-body" id="modal-text">
                                     {{showErrorToast}}
                                 </div>
                                 <div class="modal-footer">
