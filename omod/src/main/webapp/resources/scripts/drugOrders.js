@@ -381,6 +381,27 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                 $('#orderError').modal('show');
                 return;
             }
+
+            for (var i = 0; i < orderset.length; ++i) {
+                var data = orderset[i];
+
+                for (var r in data) {
+                    if (data.hasOwnProperty(r)) {
+                        if(isNaN(data.dose)) {
+                            $scope.showErrorToast ='Dose value is not a number. Please enter a number';
+                            $('#orderError').modal('show');
+                            return;
+                        }
+
+                        if(isNaN(data.quantity)) {
+                            $scope.showErrorToast ='Quantity value is not a number. Please enter a number';
+                            $('#orderError').modal('show');
+                            return;
+                        }
+                    }
+                }
+            }
+
             drugOrderMembers = orderset;
             regimenDosingInstructions = $scope.regimenDosingInstructions;
             orderSetId = $scope.orderSetId;
@@ -420,13 +441,6 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
         }
 
         $scope.discontinueOrderGroup = function (components) {
-
-            /*if(config.provider === '' || config.provider === undefined || config.provider === null) {
-                console.log('Entering this zone of discontinue drugs',config.provider);
-                $scope.showErrorToast ='You are not login as provider, please contact System Administrator';
-                $('#orderError').modal('show');
-                return;
-            }*/
             drugOrderMembers = components;
             orderSetId = null;
             discontinueOrderUuId = null;
