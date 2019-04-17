@@ -271,33 +271,26 @@ angular.module("orderEntry", ['orderService', 'encounterService', 'session'])
             // beginning of voiding orders
 
             saveVoidedOrders: function(orderContext, uuid, successCallback, errorCallback) {
-                var req = {
+              return  $http({
                     method: 'DELETE',
-                    url: '/openmrs/ws/rest/v1/order/' + uuid +'?!purge',
-                    headers: {
-                        'Content-Type': undefined
-                    },
-                    data: orderContext
-                };
+                    url: '/openmrs/ws/rest/v1/order/' + uuid +'?!purge'
+                }).then(function successCallback(response) {
+                    
+                }, function errorCallback(response) {
 
-                return $http(req).then(function (value) {
+                });
 
-                })
             },
 
             voidObs: function(orderContext, uuid, successCallback, errorCallback) {
-                var req = {
+               return $http({
                     method: 'DELETE',
-                    url: '/openmrs/ws/rest/v1/obs/' + uuid +'?!purge',
-                    headers: {
-                        'Content-Type': undefined
-                    },
-                    data: orderContext
-                };
+                    url: '/openmrs/ws/rest/v1/obs/' + uuid +'?!purge'
+                }).then(function successCallback(response) {
 
-                return $http(req).then(function (value) {
+                }, function errorCallback(response) {
 
-                })
+                });
             },
 
             updateLabResults: function(orderContext, uuid, successCallback, errorCallback) {
