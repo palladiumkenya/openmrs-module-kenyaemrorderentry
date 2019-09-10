@@ -47,7 +47,7 @@ public class RegimenDispensationFragmentController {
         }
         JSONArray drugGroupOrder=(JSONArray)orderContext.get("drugs");
         Patient patient = patientService.getPatientByUuid(patientUuid);
-        String orderSetId=orderContext.get("orderSetId").toString();
+        String orderSetId=orderContext.get("orderSetId") != null? orderContext.get("orderSetId").toString() : "";
         Provider provider = providerService.getProviderByUuid(providerUuid);
         if(orderContext.get("activeOrderGroupUuId") !=null){
             String orderGroupUuId=orderContext.get("activeOrderGroupUuId").toString();
@@ -119,8 +119,11 @@ public class RegimenDispensationFragmentController {
         if(!orderGroupExists){
             orderGroup.setEncounter(encounter);
             orderGroup.setPatient(patient);
-            OrderSet orderSet=orderSetService.getOrderSet(Integer.valueOf(orderSetId));
-            orderGroup.setOrderSet(orderSet);
+            if (orderSetId != null && orderSetId != "") {
+                OrderSet orderSet = orderSetService.getOrderSet(Integer.valueOf(orderSetId));
+                orderGroup.setOrderSet(orderSet);
+            }
+
         }
         orderGroup.setOrders(orderList);
         orderService.saveOrderGroup(orderGroup);

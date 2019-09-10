@@ -430,7 +430,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
 
             _.map($scope.patientRegimens, function (regimen) {
                 if (regimen.regimenName === orderGroup.name) {
-                    $scope.regimenLines = regimen.groupCodeName;
+                    $scope.regimenLines = (regimen.groupCodeName !==null ||regimen.groupCodeName !== "") ? regimen.groupCodeName :"" ;
                     $scope.programName = regimen.program;
 
                     $scope.showRegimenPanel = true;
