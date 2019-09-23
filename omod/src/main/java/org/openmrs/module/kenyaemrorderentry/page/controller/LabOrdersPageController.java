@@ -200,7 +200,7 @@ public class LabOrdersPageController {
                         concService.getConcept(5497), // cd4 counts
                         concService.getConcept(730), // cd4%
                         concService.getConcept(163722), // hiv rapid test
-                        concService.getConcept(844) // DNA PCR
+                        concService.getConcept(1030) // DNA PCR
                 ));
 
         JSONArray tbMonitoring = buildTestPanelWithoutPanelConcept("Blood", labTestJsonPayload,
