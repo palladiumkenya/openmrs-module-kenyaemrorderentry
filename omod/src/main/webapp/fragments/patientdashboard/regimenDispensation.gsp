@@ -123,7 +123,7 @@
         Date: ${ui.includeFragment("kenyaui", "field/java.util.Date", [id: "orderDate", formFieldName: "orderDate"])}
         <div style="margin-top:5px;" ;></div>
 
-        <div ng-show="regimenLines.length > 0" style="border-style:groove; border-width:2px;border-color:gray;padding:10px;">
+        <div ng-show="regimenNames.length > 0" style="border-style:groove; border-width:2px;border-color:gray;padding:10px;">
             <div style="font-size: 16px">
                 <b>Program:</b>{{programName}} | <b>Regimen Line:</b>{{regimenLines}} | <b>Regimen:</b>{{regimenNames}}
             </div>

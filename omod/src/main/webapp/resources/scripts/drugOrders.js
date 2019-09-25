@@ -81,7 +81,6 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                         return 1;
                     }
                 });
-
                 $scope.patientRegimens = addRegimenStatus(programRegimens);
                 $scope.patientActiveDrugOrders = OpenMRS.activeOrdersPayload;
                 if($scope.patientActiveDrugOrders) {
@@ -144,9 +143,16 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
             });
         }
 
-        function addRegimenStatus(completedFields) {
-
+        function addRegimenStatus(completed) {
+            var completedFields = [];
             var reg = [];
+            if (completed[0].conceptRef ==='' || completed[0].conceptRef === undefined ||
+                completed[0].conceptRef === null ) {
+                completedFields = completed;
+
+            } else {
+                completedFields = filterDuplicateRegimen(completed);
+            }
             for (var i = 0; i < completedFields.length; ++i) {
                 var data = completedFields[i];
 
@@ -154,10 +160,24 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                     if (data.hasOwnProperty(r)) {
                         data['regimenStatus'] = "active";
                     }
+                    if(data.conceptRef ==="162200AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA") {
+                        data['groupCodeName'] = "";
+                    }
                 }
                 reg.push(data);
             }
             return reg
+        }
+        function filterDuplicateRegimen(arr){
+            var newArr = [];
+            angular.forEach(arr, function(value, key) {
+                var exists = false;
+                angular.forEach(newArr, function(val2, key) {
+                    if(angular.equals(value.conceptRef, val2.conceptRef)){ exists = true };
+                });
+                if(exists == false && value.conceptRef != "") { newArr.push(value); }
+            });
+            return newArr;
         }
 
         function prefillDrugComponentsWithPastValues(completedFields) {
