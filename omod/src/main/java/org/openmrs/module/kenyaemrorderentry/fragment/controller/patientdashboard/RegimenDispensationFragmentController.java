@@ -93,7 +93,7 @@ public class RegimenDispensationFragmentController {
                 drugOrder.setPatient(patient);
                 drugOrder.setEncounter(encounter);
                 drugOrder.setDateCreated(date);
-                Drug drug = conceptService.getDrugByNameOrId(drugId);
+                Drug drug = conceptService.getDrug(drugId);
                 drugOrder.setDrug(drug);
                 drugOrder.setInstructions(dosingInstructions);
                 drugOrder.setOrderer(provider);
