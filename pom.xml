@@ -33,14 +33,14 @@
 
 	<properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <openMRSVersion>2.0.7</openMRSVersion>
+        <openMRSVersion>2.1.2</openMRSVersion>
         <logicVersion>0.5.2</logicVersion>
         <appframeworkVersion>2.13.0</appframeworkVersion>
         <uiframeworkVersion>3.15.0</uiframeworkVersion>
         <calculationVersion>1.2</calculationVersion>
         <serialization.xstreamVersion>0.2.14</serialization.xstreamVersion>
         <htmlwidgetsVersion>1.10.0</htmlwidgetsVersion>
-        <reportingVersion>1.18.0</reportingVersion>
+        <reportingVersion>1.19.0</reportingVersion>
         <reportingRestVersion>1.10.0</reportingRestVersion>
         <metadatadeployVersion>1.11.0</metadatadeployVersion>
         <metadatasharingVersion>1.5.0</metadatasharingVersion>
@@ -51,7 +51,7 @@
         <htmlformentryuiVersion>1.9.0</htmlformentryuiVersion>
         <coreappsVersion>1.23.0</coreappsVersion>
         <kenyacoreVersion>2.4.2-SNAPSHOT</kenyacoreVersion>
-        <kenyauiVersion>2.1.1</kenyauiVersion>
+        <kenyauiVersion>2.1.2-SNAPSHOT</kenyauiVersion>
         <webservices.restVersion>2.26.0</webservices.restVersion>
         <jacksonVersion>2.10.1</jacksonVersion>
         <apacheHttpClientVersion>4.5.10</apacheHttpClientVersion>
