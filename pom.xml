@@ -53,7 +53,7 @@
         <htmlformentryuiVersion>1.2</htmlformentryuiVersion>
         <coreappsVersion>1.6</coreappsVersion>
         <kenyacoreVersion>2.2</kenyacoreVersion>
-        <kenyauiVersion>2.1.1</kenyauiVersion>
+        <kenyauiVersion>2.1.2-SNAPSHOT</kenyauiVersion>
         <webservices.restVersion>2.11</webservices.restVersion>
 
 <!--
