@@ -301,7 +301,7 @@ public class DrugOrdersPageController {
       else   if(conceptUuid.equalsIgnoreCase("75523AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
             name = "EFV";
         }
-       else if(conceptUuid.equalsIgnoreCase("79040AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
+       else if(conceptUuid.equalsIgnoreCase("794AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
             name = "LPV";
         }
        else if(conceptUuid.equalsIgnoreCase("83412AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
