@@ -186,6 +186,8 @@ public class LabOrdersPageController {
 
         }
 
+
+
         // Add panels with no concept ids
         JSONArray finalJsonPayloadArray = buildTestPanelWithoutPanelConcept("Blood", labTestJsonPayload,
                 "GROUPING AND CROSSMATCH", Arrays.asList(
@@ -212,6 +214,11 @@ public class LabOrdersPageController {
                         concService.getConcept(307),
                         concService.getConcept(1465),
                         concService.getConcept(162202) // GeneXpert MTB/RIF
+                ));
+        JSONArray covidMonitoring = buildTestPanelWithoutPanelConcept("Blood", labTestJsonPayload,
+                "COVID MONITORING", Arrays.asList(
+                        concService.getConcept(165611) // covid
+
                 ));
 
         model.put("labTestJsonPayload", labTestJsonPayload.toString());
@@ -249,15 +256,19 @@ public class LabOrdersPageController {
 
             if (labTestConcept.getDatatype().isCoded()) {
                 inputType = "select";
-                for (ConceptAnswer ans : labTestConcept.getAnswers()) {
-                    JSONObject testResultObject = new JSONObject();
-                    testResultObject.put("concept", ans.getAnswerConcept().getUuid());
-                    testResultObject.put("label", ans.getAnswerConcept().getName(LOCALE).getName());
-                    testResultList.add(testResultObject);
+                System.out.println("labTestConcept.getAnswers()======="+labTestConcept.getAnswers());
+                if(!labTestConcept.getAnswers().isEmpty()){
+                    for (ConceptAnswer ans : labTestConcept.getAnswers()) {
+                        JSONObject testResultObject = new JSONObject();
+                        testResultObject.put("concept", ans.getAnswerConcept().getUuid());
+                        testResultObject.put("label", ans.getAnswerConcept().getName(LOCALE).getName());
+                        testResultList.add(testResultObject);
+                    }
+                    labOrderObject.put("answers", testResultList);
+                }else {
+                    labOrderObject.put("answers", constructCodedAnswersForCodedConceptWithoutAnswers());
+
                 }
-
-                labOrderObject.put("answers", testResultList);
-
 
             } else if (labTestConcept.getDatatype().isNumeric()) {
                 inputType = "inputnumeric";
@@ -360,6 +371,21 @@ public class LabOrdersPageController {
         return ansList;
 
     }
+    private JSONArray constructCodedAnswersForCodedConceptWithoutAnswers() {
+        JSONArray ansList = new JSONArray();
+
+        for (Integer ans : Arrays.asList(703, 664,1138)) {
+            Concept concept = concService.getConcept(ans);
+            JSONObject testResultObject = new JSONObject();
+            testResultObject.put("concept", concept.getUuid());
+            testResultObject.put("label", concept.getName(LOCALE).getName());
+            ansList.add(testResultObject);
+        }
+        return ansList;
+
+    }
+
+
     private JSONArray buildTestPanelWithoutPanelConcept(String sampleType, JSONArray sampleTypeArray, String panelName,
                                                         List<Concept> testConcepts) {
         if (null == panelName || panelName.equals("") || null == testConcepts || testConcepts.size() == 0)
