@@ -104,7 +104,7 @@ public class LabOrdersPageController {
 
         // Build panels for Blood
         List<Concept> bloodTestPanels = Arrays.asList(
-                conceptService.getConcept(161430),
+               /* conceptService.getConcept(161430),
                 // conceptService.getConcept(657),
                 conceptService.getConcept(161487),
                 conceptService.getConcept(161437),
@@ -118,7 +118,7 @@ public class LabOrdersPageController {
                 conceptService.getConcept(161476),
                 conceptService.getConcept(161426),
                 conceptService.getConcept(161431),
-                conceptService.getConcept(161475)
+                conceptService.getConcept(161475)*/
 
 
         );
@@ -139,11 +139,11 @@ public class LabOrdersPageController {
 
 
         );
-        sampleTypes.put("Urine", urineTestPanels);
+     //   sampleTypes.put("Urine", urineTestPanels);
         sampleTypes.put("Blood", bloodTestPanels);
-        sampleTypes.put("Stool", stoolTestPanels);
-        sampleTypes.put("Histology/Cytology", histologyTestPanels);
-        sampleTypes.put("Sputum", sputumTestPanels);
+     //   sampleTypes.put("Stool", stoolTestPanels);
+      //  sampleTypes.put("Histology/Cytology", histologyTestPanels);
+      //  sampleTypes.put("Sputum", sputumTestPanels);
 
 
 
@@ -189,13 +189,13 @@ public class LabOrdersPageController {
 
 
         // Add panels with no concept ids
-        JSONArray finalJsonPayloadArray = buildTestPanelWithoutPanelConcept("Blood", labTestJsonPayload,
+       /* JSONArray finalJsonPayloadArray = buildTestPanelWithoutPanelConcept("Blood", labTestJsonPayload,
                 "GROUPING AND CROSSMATCH", Arrays.asList(
                         concService.getConcept(161233), // blood cross matching
                         concService.getConcept(160232), // rhesus type
                         concService.getConcept(163126) // blood group
-                ));
-        JSONArray hivMonitoring = buildTestPanelWithoutPanelConcept("Blood", labTestJsonPayload,
+                ));*/
+        /*JSONArray hivMonitoring = buildTestPanelWithoutPanelConcept("Blood", labTestJsonPayload,
                 "HIV MONITORING", Arrays.asList(
                         concService.getConcept(856), // hiv viral load
                         //   concService.getConcept(1305), // hiv viral load Qualitative
@@ -203,12 +203,12 @@ public class LabOrdersPageController {
                         concService.getConcept(730), // cd4%
                         concService.getConcept(163722), // hiv rapid test
                         concService.getConcept(1030) // DNA PCR
-                ));
+                ));*/
 
-        JSONArray tbMonitoring = buildTestPanelWithoutPanelConcept("Blood", labTestJsonPayload,
+        /*JSONArray tbMonitoring = buildTestPanelWithoutPanelConcept("Blood", labTestJsonPayload,
                 "TB MONITORING", Arrays.asList(
                         concService.getConcept(162202) // GeneXpert MTB/RIF
-                ));
+                ));*/
         JSONArray sputumTb = buildTestPanelWithoutPanelConcept("Sputum", labTestJsonPayload,
                 "TB MONITORING", Arrays.asList(
                         concService.getConcept(307),
