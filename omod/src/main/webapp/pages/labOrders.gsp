@@ -64,7 +64,7 @@ th, td {
 
     jq(document).ready(function() {
         jq("#btnBack").click(function(){
-            ui.navigate('${ ui.pageLink("kenyaemr", "clinician/clinicianViewPatient", [patient: patient, patientId: patient]) }');
+            ui.navigate('${ ui.pageLink("kenyaemr", "surveillance/surveillanceViewPatient", [patient: patient, patientId: patient]) }');
         });
     });
 
