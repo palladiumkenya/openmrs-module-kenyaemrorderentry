@@ -256,7 +256,6 @@ public class LabOrdersPageController {
 
             if (labTestConcept.getDatatype().isCoded()) {
                 inputType = "select";
-                System.out.println("labTestConcept.getAnswers()======="+labTestConcept.getAnswers());
                 if(!labTestConcept.getAnswers().isEmpty()){
                     for (ConceptAnswer ans : labTestConcept.getAnswers()) {
                         JSONObject testResultObject = new JSONObject();
