@@ -11,7 +11,6 @@ package org.openmrs.module.kenyaemrorderentry.page.controller.orders;
 
 import org.openmrs.Patient;
 import org.openmrs.module.kenyaemrorderentry.util.OrderEntryUIUtils;
-import org.openmrs.module.kenyaui.annotation.AppPage;
 import org.openmrs.ui.framework.SimpleObject;
 import org.openmrs.ui.framework.UiUtils;
 import org.openmrs.ui.framework.page.PageContext;
@@ -20,18 +19,8 @@ import org.openmrs.ui.framework.page.PageModel;
 /**
  * Homepage for the drug order app
  */
-@AppPage("kenyaemr.drugorder")
+/*@AppPage("kenyaemr.drugorder")*/
 public class DrugOrderHomePageController {
 
-	public String controller(UiUtils ui, PageModel model, PageContext pageContext) {
 
-		Patient patient = (Patient) model.getAttribute("currentPatient");
-		OrderEntryUIUtils.setDrugOrderPageAttributes(pageContext, OrderEntryUIUtils.APP_DRUG_ORDER);
-
-		if (patient != null) {
-			return "redirect:" + ui.pageLink("kenyaemrorderentry", "drugOrders", SimpleObject.create("patientId", patient.getPatientId(), "currentApp","kenyaemr.drugorder"));
-		} else {
-			return null;
-		}
-	}
 }

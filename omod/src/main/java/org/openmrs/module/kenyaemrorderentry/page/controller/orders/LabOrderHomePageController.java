@@ -20,7 +20,7 @@ import org.openmrs.ui.framework.page.PageModel;
 /**
  * Homepage for the drug order app
  */
-@AppPage("kenyaemr.drugorder")
+@AppPage("kenyaemr.laborder")
 public class LabOrderHomePageController {
 
 	public String controller(UiUtils ui, PageModel model, PageContext pageContext) {
