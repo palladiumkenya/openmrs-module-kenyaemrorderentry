@@ -3,7 +3,6 @@ package org.openmrs.module.kenyaemrorderentry.page.controller;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.openmrs.CareSetting;
-import org.openmrs.module.kenyaui.annotation.AppPage;
 import org.openmrs.Concept;
 import org.openmrs.DrugOrder;
 import org.openmrs.EncounterRole;
@@ -17,7 +16,6 @@ import org.openmrs.api.EncounterService;
 import org.openmrs.api.ObsService;
 import org.openmrs.api.OrderService;
 import org.openmrs.module.appui.UiSessionContext;
-import org.openmrs.module.kenyaemrorderentry.util.OrderEntryUIUtils;
 import org.openmrs.module.webservices.rest.web.ConversionUtil;
 import org.openmrs.module.webservices.rest.web.representation.NamedRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.Representation;
@@ -34,7 +32,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-@AppPage("kenyaemr.drugorder")
+
 public class DrugOrdersPageController {
     public static final Locale LOCALE = Locale.ENGLISH;
 
@@ -51,7 +49,6 @@ public class DrugOrdersPageController {
 
 
 
-        OrderEntryUIUtils.setDrugOrderPageAttributes(pageContext, OrderEntryUIUtils.APP_DRUG_ORDER);
 
         // HACK
         EncounterType drugOrderEncounterType = encounterService.getAllEncounterTypes(false).get(0);
