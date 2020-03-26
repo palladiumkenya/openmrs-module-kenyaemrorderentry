@@ -261,7 +261,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                             <div ng-if="control.rendering === 'select'">
                                                                 <div class="form-group row">
                                                                     <label class="label label-md "><b>{{control.label}}:</b>
-                                                                        <p>  <span >({{control.dateActivated | date:'dd-MM-yyyy'}})</span>
+                                                                        <p>  <span >({{control.dateActivated | date:'dd-MM-yyyy'}},Sampele Type:{{control.instruction}})</span>
                                                                         </p></label>
 
                                                                     <div >
@@ -399,6 +399,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                 <th>Order Date</th>
                                                 <th>Order No</th>
                                                 <th>Test Name</th>
+                                                <th>Sample Type</th>
                                                 <th>Ordered By</th>
                                                 <th>Actions</th>
                                             </tr>
@@ -411,6 +412,10 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                 </td>
                                                 <td>
                                                     {{test.display}}
+
+                                                </td>
+                                                <td>
+                                                    {{test.instructions}}
 
                                                 </td>
                                                 <td>
