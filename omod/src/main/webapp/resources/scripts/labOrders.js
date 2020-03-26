@@ -500,6 +500,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
             if(tests.selected === true) {
                 checkIfSelectedTestIsActiveOrder(tests);
+                tests["instructions"]=$scope.sampleTypeName;
                 $scope.selectedOrders.push(tests);
                 $scope.filteredOrders = _.uniq($scope.selectedOrders);
                 $scope.filteredOrders = addDefaultDateAndUrgency($scope.filteredOrders);
@@ -718,6 +719,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                         data['orderer'] = config.provider.uuid;
                         data['careSetting'] = $scope.careSetting.uuid;
                         data['type'] = "testorder";
+                       // data['instructions'] = $scope.sampleTypeName;
 
                     }
                     if(data.concept ==='856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
@@ -781,6 +783,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 delete $scope.obsPayload[i].rendering;
                 delete $scope.obsPayload[i].hivVl;
                 delete $scope.obsPayload[i].name;
+                delete $scope.obsPayload[i].instruction;
                 delete $scope.obsPayload[i].dateActivated;
             }
             var uuid = {uuid:"e1406e88-e9a9-11e8-9f32-f2801f1b9fd1"};
@@ -1009,6 +1012,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 delete $scope.lOrders[i].name;
                 delete $scope.lOrders[i].dateActivated;
                 delete $scope.lOrders[i].obsDatetime;
+                delete $scope.lOrders[i].instruction;
                 delete $scope.lOrders[i].hivVl;
             }
 

@@ -139,11 +139,28 @@ public class LabOrdersPageController {
 
 
         );
+        List<Concept> trachealAspirateTestPanels = Arrays.asList(
+
+
+
+        );
+        List<Concept> opSwabsTestPanels = Arrays.asList(
+
+
+
+        );
+        List<Concept> npSwabsTestPanels = Arrays.asList(
+
+
+
+        );
+
      //   sampleTypes.put("Urine", urineTestPanels);
         sampleTypes.put("Blood", bloodTestPanels);
-     //   sampleTypes.put("Stool", stoolTestPanels);
-      //  sampleTypes.put("Histology/Cytology", histologyTestPanels);
-      //  sampleTypes.put("Sputum", sputumTestPanels);
+        sampleTypes.put("OP Swab", opSwabsTestPanels);
+        sampleTypes.put("Tracheal Aspirate", trachealAspirateTestPanels);
+        sampleTypes.put("Sputum", sputumTestPanels);
+        sampleTypes.put("NP Swab ", npSwabsTestPanels);
 
 
 
@@ -210,10 +227,20 @@ public class LabOrdersPageController {
                         concService.getConcept(162202) // GeneXpert MTB/RIF
                 ));*/
         JSONArray sputumTb = buildTestPanelWithoutPanelConcept("Sputum", labTestJsonPayload,
-                "TB MONITORING", Arrays.asList(
-                        concService.getConcept(307),
-                        concService.getConcept(1465),
-                        concService.getConcept(162202) // GeneXpert MTB/RIF
+                "COVID-19 MONITORING", Arrays.asList(
+                        concService.getConcept(165611)
+                ));
+        JSONArray tracheal = buildTestPanelWithoutPanelConcept("Tracheal Aspirate", labTestJsonPayload,
+                "COVID-19 MONITORING", Arrays.asList(
+                        concService.getConcept(165611)
+                ));
+        JSONArray opswab = buildTestPanelWithoutPanelConcept("OP Swab", labTestJsonPayload,
+                "COVID-19 MONITORING", Arrays.asList(
+                        concService.getConcept(165611)
+                ));
+        JSONArray npswab = buildTestPanelWithoutPanelConcept("NP Swab ", labTestJsonPayload,
+                "COVID-19 MONITORING", Arrays.asList(
+                        concService.getConcept(165611)
                 ));
         JSONArray covidMonitoring = buildTestPanelWithoutPanelConcept("Blood", labTestJsonPayload,
                 "COVID MONITORING", Arrays.asList(
@@ -253,6 +280,7 @@ public class LabOrdersPageController {
             labOrderObject.put("orderId", orderId);
             labOrderObject.put("encounter", labTestEncounter.getUuid());
             labOrderObject.put("dateActivated", order.getDateActivated().toString());
+            labOrderObject.put("instruction", order.getInstructions());
 
             if (labTestConcept.getDatatype().isCoded()) {
                 inputType = "select";
@@ -394,8 +422,7 @@ public class LabOrdersPageController {
         JSONArray labTestArray = new JSONArray();
         panelObj = new JSONObject();
 
-        for (Concept labTest : testConcepts) {
-            labTestObj = new JSONObject();
+        for (Concept labTest : testConcepts) { labTestObj = new JSONObject();
             labTestObj.put("concept_id", labTest.getConceptId());
             labTestObj.put("concept", labTest.getUuid());
             labTestObj.put("name", concService.getConcept(labTest.getConceptId()).getName(LOCALE).getName());
