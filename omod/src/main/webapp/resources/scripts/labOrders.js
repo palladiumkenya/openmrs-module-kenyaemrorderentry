@@ -100,36 +100,12 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 $scope.labOrders = labs;
                 $scope.OrderReason = [
                     {
-                        name:'Clinical treatment failure',
-                        uuid:'843AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
-                    },
-                    {
-                        name:'Pregnancy',
-                        uuid:'1434AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
-                    },
-                    {
                         name:'Baseline',
                         uuid:'162080AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
                     },
                     {
                         name:'Follow up',
                         uuid:'162081AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
-                    },
-                    {
-                        name:'Single Drug Substitution',
-                        uuid:'1259AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
-                    },
-                    {
-                        name:'Breastfeeding',
-                        uuid:'159882AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
-                    },
-                    {
-                        name:'Clinical failure',
-                        uuid:'163523AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
-                    },
-                    {
-                        name:'Routine',
-                        uuid:'161236AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
                     }
                 ];
                 $scope.OrderReason =  _.filter($scope.OrderReason, function(o) {
@@ -207,30 +183,13 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                             data['dateActivated'] = new Date(data.dateActivated );
                         }
 
-                        if (data.orderReasonCoded === '843AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                            data['orderReasonCoded'] = "Clinical treatment failure";
-                        }
-                        if (data.orderReasonCoded === '1434AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' ) {
-                            data['orderReasonCoded'] = "Pregnancy";
-                        }
                         if (data.orderReasonCoded === '162080AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' ) {
                             data['orderReasonCoded'] = "Baseline";
                         }
                         if (data.orderReasonCoded === '162081AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' ) {
                             data['orderReasonCoded'] = "Follow up";
                         }
-                        if (data.orderReasonCoded === '1259AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' ) {
-                            data['orderReasonCoded'] = "Single Drug Substitution";
-                        }
-                        if (data.orderReasonCoded === '159882AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' ) {
-                            data['orderReasonCoded'] = "Breastfeeding";
-                        }
-                        if (data.orderReasonCoded === '163523AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                            data['orderReasonCoded'] = "Clinical failure";
-                        }
-                        if (data.orderReasonCoded === '161236AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' ) {
-                            data['orderReasonCoded'] = "Routine";
-                        }
+
 
 
                     }
