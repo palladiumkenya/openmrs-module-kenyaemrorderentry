@@ -104,8 +104,24 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                         uuid:'162080AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
                     },
                     {
-                        name:'Follow up',
+                        name:' 1st Follow up',
                         uuid:'162081AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+                    },
+                    {
+                        name:'2nd Follow up',
+                        uuid:'164142AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+                    },
+                    {
+                        name:'3rd Follow up',
+                        uuid:'159490AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+                    },
+                    {
+                        name:'4th Follow up',
+                        uuid:'159489AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+                    },
+                    {
+                        name:'5th Follow up',
+                        uuid:'161893AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
                     }
                 ];
                 $scope.OrderReason =  _.filter($scope.OrderReason, function(o) {
@@ -187,7 +203,19 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                             data['orderReasonCoded'] = "Baseline";
                         }
                         if (data.orderReasonCoded === '162081AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' ) {
-                            data['orderReasonCoded'] = "Follow up";
+                            data['orderReasonCoded'] = "1st Follow up";
+                        }
+                        if (data.orderReasonCoded === '164142AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' ) {
+                            data['orderReasonCoded'] = "2nd Follow up";
+                        }
+                        if (data.orderReasonCoded === '159490AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' ) {
+                            data['orderReasonCoded'] = "3rd Follow up";
+                        }
+                        if (data.orderReasonCoded === '159489AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' ) {
+                            data['orderReasonCoded'] = "4th Follow up";
+                        }
+                        if (data.orderReasonCoded === '161893AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' ) {
+                            data['orderReasonCoded'] = "5th Follow up";
                         }
 
 
@@ -559,50 +587,20 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 encounterRole: config.encounterRole
             };
 
-            var checkVlOrderReason = _.filter($scope.lOrdersPayload, function(o) {
-                return o.concept ==='856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
-                    || o.concept ==='1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
-            });
-            var checkCd4OrderReason = _.filter($scope.lOrdersPayload, function(o) {
-                return o.concept ==='730AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
 
-            });
-
-            var checkCd4CountOrderReason = _.filter($scope.lOrdersPayload, function(o) {
-                return o.concept ==='5497AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+            var checkCovidOrderReason = _.filter($scope.lOrdersPayload, function(o) {
+                return o.concept ==='165611AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
 
             });
 
 
-            if(checkVlOrderReason && checkVlOrderReason[0]) {
-                if ((checkVlOrderReason[0].orderReasonNonCoded === '' || checkVlOrderReason[0].orderReasonNonCoded === null
-                    || checkVlOrderReason[0].orderReasonNonCoded === undefined) && (checkVlOrderReason[0].orderReason === ''
-                    || checkVlOrderReason[0].orderReason === null || checkVlOrderReason[0].orderReason === undefined)) {
-                    $scope.showErrorToast = 'Order reason for HIV viral load is required';
 
-                    $('#orderError').modal('show');
-                    return;
-                }
-            }
+            if(checkCovidOrderReason && checkCovidOrderReason[0]) {
+                if ((checkCovidOrderReason[0].orderReasonNonCoded === '' || checkCovidOrderReason[0].orderReasonNonCoded === null ||
+                    checkCovidOrderReason[0].orderReasonNonCoded === undefined) && (checkCovidOrderReason[0].orderReason === ''
+                    || checkCovidOrderReason[0].orderReason === null || checkCovidOrderReason[0].orderReason === undefined)) {
 
-            if(checkCd4CountOrderReason && checkCd4CountOrderReason[0]) {
-                if ((checkCd4CountOrderReason[0].orderReasonNonCoded === '' || checkCd4CountOrderReason[0].orderReasonNonCoded === null ||
-                    checkCd4CountOrderReason[0].orderReasonNonCoded === undefined) && (checkCd4CountOrderReason[0].orderReason === ''
-                    || checkCd4CountOrderReason[0].orderReason === null || checkCd4CountOrderReason[0].orderReason === undefined)) {
-
-                    $scope.showErrorToast = 'Order reason for CD4 Count is required';
-
-                    $('#orderError').modal('show');
-                    return;
-                }
-            }
-
-            if(checkCd4OrderReason && checkCd4OrderReason[0]) {
-                if ((checkCd4OrderReason[0].orderReasonNonCoded === '' || checkCd4OrderReason[0].orderReasonNonCoded === null
-                    || checkCd4OrderReason[0].orderReasonNonCoded === undefined) && (checkCd4OrderReason[0].orderReason === ''
-                    || checkCd4OrderReason[0].orderReason === null || checkCd4OrderReason[0].orderReason === undefined)) {
-
-                    $scope.showErrorToast = 'Order reason for CD4% is required';
+                    $scope.showErrorToast = 'Order reason is required';
 
                     $('#orderError').modal('show');
                     return;
