@@ -84,7 +84,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 $scope.activeTestOrders = _.map(results, function(item) { return new OpenMRS.TestOrderModel(item) });
                 $scope.activeTestOrdersForHvVl = $scope.activeTestOrders;
                 $scope.activeTestOrders = customizeActiveOrdersToDisplaySingHivVl($scope.activeTestOrders);
-                mapGeneXpertActiveTestName($scope.activeTestOrders);
+                mapOrderReasonName($scope.activeTestOrders);
                 $scope.activeTestOrders.sort(function(a, b) {
                     var key1 = a.dateActivated;
                     var key2 = b.dateActivated;
@@ -124,13 +124,6 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                         uuid:'161893AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
                     }
                 ];
-                $scope.OrderReason =  _.filter($scope.OrderReason, function(o) {
-                    if(config.patient.person.gender !== 'F') {
-                        return o.uuid !== '1434AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
-                    } else {
-                        return o;
-                    }
-                });
 
 
             });
@@ -180,6 +173,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 }
             });
         }
+
         function renameNotDetectedToLDL(res) {
             var orders = [];
             for (var i = 0; i < res.length; ++i) {
@@ -250,7 +244,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             });
         }
 
-        function mapGeneXpertActiveTestName(result) {
+        function mapOrderReasonName(result) {
 
             var orders = [];
             for (var i = 0; i < result.length; ++i) {
@@ -258,9 +252,23 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
                 for (var r in data) {
                     if (data.hasOwnProperty(r)) {
-
-                        if (data.display ==='Tuberculosis polymerase chain reaction with rifampin resistance checking' ) {
-                            data['display'] =  'GeneXpert';
+                        if (data.orderReason.uuid === '162080AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' ) {
+                            data['orderReason'] = "Baseline";
+                        }
+                        if (data.orderReason.uuid === '162081AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' ) {
+                            data['orderReason'] = "1st Follow up";
+                        }
+                        if (data.orderReason.uuid === '164142AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' ) {
+                            data['orderReason'] = "2nd Follow up";
+                        }
+                        if (data.orderReason.uuid === '159490AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' ) {
+                            data['orderReason'] = "3rd Follow up";
+                        }
+                        if (data.orderReason.uuid === '159489AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' ) {
+                            data['orderReason'] = "4th Follow up";
+                        }
+                        if (data.orderReason.uuid === '161893AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' ) {
+                            data['orderReason'] = "5th Follow up";
                         }
                     }
 
@@ -587,9 +595,13 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 encounterRole: config.encounterRole
             };
 
-
             var checkCovidOrderReason = _.filter($scope.lOrdersPayload, function(o) {
                 return o.concept ==='165611AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+
+            });
+
+            var checkLabName = _.filter($scope.lOrdersPayload, function(o) {
+                return o.commentToFulfiller ==='';
 
             });
 
@@ -601,6 +613,18 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                     || checkCovidOrderReason[0].orderReason === null || checkCovidOrderReason[0].orderReason === undefined)) {
 
                     $scope.showErrorToast = 'Order reason is required';
+
+                    $('#orderError').modal('show');
+                    return;
+                }
+            }
+
+
+            if(checkLabName && checkLabName[0]) {
+                if ((checkLabName[0].commentToFulfiller === '' || checkLabName[0].commentToFulfiller === null ||
+                    checkLabName[0].commentToFulfiller === undefined)) {
+
+                    $scope.showErrorToast = 'Lab name is required';
 
                     $('#orderError').modal('show');
                     return;
@@ -1118,12 +1142,15 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
         $scope.setOrderUrgency = function() {
             var e = document.getElementById("ddlOrderUrgency");
+            var labName = document.getElementById("ddlabName");
+            var orderReason = document.getElementById("ddlOrderReason");
             $scope.orderUrgency['urgency'] =  e.options[e.selectedIndex].value;
+            $scope.orderUrgency['commentToFulfiller'] =  labName.options[labName.selectedIndex].value;
             $scope.orderUrgency['orderReasonNonCoded'] =  $scope.orderReasonNonCoded;
-            $scope.orderUrgency['orderReason'] =  $scope.orderReasonCoded;
+            $scope.orderUrgency['orderReason'] =  orderReason.options[orderReason.selectedIndex].value;
 
             _.each($scope.OrderReason, function(o) {
-                if (o.uuid === $scope.orderReasonCoded) {
+                if (o.uuid === orderReason.options[orderReason.selectedIndex].value) {
                     $scope.name = o.name;
 
                 }
