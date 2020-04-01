@@ -153,7 +153,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                                                     data-toggle="modal" data-target="#dateOrder"
                                                                                     ng-click="orderSelectedToAddDateActivated(order)"></button>
                                                                             <button type="button" class="fa fa-warning fa-1x" style="width: 8%"
-                                                                                    data-placement="top" title="Urgency | Reason"
+                                                                                    data-placement="top" title="Urgency | Reason | Lab name"
                                                                                     data-toggle="modal" data-target="#orderUrgency"
                                                                                     ng-click="orderSelectedToAddDateActivated(order)"
                                                                             ></button>
@@ -400,6 +400,8 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                 <th>Order No</th>
                                                 <th>Test Name</th>
                                                 <th>Sample Type</th>
+                                                <th>Order Reason</th>
+                                                <th>Lab</th>
                                                 <th>Ordered By</th>
                                                 <th>Actions</th>
                                             </tr>
@@ -416,6 +418,16 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                 </td>
                                                 <td>
                                                     {{test.instructions}}
+
+                                                </td>
+                                                <td>
+                                                    <span ng-if="test.orderReason || test.orderReasonNonCoded">
+                                                        {{test.orderReason}}  {{orderReasonNonCoded}}
+                                                    </span>
+
+                                                </td>
+                                                <td>
+                                                    {{test.commentToFulfiller}}
 
                                                 </td>
                                                 <td>
@@ -544,6 +556,8 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                             <tr>
                                                 <th>Order Date</th>
                                                 <th>Test Name</th>
+                                                <th>Lab</th>
+                                                <th>Sample Type</th>
                                                 <th>Order Reason</th>
                                                 <th>Order Urgency</th>
                                                 <th>Actions</th>
@@ -554,6 +568,12 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                 </td>
                                                 <td>
                                                     {{testSummary.name}}
+                                                </td>
+                                                <td>
+                                                    {{testSummary.commentToFulfiller}}
+                                                </td>
+                                                <td>
+                                                    {{testSummary.instructions}}
                                                 </td>
                                                 <td>
                                                     {{testSummary.orderReasonCodedName}}
@@ -569,7 +589,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                                 data-toggle="modal" data-target="#dateOrder"
                                                                 ng-click="orderSelectedToAddDateActivated(testSummary)"></button>
                                                         <button type="button" class="fa fa-warning fa-1x"
-                                                                data-placement="top" title="Urgency | Reason"
+                                                                data-placement="top" title="Urgency | Reason | Lab Name"
                                                                 data-toggle="modal" data-target="#orderUrgency"
                                                                 ng-click="orderSelectedToAddDateActivated(testSummary)"
                                                         ></button>
@@ -651,11 +671,25 @@ ${ui.includeFragment("appui", "messages", [codes: [
                         <div class="modal-dialog modal-dialog-centered" role="document">
                             <div class="modal-content">
                                 <div class="modal-header modal-header-primary">
-                                    <h5 class="modal-title" id="urgencyModalCenterTitle"> Order Urgency | Reason(s)</h5>
+                                    <h5 class="modal-title" id="urgencyModalCenterTitle"> Order Urgency | Reason(s) | Lab Name</h5>
                                     <button type="button" class="close" data-dismiss="modal2" ng-click="closeModal()">&times;
                                     </button>
                                 </div>
                                 <div class="modal-body" >
+                                    <label ><b>Lab Name</b></label>
+                                    <div>
+                                        <select id="ddlabName" class="form-control">
+                                            <option value=""></option>
+                                            <option value="NPHL">NPHL (National Influenza Centre and/ NHRL)</option>
+                                            <option value="KEMRI Nairobi">KEMRI Nairobi</option>
+                                            <option value="KEMRI Kilifi" >KEMRI Kilifi</option>
+                                            <option value="KEMRI CDC Kisumu" >KEMRI CDC Kisumu</option>
+                                            <option value="KEMRI Walter Reed Kericho" >KEMRI Walter Reed Kericho</option>
+                                        </select>
+
+                                    </div>
+
+
                                     <label ><b>Order Urgency</b></label>
                                     <div>
                                         <select id="ddlOrderUrgency" class="form-control">
@@ -668,10 +702,16 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                         <label ><b>Order Reason </b></label>
                                         <div>
                                             Reason:
-                                            <select id="ddlOrderReason" class="form-control" ng-model="orderReasonCoded" >
-                                                <option value="{{r.uuid}}" ng-repeat=" r in OrderReason">{{r.name}}</option>
+                                            <select id="ddlOrderReason" class="form-control">
+                                            <option value=""></option>
+                                            <option value="162080AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">Baseline</option>
+                                            <option value="162081AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">1st Follow up</option>
+                                            <option value="164142AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" >2nd Follow up</option>
+                                            <option value="159490AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" >3rd Follow up</option>
+                                            <option value="159489AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" >4th Follow up</option>
+                                            <option value="161893AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" >5th Follow up</option>
+                                        </select>
 
-                                            </select>
                                             Reason(other):
                                             <input class="form-control" type="text" ng-model="orderReasonNonCoded">
                                         </div>
