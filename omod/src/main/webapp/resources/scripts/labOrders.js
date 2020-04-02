@@ -754,6 +754,14 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 return;
             }
             $('#spinner').modal('show');
+
+            for (var t = 0; t < $scope.obsPayload.length; ++t) {
+                delete $scope.obsPayload[t].commentToFulfiller;
+                delete $scope.obsPayload[t].orderReason;
+                delete $scope.obsPayload[t].orderReasonCoded;
+
+            }
+
             $scope.discontinueFilledOrders = angular.copy($scope.obsPayload);
             for (var i = 0; i < $scope.obsPayload.length; ++i) {
                 delete $scope.obsPayload[i].label;
@@ -765,6 +773,9 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 delete $scope.obsPayload[i].hivVl;
                 delete $scope.obsPayload[i].name;
                 delete $scope.obsPayload[i].instruction;
+                delete $scope.obsPayload[i].commentToFulfiller;
+                delete $scope.obsPayload[i].orderReason;
+                delete $scope.obsPayload[i].orderReasonCoded;
                 delete $scope.obsPayload[i].dateActivated;
             }
             var uuid = {uuid:"e1406e88-e9a9-11e8-9f32-f2801f1b9fd1"};
@@ -775,6 +786,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 // encounterDatetime: "2018-09-20",
                 encounterRole: config.encounterRole
             };
+
             var newObs = _.filter($scope.obsPayload, function(o) {
                 return !o.obsDatetime;
             });
