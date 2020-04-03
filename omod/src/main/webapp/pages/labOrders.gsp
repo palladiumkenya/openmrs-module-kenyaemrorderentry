@@ -153,7 +153,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                                                     data-toggle="modal" data-target="#dateOrder"
                                                                                     ng-click="orderSelectedToAddDateActivated(order)"></button>
                                                                             <button type="button" class="fa fa-warning fa-1x" style="width: 8%"
-                                                                                    data-placement="top" title="Urgency | Reason | Lab name"
+                                                                                    data-placement="top" title="Reason | Lab name"
                                                                                     data-toggle="modal" data-target="#orderUrgency"
                                                                                     ng-click="orderSelectedToAddDateActivated(order)"
                                                                             ></button>
@@ -559,7 +559,6 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                 <th>Lab</th>
                                                 <th>Sample Type</th>
                                                 <th>Order Reason</th>
-                                                <th>Order Urgency</th>
                                                 <th>Actions</th>
                                             </tr>
                                             <tr ng-repeat="testSummary in viewSummaryLabs">
@@ -580,16 +579,12 @@ ${ui.includeFragment("appui", "messages", [codes: [
 
                                                 </td>
                                                 <td>
-                                                    {{testSummary.urgency}}
-
-                                                </td>
-                                                <td>
                                                     <div  role="group" aria-label="Basic example">
                                                         <button type="button" class="fa fa-calendar fa-1x"
                                                                 data-toggle="modal" data-target="#dateOrder"
                                                                 ng-click="orderSelectedToAddDateActivated(testSummary)"></button>
                                                         <button type="button" class="fa fa-warning fa-1x"
-                                                                data-placement="top" title="Urgency | Reason | Lab Name"
+                                                                data-placement="top" title=" Reason | Lab Name"
                                                                 data-toggle="modal" data-target="#orderUrgency"
                                                                 ng-click="orderSelectedToAddDateActivated(testSummary)"
                                                         ></button>
@@ -671,7 +666,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                         <div class="modal-dialog modal-dialog-centered" role="document">
                             <div class="modal-content">
                                 <div class="modal-header modal-header-primary">
-                                    <h5 class="modal-title" id="urgencyModalCenterTitle"> Order Urgency | Reason(s) | Lab Name</h5>
+                                    <h5 class="modal-title" id="urgencyModalCenterTitle"> Order Reason(s) | Lab Name</h5>
                                     <button type="button" class="close" data-dismiss="modal2" ng-click="closeModal()">&times;
                                     </button>
                                 </div>
@@ -685,16 +680,6 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                             <option value="KEMRI Kilifi" >KEMRI Kilifi</option>
                                             <option value="KEMRI CDC Kisumu" >KEMRI CDC Kisumu</option>
                                             <option value="KEMRI Walter Reed Kericho" >KEMRI Walter Reed Kericho</option>
-                                        </select>
-
-                                    </div>
-
-
-                                    <label ><b>Order Urgency</b></label>
-                                    <div>
-                                        <select id="ddlOrderUrgency" class="form-control">
-                                            <option value="ROUTINE" selected="selected">ROUTINE</option>
-                                            <option value="STAT" >IMMEDIATELY</option>
                                         </select>
 
                                     </div>
