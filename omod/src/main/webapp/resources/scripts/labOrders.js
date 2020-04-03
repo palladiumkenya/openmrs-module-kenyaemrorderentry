@@ -1153,10 +1153,8 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
         $scope.orderReasonCoded = '';
 
         $scope.setOrderUrgency = function() {
-            var e = document.getElementById("ddlOrderUrgency");
             var labName = document.getElementById("ddlabName");
             var orderReason = document.getElementById("ddlOrderReason");
-            $scope.orderUrgency['urgency'] =  e.options[e.selectedIndex].value;
             $scope.orderUrgency['commentToFulfiller'] =  labName.options[labName.selectedIndex].value;
             $scope.orderUrgency['orderReasonNonCoded'] =  $scope.orderReasonNonCoded;
             $scope.orderUrgency['orderReason'] =  orderReason.options[orderReason.selectedIndex].value;
