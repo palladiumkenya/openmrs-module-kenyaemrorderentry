@@ -281,7 +281,7 @@ public class LabOrdersPageController {
             labOrderObject.put("encounter", labTestEncounter.getUuid());
             labOrderObject.put("dateActivated", order.getDateActivated().toString());
             labOrderObject.put("instruction", order.getInstructions());
-            labOrderObject.put("orderReason", order.getOrderReason().getUuid());
+            labOrderObject.put("orderReason", order.getOrderReason() !=null? order.getOrderReason().getUuid():"");
             labOrderObject.put("orderReasonCoded", order.getOrderReasonNonCoded());
 
             if (labTestConcept.getDatatype().isCoded()) {
