@@ -675,11 +675,19 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                     <div>
                                         <select id="ddlabName" class="form-control">
                                             <option value=""></option>
-                                            <option value="NPHL">NPHL (National Influenza Centre and/ NHRL)</option>
+                                            <option value="AMPATH Care Lab Eldoret" >AMPATH Care Lab, Eldoret</option>
+                                            <option value="Aga Khan" >Aga Khan</option>
+                                            <option value="Coast Provincial General Hospital Molecular Lab" >Coast Provincial General Hospital Molecular Lab</option>
+                                            <option value="EDARP Nairobi" >EDARP, Nairobi</option>
+                                            <option value="KEMRI Alupe HIV Lab" >KEMRI,Alupe HIV Lab</option>
                                             <option value="KEMRI Nairobi">KEMRI Nairobi</option>
                                             <option value="KEMRI Kilifi" >KEMRI Kilifi</option>
                                             <option value="KEMRI CDC Kisumu" >KEMRI CDC Kisumu</option>
                                             <option value="KEMRI Walter Reed Kericho" >KEMRI Walter Reed Kericho</option>
+                                            <option value="Kenyatta National Hospial Lab Nairobi" >Kenyatta National Hospial Lab, Nairobi</option>
+                                            <option value="Lancet" >Lancet</option>
+                                            <option value="NPHL">NPHL (National Influenza Centre and/ NHRL)</option>
+                                            <option value="Nyumbani Diagnostic Lab" >Nyumbani Diagnostic Lab</option>
                                         </select>
 
                                     </div>
