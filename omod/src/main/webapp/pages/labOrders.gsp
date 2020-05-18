@@ -399,6 +399,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                 <th>Order Date</th>
                                                 <th>Order No</th>
                                                 <th>Test Name</th>
+                                                <th>Order Reason</th>
                                                 <th>Ordered By</th>
                                                 <th>Actions</th>
                                             </tr>
@@ -412,6 +413,11 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                 <td>
                                                     {{test.display}}
 
+                                                </td>
+                                                <td>
+                                                    <span ng-if="test.orderReasonCoded || test.orderReasonNonCoded">
+                                                        {{test.orderReasonCoded}}  {{orderReasonNonCoded}}
+                                                    </span>
                                                 </td>
                                                 <td>
                                                     {{test.orderer.display}}
@@ -546,28 +552,39 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                             <tr ng-repeat="testSummary in viewSummaryLabs">
                                                 <td>
                                                     {{testSummary.dateActivated}}
+                                                    <span>
+                                                    <button type="button" class="fa fa-calendar fa-1x"
+                                                            data-toggle="modal" data-target="#dateOrder"
+                                                            ng-click="orderSelectedToAddDateActivated(testSummary)"></button>
+                                                </span>
                                                 </td>
                                                 <td>
                                                     {{testSummary.name}}
                                                 </td>
                                                 <td>
                                                     {{testSummary.orderReasonCodedName}}
+                                                    <span>
+                                                    <button type="button" class="fa fa-warning fa-1x"
+                                                            data-placement="top" title="Urgency | Reason"
+                                                            data-toggle="modal" data-target="#orderUrgency"
+                                                            ng-click="orderSelectedToAddDateActivated(testSummary)"></button>
+                                                </span>
 
                                                 </td>
                                                 <td>
                                                     {{testSummary.urgency}}
+                                                    <span>
+                                                    <button type="button" class="fa fa-warning fa-1x"
+                                                            data-placement="top" title="Urgency | Reason"
+                                                            data-toggle="modal" data-target="#orderUrgency"
+                                                            ng-click="orderSelectedToAddDateActivated(testSummary)"></button>
+                                                </span>
 
                                                 </td>
                                                 <td>
                                                     <div  role="group" aria-label="Basic example">
-                                                        <button type="button" class="fa fa-calendar fa-1x"
-                                                                data-toggle="modal" data-target="#dateOrder"
-                                                                ng-click="orderSelectedToAddDateActivated(testSummary)"></button>
-                                                        <button type="button" class="fa fa-warning fa-1x"
-                                                                data-placement="top" title="Urgency | Reason"
-                                                                data-toggle="modal" data-target="#orderUrgency"
-                                                                ng-click="orderSelectedToAddDateActivated(testSummary)"
-                                                        ></button>
+
+
                                                         <button type="button" class="fa fa-remove fa-1x"
                                                                 ng-click="deselectedOrder(testSummary)" style="color:#9D0101;cursor: pointer"></button>
                                                     </div>
