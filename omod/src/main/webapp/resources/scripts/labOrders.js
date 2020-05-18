@@ -84,7 +84,8 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 $scope.activeTestOrders = _.map(results, function(item) { return new OpenMRS.TestOrderModel(item) });
                 $scope.activeTestOrdersForHvVl = $scope.activeTestOrders;
                 $scope.activeTestOrders = customizeActiveOrdersToDisplaySingHivVl($scope.activeTestOrders);
-                mapGeneXpertActiveTestName($scope.activeTestOrders);
+                mapTestNameAndOrderReason($scope.activeTestOrders);
+
                 $scope.activeTestOrders.sort(function(a, b) {
                     var key1 = a.dateActivated;
                     var key2 = b.dateActivated;
@@ -100,7 +101,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 $scope.labOrders = labs;
                 $scope.OrderReason = [
                     {
-                        name:'Clinical treatment failure',
+                        name:'Confirmation of treatment failure (repeat VL)',
                         uuid:'843AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
                     },
                     {
@@ -108,12 +109,8 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                         uuid:'1434AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
                     },
                     {
-                        name:'Baseline',
+                        name:'Baseline VL (for infants diagnosed through EID)',
                         uuid:'162080AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
-                    },
-                    {
-                        name:'Follow up',
-                        uuid:'162081AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
                     },
                     {
                         name:'Single Drug Substitution',
@@ -208,16 +205,13 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                         }
 
                         if (data.orderReasonCoded === '843AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                            data['orderReasonCoded'] = "Clinical treatment failure";
+                            data['orderReasonCoded'] = "Confirmation of treatment failure (repeat VL) ";
                         }
                         if (data.orderReasonCoded === '1434AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' ) {
                             data['orderReasonCoded'] = "Pregnancy";
                         }
                         if (data.orderReasonCoded === '162080AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' ) {
-                            data['orderReasonCoded'] = "Baseline";
-                        }
-                        if (data.orderReasonCoded === '162081AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' ) {
-                            data['orderReasonCoded'] = "Follow up";
+                            data['orderReasonCoded'] = "Baseline VL (for infants diagnosed through EID)";
                         }
                         if (data.orderReasonCoded === '1259AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' ) {
                             data['orderReasonCoded'] = "Single Drug Substitution";
@@ -263,7 +257,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             });
         }
 
-        function mapGeneXpertActiveTestName(result) {
+        function mapTestNameAndOrderReason(result) {
 
             var orders = [];
             for (var i = 0; i < result.length; ++i) {
@@ -271,10 +265,33 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
                 for (var r in data) {
                     if (data.hasOwnProperty(r)) {
-
                         if (data.display ==='Tuberculosis polymerase chain reaction with rifampin resistance checking' ) {
                             data['display'] =  'GeneXpert';
                         }
+                        if(data.orderReason) {
+                            if (data.orderReason.uuid === '843AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                                data['orderReasonCoded'] = "Confirmation of treatment failure (repeat VL) ";
+                            }
+                            if (data.orderReason.uuid === '1434AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                                data['orderReasonCoded'] = "Pregnancy";
+                            }
+                            if (data.orderReason.uuid === '162080AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                                data['orderReasonCoded'] = "Baseline VL (for infants diagnosed through EID)";
+                            }
+                            if (data.orderReason.uuid === '1259AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                                data['orderReasonCoded'] = "Single Drug Substitution";
+                            }
+                            if (data.orderReason.uuid === '159882AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                                data['orderReasonCoded'] = "Breastfeeding";
+                            }
+                            if (data.orderReason.uuid === '163523AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                                data['orderReasonCoded'] = "Clinical failure";
+                            }
+                            if (data.orderReason.uuid === '161236AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                                data['orderReasonCoded'] = "Routine";
+                            }
+                        }
+
                     }
 
                 }
