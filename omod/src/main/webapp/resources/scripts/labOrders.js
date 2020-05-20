@@ -620,7 +620,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             }
 
 
-            if(checkLabName && checkLabName[0]) {
+            /*if(checkLabName && checkLabName[0]) {
                 if ((checkLabName[0].commentToFulfiller === '' || checkLabName[0].commentToFulfiller === null ||
                     checkLabName[0].commentToFulfiller === undefined)) {
 
@@ -629,7 +629,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                     $('#orderError').modal('show');
                     return;
                 }
-            }
+            }*/
 
             $('#confirmation-dailog').modal('hide');
             $('#spinner').modal('show');
