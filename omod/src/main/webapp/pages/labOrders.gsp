@@ -401,7 +401,6 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                 <th>Test Name</th>
                                                 <th>Sample Type</th>
                                                 <th>Order Reason</th>
-                                                <th>Lab</th>
                                                 <th>Ordered By</th>
                                                 <th>Actions</th>
                                             </tr>
@@ -426,10 +425,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                     </span>
 
                                                 </td>
-                                                <td>
-                                                    {{test.commentToFulfiller}}
 
-                                                </td>
                                                 <td>
                                                     {{test.orderer.display}}
 
@@ -556,7 +552,6 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                             <tr>
                                                 <th>Order Date</th>
                                                 <th>Test Name</th>
-                                                <th>Lab</th>
                                                 <th>Sample Type</th>
                                                 <th>Order Reason</th>
                                                 <th>Actions</th>
@@ -567,9 +562,6 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                 </td>
                                                 <td>
                                                     {{testSummary.name}}
-                                                </td>
-                                                <td>
-                                                    {{testSummary.commentToFulfiller}}
                                                 </td>
                                                 <td>
                                                     {{testSummary.instructions}}
@@ -666,13 +658,13 @@ ${ui.includeFragment("appui", "messages", [codes: [
                         <div class="modal-dialog modal-dialog-centered" role="document">
                             <div class="modal-content">
                                 <div class="modal-header modal-header-primary">
-                                    <h5 class="modal-title" id="urgencyModalCenterTitle"> Order Reason(s) | Lab Name</h5>
+                                    <h5 class="modal-title" id="urgencyModalCenterTitle"> Required information</h5>
                                     <button type="button" class="close" data-dismiss="modal2" ng-click="closeModal()">&times;
                                     </button>
                                 </div>
                                 <div class="modal-body" >
-                                    <label ><b>Lab Name</b></label>
-                                    <div>
+                                    <label style="display: none" ><b>Lab Name</b></label>
+                                    <div style="display: none">
                                         <select id="ddlabName" class="form-control">
                                             <option value=""></option>
                                             <option value="AMPATH Care Lab Eldoret" >AMPATH Care Lab, Eldoret</option>

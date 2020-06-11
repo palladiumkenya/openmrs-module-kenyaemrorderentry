@@ -15,13 +15,13 @@
 		<constructor-arg value="350" />
 	</bean>-->
 
-	<bean id="kenyaemr.app.laborder" factory-bean="kenyacore.appFactoryBean" factory-method="createInstance">
+	<!--<bean id="kenyaemr.app.laborder" factory-bean="kenyacore.appFactoryBean" factory-method="createInstance">
 		<constructor-arg value="kenyaemr.laborder" />
 		<constructor-arg value="Lab Requests" />
 		<constructor-arg value="kenyaemrorderentry/orders/labOrderHome.page" />
 		<constructor-arg value="kenyaemrorderentry:lab_request1.png" />
 		<constructor-arg value="355" />
-	</bean>
+	</bean>-->
 
 	
 </beans>
