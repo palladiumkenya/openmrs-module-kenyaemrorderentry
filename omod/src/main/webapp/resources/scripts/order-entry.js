@@ -230,7 +230,7 @@ angular.module("orderEntry", ['orderService', 'encounterService', 'session'])
                 var orders = _.map(orderContext.draftOrders, function(order) {
                     var transformed = replaceWithUuids(order, ['drug', 'doseUnits', 'frequency', 'quantityUnits',
                         'durationUnits', 'route', 'previousOrder', 'careSetting', 'patient', 'concept', 'orderer',
-                        'orderReason', 'dateActivated'
+                        'orderReason', 'dateActivated','dateStopped'
                     ]);
                     //'voided', 'voidReason'
                     if (!transformed.orderer) {
