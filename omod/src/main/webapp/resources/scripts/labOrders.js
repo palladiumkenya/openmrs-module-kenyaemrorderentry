@@ -185,6 +185,9 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 }
             });
         }
+        var CurrentDate = new Date();
+        var time = CurrentDate.getHours() + ":" + CurrentDate.getMinutes() + ":" + CurrentDate.getSeconds();
+
         function renameNotDetectedToLDL(res) {
             var orders = [];
             for (var i = 0; i < res.length; ++i) {
@@ -780,6 +783,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
         // The start of test result rendering components
         $scope.typeValues = {};
         $scope.postLabOrderResults = function() {
+            var obsDate ='';
             $scope.obsPayload = createLabResultsObsPaylaod($scope.labResultsRaw);
             if ($scope.obsPayload.length === 0) {
                 $scope.showErrorToast = 'You have not filled any results to post';
@@ -789,7 +793,14 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             }
             $('#spinner').modal('show');
             $scope.discontinueFilledOrders = angular.copy($scope.obsPayload);
+            $scope.discontinueFilledOrders = _.filter($scope.discontinueFilledOrders, function(o) {
+                return !o.obsDatetime;
+            });
+
+
+            $scope.discontinueOrdersRetrospectively = angular.copy($scope.obsPayload);
             for (var i = 0; i < $scope.obsPayload.length; ++i) {
+                obsDate = $scope.obsPayload[i].dateActivated;
                 delete $scope.obsPayload[i].label;
                 delete $scope.obsPayload[i].orderId;
                 delete $scope.obsPayload[i].orderUuid;
@@ -799,51 +810,68 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 delete $scope.obsPayload[i].hivVl;
                 delete $scope.obsPayload[i].name;
                 delete $scope.obsPayload[i].dateActivated;
+                delete $scope.obsPayload[i].dateStopped;
             }
             var uuid = {uuid:"e1406e88-e9a9-11e8-9f32-f2801f1b9fd1"};
             var encounterContext = {
                 patient: config.patient,
                 encounterType: uuid,
                 location: null, // TODO
-                // encounterDatetime: "2018-09-20",
+                encounterDatetime: obsDate,
+                //encounterDatetime: "2018-09-20",
                 encounterRole: config.encounterRole
             };
             var newObs = _.filter($scope.obsPayload, function(o) {
                 return !o.obsDatetime;
             });
+
             _.each($scope.obsPayload, function(o) {
 
                 if (o.obsDatetime) {
                     var encounterContextOldOrders = {};
                     $scope.oldObResults = [];
+                    $scope.obs = [];
+
                     for (var property in o) {
                         if (o.hasOwnProperty(property)) {
                             if(property ==='obsDatetime') {
-                                encounterContextOldOrders = {
-                                    patient: config.patient,
-                                    encounterType: uuid,
-                                    location: null, // TODO
-                                    encounterDatetime: o.obsDatetime,
-                                    encounterRole: config.encounterRole
-                                };
 
+// an obs
                                 $scope.oldObResults.push(o);
-                                OrderEntryService.signAndSave({ draftOrders: [] }, encounterContextOldOrders,$scope.oldObResults)
-                                    .$promise.then(function(result) {
-                                    if($scope.OrderUuid) {
-                                        $scope.voidActiveLabOrders();
-                                    }
+                                _.each($scope.oldObResults, function(r) {
+                                    encounterContextOldOrders = {
+                                        patient: config.patient,
+                                        encounterType: uuid,
+                                        location: null, // TODO
+                                        encounterDatetime: r.obsDatetime,
+                                        encounterRole: config.encounterRole
+                                    };
+                                    $scope.obs.push(r);
+                                    OrderEntryService.signAndSave({ draftOrders: [] }, encounterContextOldOrders,$scope.obs)
+                                        .$promise.then(function(result) {
+                                        if($scope.OrderUuid) {
+                                            $scope.voidActiveLabOrders();
+                                        }
 
-                                    discontinueLabTestOrders($scope.discontinueFilledOrders);
-                                    $('#spinner').modal('hide');
+                                        $scope.discontinueOrdersRetrospectively = _.filter($scope.discontinueOrdersRetrospectively, function(o) {
+                                            var obs =$.datepicker.formatDate(dateFormat, new Date(o.obsDatetime));
+                                            var today =$.datepicker.formatDate(dateFormat, new Date());
+                                            return obs !== today ;
+                                        });
+                                        $scope.discontinueOrdersRetrospectively = checkForDateActivated($scope.discontinueOrdersRetrospectively);
+                                        discontinueLabOrdersRetrospectivelyAndPoc($scope.discontinueOrdersRetrospectively);
+                                        $('#spinner').modal('hide');
 
-                                    $window.location.reload();
-                                    location.href = location.href;
-                                }, function(errorResponse) {
-                                    $('#spinner').modal('hide');
-                                    emr.errorMessage(errorResponse.data.error.message);
-                                    $scope.loading = false;
+                                         $window.location.reload();
+                                         location.href = location.href;
+                                    }, function(errorResponse) {
+                                        $('#spinner').modal('hide');
+                                        emr.errorMessage(errorResponse.data.error.message);
+                                        $scope.loading = false;
+                                    });
+
                                 });
+
                             }
 
                         }
@@ -852,22 +880,40 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 }
 
             });
-            $scope.loading = true;
-            OrderEntryService.signAndSave({ draftOrders: [] }, encounterContext, newObs)
-                .$promise.then(function(result) {
+
+            if(!_.isEmpty(newObs)) {
+                $scope.loading = true;
+                newObs.forEach(function (element) {
+                    element.obsDatetime = obsDate;
+                });
+                $scope.discontinueFilledOrders.forEach(function (element) {
+                    element.dateActivated = CurrentDate;
+                });
+
+                OrderEntryService.signAndSave({ draftOrders: [] }, encounterContext, newObs)
+                    .$promise.then(function(result) {
                     if($scope.OrderUuid) {
                         $scope.voidActiveLabOrders();
                     }
 
-                discontinueLabTestOrders($scope.discontinueFilledOrders);
-                $('#spinner').modal('hide');
+                    $scope.discontinueFilledOrders = _.filter($scope.discontinueFilledOrders, function(o) {
+                        var dateActivated =$.datepicker.formatDate(dateFormat, new Date(o.dateActivated));
+                        var today =$.datepicker.formatDate(dateFormat, new Date());
+                        return dateActivated === today ;
+                    });
+                    $scope.discontinueOrdersRetrospectively = checkForDateActivated($scope.discontinueOrdersRetrospectively);
+                    discontinueLabOrdersRetrospectivelyAndPoc($scope.discontinueOrdersRetrospectively);
+                    $('#spinner').modal('hide');
 
 
-                location.href = location.href;
-            }, function(errorResponse) {
-                emr.errorMessage(errorResponse.data.error.message);
-                $scope.loading = false;
-            });
+                      location.href = location.href;
+                }, function(errorResponse) {
+                    emr.errorMessage(errorResponse.data.error.message);
+                    $scope.loading = false;
+                });
+            }
+
+
 
         };
 
@@ -933,12 +979,14 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                             data['value'] = $scope.hivViralValues[data.orderId];
                             data['concept'] = data.concept;
                             data['encounter'] = data.encounter;
+
                         }
                         else if(data.concept==='1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
                             data['order'] = data.orderUuid;
                             data['value'] = $scope.hivViralValuesLDL[data.orderId];
                             data['concept'] = data.concept;
                             data['encounter'] = data.encounter;
+
                         } else {
                             data['order'] = data.orderUuid;
                             data['value'] =  $scope.typeValues[data.orderId];
@@ -993,7 +1041,6 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
         // discontinue lab test orders
         function discontinueLabTestOrders(completedFields) {
-
             var obs = [];
             for (var i = 0; i < completedFields.length; ++i) {
                 var data = completedFields[i];
@@ -1005,6 +1052,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                         data['action'] = "DISCONTINUE";
                         data['careSetting'] = $scope.careSetting.uuid;
                         data['orderReasonNonCoded'] = "";
+                       // data['dateActivated'] = "2020-07-05";
                     }
 
                 }
@@ -1034,10 +1082,8 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 patient: config.patient,
                 encounterType: uuid,
                 location: null, // TODO
-                // encounterDatetime: "2018-08-23 11:24:36",
                 encounterRole: config.encounterRole
             };
-
 
             $scope.loading = true;
             OrderEntryService.signAndSave({ draftOrders: $scope.lOrders }, encounterContext)
@@ -1047,7 +1093,6 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 emr.errorMessage(errorResponse.data.error.message);
                 $scope.loading = false;
             });
-
         }
 
         /**
@@ -1135,9 +1180,9 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
         $scope.orderSel = [];
         $scope.orderResultSel = [];
         $scope.labResultsRaw = [];
+        var dateFormat = "yy-mm-dd";
         $scope.setOrderDate = function() {
             $scope.orderDate = angular.element('#orderDate').val();
-            var CurrentDate = new Date();
             $scope.GivenDate = new Date($scope.orderDate);
             $scope.resultDateSelected = new Date($scope.dateOrderDone);
 
@@ -1153,12 +1198,16 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 $('#orderError').modal('show');
                 return;
             }
+            var initialOrderDate = $.datepicker.formatDate(dateFormat, new Date($scope.initialOrderDate));
+
+
 
             $scope.dateActivatedForLdl = $scope.orderDate.substring(0, 10);
             $scope.orderSel['dateActivated'] =  $scope.orderDate.substring(0, 10);
             $scope.orderSel['encounterDatetime'] =  $scope.orderDate.substring(0, 10);
-            $scope.orderResultSel['obsDatetime'] =  $scope.orderDate.substring(0, 10);
-
+            $scope.orderResultSel['obsDatetime'] =  initialOrderDate;
+            $scope.orderResultSel['dateActivated'] =  $scope.orderDate !== undefined ? $scope.orderDate.substring(0, 10).concat(' ' +time):CurrentDate;
+            
             $scope.filteredOrders.push($scope.orderSel);
             $scope.labResultsRaw.push($scope.orderResultSel);
             $scope.filteredOrders = _.uniq($scope.filteredOrders);
@@ -1508,18 +1557,22 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             $scope.dateOrderDone = order.dateActivated;
             $scope.titleDate ='Enter Results Date';
             $scope.orderResultSel = order;
+            $scope.initialOrderDate= order.dateActivated
         }
 
         $scope.orderSelectedToAddResultsDateForVl = function(order) {
             $scope.dateOrderDone = order.dateActivated;
             $scope.titleDate ='Enter Results Date';
             $scope.orderResulForVl = order;
+            $scope.initialOrderDateForVl= order.dateActivated
         }
 
         $scope.setResultDateForViralLoad = function () {
             var orders = [];
             $scope.orderDate = angular.element('#dateOrderVl').val();
-            var CurrentDate = new Date();
+            var initialOrderDateVl = $.datepicker.formatDate(dateFormat, new Date($scope.initialOrderDateForVl));
+
+
             $scope.GivenDate = new Date($scope.orderDate);
             $scope.resultDateSelected = new Date($scope.dateOrderDone);
 
@@ -1551,11 +1604,15 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                         if (data.hasOwnProperty(r)) {
 
                             if (data.concept === '856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                                data['obsDatetime'] = $scope.orderDate.substring(0, 10);
+                                data['obsDatetime'] = initialOrderDateVl;
+                                data['dateActivated'] =  $scope.orderDate !== undefined ? $scope.orderDate.substring(0, 10).concat(' ' +time):CurrentDate;
+
 
                             }
                             if (data.concept === '1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                                data['obsDatetime'] = $scope.orderDate.substring(0, 10);
+                                data['obsDatetime'] = initialOrderDateVl;
+                                data['dateActivated'] =  $scope.orderDate !== undefined ? $scope.orderDate.substring(0, 10).concat(' ' +time):CurrentDate;
+
 
                             }
 
@@ -1568,6 +1625,103 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             $('#dateOrderVl').modal('hide');
 
         }
+
+        function discontinueLabOrdersRetrospectivelyAndPoc(completedFields) {
+            var obs = [];
+            for (var i = 0; i < completedFields.length; ++i) {
+                var data = completedFields[i];
+                for (var r in data) {
+                    if (data.hasOwnProperty(r)) {
+                        data['previousOrder'] = data.orderUuid;
+                        data['type'] = "testorder";
+                        data['action'] = "DISCONTINUE";
+                        data['careSetting'] = $scope.careSetting.uuid;
+                        data['orderReasonNonCoded'] = "";
+                    }
+
+                }
+
+                obs.push(data);
+
+            }
+            $scope.lOrders = obs;
+            var uuid = {uuid:"e1406e88-e9a9-11e8-9f32-f2801f1b9fd1"};
+
+            for (var i = 0; i < $scope.lOrders.length; ++i) {
+                delete $scope.lOrders[i].label;
+                delete $scope.lOrders[i].orderId;
+                delete $scope.lOrders[i].orderUuid;
+                delete $scope.lOrders[i].answers;
+                delete $scope.lOrders[i].$$hashKey;
+                delete $scope.lOrders[i].rendering;
+                delete $scope.lOrders[i].order;
+                delete $scope.lOrders[i].value;
+                delete $scope.lOrders[i].name;
+                delete $scope.lOrders[i].obsDatetime;
+                delete $scope.lOrders[i].hivVl;
+            }
+
+
+            _.each($scope.lOrders, function(o) {
+
+                if (o.dateActivated) {
+                    var encounterContextOldOrders = {};
+                    $scope.oldOrdrs = [];
+                    for (var property in o) {
+                        if (o.hasOwnProperty(property)) {
+                            if(property ==='dateActivated') {
+                                encounterContextOldOrders = {
+                                    patient: config.patient,
+                                    encounterType: uuid,
+                                    location: null, // TODO
+                                    encounterDatetime: o.dateActivated,
+                                    encounterRole: config.encounterRole
+                                };
+                                $scope.oldOrdrs.push(o);
+                                OrderEntryService.signAndSave({ draftOrders: $scope.oldOrdrs }, encounterContextOldOrders)
+                                    .$promise.then(function(result) {
+                                    $('#spinner').modal('hide');
+                                    loadExistingOrders();
+                                    $window.location.reload();
+                                    location.href = location.href;
+                                }, function(errorResponse) {
+                                    $('#spinner').modal('hide');
+                                    emr.errorMessage(errorResponse.data.error.message);
+                                    $scope.loading = false;
+                                });
+                            }
+
+                        }
+                    }
+
+                }
+
+            });
+
+        }
+
+        function checkForDateActivated (res) {
+            var orders = [];
+            for (var i = 0; i < res.length; ++i) {
+                var data = res[i];
+
+                for (var r in data) {
+                    if (data.hasOwnProperty(r)) {
+
+                        if (data.dateActivated instanceof Date) {
+                            data['dateActivated'] = CurrentDate ;
+                        }
+
+                    }
+
+                }
+                orders.push(data);
+
+            }
+            return orders;
+
+        }
+
 
 
 

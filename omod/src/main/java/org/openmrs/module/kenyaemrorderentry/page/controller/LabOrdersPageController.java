@@ -326,7 +326,7 @@ public class LabOrdersPageController {
                                     obsObj.put("concept", obs.getConcept().getUuid());
                                     obsObj.put("concept_id", obs.getConcept().getId());
                                     obsObj.put("dateActivated", obs.getOrder().getDateActivated().toString());
-                                    obsObj.put("resultDate", obs.getObsDatetime().toString());
+                                    obsObj.put("resultDate", orderService.getOrder(orderId).getDateStopped() !=null?orderService.getOrder(orderId).getDateStopped().toString():"");
                                     labOrdersList.add(obsObj);
 
 
