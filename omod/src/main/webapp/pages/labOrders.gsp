@@ -494,13 +494,13 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                     {{ past.resultDate | date:'dd-MM-yyyy' }}
                                                 </td>
                                                 <td>
-                                                    <span ng-if="past.valueNumeric">
+                                                    <span ng-if="past.valueNumeric !==null">
                                                         {{past.valueNumeric}}
                                                     </span>
-                                                    <span ng-if="past.valueCoded">
+                                                    <span ng-if="past.valueCoded !==null">
                                                         {{past.valueCoded}}
                                                     </span>
-                                                    <span ng-if="past.valueText">
+                                                    <span ng-if="past.valueText !==null">
                                                         {{past.valueText}}
                                                     </span>
 
