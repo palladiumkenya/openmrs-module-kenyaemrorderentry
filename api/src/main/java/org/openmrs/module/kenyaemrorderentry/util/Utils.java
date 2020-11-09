@@ -61,10 +61,12 @@ public class Utils {
     public static JSONObject getDrugEntryByKeyAndValue(String key, String value) {
 
         JSONArray config = getNacopCodesMapping();
-        for (int i=0; i < config.size(); i++) {
-            JSONObject o = (JSONObject) config.get(i);
-            if (o.get(key).toString().equals(value)) {
-                return o;
+        if (config != null) {
+            for (int i = 0; i < config.size(); i++) {
+                JSONObject o = (JSONObject) config.get(i);
+                if (o.get(key).toString().equals(value)) {
+                    return o;
+                }
             }
         }
         return null;
@@ -79,10 +81,12 @@ public class Utils {
     public static JSONObject getDrugEntryByConceptId(int conceptId) {
 
         JSONArray config = getNacopCodesMapping();
-        for (int i=0; i < config.size(); i++) {
-            JSONObject o = (JSONObject) config.get(i);
-            if ((Integer) o.get("concept_id") == conceptId) {
-                return o;
+        if (config != null) {
+            for (int i = 0; i < config.size(); i++) {
+                JSONObject o = (JSONObject) config.get(i);
+                if ((Integer) o.get("concept_id") == conceptId) {
+                    return o;
+                }
             }
         }
         return null;
@@ -96,10 +100,12 @@ public class Utils {
     public static JSONObject getDrugEntryByNascopCode(String drugName) {
 
         JSONArray config = getNacopCodesMapping();
-        for (int i=0; i < config.size(); i++) {
-            JSONObject o = (JSONObject) config.get(i);
-            if (o.get("nascop_code").toString().equals(drugName)) {
-                return o;
+        if (config != null) {
+            for (int i = 0; i < config.size(); i++) {
+                JSONObject o = (JSONObject) config.get(i);
+                if (o.get("nascop_code").toString().equals(drugName)) {
+                    return o;
+                }
             }
         }
         return null;
