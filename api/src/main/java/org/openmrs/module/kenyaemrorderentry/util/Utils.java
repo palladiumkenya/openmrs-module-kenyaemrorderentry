@@ -81,7 +81,7 @@ public class Utils {
         JSONArray config = getNacopCodesMapping();
         for (int i=0; i < config.size(); i++) {
             JSONObject o = (JSONObject) config.get(i);
-            if (o.get("concept_id") == conceptId) {
+            if ((Integer) o.get("concept_id") == conceptId) {
                 return o;
             }
         }
