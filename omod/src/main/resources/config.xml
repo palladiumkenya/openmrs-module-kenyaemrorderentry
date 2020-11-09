@@ -55,5 +55,13 @@
 	</messages>
 	<!-- /Internationalization -->
 
+	<globalProperty>
+		<property>kenyaemrorderentry.drugsMappingDirectory</property>
+		<defaultValue>kenyaemrorderentry</defaultValue>
+		<description>
+			A directory that contains KenyaEMR order entry specific configs
+		</description>
+	</globalProperty>
+
 </module>
 
