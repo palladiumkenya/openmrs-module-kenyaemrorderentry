@@ -327,9 +327,10 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
         }
 
         $scope.signAndSaveDraftDrugOrders = function () {
+            var uuid = {uuid:"7df67b83-1b84-4fe2-b1b7-794b4e9bfcc3"};
             var encounterContext = {
                 patient: config.patient,
-                encounterType: config.drugOrderEncounterType,
+                encounterType: uuid,
                 location: null, // TODO
                 encounterRole: config.encounterRole
             };
