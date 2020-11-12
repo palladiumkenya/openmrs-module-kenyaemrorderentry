@@ -462,14 +462,10 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
                                 <div class="table-responsive" ng-show="pastOrders.length > 0">
                                     <table ng-hide="pastOrders.loading" class="table table-striped">
                                         <tr>
-                                            <th width="10%">Replacement</th>
                                             <th width="25%">Dates</th>
                                             <th width="65%">Instructions</th>
                                         </tr>
                                         <tr ng-repeat="order in pastOrders">
-                                            <td>
-                                                {{ replacementForPastOrder(order) | replacement }}
-                                            </td>
                                             <td>
                                                 {{ order.dateActivated }} - {{order.dateStopped}}
                                             </td>
