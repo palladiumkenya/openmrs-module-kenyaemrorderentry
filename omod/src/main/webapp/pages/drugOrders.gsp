@@ -104,10 +104,10 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
                     'patient': ${ patient.patientId }
                 })
                 .success(function(data) {
-                   console.log("Hitting the controller. " + data)
+                    jq('#msgBox').html("Successfully posted to ADT");
                 })
                 .error(function(xhr, status, err) {
-                    alert('AJAX error ' + err);
+                    jq('#msgBox').html("Could not post to ADT");
                 })
         });
     });
@@ -117,11 +117,15 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
         ${ui.includeFragment("kenyaui", "widget/panelMenu", [heading: "Navigation", items: menuItems])}
     </div>
     <div class="ke-panel-frame">
-        <p>
+        <br/>
+        <p style="color: white;">
             Please prescribe all medication and use the button below to queueu message to ADT.
         </p>
         <br/>
         <button id="postMessagetoAdt">Post prescriptions to ADT</button>
+        <br/>
+        <br/>
+        <span id="msgBox" style="color: white"></span>
     </div>
 </div>
 
