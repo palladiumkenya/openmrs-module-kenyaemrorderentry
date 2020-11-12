@@ -95,11 +95,33 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
     window.OpenMRS.activeOrdersPayload =${activeOrdersResponse};
     window.OpenMRS.pastDrugOrdersPayload =${pastDrugOrdersPayload};
 
+    jq = jQuery;
 
+    jq(function() {
+        jq('#postMessagetoAdt').click(function() {
+            jq.getJSON('${ ui.actionLink("kenyaemrIL", "interopManager", "postPrescriptionMessage") }',
+                {
+                    'patient': ${ patient.patientId }
+                })
+                .success(function(data) {
+                   console.log("Hitting the controller. " + data)
+                })
+                .error(function(xhr, status, err) {
+                    alert('AJAX error ' + err);
+                })
+        });
+    });
 </script>
 <div class="ke-page-sidebar">
     <div class="ke-panel-frame">
         ${ui.includeFragment("kenyaui", "widget/panelMenu", [heading: "Navigation", items: menuItems])}
+    </div>
+    <div class="ke-panel-frame">
+        <p>
+            Please prescribe all medication and use the button below to queueu message to ADT.
+        </p>
+        <br/>
+        <button id="postMessagetoAdt">Post prescriptions to ADT</button>
     </div>
 </div>
 
@@ -462,6 +484,7 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
         </div>
 
     </div>
+
 </div>
 
 <script type="text/javascript">
