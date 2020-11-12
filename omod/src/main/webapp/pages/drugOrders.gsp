@@ -116,6 +116,13 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
     <div class="ke-panel-frame">
         ${ui.includeFragment("kenyaui", "widget/panelMenu", [heading: "Navigation", items: menuItems])}
     </div>
+    <div class="ke-panel-frame">
+        <p>
+            Please prescribe all medication and use the button below to queueu message to ADT.
+        </p>
+        <br/>
+        <button id="postMessagetoAdt">Post prescriptions to ADT</button>
+    </div>
 </div>
 
 <div class="ke-page-content">
@@ -477,9 +484,7 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
         </div>
 
     </div>
-    <div>
-        <button id="postMessagetoAdt">Post prescriptions to ADT</button>
-    </div>
+
 </div>
 
 <script type="text/javascript">
