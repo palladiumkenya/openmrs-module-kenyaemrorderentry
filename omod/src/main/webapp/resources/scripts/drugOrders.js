@@ -190,11 +190,13 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                         for (var r in data) {
                             if (data.hasOwnProperty(r)) {
                                 if(pastOrders[t].name === data.name ) {
+                                    $scope.quantity_units = pastOrders[t].quantity_units;;
+                                    $scope.quantity = pastOrders[t].quantity;
+                                    $scope.frequency = pastOrders[t].frequency;
 
-
-                                    data['quantity_units'] = pastOrders[t].quantity_units;
-                                    data['quantity'] = pastOrders[t].quantity;
-                                    data['frequency'] = pastOrders[t].frequency;
+                                 //   data['quantity_units'] = pastOrders[t].quantity_units;
+                                 //   data['quantity'] = pastOrders[t].quantity;
+                                 //   data['frequency'] = pastOrders[t].frequency;
                                     data['units_uuid'] = pastOrders[t].units_uuid;
                                     data['dose'] = pastOrders[t].dose;
                                     data['name'] = pastOrders[t].name;
@@ -377,10 +379,14 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
         $scope.activeRegimens = [];
         $scope.components = [];
         $scope.components.quantity = [];
+
         $scope.setProgramRegimens = function (regimens) {
             $scope.activeRegimens = [];
             $scope.oldComponents = [];
             $scope.regimenDosingInstructions = "";
+            $scope.quantity_units = "";
+            $scope.quantity = "";
+            $scope.frequency = "";
             $scope.activeRegimens = regimens;
         }
         $scope.setRegimenMembers = function (regimen) {
@@ -397,6 +403,10 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
         window.orderSetSelected = {};
         window.regimenDosingInstructions = null;
         $scope.saveOrderSet = function (orderset) {
+            $scope.quantity_units = angular.element('#quantity_units').val();
+            $scope.quantity = angular.element('#quantity').val();
+            $scope.frequency = angular.element('#frequency').val();
+            var orderSetComponents = [];
             if(config.provider === '' || config.provider === undefined || config.provider === null) {
                 $scope.showErrorToast ='You are not login as provider, please contact System Administrator';
                 $('#orderError').modal('show');
@@ -407,6 +417,9 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                 var data = orderset[i];
 
                 for (var r in data) {
+                    data['quantity_units'] = $scope.quantity_units;
+                    data['quantity'] = $scope.quantity;
+                    data['frequency'] = $scope.frequency;
                     if (data.hasOwnProperty(r)) {
                         if(isNaN(data.dose)) {
                             $scope.showErrorToast ='Dose value is not a number. Please enter a number';
@@ -421,9 +434,10 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                         }
                     }
                 }
+                orderSetComponents.push(data)
             }
 
-            drugOrderMembers = orderset;
+            drugOrderMembers = orderSetComponents;
             regimenDosingInstructions = $scope.regimenDosingInstructions;
             orderSetId = $scope.orderSetId;
         }
