@@ -55,8 +55,6 @@
         <kenyacoreVersion>2.2</kenyacoreVersion>
         <kenyauiVersion>2.1.1</kenyauiVersion>
         <webservices.restVersion>2.11</webservices.restVersion>
-        <jacksonVersion>2.10.1</jacksonVersion>
-        <apacheHttpClientVersion>4.5.10</apacheHttpClientVersion>
 
 <!--
 
@@ -575,30 +573,6 @@
             <artifactId>openmrs-test</artifactId>
             <type>pom</type>
         </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-core</artifactId>
-                <version>${jacksonVersion}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-annotations</artifactId>
-                <version>${jacksonVersion}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>${jacksonVersion}</version>
-            </dependency>
-
-            <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
-            <dependency>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpclient</artifactId>
-                <version>${apacheHttpClientVersion}</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 	<build>
