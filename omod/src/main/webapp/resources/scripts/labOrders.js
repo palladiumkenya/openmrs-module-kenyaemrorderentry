@@ -127,6 +127,10 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                     {
                         name:'Routine',
                         uuid:'161236AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+                    },
+                    {
+                        name:'Confirmation of persistent low level Viremia (PLLV)',
+                        uuid:'160032AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
                     }
                 ];
                 $scope.OrderReason =  _.filter($scope.OrderReason, function(o) {
@@ -228,6 +232,9 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                         if (data.orderReasonCoded === '161236AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' ) {
                             data['orderReasonCoded'] = "Routine";
                         }
+                        if (data.orderReasonCoded === '160032AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                            data['orderReasonCoded'] = "Confirmation of persistent low level Viremia (PLLV)";
+                        }
 
 
                     }
@@ -292,6 +299,10 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                             }
                             if (data.orderReason.uuid === '161236AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
                                 data['orderReasonCoded'] = "Routine";
+                            }
+
+                            if (data.orderReason.uuid === '160032AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                                data['orderReasonCoded'] = "Confirmation of persistent low level Viremia (PLLV)";
                             }
                         }
 
