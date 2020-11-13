@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -80,6 +81,28 @@ public class DrugOrdersPageController {
             jsonConfig.put("intialCareSetting", careSetting.getUuid());
         }
 
+        // Build customized duration units
+        List<Concept> customizedDurationUnits = Arrays.asList(
+                conceptService.getConcept(1072),
+                conceptService.getConcept(1074),
+                conceptService.getConcept(1073)
+        );
+        JSONArray durationUnitsArray = new JSONArray();
+
+        for (Concept durationUnitConcept : customizedDurationUnits) {
+            JSONObject duraitonUnitObj = new JSONObject();
+            duraitonUnitObj.put("name",conceptService.getConcept(durationUnitConcept.getConceptId()).getName(LOCALE).getName());
+            duraitonUnitObj.put("uuid",durationUnitConcept.getUuid());
+            duraitonUnitObj.put("concept_id",durationUnitConcept.getConceptId());
+            durationUnitsArray.add(duraitonUnitObj);
+
+        }
+
+        JSONObject durationUnitsResponse=new JSONObject();
+        durationUnitsResponse.put("durationUnitsResponse",durationUnitsArray);
+        model.put("durationUnitsResponse",durationUnitsResponse.toString());
+
+
         model.put("patient", patient);
         model.put("jsonConfig", ui.toJson(jsonConfig));
 
@@ -100,6 +123,7 @@ public class DrugOrdersPageController {
                 component.put("conceptUuid", drugOrder.getDrug().getConcept().getUuid());
             //    component.put("name", drugOrder.getDrug().getConcept().getShortNameInLocale(LOCALE) != null ? drugOrder.getDrug().getConcept().getShortNameInLocale(LOCALE).getName() : drugOrder.getDrug().getConcept().getName(LOCALE).getName());
                 component.put("dose", drugOrder.getDose().toString());
+                component.put("drugDuration", drugOrder.getDuration() != null ? drugOrder.getDuration().toString(): "");
                 component.put("units_uuid", drugOrder.getDoseUnits().getUuid());
                 component.put("units_name", drugOrder.getDoseUnits().getName(LOCALE).getName());
                 component.put("frequency", drugOrder.getFrequency().getUuid());
@@ -140,6 +164,7 @@ public class DrugOrdersPageController {
                 orderObj.put("drug", convertToFull(drugOrder.getDrug()));
                 orderObj.put("dosingType", drugOrder.getDosingType());
                 orderObj.put("dose", drugOrder.getDose());
+                orderObj.put("drugDuration", drugOrder.getDuration() != null ? drugOrder.getDuration().toString() : "");
                 orderObj.put("doseUnits", convertToFull(drugOrder.getDoseUnits()));
                 orderObj.put("frequency", convertToFull(drugOrder.getFrequency()));
                 orderObj.put("quantity", drugOrder.getQuantity());
@@ -185,8 +210,9 @@ public class DrugOrdersPageController {
                 component = new JSONObject();
                 component.put("name", mapConceptNamesToShortNames(drugOrder.getDrug().getConcept().getUuid()));
               //  component.put("name", drugOrder.getDrug().getConcept().getShortNameInLocale(LOCALE) != null ? drugOrder.getDrug().getConcept().getShortNameInLocale(LOCALE).getName() : drugOrder.getDrug().getConcept().getName(LOCALE).getName());
-                if(drugOrder.getDose() != null || drugOrder.getDoseUnits() != null || drugOrder.getFrequency() != null) {
+                if(drugOrder.getDose() != null || drugOrder.getDoseUnits() != null || drugOrder.getFrequency() != null || drugOrder.getDuration() != null) {
                     component.put("dose", drugOrder.getDose().toString());
+                    component.put("drugDuration", drugOrder.getDuration() != null ? drugOrder.getDuration().toString(): "");
                     component.put("units_uuid", drugOrder.getDoseUnits().getUuid());
                     component.put("units_name", drugOrder.getDoseUnits().getName(LOCALE).getName());
                     component.put("frequency", drugOrder.getFrequency().getUuid());
@@ -240,10 +266,11 @@ public class DrugOrdersPageController {
                     orderObj.put("dateActivated", order.getDateCreated().toString());
                     orderObj.put("dateStopped", order.getDateStopped().toString());
 
-                    if((drugOrder.getDose()!= null || drugOrder.getQuantity() != null || drugOrder.getDoseUnits() != null
+                    if((drugOrder.getDose()!= null || drugOrder.getDuration() != null || drugOrder.getQuantity() != null || drugOrder.getDoseUnits() != null
                     || drugOrder.getFrequency() != null || drugOrder.getQuantityUnits() != null || drugOrder.getRoute()!= null
                     ) && drugOrder.getDrug() != null ) {
                         orderObj.put("dose", drugOrder.getDose());
+                        orderObj.put("drugDuration", drugOrder.getDuration());
                         orderObj.put("quantity", drugOrder.getQuantity());
                         orderObj.put("doseUnits", drugOrder.getDoseUnits().getName(LOCALE).getName());
                         orderObj.put("frequency", drugOrder.getFrequency().toString());

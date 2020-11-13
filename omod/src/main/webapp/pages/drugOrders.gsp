@@ -93,6 +93,7 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
     window.OpenMRS.drugOrdersConfig = ${ jsonConfig };
     window.sessionContext = {'locale': 'en_GB'}
     window.OpenMRS.activeOrdersPayload =${activeOrdersResponse};
+    window.OpenMRS.durationUnitsPayload =${durationUnitsResponse};
     window.OpenMRS.pastDrugOrdersPayload =${pastDrugOrdersPayload};
 
     jq = jQuery;

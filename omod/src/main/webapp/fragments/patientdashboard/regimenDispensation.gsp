@@ -179,6 +179,20 @@
                 </span>
             </div>
 
+            <div ng-if="components.length >0" style="padding-top: 10px">
+                <span>
+                    Duration: <input ng-model="drugDuration" size="5" id="drugDuration">
+                </span>
+                <span>
+                    Units: <select ng-model="drugDurationUnit" id="duration_units">
+                    <option value=""></option>
+                    <option ng-repeat="unit in customDurationUnits" ng-selected="drugDurationUnit==unit.uuid"
+                            value="{{unit.uuid}}">{{unit.name}}</option>
+                </select>
+                </span>
+
+            </div>
+
             <div style="margin-top:5px;"><textarea ng-model="regimenDosingInstructions" rows="2" cols="80"
                                                    placeholder="Additional instruction not covered above"></textarea>
             </div>

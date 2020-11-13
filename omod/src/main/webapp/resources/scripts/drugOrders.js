@@ -57,7 +57,8 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
 
         // TODO changing dosingType of a draft order should reset defaults (and discard non-defaulted properties)
           var programRegimens = OpenMRS.kenyaemrRegimenJsonPayload;
-        $scope.showRegimenPanel = false;
+          $scope.customDurationUnits = OpenMRS.durationUnitsPayload.durationUnitsResponse;
+          $scope.showRegimenPanel = false;
 
         function loadExistingOrders() {
             $scope.activeDrugOrders = {loading: true};
@@ -190,7 +191,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                         for (var r in data) {
                             if (data.hasOwnProperty(r)) {
                                 if(pastOrders[t].name === data.name ) {
-                                    $scope.quantity_units = pastOrders[t].quantity_units;;
+                                    $scope.quantity_units = pastOrders[t].quantity_units;
                                     $scope.quantity = pastOrders[t].quantity;
                                     $scope.frequency = pastOrders[t].frequency;
 
@@ -379,6 +380,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
         $scope.activeRegimens = [];
         $scope.components = [];
         $scope.components.quantity = [];
+        $scope.drugDurationUnit= "";
 
         $scope.setProgramRegimens = function (regimens) {
             $scope.activeRegimens = [];
@@ -387,6 +389,8 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
             $scope.quantity_units = "";
             $scope.quantity = "";
             $scope.frequency = "";
+            $scope.drugDuration = "";
+
             $scope.activeRegimens = regimens;
         }
         $scope.setRegimenMembers = function (regimen) {
@@ -406,7 +410,23 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
             $scope.quantity_units = angular.element('#quantity_units').val();
             $scope.quantity = angular.element('#quantity').val();
             $scope.frequency = angular.element('#frequency').val();
+            $scope.drugDuration = angular.element('#drugDuration').val();
+            $scope.drugDurationUnit = angular.element('#duration_units').val();
             var orderSetComponents = [];
+
+            if($scope.drugDuration === '' || $scope.drugDuration === undefined || $scope.drugDuration === null) {
+                $scope.showErrorToast ='Please provide duration for the drugs';
+                $('#orderError').modal('show');
+                return;
+
+            }
+            if($scope.drugDurationUnit === '' || $scope.drugDurationUnit === undefined || $scope.drugDurationUnit === null) {
+                $scope.showErrorToast ='Please provide duration unit';
+                $('#orderError').modal('show');
+                return;
+
+            }
+
             if(config.provider === '' || config.provider === undefined || config.provider === null) {
                 $scope.showErrorToast ='You are not login as provider, please contact System Administrator';
                 $('#orderError').modal('show');
@@ -420,6 +440,8 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                     data['quantity_units'] = $scope.quantity_units;
                     data['quantity'] = $scope.quantity;
                     data['frequency'] = $scope.frequency;
+                    data['drugDuration'] = $scope.drugDuration;
+                    data['drugDurationUnit'] = $scope.drugDurationUnit;
                     if (data.hasOwnProperty(r)) {
                         if(isNaN(data.dose)) {
                             $scope.showErrorToast ='Dose value is not a number. Please enter a number';
@@ -429,6 +451,11 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
 
                         if(isNaN(data.quantity)) {
                             $scope.showErrorToast ='Quantity value is not a number. Please enter a number';
+                            $('#orderError').modal('show');
+                            return;
+                        }
+                        if(isNaN(data.drugDuration)) {
+                            $scope.showErrorToast ='Duration value is not a number. Please enter a number';
                             $('#orderError').modal('show');
                             return;
                         }
