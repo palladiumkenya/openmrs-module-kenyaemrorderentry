@@ -8,7 +8,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.openmrs.GlobalProperty;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.kenyaemrorderentry.shr.LabOrderDataExchange;
+import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange;
 import org.openmrs.scheduler.tasks.AbstractTask;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.HttpResponse;
@@ -55,7 +55,7 @@ public class PushLabRequestsTask extends AbstractTask {
             Integer gpLastOrderId = StringUtils.isNotBlank(lastOrderIdStr) ? Integer.parseInt(lastOrderIdStr) : 0;
 
             LabOrderDataExchange e = new LabOrderDataExchange();
-            ObjectNode samplesWrapper = e.getLabRequests(gpLastOrderId, lastId);
+            ObjectNode samplesWrapper = e.getLabRequests(null, null);
             ArrayNode samples = (ArrayNode) samplesWrapper.get("samples");
 
             if (samples.size() < 1) {
