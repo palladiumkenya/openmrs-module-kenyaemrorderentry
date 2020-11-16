@@ -604,29 +604,31 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
         function formatDisplayOfRegimenInstructions(res) {
             var orders = [];
             var instructionDesc = [];
+            var frequency = res[0].frequency_name;
+            var duration = res[0].drugDuration;
+            var durationUnitName = res[0].drugDurationUnitName;
+
             for (var i = 0; i < res.length; ++i) {
                 var data = res[i];
-
                 for (var r in data) {
                     if (data.hasOwnProperty(r)) {
-                        data['instructionDetails'] = data.name +"(" + data.dose + " "+data.units_name +',' + data.frequency_name
-                        +','+'Quantity:' +data.quantity +' ' +data.quantity_units_name+")" ;
-                    }
 
+                        data['strength']=data.dose + ""+data.units_name
+                    }
                 }
                 orders.push(data);
 
             }
             var str = orders.map(function(elem){
-                return elem.instructionDetails;
-            }).join(" + ");
-            instructionDesc.push({instructionDetailsFinal:str});
+                return elem.strength;
+            }).join(" / ");
+            var instruction = $scope.patientRegimens[0].regimenName + "(" +str +"," + frequency + ', for ' +duration +" " +durationUnitName +")";
+            instructionDesc.push({instructionDetailsFinal:instruction});
 
             return instructionDesc;
 
         }
         function formatDisplayOfPastRegimenInstructions(res) {
-
             var orders = [];
             var instructionDesc = [];
             for (var i = 0; i < res.length; ++i) {
@@ -636,8 +638,10 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                     for (var r in data) {
                         if (data.hasOwnProperty(r)) {
                             if(data.drug_id) {
-                                data['instructionDetails'] = data.name + "(" + data.dose + " " + data.units_name + ',' + data.frequency_name
-                                    + ',' + 'Quantity:' + data.quantity + ' ' + data.quantity_units_name + ")";
+                                data['strength']= data.dose + ""+data.units_name;
+                                data['duration']= data.drugDuration;
+                                data['durationUnitName']= data.drugDurationUnitName;
+                                data['frequency_name']= data.frequency_name;
                             }
                         }
 
@@ -656,12 +660,17 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                 Object.keys(grouped).forEach(function (key) {
                     valueForGroupedOrder = grouped[key];
                     var dateActivated = valueForGroupedOrder[0].dateActivated;
+                    var duration = valueForGroupedOrder[0].duration;
+                    var durationUnitName = valueForGroupedOrder[0].durationUnitName;
+                    var frequencyName = valueForGroupedOrder[0].frequency_name;
                     var dateStopped = valueForGroupedOrder[0].dateStopped;
                     var str = valueForGroupedOrder.map(function (elem) {
-                        return elem.instructionDetails;
-                    }).join(" + ");
+                        return elem.strength;
+                    }).join(" / ");
+                    var instruction = $scope.patientRegimens[0].regimenName + "(" +str +"," + frequencyName + ', for ' + duration +" " +durationUnitName +")";
+
                     instructionDesc.push({
-                        instructionDetailsFinal: str,
+                        instructionDetailsFinal: instruction,
                         dateActivated: dateActivated,
                         dateStopped: dateStopped
                     });
