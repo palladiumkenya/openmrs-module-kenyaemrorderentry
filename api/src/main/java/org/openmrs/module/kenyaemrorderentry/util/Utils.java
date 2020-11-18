@@ -184,6 +184,7 @@ public class Utils {
         String REASON_REGIMEN_STOPPED_NON_CODED = "5622AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
         String DATE_REGIMEN_STOPPED = "1191AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
         String CURRENT_DRUG_NON_STANDARD ="1088AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+        String REGIMEN_LINE_CONCEPT ="163104AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
 
 
@@ -202,7 +203,7 @@ public class Utils {
                 regimen = obs.getValueCoded() != null ? obs.getValueCoded().getFullySpecifiedName(LOCALE).getName() : "Unresolved Regimen name";
                 try {
                     regimenShort = getRegimenNameFromRegimensXMLString(obs.getValueCoded().getUuid(), getRegimenConceptJson());
-                    regimenLine = getRegimenLineFromRegimensXMLString(obs.getValueCoded().getUuid(), getRegimenConceptJson());
+                    //regimenLine = getRegimenLineFromRegimensXMLString(obs.getValueCoded().getUuid(), getRegimenConceptJson());
                 } catch (IOException e1) {
                     e1.printStackTrace();
                 }
@@ -210,9 +211,7 @@ public class Utils {
             } else if (obs.getConcept().getUuid().equals(CURRENT_DRUG_NON_STANDARD) ) {
                 nonstandardRegimen.append(obs.getValueCoded().getFullySpecifiedName(LOCALE).getName().toUpperCase() + "/");
                 regimenUuid = obs.getValueCoded() != null ? obs.getValueCoded().getUuid() : "";
-            }
-
-            else if (obs.getConcept().getUuid().equals(REASON_REGIMEN_STOPPED_CODED)) {
+            } else if (obs.getConcept().getUuid().equals(REASON_REGIMEN_STOPPED_CODED)) {
                 String reason = obs.getValueCoded() != null ?  obs.getValueCoded().getName().getName() : "";
                 if (reason != null)
                     changeReason.add(reason);
@@ -224,10 +223,12 @@ public class Utils {
                 if(obs.getValueDatetime() != null){
                     endDate = getSimpleDateFormat("yyyy-MM-dd") .format(obs.getValueDatetime());
                 }
+            } else if (obs.getConcept().getUuid().equals(REGIMEN_LINE_CONCEPT) ) {
+                regimenLine = obs.getValueText();
             }
 
 
-        }
+            }
         if(nonstandardRegimen.length() > 0) {
             return SimpleObject.create(
                     "startDate", startDate,

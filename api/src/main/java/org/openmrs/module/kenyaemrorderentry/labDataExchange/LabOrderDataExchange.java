@@ -95,33 +95,38 @@ public class LabOrderDataExchange {
         Encounter currentRegimenEncounter = Utils.getLastEncounterForProgram(patient, "ARV");
         SimpleObject regimenDetails = Utils.buildRegimenChangeObject(currentRegimenEncounter.getObs(), currentRegimenEncounter);
         String regimenName = (String) regimenDetails.get("regimenShortDisplay");
+        String regimenLine = (String) regimenDetails.get("regimenLine");
         String nascopCode = "";
+        System.out.println("Regimen line: " + regimenLine);
         if (StringUtils.isNotBlank(regimenName )) {
-            nascopCode = Utils.getDrugNascopCodeByDrugNameAndRegimenLine(regimenName, "AF");
+            nascopCode = Utils.getDrugNascopCodeByDrugNameAndRegimenLine(regimenName, regimenLine);
         }
 
+        //add to list only if code is found. This is a temp measure to avoid sending messages with null regimen codes
+        if (StringUtils.isNotBlank(nascopCode)) {
+            ObjectNode test = Utils.getJsonNodeFactory().objectNode();
 
-        ObjectNode test = Utils.getJsonNodeFactory().objectNode();
-
-        test.put("mflCode", Utils.getDefaultLocationMflCode(null));
-        test.put("patient_identifier", cccNumber != null ? cccNumber.getIdentifier() : "");
-        test.put("dob", dob);
-        test.put("patient_name", fullName);
-        test.put("sex", patient.getGender().equals("M") ? "1" : patient.getGender().equals("F") ? "2" : "3");
-        //test.put("sampletype", o.getInstructions() != null ? getSampleTypeCode(o.getInstructions()) : "");
-        test.put("sampletype", "1");
-        test.put("datecollected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(o.getDateActivated()));
-        test.put("order_no", o.getOrderId().toString());
-        test.put("lab", "");
-        test.put("justification", o.getOrderReason() != null ? getOrderReasonCode(o.getOrderReason().getUuid()) : "");
-        //test.put("justification", "1");
-        test.put("prophylaxis", nascopCode);
-        if (patient.getGender().equals("F")) {
-            test.put("pmtct", "3");
+            test.put("mflCode", Utils.getDefaultLocationMflCode(null));
+            test.put("patient_identifier", cccNumber != null ? cccNumber.getIdentifier() : "");
+            test.put("dob", dob);
+            test.put("patient_name", fullName);
+            test.put("sex", patient.getGender().equals("M") ? "1" : patient.getGender().equals("F") ? "2" : "3");
+            //test.put("sampletype", o.getInstructions() != null ? getSampleTypeCode(o.getInstructions()) : "");
+            test.put("sampletype", "1");
+            test.put("datecollected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(o.getDateActivated()));
+            test.put("order_no", o.getOrderId().toString());
+            test.put("lab", "");
+            test.put("justification", o.getOrderReason() != null ? getOrderReasonCode(o.getOrderReason().getUuid()) : "");
+            //test.put("justification", "1");
+            test.put("prophylaxis", nascopCode);
+            if (patient.getGender().equals("F")) {
+                test.put("pmtct", "3");
+            }
+            test.put("initiation_date", originalRegimenEncounter != null ? Utils.getSimpleDateFormat("yyyy-MM-dd").format(originalRegimenEncounter.getEncounterDatetime()) : "");
+            test.put("dateinitiatedonregimen", currentRegimenEncounter != null ? Utils.getSimpleDateFormat("yyyy-MM-dd").format(currentRegimenEncounter.getEncounterDatetime()) : "");
+            labTests.add(test);
         }
-        test.put("initiation_date", originalRegimenEncounter != null ? Utils.getSimpleDateFormat("yyyy-MM-dd").format(originalRegimenEncounter.getEncounterDatetime()) : "");
-        test.put("dateinitiatedonregimen", currentRegimenEncounter != null ? Utils.getSimpleDateFormat("yyyy-MM-dd").format(currentRegimenEncounter.getEncounterDatetime()) : "");
-        labTests.add(test);
+
 
 
         return labTests;
