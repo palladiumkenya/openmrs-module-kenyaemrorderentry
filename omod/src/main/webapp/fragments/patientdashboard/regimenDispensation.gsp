@@ -125,7 +125,7 @@
 
         <div ng-show="regimenNames.length > 0" style="border-style:groove; border-width:2px;border-color:gray;padding:10px;">
             <div style="font-size: 16px">
-                <b>Program:</b>{{programName}} | <b>Regimen Line:</b>{{regimenLines}} | <b>Regimen:</b>{{regimenNames}}
+                <b>Program:</b>{{programName}} | <b>Regimen Line:</b>{{regimenLine}} | <b>Regimen:</b>{{regimenNames}}
             </div>
 
         </div>
