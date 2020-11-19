@@ -59,6 +59,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
           var programRegimens = OpenMRS.kenyaemrRegimenJsonPayload;
           $scope.customDurationUnits = OpenMRS.durationUnitsPayload.durationUnitsResponse;
           $scope.showRegimenPanel = false;
+          $scope.regimenLine = programRegimens[0].regimenLine !== null || programRegimens[0].regimenLine !=="" ? programRegimens[0].regimenLine : "";
 
         function loadExistingOrders() {
             $scope.activeDrugOrders = {loading: true};
