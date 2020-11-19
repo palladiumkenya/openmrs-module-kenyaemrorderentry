@@ -12,7 +12,6 @@ import org.openmrs.Encounter;
 import org.openmrs.EncounterType;
 import org.openmrs.Obs;
 import org.openmrs.Order;
-import org.openmrs.OrderType;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.api.ConceptService;
@@ -23,7 +22,6 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemrorderentry.util.Utils;
 import org.openmrs.ui.framework.SimpleObject;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,7 +31,6 @@ import java.util.Set;
 
 public class LabOrderDataExchange {
 
-    ObsService obsService = Context.getObsService();
     ConceptService conceptService = Context.getConceptService();
     EncounterService encounterService = Context.getEncounterService();
     OrderService orderService = Context.getOrderService();
@@ -117,7 +114,6 @@ public class LabOrderDataExchange {
             test.put("dob", dob);
             test.put("patient_name", fullName);
             test.put("sex", patient.getGender().equals("M") ? "1" : patient.getGender().equals("F") ? "2" : "3");
-            //test.put("sampletype", o.getInstructions() != null ? getSampleTypeCode(o.getInstructions()) : "");
             test.put("sampletype", "1");
             test.put("datecollected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(o.getDateActivated()));
             test.put("order_no", o.getOrderId().toString());
@@ -132,13 +128,16 @@ public class LabOrderDataExchange {
             test.put("dateinitiatedonregimen", currentRegimenEncounter != null ? Utils.getSimpleDateFormat("yyyy-MM-dd").format(currentRegimenEncounter.getEncounterDatetime()) : "");
             labTests.add(test);
         }
-
-
-
         return labTests;
     }
 
 
+    /**
+     * TODO: Get correct mappings for the different regions
+     * Returns mapping for testing labs
+     * @param lab
+     * @return
+     */
     private String getRequestLab(String lab) {
 
         if (lab == null) {
@@ -178,6 +177,12 @@ public class LabOrderDataExchange {
         return code.toString();
     }
 
+    /**
+     * TODO: add correct mappings for the different specimen types
+     * Returns mapping for specimen types
+     * @param type
+     * @return
+     */
     private String getSampleTypeCode(String type) {
 
         if (type == null) {
@@ -295,6 +300,13 @@ public class LabOrderDataExchange {
         return "Results updated successfully";
     }
 
+    /**
+     * Updates an active order and sets results if provided
+     * @param orderId
+     * @param result
+     * @param specimenStatus
+     * @param rejectedReason
+     */
     private void updateOrder(Integer orderId, String result, String specimenStatus, String rejectedReason) {
 
         Order od = orderService.getOrder(orderId);
