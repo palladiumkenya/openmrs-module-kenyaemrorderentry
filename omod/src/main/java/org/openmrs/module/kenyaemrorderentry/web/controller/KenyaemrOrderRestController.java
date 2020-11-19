@@ -25,7 +25,7 @@ public class KenyaemrOrderRestController extends BaseRestController {
 
     @RequestMapping(method = RequestMethod.POST, value = "/labresults") // end point for processing individual lab results
     @ResponseBody
-    public Object processCovidLabResults(HttpServletRequest request) {
+    public Object processIncomingViralLoadResults(HttpServletRequest request) {
         String requestBody = null;
         try {
             requestBody = Utils.fetchRequestBody(request.getReader());
