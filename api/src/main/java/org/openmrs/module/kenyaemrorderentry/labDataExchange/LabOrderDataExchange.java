@@ -23,19 +23,22 @@ import org.openmrs.module.kenyaemrorderentry.util.Utils;
 import org.openmrs.ui.framework.SimpleObject;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class LabOrderDataExchange {
 
-    ObsService obsService = Context.getObsService();
     ConceptService conceptService = Context.getConceptService();
     EncounterService encounterService = Context.getEncounterService();
     OrderService orderService = Context.getOrderService();
 
     String LAB_ENCOUNTER_TYPE_UUID = "e1406e88-e9a9-11e8-9f32-f2801f1b9fd1";
-    Concept vlTestConcept = conceptService.getConcept(856);
+    Concept vlTestConceptQualitative = conceptService.getConcept(1305);
+    Concept LDLConcept = conceptService.getConcept(1302);
+    Concept vlTestConceptQuantitative = conceptService.getConcept(856);
     EncounterType labEncounterType = encounterService.getEncounterTypeByUuid(LAB_ENCOUNTER_TYPE_UUID);
 
     /**
@@ -95,39 +98,46 @@ public class LabOrderDataExchange {
         Encounter currentRegimenEncounter = Utils.getLastEncounterForProgram(patient, "ARV");
         SimpleObject regimenDetails = Utils.buildRegimenChangeObject(currentRegimenEncounter.getObs(), currentRegimenEncounter);
         String regimenName = (String) regimenDetails.get("regimenShortDisplay");
+        String regimenLine = (String) regimenDetails.get("regimenLine");
         String nascopCode = "";
+        System.out.println("Regimen line: " + regimenLine);
         if (StringUtils.isNotBlank(regimenName )) {
-            nascopCode = Utils.getDrugNascopCodeByDrugNameAndRegimenLine(regimenName, "AF");
+            nascopCode = Utils.getDrugNascopCodeByDrugNameAndRegimenLine(regimenName, regimenLine);
         }
 
+        //add to list only if code is found. This is a temp measure to avoid sending messages with null regimen codes
+        if (StringUtils.isNotBlank(nascopCode)) {
+            ObjectNode test = Utils.getJsonNodeFactory().objectNode();
 
-        ObjectNode test = Utils.getJsonNodeFactory().objectNode();
-
-        test.put("mflCode", Utils.getDefaultLocationMflCode(null));
-        test.put("patient_identifier", cccNumber != null ? cccNumber.getIdentifier() : "");
-        test.put("dob", dob);
-        test.put("patient_name", fullName);
-        test.put("sex", patient.getGender().equals("M") ? "1" : patient.getGender().equals("F") ? "2" : "3");
-        //test.put("sampletype", o.getInstructions() != null ? getSampleTypeCode(o.getInstructions()) : "");
-        test.put("sampletype", "1");
-        test.put("datecollected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(o.getDateActivated()));
-        test.put("order_no", o.getOrderId().toString());
-        test.put("lab", "");
-        test.put("justification", o.getOrderReason() != null ? getOrderReasonCode(o.getOrderReason().getUuid()) : "");
-        //test.put("justification", "1");
-        test.put("prophylaxis", nascopCode);
-        if (patient.getGender().equals("F")) {
-            test.put("pmtct", "3");
+            test.put("mflCode", Utils.getDefaultLocationMflCode(null));
+            test.put("patient_identifier", cccNumber != null ? cccNumber.getIdentifier() : "");
+            test.put("dob", dob);
+            test.put("patient_name", fullName);
+            test.put("sex", patient.getGender().equals("M") ? "1" : patient.getGender().equals("F") ? "2" : "3");
+            test.put("sampletype", "1");
+            test.put("datecollected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(o.getDateActivated()));
+            test.put("order_no", o.getOrderId().toString());
+            test.put("lab", "");
+            test.put("justification", o.getOrderReason() != null ? getOrderReasonCode(o.getOrderReason().getUuid()) : "");
+            //test.put("justification", "1");
+            test.put("prophylaxis", nascopCode);
+            if (patient.getGender().equals("F")) {
+                test.put("pmtct", "3");
+            }
+            test.put("initiation_date", originalRegimenEncounter != null ? Utils.getSimpleDateFormat("yyyy-MM-dd").format(originalRegimenEncounter.getEncounterDatetime()) : "");
+            test.put("dateinitiatedonregimen", currentRegimenEncounter != null ? Utils.getSimpleDateFormat("yyyy-MM-dd").format(currentRegimenEncounter.getEncounterDatetime()) : "");
+            labTests.add(test);
         }
-        test.put("initiation_date", originalRegimenEncounter != null ? Utils.getSimpleDateFormat("yyyy-MM-dd").format(originalRegimenEncounter.getEncounterDatetime()) : "");
-        test.put("dateinitiatedonregimen", currentRegimenEncounter != null ? Utils.getSimpleDateFormat("yyyy-MM-dd").format(currentRegimenEncounter.getEncounterDatetime()) : "");
-        labTests.add(test);
-
-
         return labTests;
     }
 
 
+    /**
+     * TODO: Get correct mappings for the different regions
+     * Returns mapping for testing labs
+     * @param lab
+     * @return
+     */
     private String getRequestLab(String lab) {
 
         if (lab == null) {
@@ -167,6 +177,12 @@ public class LabOrderDataExchange {
         return code.toString();
     }
 
+    /**
+     * TODO: add correct mappings for the different specimen types
+     * Returns mapping for specimen types
+     * @param type
+     * @return
+     */
     private String getSampleTypeCode(String type) {
 
         if (type == null) {
@@ -256,9 +272,8 @@ public class LabOrderDataExchange {
      * @param resultPayload this should be an array
      * @return
      */
-    public String processIncomingLabResults(String resultPayload) {
+    public String processIncomingViralLoadLabResults(String resultPayload) {
 
-        Integer statusCode;
         String statusMsg;
         ObjectMapper mapper = new ObjectMapper();
         ArrayNode resultsObj = null;
@@ -266,7 +281,6 @@ public class LabOrderDataExchange {
             JsonNode actualObj = mapper.readTree(resultPayload);
             resultsObj = (ArrayNode) actualObj;
         } catch (JsonProcessingException e) {
-            statusCode = 400;
             statusMsg = "The payload could not be understood. An array is expected!";
             e.printStackTrace();
             return statusMsg;
@@ -275,55 +289,118 @@ public class LabOrderDataExchange {
         if (resultsObj.size() > 0) {
             for (int i = 0; i < resultsObj.size(); i++) {
                 ObjectNode o = (ObjectNode) resultsObj.get(i);
-                Integer specimenId = o.get("specimen_id").intValue();
-                Integer specimenReceivedStatus = o.get("receivedstatus").intValue();// 1-received, 2-rejected
-                String specimenRejectedReason = o.get("rejectedreason").textValue();
-                Integer results = o.get("result").intValue(); //1 - negative, 2 - positive, 5 - inconclusive
+                Integer specimenId = o.get("order_number").asInt();
+                String patientIdentifier = o.get("patient").textValue(); // holds CCC number
+                String specimenReceivedStatus = o.get("sample_status").textValue();// Complete, Incomplete, Rejected
+                String specimenRejectedReason = o.get("rejected_reason").textValue();
+                String results = o.get("result").textValue(); //1 - negative, 2 - positive, 5 - inconclusive
                 updateOrder(specimenId, results, specimenReceivedStatus, specimenRejectedReason);
             }
         }
         return "Results updated successfully";
     }
 
-    private void updateOrder(Integer orderId, Integer result, Integer receivedStatus, String rejectedReason) {
+    /**
+     * Updates an active order and sets results if provided
+     * @param orderId
+     * @param result
+     * @param specimenStatus
+     * @param rejectedReason
+     */
+    private void updateOrder(Integer orderId, String result, String specimenStatus, String rejectedReason) {
 
-        Order od = Context.getOrderService().getOrder(orderId);
+        Order od = orderService.getOrder(orderId);
+
         if (od != null && od.isActive()) {
-
-            if (receivedStatus == 2 || StringUtils.isNotBlank(rejectedReason)) {
+            if (specimenStatus.equals("Rejected") || StringUtils.isNotBlank(rejectedReason) || result.equals("Collect New Sample")) {
+                // Get all active VL orders and discontinue them
+                Map<String, Order> ordersToProcess = getOrdersToProcess(od, vlTestConceptQuantitative);
+                Order o1 = ordersToProcess.get("orderToRetain");
+                Order o2 = ordersToProcess.get("orderToVoid");
+                String discontinuationReason = "";
+                if (StringUtils.isNotBlank(rejectedReason)){
+                    discontinuationReason = rejectedReason;
+                } else if (result.equals("Collect New Sample")) {
+                    discontinuationReason = "Collect New Sample";
+                } else {
+                    discontinuationReason = "Rejected specimen";
+                }
                 try {
-                    orderService.discontinueOrder(od, rejectedReason != null ? rejectedReason : "Rejected order", new Date(), od.getOrderer(),
-                            od.getEncounter());
+                    orderService.discontinueOrder(o1, discontinuationReason, new Date(), o1.getOrderer(),
+                            o1.getEncounter());
+                    orderService.discontinueOrder(o2, discontinuationReason, new Date(), o2.getOrderer(),
+                            o2.getEncounter());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             } else {
+
+                Concept conceptToRetain = null;
+                String aboveMillionResult = "> 10,000,000 cp/ml";
+                Obs o = new Obs();
+
+                if (result.equals("< LDL copies/ml")) {
+                    conceptToRetain = vlTestConceptQualitative;
+                    o.setValueCoded(LDLConcept);
+                } else {
+                    conceptToRetain = vlTestConceptQuantitative;
+                    o.setValueNumeric(result.equalsIgnoreCase(aboveMillionResult) ? 10000000 : Double.valueOf(result));
+                }
+
                 Encounter enc = new Encounter();
                 enc.setEncounterType(labEncounterType);
                 enc.setEncounterDatetime(new Date());
                 enc.setPatient(od.getPatient());
                 enc.setCreator(Context.getUserService().getUser(1));
 
-                Obs o = new Obs();
-                o.setConcept(vlTestConcept);
+                // In order to record results both qualitative (LDL) and quantitative,
+                // every vl request saves two orders: one with 856(quantitative) for numeric values and another with 1305(quantitative) for LDL value
+                // When recording result, it is therefore prudent to set result for one order and void the other one
+                Map<String, Order> ordersToProcess = getOrdersToProcess(od, conceptToRetain);
+                Order orderToRetain = ordersToProcess.get("orderToRetain");
+                Order orderToVoid = ordersToProcess.get("orderToVoid");
+
+                // logic that picks the right concept id for the result obs
+                o.setConcept(conceptToRetain);
                 o.setDateCreated(new Date());
                 o.setCreator(Context.getUserService().getUser(1));
                 o.setObsDatetime(new Date());
                 o.setPerson(od.getPatient());
-                o.setOrder(od);
-                //  o.setValueCoded(result == 1 ? covidNegConcept : result == 2 ? covidPosConcept : covidIndeterminateConcept);
+                o.setOrder(orderToRetain);
                 enc.addObs(o);
 
                 try {
                     encounterService.saveEncounter(enc);
-                    orderService.discontinueOrder(od, "Results received", new Date(), od.getOrderer(),
-                            od.getEncounter());
+                    orderService.discontinueOrder(orderToRetain, "Results received", new Date(), orderToRetain.getOrderer(),
+                            orderToRetain.getEncounter());
+                    orderService.voidOrder(orderToVoid, "Duplicate order");
                 } catch (Exception e) {
-
                     e.printStackTrace();
                 }
             }
         }
+    }
+
+    /**
+     * Returns an object indicating the order to retain and that to void
+     * @param referenceOrder
+     * @param conceptToRetain
+     * @return
+     */
+    private Map<String, Order> getOrdersToProcess(Order referenceOrder, Concept conceptToRetain) {
+
+        Map<String, Order> listToProcess = new HashMap<String, Order>();
+        Concept conceptToVoid = conceptToRetain.equals(vlTestConceptQualitative) ? vlTestConceptQuantitative : vlTestConceptQualitative;
+        List<Order> ordersOnSameDay = orderService.getActiveOrders(referenceOrder.getPatient(), referenceOrder.getOrderType(), referenceOrder.getCareSetting(), referenceOrder.getDateActivated());
+
+        for (Order order : ordersOnSameDay) {
+            if (order.getConcept().equals(conceptToVoid)) {
+                listToProcess.put("orderToVoid", order);
+            } else if (order.getConcept().equals(conceptToRetain)) {
+                listToProcess.put("orderToRetain", order);
+            }
+        }
+        return listToProcess;
     }
 
 }

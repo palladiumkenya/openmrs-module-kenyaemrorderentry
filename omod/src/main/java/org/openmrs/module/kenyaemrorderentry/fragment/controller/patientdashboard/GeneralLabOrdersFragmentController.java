@@ -91,7 +91,7 @@ public class GeneralLabOrdersFragmentController {
         LabOrderDataExchange dataExchange = new LabOrderDataExchange();
         ObjectNode payload = dataExchange.getLabRequests(null, null);
 
-        //System.out.println("Generated payload:::::" + payload.toString());
+        System.out.println("Generated payload:::::" + payload.toString());
 
         SimpleObject simpleObject = SimpleObject.create("status", "successful");
         return simpleObject;
