@@ -29,6 +29,7 @@ import org.openmrs.ui.framework.SimpleObject;
 import org.openmrs.util.OpenmrsUtil;
 import org.openmrs.util.PrivilegeConstants;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -713,6 +714,25 @@ public class Utils {
             }
         }
         return false;
+    }
+
+    public static String fetchRequestBody(BufferedReader reader) {
+        String requestBodyJsonStr = "";
+        try {
+
+            BufferedReader br = new BufferedReader(reader);
+            String output = "";
+            while ((output = reader.readLine()) != null) {
+                requestBodyJsonStr += output;
+            }
+
+
+        } catch (IOException e) {
+
+            System.out.println("IOException: " + e.getMessage());
+
+        }
+        return requestBodyJsonStr;
     }
 }
 
