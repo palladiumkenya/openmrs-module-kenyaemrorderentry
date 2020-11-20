@@ -36,7 +36,8 @@
 	
 	<!-- Maps hibernate file's, if present -->
 	<mappingFiles>
-
+		LabManifest.hbm.xml
+		LabManifestOrder.hbm.xml
 	</mappingFiles>
 
 	<!-- Internationalization -->

@@ -16,7 +16,9 @@ import org.openmrs.api.PatientService;
 import org.openmrs.api.ProviderService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appui.UiSessionContext;
+import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange;
+import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.webservices.rest.web.ConversionUtil;
 import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.ui.framework.SimpleObject;
@@ -26,6 +28,7 @@ import org.openmrs.ui.framework.fragment.FragmentConfiguration;
 import org.openmrs.ui.framework.fragment.FragmentModel;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -90,6 +93,18 @@ public class GeneralLabOrdersFragmentController {
 
         LabOrderDataExchange dataExchange = new LabOrderDataExchange();
         ObjectNode payload = dataExchange.getLabRequests(null, null);
+
+        KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
+        LabManifest manifest = new LabManifest();
+        manifest.setCourier("G4S");
+        manifest.setCourierOfficer("Mangiti Fred");
+        manifest.setStatus("Pending");
+        manifest.setStartDate(new Date());
+        manifest.setEndDate(new Date());
+        manifest.setCreator(Context.getAuthenticatedUser());
+        manifest.setDateCreated(new Date());
+
+        kenyaemrOrdersService.saveLabOrderManifest(manifest);
 
         System.out.println("Generated payload:::::" + payload.toString());
 

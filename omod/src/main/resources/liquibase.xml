@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <!--  LAB ORDER MANIFEST TABLE DESIGN -->
+
+    <changeSet id="kenyaemr_order_entry_001" author="schege">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="kenyaemr_order_entry_lab_manifest"/>
+            </not>
+        </preConditions>
+        <comment>
+            Create table to store Lab order manifests
+        </comment>
+        <createTable tableName="kenyaemr_order_entry_lab_manifest">
+            <column name="id" autoIncrement="true" type="int">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="start_date" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="end_date" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="dispatch_date" type="datetime">
+                <constraints nullable="true"/>
+            </column>
+            <column name="courier" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="courier_officer" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="status" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="creator" type="int"/>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int"/>
+            <column name="date_changed" type="datetime"/>
+            <column defaultValueBoolean="false" name="voided" type="boolean">
+                <constraints nullable="true"/>
+            </column>
+            <column name="voided_by" type="int"/>
+            <column name="date_voided" type="datetime"/>
+            <column name="voided_reason" type="varchar(255)"/>
+            <column name="uuid" type="char(38)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="kenyaemr_order_entry_002" author="schege">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="kenyaemr_order_entry_lab_manifest_order"/>
+            </not>
+        </preConditions>
+        <comment>
+            Create table to store Lab manifest orders
+        </comment>
+        <createTable tableName="kenyaemr_order_entry_lab_manifest_order">
+            <column name="id" autoIncrement="true" type="int">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="manifest_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="order_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="payload" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_sent" type="datetime">
+                <constraints nullable="true"/>
+            </column>
+            <column name="status" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="result" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="result_date" type="date">
+                <constraints nullable="true"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueBoolean="false" name="voided" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_voided" type="datetime"/>
+            <column name="voided_reason" type="varchar(255)"/>
+            <column name="uuid" type="char(38)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="kenyaemr_order_entry_lab_manifest_order" baseColumnNames="manifest_id"
+                                 constraintName="manifest_reference"
+                                 referencedTableName="kenyaemr_order_entry_lab_manifest"
+                                 referencedColumnNames="id"
+                                 deferrable="false" initiallyDeferred="false"/>
+
+        <addForeignKeyConstraint baseTableName="kenyaemr_order_entry_lab_manifest_order" baseColumnNames="order_id"
+                                 constraintName="manifest_order_reference"
+                                 referencedTableName="orders" referencedColumnNames="order_id"
+                                 deferrable="false" initiallyDeferred="false"/>
+    </changeSet>
+
+</databaseChangeLog>
