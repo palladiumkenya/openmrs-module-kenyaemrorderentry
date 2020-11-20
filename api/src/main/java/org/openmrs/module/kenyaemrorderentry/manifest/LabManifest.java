@@ -2,13 +2,14 @@ package org.openmrs.module.kenyaemrorderentry.manifest;
 
 import org.openmrs.BaseOpenmrsData;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.UUID;
 
 /**
  * A model that holds information about lab manifest
  */
-public class LabManifest extends BaseOpenmrsData {
+public class LabManifest extends BaseOpenmrsData implements Serializable {
     private Integer id;
     private Date startDate;
     private Date endDate;

@@ -3,13 +3,14 @@ package org.openmrs.module.kenyaemrorderentry.manifest;
 import org.openmrs.BaseOpenmrsData;
 import org.openmrs.Order;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.UUID;
 
 /**
  * A model for a manifest entry. This is ideally an order in a manifest.
  */
-public class LabManifestOrder extends BaseOpenmrsData {
+public class LabManifestOrder extends BaseOpenmrsData implements Serializable {
     private Integer id;
     private LabManifest labManifest;
     private Order order;
@@ -65,14 +66,6 @@ public class LabManifestOrder extends BaseOpenmrsData {
 
     public void setOrder(Order order) {
         this.order = order;
-    }
-
-    public String getTestType() {
-        return payload;
-    }
-
-    public void setTestType(String payload) {
-        this.payload = payload;
     }
 
     public Date getDateSent() {

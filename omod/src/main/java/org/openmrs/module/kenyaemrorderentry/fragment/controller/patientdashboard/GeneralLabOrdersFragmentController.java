@@ -19,6 +19,7 @@ import org.openmrs.module.appui.UiSessionContext;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
+import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 import org.openmrs.module.webservices.rest.web.ConversionUtil;
 import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.ui.framework.SimpleObject;
@@ -105,6 +106,16 @@ public class GeneralLabOrdersFragmentController {
         manifest.setDateCreated(new Date());
 
         kenyaemrOrdersService.saveLabOrderManifest(manifest);
+
+        LabManifest savedManifest = kenyaemrOrdersService.getLabOrderManifestById(1);
+
+        LabManifestOrder labOrder = new LabManifestOrder();
+        labOrder.setLabManifest(savedManifest);
+        labOrder.setOrder(Context.getOrderService().getOrder(16243));
+        labOrder.setPayload(payload.toString());
+        labOrder.setStatus("Pending");
+
+        kenyaemrOrdersService.saveLabManifestOrder(labOrder);
 
         System.out.println("Generated payload:::::" + payload.toString());
 
