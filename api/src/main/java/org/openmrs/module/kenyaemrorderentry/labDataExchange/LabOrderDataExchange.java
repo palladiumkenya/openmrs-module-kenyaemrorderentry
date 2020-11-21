@@ -69,7 +69,7 @@ public class LabOrderDataExchange {
     }
 
     /**
-     * Returns object lab request for patients
+     * Returns an array of active lab request
      *
      * @param o
      * @return
@@ -100,7 +100,6 @@ public class LabOrderDataExchange {
         String regimenName = (String) regimenDetails.get("regimenShortDisplay");
         String regimenLine = (String) regimenDetails.get("regimenLine");
         String nascopCode = "";
-        System.out.println("Regimen line: " + regimenLine);
         if (StringUtils.isNotBlank(regimenName )) {
             nascopCode = Utils.getDrugNascopCodeByDrugNameAndRegimenLine(regimenName, regimenLine);
         }
@@ -129,6 +128,67 @@ public class LabOrderDataExchange {
             labTests.add(test);
         }
         return labTests;
+    }
+
+    /**
+     * Returns a single object for an active lab order
+     *
+     * @param o
+     * @return
+     */
+    protected ObjectNode generatePayloadForLabOrder(Order o) {
+        Patient patient = o.getPatient();
+        ObjectNode test = Utils.getJsonNodeFactory().objectNode();
+
+        String dob = patient.getBirthdate() != null ? Utils.getSimpleDateFormat("yyyy-MM-dd").format(patient.getBirthdate()) : "";
+
+        String fullName = "";
+
+        if (patient.getGivenName() != null) {
+            fullName += patient.getGivenName();
+        }
+
+        if (patient.getMiddleName() != null) {
+            fullName += " " + patient.getMiddleName();
+        }
+
+        if (patient.getFamilyName() != null) {
+            fullName += " " + patient.getFamilyName();
+        }
+
+        PatientIdentifier cccNumber = patient.getPatientIdentifier(Utils.getUniquePatientNumberIdentifierType());
+        Encounter originalRegimenEncounter = Utils.getFirstEncounterForProgram(patient, "ARV");
+        Encounter currentRegimenEncounter = Utils.getLastEncounterForProgram(patient, "ARV");
+        SimpleObject regimenDetails = Utils.buildRegimenChangeObject(currentRegimenEncounter.getObs(), currentRegimenEncounter);
+        String regimenName = (String) regimenDetails.get("regimenShortDisplay");
+        String regimenLine = (String) regimenDetails.get("regimenLine");
+        String nascopCode = "";
+        if (StringUtils.isNotBlank(regimenName )) {
+            nascopCode = Utils.getDrugNascopCodeByDrugNameAndRegimenLine(regimenName, regimenLine);
+        }
+
+        //add to list only if code is found. This is a temp measure to avoid sending messages with null regimen codes
+        if (StringUtils.isNotBlank(nascopCode)) {
+
+            test.put("mflCode", Utils.getDefaultLocationMflCode(null));
+            test.put("patient_identifier", cccNumber != null ? cccNumber.getIdentifier() : "");
+            test.put("dob", dob);
+            test.put("patient_name", fullName);
+            test.put("sex", patient.getGender().equals("M") ? "1" : patient.getGender().equals("F") ? "2" : "3");
+            test.put("sampletype", "1");
+            test.put("datecollected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(o.getDateActivated()));
+            test.put("order_no", o.getOrderId().toString());
+            test.put("lab", "");
+            test.put("justification", o.getOrderReason() != null ? getOrderReasonCode(o.getOrderReason().getUuid()) : "");
+            //test.put("justification", "1");
+            test.put("prophylaxis", nascopCode);
+            if (patient.getGender().equals("F")) {
+                test.put("pmtct", "3");
+            }
+            test.put("initiation_date", originalRegimenEncounter != null ? Utils.getSimpleDateFormat("yyyy-MM-dd").format(originalRegimenEncounter.getEncounterDatetime()) : "");
+            test.put("dateinitiatedonregimen", currentRegimenEncounter != null ? Utils.getSimpleDateFormat("yyyy-MM-dd").format(currentRegimenEncounter.getEncounterDatetime()) : "");
+        }
+        return test;
     }
 
 
@@ -265,6 +325,36 @@ public class LabOrderDataExchange {
 
         return activeLabs;
     }
+
+    /**
+     * Returns active orders which have not been added to any manifest
+     * @param manifestId
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    public Set<Order> getActiveViralLoadOrdersNotInManifest(Integer manifestId, Date startDate, Date endDate) {
+
+        Set<Order> activeLabs = new HashSet<Order>();
+        String sql = "select o.order_id from orders o\n" +
+                "left join kenyaemr_order_entry_lab_manifest_order mo on mo.order_id = o.order_id\n" +
+                "where o.order_action='NEW' and o.concept_id = 856 and o.date_stopped is null and o.voided=0 and mo.order_id is null;";
+
+        List<List<Object>> activeOrders = Context.getAdministrationService().executeSQL(sql, true);
+        if (!activeOrders.isEmpty()) {
+            for (List<Object> res : activeOrders) {
+                Integer orderId = (Integer) res.get(0);
+                Order o = orderService.getOrder(orderId);
+                if (o != null) {
+                    activeLabs.add(o);
+                }
+            }
+        }
+
+        return activeLabs;
+    }
+
+
 
     /**
      * processes results from lab     *
