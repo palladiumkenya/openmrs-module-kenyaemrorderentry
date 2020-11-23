@@ -12,6 +12,15 @@ table th {
 .nameColumn {
     width: 260px;
 }
+.cccNumberColumn {
+    width: 150px;
+}
+.dateRequestColumn {
+    width: 150px;
+}
+.actionColumn {
+    width: 260px;
+}
 </style>
 
 <div class="ke-page-sidebar">
@@ -35,20 +44,22 @@ table th {
         <br/>
         <br/>
         <fieldset>
-            <legend>Request with samples taken</legend>
-            <table width="50%">
+            <legend>Samples already added to the manifest</legend>
+            <table width="70%">
                 <tr>
                     <th class="nameColumn">Patient Name</th>
-                    <th>CCC Number</th>
-                    <th>Date requested</th>
+                    <th class="cccNumberColumn">CCC Number</th>
+                    <th class="dateRequestColumn">Date requested</th>
+                    <th class="actionColumn"></th>
                     <th></th>
                 </tr>
                 <% allOrders.each { o -> %>
                 <tr>
                     <td class="nameColumn">${o.order.patient.givenName} ${o.order.patient.familyName} </td>
-                    <td>${o.order.patient.getPatientIdentifier(cccNumberType)}</td>
-                    <td>${kenyaui.formatDate(o.order.dateActivated)}</td>
-                    <td><button>Remove</button></td>
+                    <td class="cccNumberColumn">${o.order.patient.getPatientIdentifier(cccNumberType)}</td>
+                    <td class="dateRequestColumn">${kenyaui.formatDate(o.order.dateActivated)}</td>
+                    <td class="actionColumn"><button>Remove</button></td>
+                    <td></td>
                 </tr>
                 <% } %>
 
@@ -56,21 +67,21 @@ table th {
         </fieldset>
 
         <fieldset>
-            <legend>Requests with samples yet to be taken</legend>
-            <table width="50%">
+            <legend>Samples yet to be added to the manifest</legend>
+            <table width="70%">
                 <tr>
                     <th class="nameColumn">Patient Name</th>
-                    <th>CCC Number</th>
-                    <th>Date requested</th>
-                    <th></th>
+                    <th class="cccNumberColumn">CCC Number</th>
+                    <th class="dateRequestColumn">Date requested</th>
+                    <th class="actionColumn"></th>
                     <th></th>
                 </tr>
                 <% eligibleOrders.each { o -> %>
                 <tr>
                     <td class="nameColumn">${o.patient.givenName} ${o.patient.familyName} </td>
-                    <td>${o.patient.getPatientIdentifier(cccNumberType)}</td>
-                    <td>${kenyaui.formatDate(o.dateActivated)}</td>
-                    <td><button id="addOrderToManifest" value="od_${o.orderId}">Add to manifest</button></td>
+                    <td class="cccNumberColumn">${o.patient.getPatientIdentifier(cccNumberType)}</td>
+                    <td class="dateRequestColumn">${kenyaui.formatDate(o.dateActivated)}</td>
+                    <td class="actionColumn"><button id="addOrderToManifest" value="od_${o.orderId}">Add to manifest</button></td>
                     <td><span id="alert_${o.orderId}"></span></td>
                 </tr>
                 <% } %>
@@ -87,11 +98,25 @@ table th {
     //On ready
     jq = jQuery;
     jq(function () {
-        console.log("hitting the body ====================================");
         jq('#eligibleList').on('click','#addOrderToManifest',function () {
-            var orderId = jq(this).val();
-            console.log("Value: " + orderId);
-            jq('#alert_' + orderId).text("Button clicked for order id: " + orderId);
+            var concatOrderId = jq(this).val();
+            var orderId = concatOrderId.split("_")[1];
+
+            jq.getJSON('${ ui.actionLink("kenyaemrorderentry", "patientdashboard/generalLabOrders", "addOrderToManifest") }',{
+                'manifestId': ${ manifest.id },
+                'orderId': orderId
+            })
+                .success(function (data) {
+                    if (data.status == 'successful') {
+                        jq('#alert_' + orderId).text("Order successfully added to manifest ");
+                        jq(this).prop('disabled', true);
+                    } else {
+                        jq('#alert_' + orderId).text("A problem was encountered when adding order to the manifest ");
+                    }
+                })
+                .error(function (xhr, status, err) {
+                    jq('#alert_' + orderId).text("A problem was encountered when adding order to the manifest ");
+                })
         });
     });
 

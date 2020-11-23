@@ -5,6 +5,7 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.openmrs.CareSetting;
 import org.openmrs.EncounterRole;
 import org.openmrs.EncounterType;
+import org.openmrs.Order;
 import org.openmrs.OrderType;
 import org.openmrs.Patient;
 import org.openmrs.api.ConceptService;
@@ -37,7 +38,8 @@ import java.util.Map;
 
 public class GeneralLabOrdersFragmentController {
     public static final Locale LOCALE = Locale.ENGLISH;
-    ConceptService concService = Context.getConceptService();
+    KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
+
 
     public void controller(FragmentConfiguration config,
                           // @RequestParam("patient") Patient patient,
@@ -95,7 +97,6 @@ public class GeneralLabOrdersFragmentController {
         LabOrderDataExchange dataExchange = new LabOrderDataExchange();
         ObjectNode payload = dataExchange.getLabRequests(null, null);
 
-        KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
         LabManifest manifest = new LabManifest();
         manifest.setCourier("G4S");
         manifest.setCourierOfficer("Mangiti Fred");
@@ -121,5 +122,26 @@ public class GeneralLabOrdersFragmentController {
 
         SimpleObject simpleObject = SimpleObject.create("status", "successful");
         return simpleObject;
+    }
+
+    public SimpleObject addOrderToManifest(@RequestParam(value = "manifestId") LabManifest manifest, @RequestParam(value = "orderId")Order order) {
+
+        if (manifest != null && order != null) {
+            LabManifestOrder labOrder = new LabManifestOrder();
+            labOrder.setLabManifest(manifest);
+            labOrder.setOrder(order);
+
+            LabOrderDataExchange dataExchange = new LabOrderDataExchange();
+            ObjectNode payload = dataExchange.generatePayloadForLabOrder(order);
+            // TODO: check if the payload is not null. Currently, an empty payload is generated if nascop code is null
+            if (payload.isEmpty()) {
+                labOrder.setPayload(payload.toString());
+                labOrder.setStatus("Pending");
+
+                kenyaemrOrdersService.saveLabManifestOrder(labOrder);
+                return SimpleObject.create("status", "successful");
+            }
+        }
+        return SimpleObject.create("status", "Not successful");
     }
 }

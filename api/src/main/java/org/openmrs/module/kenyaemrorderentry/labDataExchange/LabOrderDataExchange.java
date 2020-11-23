@@ -136,7 +136,7 @@ public class LabOrderDataExchange {
      * @param o
      * @return
      */
-    protected ObjectNode generatePayloadForLabOrder(Order o) {
+    public ObjectNode generatePayloadForLabOrder(Order o) {
         Patient patient = o.getPatient();
         ObjectNode test = Utils.getJsonNodeFactory().objectNode();
 
