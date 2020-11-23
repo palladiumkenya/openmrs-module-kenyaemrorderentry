@@ -104,4 +104,19 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
         }
         return null;
     }
+
+    @Override
+    public List<LabManifestOrder> getLabManifestOrderByStatus(String status) {
+        Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifestOrder.class);
+        criteria.add(Restrictions.eq("status", status));
+        return criteria.list();
+    }
+
+    @Override
+    public List<LabManifestOrder> getLabManifestOrderByManifestAndStatus(LabManifest labManifestOrder, String status) {
+        Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifestOrder.class);
+        criteria.add(Restrictions.eq("labManifest", labManifestOrder));
+        criteria.add(Restrictions.eq("status", status));
+        return criteria.list();
+    }
 }

@@ -370,7 +370,6 @@ public class LabOrderDataExchange {
      */
     public String processIncomingViralLoadLabResults(String resultPayload) {
 
-        System.out.println("Received results object: " + resultPayload);
         String statusMsg;
         ObjectMapper mapper = new ObjectMapper();
         ArrayNode resultsObj = null;

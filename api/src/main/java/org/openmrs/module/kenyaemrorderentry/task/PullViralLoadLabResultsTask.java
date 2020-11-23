@@ -95,8 +95,6 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
                 request.put("facility_code", Utils.getDefaultLocationMflCode(Utils.getDefaultLocation()));
                 request.put("order_numbers", StringUtils.join(orderIds, ","));
 
-                System.out.println("Generated payload: " + request.toString());
-
                 if (orderIds.size() < 1) {
                     System.out.println("There are no lab requests awaiting results");
                     return;
@@ -122,8 +120,12 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
                 // extract the array with results
                 JSONArray resultArray = (JSONArray) responseObject.get("data");
 
+                /*System.out.println("JSONArray:toString: " + resultArray.toString());
+                System.out.println("JSONArray:toJSONString: " + resultArray.toJSONString());*/
+
+
                 if (resultArray != null && !resultArray.isEmpty()) {
-                    dataExchange.processIncomingViralLoadLabResults(resultArray.toString());
+                    dataExchange.processIncomingViralLoadLabResults(resultArray.toJSONString());
                 }
 
                 System.out.println("Successfully executed the task that pulls lab requests");

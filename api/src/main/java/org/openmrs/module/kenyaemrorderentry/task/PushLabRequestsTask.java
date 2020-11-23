@@ -5,9 +5,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.HttpClientUtils;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.openmrs.GlobalProperty;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
@@ -50,18 +54,18 @@ public class PushLabRequestsTask extends AbstractTask {
             List<LabManifest> allManifest = kenyaemrOrdersService.getLabOrderManifest();
 
             if (allManifest.size() < 1) {
-                System.out.println("There are not manifests yet! No viral load requests are  present to be pushed to CHAI system");
+                System.out.println("There are no manifests yet! No viral load requests are  present to be pushed to CHAI system");
                 return;
             }
 
-            List<LabManifestOrder> ordersInManifest = kenyaemrOrdersService.getLabManifestOrderByManifest(allManifest.get(0));
+            List<LabManifestOrder> ordersInManifest = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(allManifest.get(0), "Pending");
 
             if (ordersInManifest.size() < 1) {
                 System.out.println("Found no lab requests to post. Will attempt again in the next schedule");
                 return;
+            } else {
+                System.out.println("No of labs to push: " + ordersInManifest.size());
             }
-
-
 
             CloseableHttpClient httpClient = HttpClients.createDefault();
 
@@ -75,12 +79,12 @@ public class PushLabRequestsTask extends AbstractTask {
                 postRequest.addHeader("apikey", API_KEY);
 
                 for (LabManifestOrder manifestOrder : ordersInManifest) {
-                    if (StringUtils.isNotBlank(manifestOrder.getStatus()) && manifestOrder.getStatus().equals("sent")) {
-                        System.out.println("Skipping already sent order");
-                        continue;
-                    }
+
+                    //LabManifestOrder od = manifestOrder;
+
                     //Set the request post body
                     String payload = manifestOrder.getPayload();
+                    System.out.println("Payload: " + payload);
                     StringEntity userEntity = new StringEntity(payload);
                     postRequest.setEntity(userEntity);
 
@@ -90,14 +94,20 @@ public class PushLabRequestsTask extends AbstractTask {
                     //verify the valid error code first
                     int statusCode = response.getStatusLine().getStatusCode();
                     if (statusCode != 201) {
-                        throw new RuntimeException("Failed with HTTP error code : " + statusCode);
+                        JSONParser parser = new JSONParser();
+                        JSONObject responseObj = (JSONObject) parser.parse(EntityUtils.toString(response.getEntity()));
+                        JSONObject errorObj = (JSONObject) responseObj.get("error");
+                        if (statusCode == 400) {// bad request
+                            manifestOrder.setStatus("Error - " + statusCode + ". Msg" + errorObj.get("message"));
+                        }
+                       // throw new RuntimeException("Failed with HTTP error code : " + statusCode + ". Error msg: " + errorObj.get("message"));
+                    } else {
+                        manifestOrder.setStatus("Sent");
+                        System.out.println("Successfully executed the task that pushes lab requests");
+                        log.info("Successfully executed the task that pushes lab requests");
                     }
-                    LabManifestOrder od = manifestOrder;
-                    od.setStatus("sent");
-                    kenyaemrOrdersService.saveLabManifestOrder(od);
+                    kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
 
-                    System.out.println("Successfully executed the task that pushes lab requests");
-                    log.info("Successfully executed the task that pushes lab requests");
                 }
             }
             finally

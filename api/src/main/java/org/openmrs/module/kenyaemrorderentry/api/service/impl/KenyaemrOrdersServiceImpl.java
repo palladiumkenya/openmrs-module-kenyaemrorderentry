@@ -74,6 +74,16 @@ public class KenyaemrOrdersServiceImpl extends BaseOpenmrsService implements Ken
         return dao.getLabManifestOrderByManifest(specimenId);
     }
 
+    @Override
+    public List<LabManifestOrder> getLabManifestOrderByStatus(String status) {
+        return dao.getLabManifestOrderByStatus(status);
+    }
+
+    @Override
+    public List<LabManifestOrder> getLabManifestOrderByManifestAndStatus(LabManifest labManifestOrder, String status) {
+        return dao.getLabManifestOrderByManifestAndStatus(labManifestOrder, status);
+    }
+
     public HibernateKenyaemrOrdersDAO getDao() {
         return dao;
     }
