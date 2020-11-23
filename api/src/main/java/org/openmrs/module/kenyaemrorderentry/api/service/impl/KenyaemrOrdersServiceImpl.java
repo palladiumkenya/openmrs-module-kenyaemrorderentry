@@ -2,6 +2,7 @@ package org.openmrs.module.kenyaemrorderentry.api.service.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openmrs.Order;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.kenyaemrorderentry.api.db.hibernate.HibernateKenyaemrOrdersDAO;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
@@ -66,6 +67,11 @@ public class KenyaemrOrdersServiceImpl extends BaseOpenmrsService implements Ken
     @Override
     public void voidLabManifestOrder(Integer id) {
         dao.voidLabManifestOrder(id);
+    }
+
+    @Override
+    public LabManifestOrder getLabManifestOrderByOrderId(Order specimenId) {
+        return dao.getLabManifestOrderByManifest(specimenId);
     }
 
     public HibernateKenyaemrOrdersDAO getDao() {

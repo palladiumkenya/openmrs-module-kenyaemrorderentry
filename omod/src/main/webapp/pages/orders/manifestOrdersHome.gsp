@@ -98,6 +98,7 @@ table th {
     //On ready
     jq = jQuery;
     jq(function () {
+        // a function that adds an order to a manifest
         jq('#eligibleList').on('click','#addOrderToManifest',function () {
             var concatOrderId = jq(this).val();
             var orderId = concatOrderId.split("_")[1];
@@ -108,14 +109,14 @@ table th {
             })
                 .success(function (data) {
                     if (data.status == 'successful') {
-                        jq('#alert_' + orderId).text("Order successfully added to manifest ");
+                        jq('#alert_' + orderId).text("Sample successfully added to manifest ");
                         jq(this).prop('disabled', true);
                     } else {
-                        jq('#alert_' + orderId).text("A problem was encountered when adding order to the manifest ");
+                        jq('#alert_' + orderId).text("There was a problem adding to the manifest. Please confirm that the patient's regimen code is correctly mapped ");
                     }
                 })
                 .error(function (xhr, status, err) {
-                    jq('#alert_' + orderId).text("A problem was encountered when adding order to the manifest ");
+                    jq('#alert_' + orderId).text("A problem was encountered when adding sample to the manifest ");
                 })
         });
     });

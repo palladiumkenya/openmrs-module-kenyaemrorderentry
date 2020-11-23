@@ -19,6 +19,8 @@ import org.openmrs.api.EncounterService;
 import org.openmrs.api.ObsService;
 import org.openmrs.api.OrderService;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
+import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 import org.openmrs.module.kenyaemrorderentry.util.Utils;
 import org.openmrs.ui.framework.SimpleObject;
 
@@ -31,9 +33,15 @@ import java.util.Set;
 
 public class LabOrderDataExchange {
 
+    public static final String GP_LAB_SERVER_REQUEST_URL = "chai.viral_load_server_url";
+    public static final String GP_LAB_SERVER_RESULT_URL = "chai.viral_load_server_result_url";
+    public static final String GP_LAB_SERVER_API_TOKEN = "chai.viral_load_server_api_token";
+
     ConceptService conceptService = Context.getConceptService();
     EncounterService encounterService = Context.getEncounterService();
     OrderService orderService = Context.getOrderService();
+    KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
+
 
     String LAB_ENCOUNTER_TYPE_UUID = "e1406e88-e9a9-11e8-9f32-f2801f1b9fd1";
     Concept vlTestConceptQualitative = conceptService.getConcept(1305);
@@ -354,8 +362,6 @@ public class LabOrderDataExchange {
         return activeLabs;
     }
 
-
-
     /**
      * processes results from lab     *
      *
@@ -364,6 +370,7 @@ public class LabOrderDataExchange {
      */
     public String processIncomingViralLoadLabResults(String resultPayload) {
 
+        System.out.println("Received results object: " + resultPayload);
         String statusMsg;
         ObjectMapper mapper = new ObjectMapper();
         ArrayNode resultsObj = null;
@@ -382,12 +389,20 @@ public class LabOrderDataExchange {
                 Integer specimenId = o.get("order_number").asInt();
                 String patientIdentifier = o.get("patient").textValue(); // holds CCC number
                 String specimenReceivedStatus = o.get("sample_status").textValue();// Complete, Incomplete, Rejected
-                String specimenRejectedReason = o.get("rejected_reason").textValue();
+
+                String specimenRejectedReason = o.has("rejected_reason") ? o.get("rejected_reason").textValue() : "";
                 String results = o.get("result").textValue(); //1 - negative, 2 - positive, 5 - inconclusive
                 updateOrder(specimenId, results, specimenReceivedStatus, specimenRejectedReason);
+                // update manifest object to reflect received status
+                LabManifestOrder manifestOrder = kenyaemrOrdersService.getLabManifestOrderByOrderId(orderService.getOrder(specimenId));
+                if (manifestOrder != null) {
+                    manifestOrder.setStatus("Received result");
+                    manifestOrder.setResultDate(new Date());
+                    kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
+                }
             }
         }
-        return "Results updated successfully";
+        return "Viral load results pulled and updated successfully in the database";
     }
 
     /**
@@ -423,7 +438,7 @@ public class LabOrderDataExchange {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-            } else {
+            } else if (specimenStatus.equalsIgnoreCase("Complete")) {
 
                 Concept conceptToRetain = null;
                 String aboveMillionResult = "> 10,000,000 cp/ml";

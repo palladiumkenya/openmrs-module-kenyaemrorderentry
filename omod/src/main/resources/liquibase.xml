@@ -116,4 +116,53 @@
                                  deferrable="false" initiallyDeferred="false"/>
     </changeSet>
 
+    <!--Adding scheduled task to process lab requests to the lab system-->
+    <changeSet id="kenyaemr_order_entry_003" author="aojwang">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM scheduler_task_config
+                WHERE schedulable_class = 'org.openmrs.module.kenyaemrorderentry.task.PushLabRequestsTask'
+                And name = 'Push Lab Requests to Lab'
+            </sqlCheck>
+        </preConditions>
+        <comment>Inserting processor for lab requests into 'schedule_task_config' table</comment>
+        <insert tableName="scheduler_task_config">
+            <column name="name" value="Push Lab Requests to Lab" />
+            <column name="description" value="Push lab requests to CHAI lab system" />
+            <column name="schedulable_class" value="org.openmrs.module.kenyaemrorderentry.task.PushLabRequestsTask" />
+            <column name="start_time_pattern" value="MM/dd/yyyy HH:mm:ss" />
+            <column name="start_time" valueDate="2020-04-01T23:59:59" />
+            <column name="repeat_interval" value="1800" />
+            <column name="date_created" valueDate="CURRENT_TIMESTAMP" />
+            <column name="created_by" value="1" />
+            <column name="start_on_startup" value="1" />
+            <column name="started" value="1" />
+            <column name="uuid" value="67b980ec-dbf3-4662-95da-d9dba9d356d2" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="kenyaemr_order_entry_004" author="aojwang">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM scheduler_task_config
+                WHERE schedulable_class = 'org.openmrs.module.kenyaemrorderentry.task.PullViralLoadLabResultsTask'
+                And name = 'Pull Viral Load results'
+            </sqlCheck>
+        </preConditions>
+        <comment>Inserting processor for lab requests into 'schedule_task_config' table</comment>
+        <insert tableName="scheduler_task_config">
+            <column name="name" value="Pull Viral Load results" />
+            <column name="description" value="Pull viral load lab results from CHAI lab system" />
+            <column name="schedulable_class" value="org.openmrs.module.kenyaemrorderentry.task.PullViralLoadLabResultsTask" />
+            <column name="start_time_pattern" value="MM/dd/yyyy HH:mm:ss" />
+            <column name="start_time" valueDate="2020-04-01T23:59:59" />
+            <column name="repeat_interval" value="1800" />
+            <column name="date_created" valueDate="CURRENT_TIMESTAMP" />
+            <column name="created_by" value="1" />
+            <column name="start_on_startup" value="1" />
+            <column name="started" value="1" />
+            <column name="uuid" value="a78ff983-defc-4b90-a8bf-7f7e6b16f5b1" />
+        </insert>
+    </changeSet>
+
 </databaseChangeLog>

@@ -134,7 +134,7 @@ public class GeneralLabOrdersFragmentController {
             LabOrderDataExchange dataExchange = new LabOrderDataExchange();
             ObjectNode payload = dataExchange.generatePayloadForLabOrder(order);
             // TODO: check if the payload is not null. Currently, an empty payload is generated if nascop code is null
-            if (payload.isEmpty()) {
+            if (!payload.isEmpty()) {
                 labOrder.setPayload(payload.toString());
                 labOrder.setStatus("Pending");
 

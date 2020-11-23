@@ -64,5 +64,29 @@
 		</description>
 	</globalProperty>
 
+	<globalProperty>
+		<property>chai.viral_load_server_url</property>
+		<defaultValue></defaultValue>
+		<description>
+			The POST URL for pushing requests to the viral load server
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>chai.viral_load_server_result_url</property>
+		<defaultValue></defaultValue>
+		<description>
+			The POST URL for fetching viral load result
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>chai.viral_load_server_api_token</property>
+		<defaultValue></defaultValue>
+		<description>
+			API token to authenticate communication to the CHAI lab system API
+		</description>
+	</globalProperty>
+
 </module>
 

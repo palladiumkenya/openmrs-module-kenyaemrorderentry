@@ -1,5 +1,6 @@
 package org.openmrs.module.kenyaemrorderentry.api.db;
 
+import org.openmrs.Order;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 
@@ -19,4 +20,6 @@ public interface KenyaemrOrdersDAO {
     LabManifestOrder getLabManifestOrderById(Integer id);
     List<LabManifestOrder> getLabManifestOrderByManifest(LabManifest labManifestOrder);
     void voidLabManifestOrder(Integer id);
+
+    LabManifestOrder getLabManifestOrderByManifest(Order specimenId);
 }

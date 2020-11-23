@@ -6,6 +6,7 @@ import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.exception.DataException;
+import org.openmrs.Order;
 import org.openmrs.api.db.DAOException;
 import org.openmrs.module.kenyaemrorderentry.api.db.KenyaemrOrdersDAO;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
@@ -92,5 +93,15 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
     @Override
     public void voidLabManifestOrder(Integer id) throws DAOException{
         sessionFactory.getCurrentSession().saveOrUpdate(id);
+    }
+
+    @Override
+    public LabManifestOrder getLabManifestOrderByManifest(Order specimenId) {
+        Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifestOrder.class);
+        criteria.add(Restrictions.eq("order", specimenId));
+        if (criteria.list().size() > 0) {
+            return (LabManifestOrder) criteria.list().get(0);
+        }
+        return null;
     }
 }

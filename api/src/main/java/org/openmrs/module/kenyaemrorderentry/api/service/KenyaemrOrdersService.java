@@ -1,5 +1,6 @@
 package org.openmrs.module.kenyaemrorderentry.api.service;
 
+import org.openmrs.Order;
 import org.openmrs.api.OpenmrsService;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
@@ -22,4 +23,6 @@ public interface KenyaemrOrdersService extends OpenmrsService {
     LabManifestOrder getLabManifestOrderById(Integer id);
     List<LabManifestOrder> getLabManifestOrderByManifest(LabManifest labManifestOrder);
     void voidLabManifestOrder(Integer id);
+
+    LabManifestOrder getLabManifestOrderByOrderId(Order specimenId);
 }
