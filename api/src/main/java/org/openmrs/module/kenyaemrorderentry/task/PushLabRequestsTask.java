@@ -51,14 +51,17 @@ public class PushLabRequestsTask extends AbstractTask {
                 return;
             }
 
-            List<LabManifest> allManifest = kenyaemrOrdersService.getLabOrderManifest();
+            // Get a manifest ready to be sent
+            LabManifest readyManifest = kenyaemrOrdersService.getLabOrderManifestByStatus("Ready to send");
 
-            if (allManifest.size() < 1) {
-                System.out.println("There are no manifests yet! No viral load requests are  present to be pushed to CHAI system");
+
+            if (readyManifest == null) {
+                System.out.println("There are no active manifests to push to the lab system");
+                System.out.println("Manifest : " + readyManifest);
                 return;
             }
 
-            List<LabManifestOrder> ordersInManifest = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(allManifest.get(0), "Pending");
+            List<LabManifestOrder> ordersInManifest = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(readyManifest, "Pending");
 
             if (ordersInManifest.size() < 1) {
                 System.out.println("Found no lab requests to post. Will attempt again in the next schedule");
@@ -107,11 +110,9 @@ public class PushLabRequestsTask extends AbstractTask {
                         log.info("Successfully executed the task that pushes lab requests");
                     }
                     kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
-
                 }
             }
-            finally
-            {
+            finally {
                 //Important: Close the connect
                 httpClient.close();
             }

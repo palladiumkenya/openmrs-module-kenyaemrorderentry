@@ -34,7 +34,6 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
     KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
     LabOrderDataExchange dataExchange = new LabOrderDataExchange();
 
-
     /**
      * @see AbstractTask#execute()
      */
@@ -56,26 +55,23 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
                 return;
             }
 
-            List<LabManifest> allManifest = kenyaemrOrdersService.getLabOrderManifest();
+            LabManifest allManifest = kenyaemrOrdersService.getLabOrderManifestByStatus("Ready to send");
 
-            if (allManifest.size() < 1) {
-                System.out.println("There are not manifests yet! No viral load requests are  present to be pushed to CHAI system");
+            if (allManifest == null) {
+                System.out.println("There are no manifests to pull results for");
                 return;
             }
 
-            List<LabManifestOrder> ordersInManifest = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(allManifest.get(0), "Sent");
+            List<LabManifestOrder> ordersInManifest = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(allManifest, "Sent");
 
             if (ordersInManifest.size() < 1) {
-                System.out.println("Found no lab requests to post. Will attempt again in the next schedule");
+                System.out.println("There are no active labs to pull results for");
                 return;
             }
-
-
 
             CloseableHttpClient httpClient = HttpClients.createDefault();
 
-            try
-            {
+            try {
                 //Define a postRequest request
                 HttpPost postRequest = new HttpPost(serverUrl);
 
@@ -118,10 +114,6 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
                 // extract the array with results
                 JSONArray resultArray = (JSONArray) responseObject.get("data");
 
-                /*System.out.println("JSONArray:toString: " + resultArray.toString());
-                System.out.println("JSONArray:toJSONString: " + resultArray.toJSONString());*/
-
-
                 if (resultArray != null && !resultArray.isEmpty()) {
                     dataExchange.processIncomingViralLoadLabResults(resultArray.toJSONString());
                 }
@@ -129,12 +121,9 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
                 System.out.println("Successfully executed the task that pulls lab requests");
                 log.info("Successfully executed the task that pulls lab requests");
             }
-            finally
-            {
-                //Important: Close the connect
+            finally {
                 httpClient.close();
             }
-
         }
         catch (Exception e) {
             throw new IllegalArgumentException("Unable to execute task that pulls lab requests", e);

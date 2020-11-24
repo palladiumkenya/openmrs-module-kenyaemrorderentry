@@ -393,12 +393,6 @@ public class LabOrderDataExchange {
                 String results = o.get("result").textValue(); //1 - negative, 2 - positive, 5 - inconclusive
                 updateOrder(specimenId, results, specimenReceivedStatus, specimenRejectedReason);
                 // update manifest object to reflect received status
-                LabManifestOrder manifestOrder = kenyaemrOrdersService.getLabManifestOrderByOrderId(orderService.getOrder(specimenId));
-                if (manifestOrder != null) {
-                    manifestOrder.setStatus("Received result");
-                    manifestOrder.setResultDate(new Date());
-                    kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
-                }
             }
         }
         return "Viral load results pulled and updated successfully in the database";
@@ -414,9 +408,10 @@ public class LabOrderDataExchange {
     private void updateOrder(Integer orderId, String result, String specimenStatus, String rejectedReason) {
 
         Order od = orderService.getOrder(orderId);
+        LabManifestOrder manifestOrder = kenyaemrOrdersService.getLabManifestOrderByOrderId(orderService.getOrder(orderId));
 
         if (od != null && od.isActive()) {
-            if (specimenStatus.equals("Rejected") || StringUtils.isNotBlank(rejectedReason) || result.equals("Collect New Sample")) {
+            if ((StringUtils.isNotBlank(specimenStatus) && specimenStatus.equals("Rejected")) || StringUtils.isNotBlank(rejectedReason) || (StringUtils.isNotBlank(result) && result.equals("Collect New Sample"))) {
                 // Get all active VL orders and discontinue them
                 Map<String, Order> ordersToProcess = getOrdersToProcess(od, vlTestConceptQuantitative);
                 Order o1 = ordersToProcess.get("orderToRetain");
@@ -430,14 +425,18 @@ public class LabOrderDataExchange {
                     discontinuationReason = "Rejected specimen";
                 }
                 try {
+                    // discontinue one order, and void the other.
+                    // Discontinuing both orders result in one of them remaining active
                     orderService.discontinueOrder(o1, discontinuationReason, new Date(), o1.getOrderer(),
                             o1.getEncounter());
-                    orderService.discontinueOrder(o2, discontinuationReason, new Date(), o2.getOrderer(),
-                            o2.getEncounter());
+                    orderService.voidOrder(o2, discontinuationReason);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-            } else if (specimenStatus.equalsIgnoreCase("Complete")) {
+                manifestOrder.setStatus(discontinuationReason);
+                manifestOrder.setResultDate(new Date());
+                kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
+            } else if (StringUtils.isNotBlank(specimenStatus) && specimenStatus.equalsIgnoreCase("Complete")) {
 
                 Concept conceptToRetain = null;
                 String aboveMillionResult = "> 10,000,000 cp/ml";
@@ -481,8 +480,14 @@ public class LabOrderDataExchange {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                manifestOrder.setStatus("Result received");
+                manifestOrder.setResultDate(new Date());
+                kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
+            } else if (StringUtils.isNotBlank(specimenStatus) && specimenStatus.equalsIgnoreCase("Incomplete")) {
+                System.out.println("Status for " + orderId + " sample not yet ready");
             }
         }
+
     }
 
     /**

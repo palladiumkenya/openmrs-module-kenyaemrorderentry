@@ -27,7 +27,7 @@ public class ManifestOrdersHomePageController {
         LabOrderDataExchange e = new LabOrderDataExchange();
 
         model.put("manifest", manifest);
-        model.put("allOrders", allOrdersForManifest);
+        model.put("manifestOrders", allOrdersForManifest);
         model.put("eligibleOrders", e.getActiveViralLoadOrdersNotInManifest(null,null,null));
         model.put("cccNumberType", pat.getPatientIdentifierTypeId());
     }

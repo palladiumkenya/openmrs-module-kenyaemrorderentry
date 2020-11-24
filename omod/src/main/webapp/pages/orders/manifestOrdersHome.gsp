@@ -61,14 +61,14 @@ table th {
                     <th class="actionColumn"></th>
                     <th></th>
                 </tr>
-                <% allOrders.each { o -> %>
+                <% manifestOrders.each { o -> %>
                 <tr>
                     <td class="nameColumn">${o.order.patient.givenName} ${o.order.patient.familyName} </td>
                     <td class="cccNumberColumn">${o.order.patient.getPatientIdentifier(cccNumberType)}</td>
                     <td class="dateRequestColumn">${kenyaui.formatDate(o.order.dateActivated)}</td>
                     <td class="actionColumn">
                         <% if (manifest.status != "Sent" && manifest.status != "Sending") { %>
-                        <button class="removeOrderFromManifest" value="od_${o.orderId}">Remove from manifest</button>
+                        <button class="removeOrderFromManifest" value="od_${o.id}">Remove from manifest</button>
                         <% } %>
                     </td>
                     <td></td>

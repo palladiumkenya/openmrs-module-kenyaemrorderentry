@@ -14,6 +14,7 @@ public interface KenyaemrOrdersService extends OpenmrsService {
     LabManifest saveLabOrderManifest(LabManifest labManifest);
     List<LabManifest> getLabOrderManifest();
     LabManifest getLabOrderManifestById(Integer id);
+    LabManifest getLabOrderManifestByStatus(String status);
     List<LabManifest> getLabOrderManifestBetweenDates(Date startDate, Date endDate);
     void voidLabOrderManifest(Integer id);
 
