@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.openmrs.Concept;
 import org.openmrs.Encounter;
 import org.openmrs.EncounterType;
@@ -427,7 +428,7 @@ public class LabOrderDataExchange {
                 try {
                     // discontinue one order, and void the other.
                     // Discontinuing both orders result in one of them remaining active
-                    orderService.discontinueOrder(o1, discontinuationReason, new Date(), o1.getOrderer(),
+                    orderService.discontinueOrder(o1, discontinuationReason, aMomentBefore(new Date()), o1.getOrderer(),
                             o1.getEncounter());
                     orderService.voidOrder(o2, discontinuationReason);
                 } catch (Exception e) {
@@ -436,7 +437,7 @@ public class LabOrderDataExchange {
                 manifestOrder.setStatus(discontinuationReason);
                 manifestOrder.setResultDate(new Date());
                 kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
-            } else if (StringUtils.isNotBlank(specimenStatus) && specimenStatus.equalsIgnoreCase("Complete")) {
+            } else if (StringUtils.isNotBlank(specimenStatus) && specimenStatus.equalsIgnoreCase("Complete") && StringUtils.isNotBlank(result)) {
 
                 Concept conceptToRetain = null;
                 String aboveMillionResult = "> 10,000,000 cp/ml";
@@ -474,9 +475,9 @@ public class LabOrderDataExchange {
 
                 try {
                     encounterService.saveEncounter(enc);
-                    orderService.discontinueOrder(orderToRetain, "Results received", new Date(), orderToRetain.getOrderer(),
+                    orderService.discontinueOrder(orderToRetain, "Results received", aMomentBefore(new Date()), orderToRetain.getOrderer(),
                             orderToRetain.getEncounter());
-                    orderService.voidOrder(orderToVoid, "Duplicate order");
+                    orderService.voidOrder(orderToVoid, "Duplicate VL order");
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -510,6 +511,19 @@ public class LabOrderDataExchange {
             }
         }
         return listToProcess;
+    }
+
+    /**
+     * Borrowed from OpenMRS core
+     * To support MySQL datetime values (which are only precise to the second) we subtract one
+     * second. Eventually we may move this method and enhance it to subtract the smallest moment the
+     * underlying database will represent.
+     *
+     * @param date
+     * @return one moment before date
+     */
+    private Date aMomentBefore(Date date) {
+        return DateUtils.addSeconds(date, -1);
     }
 
 }

@@ -22,7 +22,7 @@ public class ManifestOrdersHomePageController {
     public void get(@RequestParam(value = "manifest") LabManifest manifest, @SpringBean KenyaUiUtils kenyaUi,
                     UiUtils ui, PageModel model) {
 
-        List<LabManifestOrder> allOrdersForManifest = Context.getService(KenyaemrOrdersService.class).getLabManifestOrderByManifest(manifest);
+        List<LabManifestOrder> allOrdersForManifest = Context.getService(KenyaemrOrdersService.class).getLabManifestOrderByManifestAndStatus(manifest, "Pending");
         PatientIdentifierType pat = Utils.getUniquePatientNumberIdentifierType();
         LabOrderDataExchange e = new LabOrderDataExchange();
 
