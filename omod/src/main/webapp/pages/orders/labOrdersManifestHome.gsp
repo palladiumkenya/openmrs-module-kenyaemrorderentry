@@ -2,28 +2,12 @@
     ui.decorateWith("kenyaemr", "standardPage", [layout: "sidebar"])
 
     def menuItems = [
-            [label: "Back", iconProvider: "kenyaui", icon: "buttons/back.png", label: "Back", href: ui.pageLink("kenyaemrorderentry", "orders/labOrderHome")]
+            [label: "Back", iconProvider: "kenyaui", icon: "buttons/back.png", label: "Back to Labs", href: ui.pageLink("kenyaemrorderentry", "orders/labOrderHome")]
     ]
 %>
 <style>
-div.column-order-btns {
-    width: 100px;
-}
-
-div.column-one {
-    width: 180px;
-}
-
-div.column-two {
-    width: 80px;
-}
-
-div.column-three {
-    width: 200px;
-}
-
-div.column-four {
-    width: 120px;
+table th {
+    text-align: left;
 }
 </style>
 
@@ -34,27 +18,23 @@ div.column-four {
 <div class="ke-page-content">
     <div align="left">
 
-        <button type="button" id="generateManifest" class="pushLabOrders">
-            <img src="${ui.resourceLink("kenyaui", "images/glyphs/report_download_excel.png")}"
-                 style="display:none;"/>Push Lab Orders
-        </button>
-        <button type="button" class="pullLabOrders">
-            <img src="${ui.resourceLink("kenyaui", "images/glyphs/report_download_excel.png")}"
-                 style="display:none;"/>Pull Lab results
-        </button>
-
-        <br/>
+        <h3>Manifest list</h3>
+        <div>
+            <button type="button"
+                    onclick="ui.navigate('${ ui.pageLink("kenyaemrorderentry", "manifest/createManifest", [ returnUrl: ui.thisUrl() ])}')">
+                <img src="${ui.resourceLink("kenyaui", "images/glyphs/add.png")}"/>
+                Add new Manifest
+            </button>
+        </div>
         <br/>
         <br/>
 
-        <span id="msgBox"></span>
-        <table>
+        <table width="60%">
             <tr>
                 <th>Start Date</th>
                 <th>End Date</th>
                 <th>Courier</th>
                 <th>Status</th>
-                <th></th>
                 <th></th>
             </tr>
             <% allManifest.each { m -> %>
@@ -66,14 +46,21 @@ div.column-four {
                 <td>
                     <button type="button"
                             onclick="ui.navigate('${ ui.pageLink("kenyaemrorderentry", "orders/manifestOrdersHome", [ manifest: m.id,  returnUrl: ui.thisUrl() ])}')">
-                        <img src="${ui.resourceLink("hivtestingservices", "images/glyphs/edit.png")}"/> View Orders
+                       View details
                     </button>
+                    <% if(m.status != "Sent") { %>
+                    <button type="button"
+                            onclick="ui.navigate('${ ui.pageLink("kenyaemrorderentry", "manifest/createManifest", [ manifestId:m.id, returnUrl: ui.thisUrl() ])}')">
+
+                        Edit details
+                    </button>
+                    <% } %>
                 </td>
-                <td><button>Push to lab system</button></td>
             </tr>
             <% } %>
 
         </table>
+
     </div>
 
 </div>

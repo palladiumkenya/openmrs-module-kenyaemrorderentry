@@ -63,7 +63,7 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
                 return;
             }
 
-            List<LabManifestOrder> ordersInManifest = kenyaemrOrdersService.getLabManifestOrderByManifest(allManifest.get(0));
+            List<LabManifestOrder> ordersInManifest = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(allManifest.get(0), "Sent");
 
             if (ordersInManifest.size() < 1) {
                 System.out.println("Found no lab requests to post. Will attempt again in the next schedule");
@@ -86,9 +86,7 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
                 // we want to create a comma separated list of order id
                 List<Integer> orderIds = new ArrayList<Integer>();
                 for (LabManifestOrder manifestOrder : ordersInManifest) {
-                    if (manifestOrder.getStatus().equals("sent")) {
-                        orderIds.add(manifestOrder.getOrder().getOrderId());
-                    }
+                    orderIds.add(manifestOrder.getOrder().getOrderId());
                 }
                 ObjectNode request = Utils.getJsonNodeFactory().objectNode();
                 request.put("test", "2");

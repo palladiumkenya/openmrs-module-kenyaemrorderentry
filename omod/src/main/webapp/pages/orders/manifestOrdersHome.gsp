@@ -2,7 +2,7 @@
     ui.decorateWith("kenyaemr", "standardPage", [layout: "sidebar"])
 
     def menuItems = [
-            [label: "Back", iconProvider: "kenyaui", icon: "buttons/back.png", label: "Back", href: ui.pageLink("kenyaemrorderentry", "orders/labOrderHome")]
+            [label: "Back", iconProvider: "kenyaui", icon: "buttons/back.png", label: "Back to manifest list", href: ui.pageLink("kenyaemrorderentry", "orders/labOrdersManifestHome")]
     ]
 %>
 <style>
@@ -34,17 +34,25 @@ table th {
             <legend>Manifest details</legend>
             <table width="30%">
                 <tr>
-                    <td>Start date: ${kenyaui.formatDate(manifest.startDate)}</td>
+                    <td><b>Start date:</b> ${kenyaui.formatDate(manifest.startDate)}</td>
                 </tr>
                 <tr>
-                    <td>End date:  ${kenyaui.formatDate(manifest.endDate)}</td>
+                    <td><b>End date:</b>  ${kenyaui.formatDate(manifest.endDate)}</td>
                 </tr>
+                <tr>
+                    <td><b>Status:</b>  ${manifest.status}</td>
+                </tr>
+                <% if(manifest.dispatchDate != null) { %>
+                <tr>
+                    <td><b>Dispatch date:</b>  ${kenyaui.formatDate(manifest.dispatchDate)}</td>
+                </tr>
+                <% } %>
             </table>
         </fieldset>
         <br/>
         <br/>
         <fieldset>
-            <legend>Samples already added to the manifest</legend>
+            <legend>Samples in the manifest</legend>
             <table width="70%">
                 <tr>
                     <th class="nameColumn">Patient Name</th>
@@ -58,7 +66,11 @@ table th {
                     <td class="nameColumn">${o.order.patient.givenName} ${o.order.patient.familyName} </td>
                     <td class="cccNumberColumn">${o.order.patient.getPatientIdentifier(cccNumberType)}</td>
                     <td class="dateRequestColumn">${kenyaui.formatDate(o.order.dateActivated)}</td>
-                    <td class="actionColumn"><button>Remove</button></td>
+                    <td class="actionColumn">
+                        <% if (manifest.status != "Sent" && manifest.status != "Sending") { %>
+                        <button class="removeOrderFromManifest" value="od_${o.orderId}">Remove from manifest</button>
+                        <% } %>
+                    </td>
                     <td></td>
                 </tr>
                 <% } %>
@@ -66,8 +78,9 @@ table th {
             </table>
         </fieldset>
 
+        <% if (manifest.status != "Sent") { %>
         <fieldset>
-            <legend>Samples yet to be added to the manifest</legend>
+            <legend>Active requests</legend>
             <table width="70%">
                 <tr>
                     <th class="nameColumn">Patient Name</th>
@@ -81,14 +94,16 @@ table th {
                     <td class="nameColumn">${o.patient.givenName} ${o.patient.familyName} </td>
                     <td class="cccNumberColumn">${o.patient.getPatientIdentifier(cccNumberType)}</td>
                     <td class="dateRequestColumn">${kenyaui.formatDate(o.dateActivated)}</td>
-                    <td class="actionColumn"><button id="addOrderToManifest" value="od_${o.orderId}">Add to manifest</button></td>
+                    <td class="actionColumn">
+                        <button class="addOrderToManifest" value="od_${o.orderId}">Add to manifest</button>
+                    </td>
                     <td><span id="alert_${o.orderId}"></span></td>
                 </tr>
                 <% } %>
 
             </table>
         </fieldset>
-
+        <% } %>
     </div>
 
 </div>
@@ -99,7 +114,7 @@ table th {
     jq = jQuery;
     jq(function () {
         // a function that adds an order to a manifest
-        jq('#eligibleList').on('click','#addOrderToManifest',function () {
+        jq('#eligibleList').on('click','.addOrderToManifest',function () {
             var concatOrderId = jq(this).val();
             var orderId = concatOrderId.split("_")[1];
 
