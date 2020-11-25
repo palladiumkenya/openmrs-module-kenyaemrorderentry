@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.openmrs.Concept;
 import org.openmrs.Encounter;
 import org.openmrs.EncounterType;
@@ -19,6 +20,9 @@ import org.openmrs.api.EncounterService;
 import org.openmrs.api.ObsService;
 import org.openmrs.api.OrderService;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.kenyacore.RegimenMappingUtils;
+import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
+import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 import org.openmrs.module.kenyaemrorderentry.util.Utils;
 import org.openmrs.ui.framework.SimpleObject;
 
@@ -31,9 +35,15 @@ import java.util.Set;
 
 public class LabOrderDataExchange {
 
+    public static final String GP_LAB_SERVER_REQUEST_URL = "chai.viral_load_server_url";
+    public static final String GP_LAB_SERVER_RESULT_URL = "chai.viral_load_server_result_url";
+    public static final String GP_LAB_SERVER_API_TOKEN = "chai.viral_load_server_api_token";
+
     ConceptService conceptService = Context.getConceptService();
     EncounterService encounterService = Context.getEncounterService();
     OrderService orderService = Context.getOrderService();
+    KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
+
 
     String LAB_ENCOUNTER_TYPE_UUID = "e1406e88-e9a9-11e8-9f32-f2801f1b9fd1";
     Concept vlTestConceptQualitative = conceptService.getConcept(1305);
@@ -69,7 +79,7 @@ public class LabOrderDataExchange {
     }
 
     /**
-     * Returns object lab request for patients
+     * Returns an array of active lab request
      *
      * @param o
      * @return
@@ -94,15 +104,14 @@ public class LabOrderDataExchange {
         }
 
         PatientIdentifier cccNumber = patient.getPatientIdentifier(Utils.getUniquePatientNumberIdentifierType());
-        Encounter originalRegimenEncounter = Utils.getFirstEncounterForProgram(patient, "ARV");
-        Encounter currentRegimenEncounter = Utils.getLastEncounterForProgram(patient, "ARV");
-        SimpleObject regimenDetails = Utils.buildRegimenChangeObject(currentRegimenEncounter.getObs(), currentRegimenEncounter);
+        Encounter originalRegimenEncounter = RegimenMappingUtils.getFirstEncounterForProgram(patient, "ARV");
+        Encounter currentRegimenEncounter = RegimenMappingUtils.getLastEncounterForProgram(patient, "ARV");
+        SimpleObject regimenDetails = RegimenMappingUtils.buildRegimenChangeObject(currentRegimenEncounter.getObs(), currentRegimenEncounter);
         String regimenName = (String) regimenDetails.get("regimenShortDisplay");
         String regimenLine = (String) regimenDetails.get("regimenLine");
         String nascopCode = "";
-        System.out.println("Regimen line: " + regimenLine);
         if (StringUtils.isNotBlank(regimenName )) {
-            nascopCode = Utils.getDrugNascopCodeByDrugNameAndRegimenLine(regimenName, regimenLine);
+            nascopCode = RegimenMappingUtils.getDrugNascopCodeByDrugNameAndRegimenLine(regimenName, regimenLine);
         }
 
         //add to list only if code is found. This is a temp measure to avoid sending messages with null regimen codes
@@ -129,6 +138,67 @@ public class LabOrderDataExchange {
             labTests.add(test);
         }
         return labTests;
+    }
+
+    /**
+     * Returns a single object for an active lab order
+     *
+     * @param o
+     * @return
+     */
+    public ObjectNode generatePayloadForLabOrder(Order o) {
+        Patient patient = o.getPatient();
+        ObjectNode test = Utils.getJsonNodeFactory().objectNode();
+
+        String dob = patient.getBirthdate() != null ? Utils.getSimpleDateFormat("yyyy-MM-dd").format(patient.getBirthdate()) : "";
+
+        String fullName = "";
+
+        if (patient.getGivenName() != null) {
+            fullName += patient.getGivenName();
+        }
+
+        if (patient.getMiddleName() != null) {
+            fullName += " " + patient.getMiddleName();
+        }
+
+        if (patient.getFamilyName() != null) {
+            fullName += " " + patient.getFamilyName();
+        }
+
+        PatientIdentifier cccNumber = patient.getPatientIdentifier(Utils.getUniquePatientNumberIdentifierType());
+        Encounter originalRegimenEncounter = RegimenMappingUtils.getFirstEncounterForProgram(patient, "ARV");
+        Encounter currentRegimenEncounter = RegimenMappingUtils.getLastEncounterForProgram(patient, "ARV");
+        SimpleObject regimenDetails = RegimenMappingUtils.buildRegimenChangeObject(currentRegimenEncounter.getObs(), currentRegimenEncounter);
+        String regimenName = (String) regimenDetails.get("regimenShortDisplay");
+        String regimenLine = (String) regimenDetails.get("regimenLine");
+        String nascopCode = "";
+        if (StringUtils.isNotBlank(regimenName )) {
+            nascopCode = RegimenMappingUtils.getDrugNascopCodeByDrugNameAndRegimenLine(regimenName, regimenLine);
+        }
+
+        //add to list only if code is found. This is a temp measure to avoid sending messages with null regimen codes
+        if (StringUtils.isNotBlank(nascopCode)) {
+
+            test.put("mflCode", Utils.getDefaultLocationMflCode(null));
+            test.put("patient_identifier", cccNumber != null ? cccNumber.getIdentifier() : "");
+            test.put("dob", dob);
+            test.put("patient_name", fullName);
+            test.put("sex", patient.getGender().equals("M") ? "1" : patient.getGender().equals("F") ? "2" : "3");
+            test.put("sampletype", "1");
+            test.put("datecollected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(o.getDateActivated()));
+            test.put("order_no", o.getOrderId().toString());
+            test.put("lab", "");
+            test.put("justification", o.getOrderReason() != null ? getOrderReasonCode(o.getOrderReason().getUuid()) : "");
+            //test.put("justification", "1");
+            test.put("prophylaxis", nascopCode);
+            if (patient.getGender().equals("F")) {
+                test.put("pmtct", "3");
+            }
+            test.put("initiation_date", originalRegimenEncounter != null ? Utils.getSimpleDateFormat("yyyy-MM-dd").format(originalRegimenEncounter.getEncounterDatetime()) : "");
+            test.put("dateinitiatedonregimen", currentRegimenEncounter != null ? Utils.getSimpleDateFormat("yyyy-MM-dd").format(currentRegimenEncounter.getEncounterDatetime()) : "");
+        }
+        return test;
     }
 
 
@@ -267,6 +337,34 @@ public class LabOrderDataExchange {
     }
 
     /**
+     * Returns active orders which have not been added to any manifest
+     * @param manifestId
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    public Set<Order> getActiveViralLoadOrdersNotInManifest(Integer manifestId, Date startDate, Date endDate) {
+
+        Set<Order> activeLabs = new HashSet<Order>();
+        String sql = "select o.order_id from orders o\n" +
+                "left join kenyaemr_order_entry_lab_manifest_order mo on mo.order_id = o.order_id\n" +
+                "where o.order_action='NEW' and o.concept_id = 856 and o.date_stopped is null and o.voided=0 and mo.order_id is null;";
+
+        List<List<Object>> activeOrders = Context.getAdministrationService().executeSQL(sql, true);
+        if (!activeOrders.isEmpty()) {
+            for (List<Object> res : activeOrders) {
+                Integer orderId = (Integer) res.get(0);
+                Order o = orderService.getOrder(orderId);
+                if (o != null) {
+                    activeLabs.add(o);
+                }
+            }
+        }
+
+        return activeLabs;
+    }
+
+    /**
      * processes results from lab     *
      *
      * @param resultPayload this should be an array
@@ -292,12 +390,14 @@ public class LabOrderDataExchange {
                 Integer specimenId = o.get("order_number").asInt();
                 String patientIdentifier = o.get("patient").textValue(); // holds CCC number
                 String specimenReceivedStatus = o.get("sample_status").textValue();// Complete, Incomplete, Rejected
-                String specimenRejectedReason = o.get("rejected_reason").textValue();
+
+                String specimenRejectedReason = o.has("rejected_reason") ? o.get("rejected_reason").textValue() : "";
                 String results = o.get("result").textValue(); //1 - negative, 2 - positive, 5 - inconclusive
                 updateOrder(specimenId, results, specimenReceivedStatus, specimenRejectedReason);
+                // update manifest object to reflect received status
             }
         }
-        return "Results updated successfully";
+        return "Viral load results pulled and updated successfully in the database";
     }
 
     /**
@@ -310,9 +410,10 @@ public class LabOrderDataExchange {
     private void updateOrder(Integer orderId, String result, String specimenStatus, String rejectedReason) {
 
         Order od = orderService.getOrder(orderId);
+        LabManifestOrder manifestOrder = kenyaemrOrdersService.getLabManifestOrderByOrderId(orderService.getOrder(orderId));
 
         if (od != null && od.isActive()) {
-            if (specimenStatus.equals("Rejected") || StringUtils.isNotBlank(rejectedReason) || result.equals("Collect New Sample")) {
+            if ((StringUtils.isNotBlank(specimenStatus) && specimenStatus.equals("Rejected")) || StringUtils.isNotBlank(rejectedReason) || (StringUtils.isNotBlank(result) && result.equals("Collect New Sample"))) {
                 // Get all active VL orders and discontinue them
                 Map<String, Order> ordersToProcess = getOrdersToProcess(od, vlTestConceptQuantitative);
                 Order o1 = ordersToProcess.get("orderToRetain");
@@ -326,14 +427,18 @@ public class LabOrderDataExchange {
                     discontinuationReason = "Rejected specimen";
                 }
                 try {
-                    orderService.discontinueOrder(o1, discontinuationReason, new Date(), o1.getOrderer(),
+                    // discontinue one order, and void the other.
+                    // Discontinuing both orders result in one of them remaining active
+                    orderService.discontinueOrder(o1, discontinuationReason, aMomentBefore(new Date()), o1.getOrderer(),
                             o1.getEncounter());
-                    orderService.discontinueOrder(o2, discontinuationReason, new Date(), o2.getOrderer(),
-                            o2.getEncounter());
+                    orderService.voidOrder(o2, discontinuationReason);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-            } else {
+                manifestOrder.setStatus(discontinuationReason);
+                manifestOrder.setResultDate(new Date());
+                kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
+            } else if (StringUtils.isNotBlank(specimenStatus) && specimenStatus.equalsIgnoreCase("Complete") && StringUtils.isNotBlank(result)) {
 
                 Concept conceptToRetain = null;
                 String aboveMillionResult = "> 10,000,000 cp/ml";
@@ -371,14 +476,20 @@ public class LabOrderDataExchange {
 
                 try {
                     encounterService.saveEncounter(enc);
-                    orderService.discontinueOrder(orderToRetain, "Results received", new Date(), orderToRetain.getOrderer(),
+                    orderService.discontinueOrder(orderToRetain, "Results received", aMomentBefore(new Date()), orderToRetain.getOrderer(),
                             orderToRetain.getEncounter());
-                    orderService.voidOrder(orderToVoid, "Duplicate order");
+                    orderService.voidOrder(orderToVoid, "Duplicate VL order");
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                manifestOrder.setStatus("Result received");
+                manifestOrder.setResultDate(new Date());
+                kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
+            } else if (StringUtils.isNotBlank(specimenStatus) && specimenStatus.equalsIgnoreCase("Incomplete")) {
+                System.out.println("Status for " + orderId + " sample not yet ready");
             }
         }
+
     }
 
     /**
@@ -401,6 +512,19 @@ public class LabOrderDataExchange {
             }
         }
         return listToProcess;
+    }
+
+    /**
+     * Borrowed from OpenMRS core
+     * To support MySQL datetime values (which are only precise to the second) we subtract one
+     * second. Eventually we may move this method and enhance it to subtract the smallest moment the
+     * underlying database will represent.
+     *
+     * @param date
+     * @return one moment before date
+     */
+    private Date aMomentBefore(Date date) {
+        return DateUtils.addSeconds(date, -1);
     }
 
 }

@@ -308,7 +308,7 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
                                             <div class="link-item" >
                                                 <b>Current {{regimen.program}} Regimen:</b> {{regimen.regimenName}}
                                                 <button ng-click="getCurrentRegimen(regimen)" ng-disabled="disableButton"
-                                                        class="refill-regimen pull-right">Refill</button>
+                                                        class="refill-regimen pull-right">Prescribe regimen</button>
                                             </div>
                                         </div>
                                     </div>

@@ -132,7 +132,7 @@ public class DrugOrdersPageController {
                 component.put("quantity",drugOrder.getQuantity());
                 component.put("quantity_units_name",drugOrder.getQuantityUnits().getName(LOCALE).getName());
                 component.put("quantity_units",drugOrder.getQuantityUnits().getUuid());
-                component.put("drugDurationUnitName", drugOrder.getDurationUnits().getName(LOCALE).getName());
+                component.put("drugDurationUnitName", drugOrder.getDurationUnits() != null ? drugOrder.getDurationUnits().getName(LOCALE).getName() : "");
 
                 if(order.getOrderGroup().getOrderGroupId()==previousOrderGroupId){
                     components.add(component);

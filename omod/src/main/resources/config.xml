@@ -28,6 +28,9 @@
 		<require_module version="${kenyauiVersion}">
 			org.openmrs.module.kenyaui
 		</require_module>
+		<require_module version="${kenyacoreVersion}">
+			org.openmrs.module.kenyacore
+		</require_module>
     </require_modules>
 
     <!-- Module Activator -->
@@ -36,7 +39,8 @@
 	
 	<!-- Maps hibernate file's, if present -->
 	<mappingFiles>
-
+		LabManifest.hbm.xml
+		LabManifestOrder.hbm.xml
 	</mappingFiles>
 
 	<!-- Internationalization -->
@@ -60,6 +64,30 @@
 		<defaultValue>kenyaemrorderentry</defaultValue>
 		<description>
 			A directory that contains KenyaEMR order entry specific configs
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>chai.viral_load_server_url</property>
+		<defaultValue></defaultValue>
+		<description>
+			The POST URL for pushing requests to the viral load server
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>chai.viral_load_server_result_url</property>
+		<defaultValue></defaultValue>
+		<description>
+			The POST URL for fetching viral load result
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>chai.viral_load_server_api_token</property>
+		<defaultValue></defaultValue>
+		<description>
+			API token to authenticate communication to the CHAI lab system API
 		</description>
 	</globalProperty>
 

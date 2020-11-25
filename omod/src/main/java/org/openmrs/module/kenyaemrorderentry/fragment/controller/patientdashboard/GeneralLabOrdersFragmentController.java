@@ -5,6 +5,7 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.openmrs.CareSetting;
 import org.openmrs.EncounterRole;
 import org.openmrs.EncounterType;
+import org.openmrs.Order;
 import org.openmrs.OrderType;
 import org.openmrs.Patient;
 import org.openmrs.api.ConceptService;
@@ -16,7 +17,10 @@ import org.openmrs.api.PatientService;
 import org.openmrs.api.ProviderService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appui.UiSessionContext;
+import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange;
+import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
+import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 import org.openmrs.module.webservices.rest.web.ConversionUtil;
 import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.ui.framework.SimpleObject;
@@ -26,6 +30,7 @@ import org.openmrs.ui.framework.fragment.FragmentConfiguration;
 import org.openmrs.ui.framework.fragment.FragmentModel;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -33,7 +38,8 @@ import java.util.Map;
 
 public class GeneralLabOrdersFragmentController {
     public static final Locale LOCALE = Locale.ENGLISH;
-    ConceptService concService = Context.getConceptService();
+    KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
+
 
     public void controller(FragmentConfiguration config,
                           // @RequestParam("patient") Patient patient,
@@ -91,9 +97,51 @@ public class GeneralLabOrdersFragmentController {
         LabOrderDataExchange dataExchange = new LabOrderDataExchange();
         ObjectNode payload = dataExchange.getLabRequests(null, null);
 
+        LabManifest manifest = new LabManifest();
+        manifest.setCourier("G4S");
+        manifest.setCourierOfficer("Mangiti Fred");
+        manifest.setStatus("Pending");
+        manifest.setStartDate(new Date());
+        manifest.setEndDate(new Date());
+        manifest.setCreator(Context.getAuthenticatedUser());
+        manifest.setDateCreated(new Date());
+
+        kenyaemrOrdersService.saveLabOrderManifest(manifest);
+
+        LabManifest savedManifest = kenyaemrOrdersService.getLabOrderManifestById(1);
+
+        LabManifestOrder labOrder = new LabManifestOrder();
+        labOrder.setLabManifest(savedManifest);
+        labOrder.setOrder(Context.getOrderService().getOrder(16243));
+        labOrder.setPayload(payload.toString());
+        labOrder.setStatus("Pending");
+
+        kenyaemrOrdersService.saveLabManifestOrder(labOrder);
+
         System.out.println("Generated payload:::::" + payload.toString());
 
         SimpleObject simpleObject = SimpleObject.create("status", "successful");
         return simpleObject;
+    }
+
+    public SimpleObject addOrderToManifest(@RequestParam(value = "manifestId") LabManifest manifest, @RequestParam(value = "orderId")Order order) {
+
+        if (manifest != null && order != null) {
+            LabManifestOrder labOrder = new LabManifestOrder();
+            labOrder.setLabManifest(manifest);
+            labOrder.setOrder(order);
+
+            LabOrderDataExchange dataExchange = new LabOrderDataExchange();
+            ObjectNode payload = dataExchange.generatePayloadForLabOrder(order);
+            // TODO: check if the payload is not null. Currently, an empty payload is generated if nascop code is null
+            if (!payload.isEmpty()) {
+                labOrder.setPayload(payload.toString());
+                labOrder.setStatus("Pending");
+
+                kenyaemrOrdersService.saveLabManifestOrder(labOrder);
+                return SimpleObject.create("status", "successful");
+            }
+        }
+        return SimpleObject.create("status", "Not successful");
     }
 }

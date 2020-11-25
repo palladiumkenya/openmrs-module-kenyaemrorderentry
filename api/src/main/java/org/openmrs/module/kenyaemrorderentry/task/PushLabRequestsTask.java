@@ -3,25 +3,32 @@ package org.openmrs.module.kenyaemrorderentry.task;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.HttpClientUtils;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.openmrs.GlobalProperty;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange;
+import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
+import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 import org.openmrs.scheduler.tasks.AbstractTask;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.HttpResponse;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import java.util.List;
 
 /**
- * Created by developer on 10 Nov, 2020
+ * Prepares payload and performs remote login to CHAI system
  */
 public class PushLabRequestsTask extends AbstractTask {
     private Log log = LogFactory.getLog(getClass());
+    KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
+
 
     /**
      * @see AbstractTask#execute()
@@ -33,8 +40,8 @@ public class PushLabRequestsTask extends AbstractTask {
             if (!Context.isAuthenticated()) {
                 authenticate();
             }
-            GlobalProperty gpServerUrl = Context.getAdministrationService().getGlobalPropertyObject("chai.server_url");
-            GlobalProperty gpApiToken = Context.getAdministrationService().getGlobalPropertyObject("chai.api_token");
+            GlobalProperty gpServerUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LAB_SERVER_REQUEST_URL);
+            GlobalProperty gpApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LAB_SERVER_API_TOKEN);
 
             String serverUrl = gpServerUrl.getPropertyValue();
             String API_KEY = gpApiToken.getPropertyValue();
@@ -44,26 +51,24 @@ public class PushLabRequestsTask extends AbstractTask {
                 return;
             }
 
-            GlobalProperty lastOrderEntry = Context.getAdministrationService().getGlobalPropertyObject("lab.lastUpdate");
-            String lastOrdersql = "select max(order_id) last_id from orders where voided=0;";
-            List<List<Object>> lastOrderId = Context.getAdministrationService().executeSQL(lastOrdersql, true);
+            // Get a manifest ready to be sent
+            LabManifest readyManifest = kenyaemrOrdersService.getLabOrderManifestByStatus("Ready to send");
 
-            Integer lastId = (Integer) lastOrderId.get(0).get(0);
-            lastId = lastId != null ? lastId : 0;
 
-            String lastOrderIdStr = lastOrderEntry != null && lastOrderEntry.getValue() != null ? lastOrderEntry.getValue().toString() : "";
-            Integer gpLastOrderId = StringUtils.isNotBlank(lastOrderIdStr) ? Integer.parseInt(lastOrderIdStr) : 0;
-
-            LabOrderDataExchange e = new LabOrderDataExchange();
-            ObjectNode samplesWrapper = e.getLabRequests(null, null);
-            ArrayNode samples = (ArrayNode) samplesWrapper.get("samples");
-
-            if (samples.size() < 1) {
-                System.out.println("Found no lab requests to post. Skipping the post operation");
+            if (readyManifest == null) {
+                System.out.println("There are no active manifests to push to the lab system");
+                System.out.println("Manifest : " + readyManifest);
                 return;
             }
 
-            String payload = samplesWrapper.toString();
+            List<LabManifestOrder> ordersInManifest = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(readyManifest, "Pending");
+
+            if (ordersInManifest.size() < 1) {
+                System.out.println("Found no lab requests to post. Will attempt again in the next schedule");
+                return;
+            } else {
+                System.out.println("No of labs to push: " + ordersInManifest.size());
+            }
 
             CloseableHttpClient httpClient = HttpClients.createDefault();
 
@@ -76,29 +81,38 @@ public class PushLabRequestsTask extends AbstractTask {
                 postRequest.addHeader("content-type", "application/json");
                 postRequest.addHeader("apikey", API_KEY);
 
-                //Set the request post body
-                StringEntity userEntity = new StringEntity(payload);
-                postRequest.setEntity(userEntity);
+                for (LabManifestOrder manifestOrder : ordersInManifest) {
 
-                //Send the request; It will immediately return the response in HttpResponse object if any
-                HttpResponse response = httpClient.execute(postRequest);
+                    //LabManifestOrder od = manifestOrder;
 
-                //verify the valid error code first
-                int statusCode = response.getStatusLine().getStatusCode();
-                if (statusCode != 201)
-                {
-                    throw new RuntimeException("Failed with HTTP error code : " + statusCode);
+                    //Set the request post body
+                    String payload = manifestOrder.getPayload();
+                    System.out.println("Payload: " + payload);
+                    StringEntity userEntity = new StringEntity(payload);
+                    postRequest.setEntity(userEntity);
+
+                    //Send the request; It will immediately return the response in HttpResponse object if any
+                    HttpResponse response = httpClient.execute(postRequest);
+
+                    //verify the valid error code first
+                    int statusCode = response.getStatusLine().getStatusCode();
+                    if (statusCode != 201) {
+                        JSONParser parser = new JSONParser();
+                        JSONObject responseObj = (JSONObject) parser.parse(EntityUtils.toString(response.getEntity()));
+                        JSONObject errorObj = (JSONObject) responseObj.get("error");
+                        if (statusCode == 400) {// bad request
+                            manifestOrder.setStatus("Error - " + statusCode + ". Msg" + errorObj.get("message"));
+                        }
+                       // throw new RuntimeException("Failed with HTTP error code : " + statusCode + ". Error msg: " + errorObj.get("message"));
+                    } else {
+                        manifestOrder.setStatus("Sent");
+                        System.out.println("Successfully executed the task that pushes lab requests");
+                        log.info("Successfully executed the task that pushes lab requests");
+                    }
+                    kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
                 }
-                System.out.println("Successfully executed the task that pushes lab requests");
-                log.info("Successfully executed the task that pushes lab requests");
-
-                lastOrderEntry.setPropertyValue(lastId.toString());
-                Context.getAdministrationService().saveGlobalProperty(lastOrderEntry);
-
-
             }
-            finally
-            {
+            finally {
                 //Important: Close the connect
                 httpClient.close();
             }
