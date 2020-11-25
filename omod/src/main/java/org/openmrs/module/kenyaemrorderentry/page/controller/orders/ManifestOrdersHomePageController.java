@@ -2,6 +2,7 @@ package org.openmrs.module.kenyaemrorderentry.page.controller.orders;
 
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.kenyacore.RegimenMappingUtils;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
@@ -25,7 +26,6 @@ public class ManifestOrdersHomePageController {
         List<LabManifestOrder> allOrdersForManifest = Context.getService(KenyaemrOrdersService.class).getLabManifestOrderByManifestAndStatus(manifest, "Pending");
         PatientIdentifierType pat = Utils.getUniquePatientNumberIdentifierType();
         LabOrderDataExchange e = new LabOrderDataExchange();
-
         model.put("manifest", manifest);
         model.put("manifestOrders", allOrdersForManifest);
         model.put("eligibleOrders", e.getActiveViralLoadOrdersNotInManifest(null,null,null));
