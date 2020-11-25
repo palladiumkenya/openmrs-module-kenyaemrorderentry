@@ -20,6 +20,7 @@ import org.openmrs.api.EncounterService;
 import org.openmrs.api.ObsService;
 import org.openmrs.api.OrderService;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.kenyacore.RegimenMappingUtils;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 import org.openmrs.module.kenyaemrorderentry.util.Utils;
@@ -103,14 +104,14 @@ public class LabOrderDataExchange {
         }
 
         PatientIdentifier cccNumber = patient.getPatientIdentifier(Utils.getUniquePatientNumberIdentifierType());
-        Encounter originalRegimenEncounter = Utils.getFirstEncounterForProgram(patient, "ARV");
-        Encounter currentRegimenEncounter = Utils.getLastEncounterForProgram(patient, "ARV");
-        SimpleObject regimenDetails = Utils.buildRegimenChangeObject(currentRegimenEncounter.getObs(), currentRegimenEncounter);
+        Encounter originalRegimenEncounter = RegimenMappingUtils.getFirstEncounterForProgram(patient, "ARV");
+        Encounter currentRegimenEncounter = RegimenMappingUtils.getLastEncounterForProgram(patient, "ARV");
+        SimpleObject regimenDetails = RegimenMappingUtils.buildRegimenChangeObject(currentRegimenEncounter.getObs(), currentRegimenEncounter);
         String regimenName = (String) regimenDetails.get("regimenShortDisplay");
         String regimenLine = (String) regimenDetails.get("regimenLine");
         String nascopCode = "";
         if (StringUtils.isNotBlank(regimenName )) {
-            nascopCode = Utils.getDrugNascopCodeByDrugNameAndRegimenLine(regimenName, regimenLine);
+            nascopCode = RegimenMappingUtils.getDrugNascopCodeByDrugNameAndRegimenLine(regimenName, regimenLine);
         }
 
         //add to list only if code is found. This is a temp measure to avoid sending messages with null regimen codes
@@ -166,14 +167,14 @@ public class LabOrderDataExchange {
         }
 
         PatientIdentifier cccNumber = patient.getPatientIdentifier(Utils.getUniquePatientNumberIdentifierType());
-        Encounter originalRegimenEncounter = Utils.getFirstEncounterForProgram(patient, "ARV");
-        Encounter currentRegimenEncounter = Utils.getLastEncounterForProgram(patient, "ARV");
-        SimpleObject regimenDetails = Utils.buildRegimenChangeObject(currentRegimenEncounter.getObs(), currentRegimenEncounter);
+        Encounter originalRegimenEncounter = RegimenMappingUtils.getFirstEncounterForProgram(patient, "ARV");
+        Encounter currentRegimenEncounter = RegimenMappingUtils.getLastEncounterForProgram(patient, "ARV");
+        SimpleObject regimenDetails = RegimenMappingUtils.buildRegimenChangeObject(currentRegimenEncounter.getObs(), currentRegimenEncounter);
         String regimenName = (String) regimenDetails.get("regimenShortDisplay");
         String regimenLine = (String) regimenDetails.get("regimenLine");
         String nascopCode = "";
         if (StringUtils.isNotBlank(regimenName )) {
-            nascopCode = Utils.getDrugNascopCodeByDrugNameAndRegimenLine(regimenName, regimenLine);
+            nascopCode = RegimenMappingUtils.getDrugNascopCodeByDrugNameAndRegimenLine(regimenName, regimenLine);
         }
 
         //add to list only if code is found. This is a temp measure to avoid sending messages with null regimen codes

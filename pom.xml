@@ -52,7 +52,7 @@
         <htmlformentry19extVersion>1.5</htmlformentry19extVersion>
         <htmlformentryuiVersion>1.2</htmlformentryuiVersion>
         <coreappsVersion>1.6</coreappsVersion>
-        <kenyacoreVersion>2.2</kenyacoreVersion>
+        <kenyacoreVersion>2.4.2-SNAPSHOT</kenyacoreVersion>
         <kenyauiVersion>2.1.1</kenyauiVersion>
         <webservices.restVersion>2.11</webservices.restVersion>
         <jacksonVersion>2.10.1</jacksonVersion>

@@ -28,6 +28,9 @@
 		<require_module version="${kenyauiVersion}">
 			org.openmrs.module.kenyaui
 		</require_module>
+		<require_module version="${kenyacoreVersion}">
+			org.openmrs.module.kenyacore
+		</require_module>
     </require_modules>
 
     <!-- Module Activator -->
