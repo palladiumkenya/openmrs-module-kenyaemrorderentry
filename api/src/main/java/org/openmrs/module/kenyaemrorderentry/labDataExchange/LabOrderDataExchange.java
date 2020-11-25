@@ -26,6 +26,7 @@ import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 import org.openmrs.module.kenyaemrorderentry.util.Utils;
 import org.openmrs.ui.framework.SimpleObject;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -411,6 +412,10 @@ public class LabOrderDataExchange {
 
         Order od = orderService.getOrder(orderId);
         LabManifestOrder manifestOrder = kenyaemrOrdersService.getLabManifestOrderByOrderId(orderService.getOrder(orderId));
+        Date orderDiscontinuationDate = aMomentBefore(new Date());
+
+        SimpleDateFormat df = Utils.getSimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        String formatedDiscDate = df.format(orderDiscontinuationDate);
 
         if (od != null && od.isActive()) {
             if ((StringUtils.isNotBlank(specimenStatus) && specimenStatus.equals("Rejected")) || StringUtils.isNotBlank(rejectedReason) || (StringUtils.isNotBlank(result) && result.equals("Collect New Sample"))) {
@@ -429,34 +434,32 @@ public class LabOrderDataExchange {
                 try {
                     // discontinue one order, and void the other.
                     // Discontinuing both orders result in one of them remaining active
-                    orderService.discontinueOrder(o1, discontinuationReason, aMomentBefore(new Date()), o1.getOrderer(),
+                    orderService.discontinueOrder(o1, discontinuationReason, orderDiscontinuationDate, o1.getOrderer(),
                             o1.getEncounter());
                     orderService.voidOrder(o2, discontinuationReason);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
                 manifestOrder.setStatus(discontinuationReason);
-                manifestOrder.setResultDate(new Date());
+                manifestOrder.setResultDate(orderDiscontinuationDate);
                 kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
             } else if (StringUtils.isNotBlank(specimenStatus) && specimenStatus.equalsIgnoreCase("Complete") && StringUtils.isNotBlank(result)) {
 
                 Concept conceptToRetain = null;
+                String lDLResult = "< LDL copies/ml";
                 String aboveMillionResult = "> 10,000,000 cp/ml";
                 Obs o = new Obs();
 
-                if (result.equals("< LDL copies/ml")) {
+                if (result.equals(lDLResult)) {
                     conceptToRetain = vlTestConceptQualitative;
                     o.setValueCoded(LDLConcept);
+                } else if (result.equalsIgnoreCase(aboveMillionResult)) {
+                    conceptToRetain = vlTestConceptQuantitative;
+                    o.setValueNumeric(new Double(10000001));
                 } else {
                     conceptToRetain = vlTestConceptQuantitative;
-                    o.setValueNumeric(result.equalsIgnoreCase(aboveMillionResult) ? 10000000 : Double.valueOf(result));
+                    o.setValueNumeric(Double.valueOf(result));
                 }
-
-                Encounter enc = new Encounter();
-                enc.setEncounterType(labEncounterType);
-                enc.setEncounterDatetime(new Date());
-                enc.setPatient(od.getPatient());
-                enc.setCreator(Context.getUserService().getUser(1));
 
                 // In order to record results both qualitative (LDL) and quantitative,
                 // every vl request saves two orders: one with 856(quantitative) for numeric values and another with 1305(quantitative) for LDL value
@@ -465,26 +468,41 @@ public class LabOrderDataExchange {
                 Order orderToRetain = ordersToProcess.get("orderToRetain");
                 Order orderToVoid = ordersToProcess.get("orderToVoid");
 
+
                 // logic that picks the right concept id for the result obs
                 o.setConcept(conceptToRetain);
-                o.setDateCreated(new Date());
+                o.setDateCreated(orderDiscontinuationDate);
                 o.setCreator(Context.getUserService().getUser(1));
-                o.setObsDatetime(new Date());
+                o.setObsDatetime(orderDiscontinuationDate);
                 o.setPerson(od.getPatient());
                 o.setOrder(orderToRetain);
-                enc.addObs(o);
 
-                try {
-                    encounterService.saveEncounter(enc);
-                    orderService.discontinueOrder(orderToRetain, "Results received", aMomentBefore(new Date()), orderToRetain.getOrderer(),
-                            orderToRetain.getEncounter());
-                    orderService.voidOrder(orderToVoid, "Duplicate VL order");
-                } catch (Exception e) {
-                    e.printStackTrace();
+                Encounter enc = new Encounter();
+                enc.setEncounterType(labEncounterType);
+                enc.setEncounterDatetime(orderDiscontinuationDate);
+                enc.setPatient(od.getPatient());
+                enc.setCreator(Context.getUserService().getUser(1));
+
+                enc.addObs(o);
+                if (orderToRetain != null && orderToVoid != null) {
+
+                    try {
+
+                        encounterService.saveEncounter(enc);
+                        orderService.discontinueOrder(orderToRetain, "Results received", orderDiscontinuationDate, orderToRetain.getOrderer(),
+                                orderToRetain.getEncounter());
+                        orderService.voidOrder(orderToVoid, "Duplicate VL order");
+                        // this is really a hack to ensure that order date_stopped is filled, otherwise the order will remain active
+                        // the issue here is that even though disc order is created, the original order is not stopped
+                        Context.getAdministrationService().executeSQL("update orders set date_stopped = '" +  formatedDiscDate + "' where order_id = " + orderToRetain.getOrderId().intValue() , false);
+                    } catch (Exception e) {
+                        System.out.println("An error was encountered while updating orders for viral load");
+                        e.printStackTrace();
+                    }
+                    manifestOrder.setStatus("Result received");
+                    manifestOrder.setResultDate(orderDiscontinuationDate);
+                    kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
                 }
-                manifestOrder.setStatus("Result received");
-                manifestOrder.setResultDate(new Date());
-                kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
             } else if (StringUtils.isNotBlank(specimenStatus) && specimenStatus.equalsIgnoreCase("Incomplete")) {
                 System.out.println("Status for " + orderId + " sample not yet ready");
             }

@@ -34,6 +34,7 @@ public class KenyaemrOrderRestController extends BaseRestController {
         }
 
         if (requestBody != null) {
+            System.out.println("Request body string::: " + requestBody);
             LabOrderDataExchange shr = new LabOrderDataExchange();
             return shr.processIncomingViralLoadLabResults(requestBody);
 

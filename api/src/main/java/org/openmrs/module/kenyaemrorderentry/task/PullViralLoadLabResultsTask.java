@@ -1,5 +1,9 @@
 package org.openmrs.module.kenyaemrorderentry.task;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -10,9 +14,6 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.openmrs.GlobalProperty;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
@@ -23,7 +24,6 @@ import org.openmrs.module.kenyaemrorderentry.util.Utils;
 import org.openmrs.scheduler.tasks.AbstractTask;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -41,9 +41,7 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
         Context.openSession();
         try {
 
-            if (!Context.isAuthenticated()) {
-                authenticate();
-            }
+
             GlobalProperty gpServerUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LAB_SERVER_RESULT_URL);
             GlobalProperty gpApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LAB_SERVER_API_TOKEN);
 
@@ -107,15 +105,19 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
                 }
                 String responseString = EntityUtils.toString(response.getEntity());
 
-                JSONParser parser = new JSONParser();
-                Object object = parser.parse(responseString);
-                JSONObject responseObject = (JSONObject) object;
+                ObjectMapper mapper = new ObjectMapper();
+                ObjectNode resultsObj = null;
+                try {
+                    JsonNode actualObj = mapper.readTree(responseString);
+                    resultsObj = (ObjectNode) actualObj;
+                } catch (JsonProcessingException e) {
+                    e.printStackTrace();
+                }
 
-                // extract the array with results
-                JSONArray resultArray = (JSONArray) responseObject.get("data");
+                ArrayNode resultArray = (ArrayNode) resultsObj.get("data");
 
                 if (resultArray != null && !resultArray.isEmpty()) {
-                    dataExchange.processIncomingViralLoadLabResults(resultArray.toJSONString());
+                    dataExchange.processIncomingViralLoadLabResults(resultArray.toString());
                 }
 
                 System.out.println("Successfully executed the task that pulls lab requests");
@@ -127,6 +129,8 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
         }
         catch (Exception e) {
             throw new IllegalArgumentException("Unable to execute task that pulls lab requests", e);
+        } finally {
+            Context.closeSession();
         }
     }
 }
