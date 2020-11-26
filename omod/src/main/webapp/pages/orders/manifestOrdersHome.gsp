@@ -6,9 +6,37 @@
     ]
 %>
 <style>
-table th {
-    text-align: left;
+.simple-table {
+    border: solid 1px #DDEEEE;
+    border-collapse: collapse;
+    border-spacing: 0;
+    font: normal 13px Arial, sans-serif;
 }
+.simple-table thead th {
+
+    border: solid 1px #DDEEEE;
+    color: #336B6B;
+    padding: 10px;
+    text-align: left;
+    text-shadow: 1px 1px 1px #fff;
+}
+.simple-table td {
+    border: solid 1px #DDEEEE;
+    color: #333;
+    padding: 5px;
+    text-shadow: 1px 1px 1px #fff;
+}
+/*table {
+    width: 90%;
+}*/
+th, td {
+    padding: 5px;
+    text-align: left;
+    height: 30px;
+    border-bottom: 1px solid #ddd;
+}
+tr:nth-child(even) {background-color: #f2f2f2;}
+
 .nameColumn {
     width: 260px;
 }
@@ -32,28 +60,36 @@ table th {
     <div align="left" id="eligibleList">
         <fieldset>
             <legend>Manifest details</legend>
-            <table width="30%">
+            <table width="70%">
                 <tr>
-                    <td><b>Start date:</b> ${kenyaui.formatDate(manifest.startDate)}</td>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Status</th>
+                    <th>Dispatch Date</th>
                 </tr>
                 <tr>
-                    <td><b>End date:</b>  ${kenyaui.formatDate(manifest.endDate)}</td>
+                    <td>${kenyaui.formatDate(manifest.startDate)}</td>
+                    <td>${kenyaui.formatDate(manifest.endDate)}</td>
+                    <td>${manifest.status}</td>
+                    <td>${manifest.dispatchDate != null ? kenyaui.formatDate(manifest.dispatchDate) : ""}</td>
                 </tr>
+
+                <tr></tr>
                 <tr>
-                    <td><b>Status:</b>  ${manifest.status}</td>
+                    <td>
+                        <button style="background-color: bisque;">Print Manifest</button>
+                        <% if(manifest.status == "Ready to send") { %>
+                        <button id="refresh" onclick="window.location.reload()">Refresh page</button>
+                        <% } %>
+                    </td>
                 </tr>
-                <% if(manifest.dispatchDate != null) { %>
-                <tr>
-                    <td><b>Dispatch date:</b>  ${kenyaui.formatDate(manifest.dispatchDate)}</td>
-                </tr>
-                <% } %>
             </table>
         </fieldset>
         <br/>
         <br/>
         <fieldset>
             <legend>Samples in the manifest</legend>
-            <table width="70%">
+            <table class="simple-table" width="90%">
                 <tr>
                     <th class="nameColumn">Patient Name</th>
                     <th class="cccNumberColumn">CCC Number</th>
@@ -81,7 +117,7 @@ table th {
         <% if (manifest.status != "Sent") { %>
         <fieldset>
             <legend>Active requests</legend>
-            <table width="70%">
+            <table class="simple-table" width="90%">
                 <tr>
                     <th class="nameColumn">Patient Name</th>
                     <th class="cccNumberColumn">CCC Number</th>
@@ -127,7 +163,7 @@ table th {
                         jq('#alert_' + orderId).text("Sample successfully added to manifest ");
                         jq(this).prop('disabled', true);
                     } else {
-                        jq('#alert_' + orderId).text("There was a problem adding to the manifest. Please confirm that the patient's regimen code is correctly mapped ");
+                        jq('#alert_' + orderId).text("Could not add to the manifest!. Please check that the patient's regimen line is correctly captured and try again ");
                     }
                 })
                 .error(function (xhr, status, err) {
