@@ -112,6 +112,10 @@ public class ManifestFormFragmentController {
             require(errors, "endDate");
             require(errors, "status");
 
+            System.out.println("startDate: " + startDate);
+            System.out.println("endDate: " + endDate);
+            System.out.println("now: " + new Date());
+
             if (startDate != null) {
                 if (startDate.after(new Date())) {
                     errors.rejectValue("startDate", "Cannot be in the future");
@@ -120,7 +124,7 @@ public class ManifestFormFragmentController {
                     calendar.setTime(new Date());
                     calendar.add(Calendar.YEAR, -120);
                     if (startDate.before(calendar.getTime())) {
-                        errors.rejectValue("startDate", " error.date.invalid");
+                        errors.rejectValue("startDate", " Invalid date");
                     }
                 }
             }
@@ -132,7 +136,7 @@ public class ManifestFormFragmentController {
                     calendar.setTime(new Date());
                     calendar.add(Calendar.YEAR, -120);
                     if (endDate.before(calendar.getTime())) {
-                        errors.rejectValue("endDate", " error.date.invalid");
+                        errors.rejectValue("endDate", " Invalid date");
                     }
                 }
             }

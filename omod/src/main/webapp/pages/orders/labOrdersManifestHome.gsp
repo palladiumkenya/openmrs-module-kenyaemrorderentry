@@ -6,9 +6,37 @@
     ]
 %>
 <style>
-table th {
-    text-align: left;
+.simple-table {
+    border: solid 1px #DDEEEE;
+    border-collapse: collapse;
+    border-spacing: 0;
+    font: normal 13px Arial, sans-serif;
 }
+.simple-table thead th {
+
+    border: solid 1px #DDEEEE;
+    color: #336B6B;
+    padding: 10px;
+    text-align: left;
+    text-shadow: 1px 1px 1px #fff;
+}
+.simple-table td {
+    border: solid 1px #DDEEEE;
+    color: #333;
+    padding: 5px;
+    text-shadow: 1px 1px 1px #fff;
+}
+table {
+    width: 50%;
+}
+th, td {
+    padding: 5px;
+    text-align: left;
+    height: 30px;
+    border-bottom: 1px solid #ddd;
+}
+tr:nth-child(even) {background-color: #f2f2f2;}
+
 </style>
 
 <div class="ke-page-sidebar">
@@ -18,7 +46,7 @@ table th {
 <div class="ke-page-content">
     <div align="left">
 
-        <h3>Manifest list</h3>
+        <h2>Manifest list</h2>
         <div>
             <button type="button"
                     onclick="ui.navigate('${ ui.pageLink("kenyaemrorderentry", "manifest/createManifest", [ returnUrl: ui.thisUrl() ])}')">
@@ -29,7 +57,7 @@ table th {
         <br/>
         <br/>
 
-        <table width="60%">
+        <table class="simple-table">
             <tr>
                 <th>Start Date</th>
                 <th>End Date</th>
