@@ -1,8 +1,11 @@
 package org.openmrs.module.kenyaemrorderentry.page.controller.orders;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpResponse;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyacore.RegimenMappingUtils;
+import org.openmrs.module.kenyaemrorderentry.api.itext.LabManifestReport;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
@@ -15,6 +18,11 @@ import org.openmrs.ui.framework.annotation.SpringBean;
 import org.openmrs.ui.framework.page.PageModel;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 @AppPage("kenyaemr.laborder")

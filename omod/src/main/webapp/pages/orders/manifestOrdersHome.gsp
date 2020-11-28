@@ -1,6 +1,5 @@
 <%
     ui.decorateWith("kenyaemr", "standardPage", [layout: "sidebar"])
-
     def menuItems = [
             [label: "Back", iconProvider: "kenyaui", icon: "buttons/back.png", label: "Back to manifest list", href: ui.pageLink("kenyaemrorderentry", "orders/labOrdersManifestHome")]
     ]
@@ -77,7 +76,11 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                 <tr></tr>
                 <tr>
                     <td>
-                        <button style="background-color: bisque;">Print Manifest</button>
+                        <a href="${ ui.pageLink("kenyaemrorderentry","manifest/downloadManifest",[manifest : manifest.id]) }"   target="_blank">
+                            <button style="background-color: bisque;">
+                                Download Manifest
+                            </button>
+                        </a>
                         <% if(manifest.status == "Ready to send") { %>
                         <button id="refresh" onclick="window.location.reload()">Refresh page</button>
                         <% } %>
