@@ -17,11 +17,16 @@ import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.property.TextAlignment;
 import com.itextpdf.layout.property.UnitValue;
+import org.apache.commons.lang3.StringUtils;
+import org.openmrs.Encounter;
+import org.openmrs.Patient;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.kenyacore.RegimenMappingUtils;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 import org.openmrs.module.kenyaemrorderentry.util.Utils;
+import org.openmrs.ui.framework.SimpleObject;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -83,12 +88,15 @@ public class LabManifestReport {
         document.add(new Paragraph("Viral Load Request Form").setTextAlignment(TextAlignment.CENTER).setBold().setFontSize(16));
         document.add(new Paragraph("\n"));
 
-        Table table = new Table(new float[]{4, 1, 3, 4, 3, 3, 3, 3, 1});
+        Table table = new Table(10);
         table.setWidth(UnitValue.createPercentValue(100));
+        table.setFont(font);
 
-        document.add(addHeaderRow(table));
+        Table tWithHeaderRow = addHeaderRow(table);
+        Table tWithData = addManifestSamples(this.manifest, tWithHeaderRow);
 
-        document.add(addManifestSamples(this.manifest, table));
+
+        document.add(tWithData);
         document.add(new Paragraph("iText is:").setFont(font));
         // Create a List
         List list = new List()
@@ -121,6 +129,7 @@ public class LabManifestReport {
         table.addHeaderCell(new Paragraph("Date & time of collection"));
         table.addHeaderCell(new Paragraph("Date & time of separation/centrifugation"));
         table.addHeaderCell(new Paragraph("Date started on ART"));
+        table.addHeaderCell(new Paragraph("Current Regimen"));
         return table;
     }
 
@@ -132,20 +141,38 @@ public class LabManifestReport {
             addManifestRow(sample, table);
         }
 
-        table.complete();
+        //table.complete();
         return table;
     }
 
     private void addManifestRow(LabManifestOrder sample, Table table) {
-        table.addCell(new Paragraph(sample.getOrder().getPatient().getNames().toString()));
-        table.addCell(new Paragraph(sample.getOrder().getPatient().getPatientIdentifier(Utils.getUniquePatientNumberIdentifierType()).getIdentifier()));
+
+        Patient patient = sample.getOrder().getPatient();
+        String fullName = patient.getGivenName().concat(" ").concat(
+                patient.getFamilyName() != null ? sample.getOrder().getPatient().getFamilyName() : ""
+        ).concat(" ").concat(
+                patient.getMiddleName() != null ? sample.getOrder().getPatient().getMiddleName() : ""
+        );
+
+        Encounter originalRegimenEncounter = RegimenMappingUtils.getFirstEncounterForProgram(patient, "ARV");
+        Encounter currentRegimenEncounter = RegimenMappingUtils.getLastEncounterForProgram(patient, "ARV");
+        SimpleObject regimenDetails = RegimenMappingUtils.buildRegimenChangeObject(currentRegimenEncounter.getObs(), currentRegimenEncounter);
+        String regimenName = (String) regimenDetails.get("regimenShortDisplay");
+        String regimenLine = (String) regimenDetails.get("regimenLine");
+        String nascopCode = "";
+        if (StringUtils.isNotBlank(regimenName )) {
+            nascopCode = RegimenMappingUtils.getDrugNascopCodeByDrugNameAndRegimenLine(regimenName, regimenLine);
+        }
+        table.addCell(new Paragraph(fullName));
+        table.addCell(new Paragraph(patient.getPatientIdentifier(Utils.getUniquePatientNumberIdentifierType()).getIdentifier()));
         table.addCell(new Paragraph(Utils.getSimpleDateFormat("dd/MM/yyyy").format(sample.getOrder().getPatient().getBirthdate())));
         table.addCell(new Paragraph(sample.getOrder().getPatient().getGender()));
         table.addCell(new Paragraph("3"));
         table.addCell(new Paragraph("1"));
         table.addCell(new Paragraph(Utils.getSimpleDateFormat("dd/MM/yyyy").format(sample.getDateCreated())));
         table.addCell(new Paragraph("20/06/2020"));
-        table.addCell(new Paragraph("21/06/2020"));
+        table.addCell(new Paragraph(originalRegimenEncounter != null ? Utils.getSimpleDateFormat("yyyy-MM-dd").format(originalRegimenEncounter.getEncounterDatetime()) : ""));
+        table.addCell(new Paragraph(nascopCode));
     }
 
     public LabManifest getManifest() {
