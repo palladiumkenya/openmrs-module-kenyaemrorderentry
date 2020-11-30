@@ -289,7 +289,7 @@ public class LabOrderDataExchange {
      * @param conceptUuid
      * @return
      */
-    private String getOrderReasonCode(String conceptUuid) {
+    public static String getOrderReasonCode(String conceptUuid) {
 
         if (conceptUuid == null)
             return "";

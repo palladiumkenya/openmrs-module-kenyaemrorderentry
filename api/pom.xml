@@ -115,6 +115,15 @@
 			<groupId>com.itextpdf</groupId>
 			<artifactId>layout</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>com.itextpdf</groupId>
+			<artifactId>barcodes</artifactId>
+		</dependency>
+		<!-- only needed for Asian fonts -->
+		<dependency>
+			<groupId>com.itextpdf</groupId>
+			<artifactId>font-asian</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
