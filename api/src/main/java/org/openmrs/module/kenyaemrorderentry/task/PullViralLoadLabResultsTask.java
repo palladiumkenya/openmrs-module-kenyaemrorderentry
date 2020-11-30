@@ -32,7 +32,6 @@ import java.util.List;
 public class PullViralLoadLabResultsTask extends AbstractTask {
     private Log log = LogFactory.getLog(getClass());
     KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
-    LabOrderDataExchange dataExchange = new LabOrderDataExchange();
 
     /**
      * @see AbstractTask#execute()
@@ -41,14 +40,15 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
         Context.openSession();
         try {
 
-
             GlobalProperty gpServerUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LAB_SERVER_RESULT_URL);
             GlobalProperty gpApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LAB_SERVER_API_TOKEN);
+            GlobalProperty gpVLUpdateEndpoint = Context.getAdministrationService().getGlobalPropertyObject("local.viral_load_result_end_point");
 
             String serverUrl = gpServerUrl.getPropertyValue();
             String API_KEY = gpApiToken.getPropertyValue();
+            String updatesEndpoint = gpVLUpdateEndpoint.getPropertyValue();
 
-            if (StringUtils.isBlank(serverUrl) || StringUtils.isBlank(API_KEY)) {
+            if (StringUtils.isBlank(serverUrl) || StringUtils.isBlank(API_KEY) || StringUtils.isBlank(updatesEndpoint)) {
                 System.out.println("Please set credentials for posting lab requests to the lab system");
                 return;
             }
@@ -117,7 +117,8 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
                 ArrayNode resultArray = (ArrayNode) resultsObj.get("data");
 
                 if (resultArray != null && !resultArray.isEmpty()) {
-                    dataExchange.processIncomingViralLoadLabResults(resultArray.toString());
+                    ProcessViralLoadResults.processPayload(resultArray.toString());// the only way that works for now is posting this through REST
+                    //dataExchange.processIncomingViralLoadLabResults(resultArray.toString());
                 }
 
                 System.out.println("Successfully executed the task that pulls lab requests");

@@ -10,6 +10,9 @@ import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfNumber;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
+import com.itextpdf.layout.borders.Border;
+import com.itextpdf.layout.borders.SolidBorder;
+import com.itextpdf.layout.element.Cell;
 import com.itextpdf.layout.element.Image;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
@@ -87,7 +90,65 @@ public class LabManifestReport {
         document.add(new Paragraph("\n"));
         document.add(new Paragraph("MINISTRY OF HEALTH").setTextAlignment(TextAlignment.CENTER).setFontSize(12));
         document.add(new Paragraph("Viral Load Request Form").setTextAlignment(TextAlignment.CENTER).setBold().setFontSize(16));
-        document.add(new Paragraph("\n"));
+
+        Table manifestMetadata = new Table(4);
+        manifestMetadata.setWidth(UnitValue.createPercentValue(100));
+        manifestMetadata.setFont(font);
+
+        Paragraph fDetailsCol1 = new Paragraph();
+        Text column1Label = new Text("Facility Details").setBold().setFontSize(10).setUnderline();
+        Text facilityNameLabel = new Text("Facility Name: " + Utils.getDefaultLocation().getName()).setFontSize(10);
+        Text mflCodeLabel = new Text("MFL Code: " + Utils.getDefaultLocationMflCode(Utils.getDefaultLocation())).setFontSize(10);
+
+        Text facilityEmailLabel = new Text("Facility/CCC email: ...........").setFontSize(10);
+        Text facilityPhoneNoLabel = new Text("Facility/CCC phone no: ..........").setFontSize(10);
+        fDetailsCol1.setFixedLeading(13); // sets line spacing
+        fDetailsCol1.add(column1Label).add("\n").add(facilityNameLabel).add("\n").add(mflCodeLabel).add("\n").add(facilityEmailLabel).add("\n").add(facilityPhoneNoLabel);
+
+        // adding column 2
+        Paragraph fDetailsCol2 = new Paragraph();
+        Text column2Label = new Text("");
+        Text countyLabel = new Text("County: ........................").setFontSize(10);
+        Text subCountyLabel = new Text("Sub-county: ....................").setFontSize(10);
+        Text clinicianPhoneNoLabel = new Text("Clinician's phone no: .................").setFontSize(10);
+        Text clinicianNameLabel = new Text("Clinician's Name: ........................").setFontSize(10);
+        fDetailsCol2.setFixedLeading(13);
+        fDetailsCol2.add(column2Label).add("\n").add(countyLabel).add("\n").add(subCountyLabel).add("\n").add(clinicianPhoneNoLabel).add("\n").add(clinicianNameLabel);
+
+        Paragraph fDetailsCol3 = new Paragraph();
+        Text column3Label = new Text("Facility Laboratory details").setBold().setFontSize(10).setUnderline();
+        //Text facilityDispatchLabel = new Text("Date & time sample dispatched: " + this.manifest.getDispatchDate() != null ? Utils.getSimpleDateFormat("dd/MM/yyyy").format(this.manifest.getDispatchDate()) : "").setFontSize(10);
+        Text facilityDispatchLabel = new Text("Date & time sample dispatched: ........................").setFontSize(10);
+        Text facilityFocalPointLabel = new Text("Lab focal person phone contact: ........................").setFontSize(10);
+        Text hubDetailsLabel = new Text("Hub details").setFontSize(10).setBold().setFontSize(10).setUnderline();
+        Text hubDispatchLabel = new Text("Date & time sample dispatched: ........................").setFontSize(10);
+        Text hubFocalPointLabel = new Text("Lab focal person phone contact: ........................").setFontSize(10);
+        fDetailsCol3.setFixedLeading(13);
+        fDetailsCol3.add(column3Label).add("\n").add(facilityDispatchLabel).add("\n").add(facilityFocalPointLabel).add("\n").add(hubDetailsLabel).add("\n").add(hubDispatchLabel).add("\n").add(hubFocalPointLabel);
+
+        Cell col1 = new Cell();
+        col1.setBorder(Border.NO_BORDER);
+        col1.setBorderTop(new SolidBorder(1f));
+        col1.setBorderLeft(new SolidBorder(1f));
+
+        Cell col2 = new Cell();
+        col2.setBorder(Border.NO_BORDER);
+        col2.setBorderTop(new SolidBorder(1f));
+
+        Cell col3 = new Cell();
+        col3.setBorder(Border.NO_BORDER);
+        col3.setBorderTop(new SolidBorder(1f));
+        col3.setBorderRight(new SolidBorder(1f));
+
+        col1.add(fDetailsCol1);
+        col2.add(fDetailsCol2);
+        col3.add(fDetailsCol3);
+
+        manifestMetadata.addCell(col1);
+        manifestMetadata.addCell(col2);
+        manifestMetadata.addCell(col3);
+
+        document.add(manifestMetadata);
 
         Table table = new Table(12);
         table.setWidth(UnitValue.createPercentValue(100));

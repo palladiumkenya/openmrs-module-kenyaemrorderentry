@@ -1,6 +1,9 @@
 package org.openmrs.module.kenyaemrorderentry.api.itext;
 
 import com.itextpdf.barcodes.Barcode128;
+import com.itextpdf.barcodes.BarcodeQRCode;
+import com.itextpdf.barcodes.qrcode.EncodeHintType;
+import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.kernel.geom.PageSize;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
@@ -18,6 +21,8 @@ import org.openmrs.module.kenyaemrorderentry.util.Utils;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 public class PrintSpecimenLabel {
 
@@ -89,8 +94,16 @@ public class PrintSpecimenLabel {
         cell.add(code128Image);
         //table.addCell(cell);
 
-        doc.add(table);
+        Map<EncodeHintType, Object> hints = new HashMap<EncodeHintType, Object>();
+        BarcodeQRCode qrcode = new BarcodeQRCode(code, hints);
+        Image qrcodeImage = new Image(qrcode.createFormXObject(ColorConstants.BLACK, pdfDoc));
+        qrcodeImage.setAutoScale(true);
+        Cell qrCodeCell = new Cell();
+        qrCodeCell.add(qrcodeImage);
+        table.addCell(new Cell());
+        table.addCell(qrCodeCell);
 
+        doc.add(table);
         doc.close();
         return returnFile;
     }

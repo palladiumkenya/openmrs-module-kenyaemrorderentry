@@ -91,5 +91,13 @@
 		</description>
 	</globalProperty>
 
+	<globalProperty>
+		<property>local.viral_load_result_end_point</property>
+		<defaultValue></defaultValue>
+		<description>
+			End point for processing viral load results from the lab
+		</description>
+	</globalProperty>
+
 </module>
 

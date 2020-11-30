@@ -111,7 +111,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                         <% } %>
                         <a href="${ ui.pageLink("kenyaemrorderentry","manifest/printSpecimenLabel",[manifestOrder : o.id]) }"   target="_blank">
                             <button style="background-color: cadetblue; color: white">
-                                Print
+                                Print Label
                             </button>
                         </a>
                     </td>
