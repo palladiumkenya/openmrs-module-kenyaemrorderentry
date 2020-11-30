@@ -11,18 +11,19 @@ import com.itextpdf.kernel.pdf.PdfNumber;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Image;
-import com.itextpdf.layout.element.List;
-import com.itextpdf.layout.element.ListItem;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
+import com.itextpdf.layout.element.Text;
 import com.itextpdf.layout.property.TextAlignment;
 import com.itextpdf.layout.property.UnitValue;
+import org.apache.commons.lang.WordUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Encounter;
 import org.openmrs.Patient;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyacore.RegimenMappingUtils;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
+import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 import org.openmrs.module.kenyaemrorderentry.util.Utils;
@@ -88,7 +89,7 @@ public class LabManifestReport {
         document.add(new Paragraph("Viral Load Request Form").setTextAlignment(TextAlignment.CENTER).setBold().setFontSize(16));
         document.add(new Paragraph("\n"));
 
-        Table table = new Table(10);
+        Table table = new Table(12);
         table.setWidth(UnitValue.createPercentValue(100));
         table.setFont(font);
 
@@ -97,21 +98,6 @@ public class LabManifestReport {
 
 
         document.add(tWithData);
-        document.add(new Paragraph("iText is:").setFont(font));
-        // Create a List
-        List list = new List()
-                .setSymbolIndent(12)
-                .setListSymbol("\u2022")
-                .setFont(font);
-        // Add ListItem objects
-        list.add(new ListItem("Never gonna give you up"))
-                .add(new ListItem("Never gonna let you down"))
-                .add(new ListItem("Never gonna run around and desert you"))
-                .add(new ListItem("Never gonna make you cry"))
-                .add(new ListItem("Never gonna say goodbye"))
-                .add(new ListItem("Never gonna tell a lie and hurt you"));
-        // Add the list
-        document.add(list);
 
         //Close document
         document.close();
@@ -120,16 +106,43 @@ public class LabManifestReport {
     }
     private Table addHeaderRow(Table table) {
 
-        table.addHeaderCell(new Paragraph("Patient Name"));
-        table.addHeaderCell(new Paragraph("CCC No"));
-        table.addHeaderCell(new Paragraph("DOB"));
-        table.addHeaderCell(new Paragraph("Sex"));
-        table.addHeaderCell(new Paragraph("If female, select the following"));
-        table.addHeaderCell(new Paragraph("Sample type"));
-        table.addHeaderCell(new Paragraph("Date & time of collection"));
-        table.addHeaderCell(new Paragraph("Date & time of separation/centrifugation"));
-        table.addHeaderCell(new Paragraph("Date started on ART"));
-        table.addHeaderCell(new Paragraph("Current Regimen"));
+        table.addHeaderCell(new Paragraph("Patient Name").setBold());
+
+        Paragraph cccNumberCol = new Paragraph();
+        Text cccNoText = new Text("CCC No \n").setBold();
+        Text cccNoDetail1 = new Text("Indicate full ccc number of the\n").setItalic().setFontSize(8);
+        Text cccNoDetail2 = new Text("clients as it appears in the patient\n").setItalic().setFontSize(8);
+        Text cccNoDetail3 = new Text("file. (MFL-XXXXX)\n").setItalic().setFontSize(8);
+        cccNumberCol.add(cccNoText);
+        cccNumberCol.add(cccNoDetail1);
+        cccNumberCol.add(cccNoDetail2);
+        cccNumberCol.add(cccNoDetail3);
+        table.addHeaderCell(cccNumberCol);
+
+        Paragraph dobCol = new Paragraph();
+        Text dobText = new Text("DOB \n").setBold();
+        Text dobDetails = new Text("(dd/mm/yyy)").setItalic().setFontSize(8).setBold();
+        dobCol.add(dobText);
+        dobCol.add(dobDetails);
+        table.addHeaderCell(dobCol);
+
+        table.addHeaderCell(new Paragraph("Sex").setBold());
+
+        Paragraph pregnancyCol = new Paragraph();
+        Text pregnancyText = new Text("If female, \nselect the \nfollowing \n").setBold();
+        Text pregnancyDetails = new Text("1= Pregnant\n2= Breast feeding\n3= None of the above").setItalic().setFontSize(8);
+
+        pregnancyCol.add(pregnancyText);
+        pregnancyCol.add(pregnancyDetails);
+
+        table.addHeaderCell(pregnancyCol);
+        table.addHeaderCell(new Paragraph("Sample \ntype").setBold().setTextAlignment(TextAlignment.CENTER));
+        table.addHeaderCell(new Paragraph("Date & \ntime of \ncollection").setBold().setTextAlignment(TextAlignment.CENTER));
+        table.addHeaderCell(new Paragraph("Date & time \nof separation \n/centrifugation").setBold().setTextAlignment(TextAlignment.CENTER));
+        table.addHeaderCell(new Paragraph("Date \nstarted \non ART").setBold().setTextAlignment(TextAlignment.CENTER));
+        table.addHeaderCell(new Paragraph("Current \nART \nRegimen").setBold().setTextAlignment(TextAlignment.CENTER));
+        table.addHeaderCell(new Paragraph("Date \ninitiated \non \ncurrent \nRegimen").setBold().setTextAlignment(TextAlignment.CENTER));
+        table.addHeaderCell(new Paragraph("Justification \ncode").setBold().setTextAlignment(TextAlignment.CENTER));
         return table;
     }
 
@@ -141,7 +154,6 @@ public class LabManifestReport {
             addManifestRow(sample, table);
         }
 
-        //table.complete();
         return table;
     }
 
@@ -163,16 +175,19 @@ public class LabManifestReport {
         if (StringUtils.isNotBlank(regimenName )) {
             nascopCode = RegimenMappingUtils.getDrugNascopCodeByDrugNameAndRegimenLine(regimenName, regimenLine);
         }
-        table.addCell(new Paragraph(fullName));
-        table.addCell(new Paragraph(patient.getPatientIdentifier(Utils.getUniquePatientNumberIdentifierType()).getIdentifier()));
-        table.addCell(new Paragraph(Utils.getSimpleDateFormat("dd/MM/yyyy").format(sample.getOrder().getPatient().getBirthdate())));
-        table.addCell(new Paragraph(sample.getOrder().getPatient().getGender()));
-        table.addCell(new Paragraph("3"));
-        table.addCell(new Paragraph("1"));
-        table.addCell(new Paragraph(Utils.getSimpleDateFormat("dd/MM/yyyy").format(sample.getDateCreated())));
-        table.addCell(new Paragraph("20/06/2020"));
-        table.addCell(new Paragraph(originalRegimenEncounter != null ? Utils.getSimpleDateFormat("yyyy-MM-dd").format(originalRegimenEncounter.getEncounterDatetime()) : ""));
-        table.addCell(new Paragraph(nascopCode));
+        table.addCell(new Paragraph(WordUtils.capitalizeFully(fullName))).setFontSize(10);
+        table.addCell(new Paragraph(patient.getPatientIdentifier(Utils.getUniquePatientNumberIdentifierType()).getIdentifier())).setFontSize(10);
+        table.addCell(new Paragraph(Utils.getSimpleDateFormat("dd/MM/yyyy").format(sample.getOrder().getPatient().getBirthdate()))).setFontSize(10);
+        table.addCell(new Paragraph(sample.getOrder().getPatient().getGender())).setFontSize(10);
+        table.addCell(new Paragraph("3")).setFontSize(10);
+        table.addCell(new Paragraph("1")).setFontSize(10);
+        table.addCell(new Paragraph(Utils.getSimpleDateFormat("dd/MM/yyyy").format(sample.getOrder().getDateActivated()))).setFontSize(10);
+        table.addCell(new Paragraph(Utils.getSimpleDateFormat("dd/MM/yyyy").format(sample.getDateCreated()))).setFontSize(10);
+        table.addCell(new Paragraph(originalRegimenEncounter != null ? Utils.getSimpleDateFormat("dd/MM/yyyy").format(originalRegimenEncounter.getEncounterDatetime()) : "")).setFontSize(10);
+        table.addCell(new Paragraph(nascopCode)).setFontSize(10);
+        table.addCell(new Paragraph(currentRegimenEncounter != null ? Utils.getSimpleDateFormat("dd/MM/yyyy").format(currentRegimenEncounter.getEncounterDatetime()) : "")).setFontSize(10);
+        table.addCell(new Paragraph(sample.getOrder().getOrderReason() != null ? LabOrderDataExchange.getOrderReasonCode(sample.getOrder().getOrderReason().getUuid()) : "")).setFontSize(10);
+
     }
 
     public LabManifest getManifest() {

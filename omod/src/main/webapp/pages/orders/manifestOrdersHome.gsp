@@ -109,6 +109,11 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                         <% if (manifest.status != "Sent" && manifest.status != "Sending") { %>
                         <button class="removeOrderFromManifest" value="od_${o.id}">Remove from manifest</button>
                         <% } %>
+                        <a href="${ ui.pageLink("kenyaemrorderentry","manifest/printSpecimenLabel",[manifestOrder : o.id]) }"   target="_blank">
+                            <button style="background-color: cadetblue; color: white">
+                                Print
+                            </button>
+                        </a>
                     </td>
                     <td></td>
                 </tr>
