@@ -495,7 +495,7 @@ public class LabOrderDataExchange {
                         // this is really a hack to ensure that order date_stopped is filled, otherwise the order will remain active
                         // the issue here is that even though disc order is created, the original order is not stopped
                         // an alternative is to discontinue this order via REST which works well
-                        Context.getAdministrationService().executeSQL("update orders o1 inner join orders o2 on o1.order_id=o2.previous_order_id and o1.date_stopped is null set o1.date_stopped = '" +  formatedDiscDate + "' where o1.order_id = " + orderToRetain.getOrderId().intValue() , false);
+                        //Context.getAdministrationService().executeSQL("update orders o1 inner join orders o2 on o1.order_id=o2.previous_order_id and o1.date_stopped is null set o1.date_stopped = '" +  formatedDiscDate + "' where o1.order_id = " + orderToRetain.getOrderId().intValue() , false);
                     } catch (Exception e) {
                         System.out.println("An error was encountered while updating orders for viral load");
                         e.printStackTrace();
