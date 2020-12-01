@@ -127,6 +127,10 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                     {
                         name:'Routine',
                         uuid:'161236AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+                    },
+                    {
+                        name: 'Confirmation of persistent low level Viremia (PLLV)',
+                        uuid: '160032AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
                     }
                 ];
                 $scope.OrderReason =  _.filter($scope.OrderReason, function(o) {
@@ -228,7 +232,9 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                         if (data.orderReasonCoded === '161236AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' ) {
                             data['orderReasonCoded'] = "Routine";
                         }
-
+                        if (data.orderReasonCoded === '160032AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                            data['orderReasonCoded'] = "Confirmation of persistent low level Viremia (PLLV)";
+                        }
 
                     }
 
@@ -292,6 +298,10 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                             }
                             if (data.orderReason.uuid === '161236AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
                                 data['orderReasonCoded'] = "Routine";
+                            }
+
+                            if (data.orderReason.uuid === '160032AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                                data['orderReasonCoded'] = "Confirmation of persistent low level Viremia (PLLV)";
                             }
                         }
 
@@ -1193,7 +1203,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 return;
             }
             if($scope.GivenDate < $scope.resultDateSelected){
-                $scope.showErrorToast = 'Result date can not be before the order date.';
+                $scope.showErrorToast = 'Result date cannot be before the order date.';
 
                 $('#orderError').modal('show');
                 return;
