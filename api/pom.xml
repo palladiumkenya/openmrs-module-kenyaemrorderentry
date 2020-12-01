@@ -67,6 +67,13 @@
 
 		<dependency>
 			<groupId>org.openmrs.module</groupId>
+			<artifactId>reporting-api</artifactId>
+			<version>${reportingVersion}</version>
+
+		</dependency>
+
+		<dependency>
+			<groupId>org.openmrs.module</groupId>
 			<artifactId>kenyaui-omod</artifactId>
 			<version>${kenyauiVersion}</version>
 		</dependency>

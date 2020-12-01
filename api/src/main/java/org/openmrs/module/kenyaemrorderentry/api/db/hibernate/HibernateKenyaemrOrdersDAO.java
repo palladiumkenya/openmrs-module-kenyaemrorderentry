@@ -2,10 +2,13 @@ package org.openmrs.module.kenyaemrorderentry.api.db.hibernate;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.CacheMode;
 import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.exception.DataException;
+import org.openmrs.Cohort;
 import org.openmrs.Order;
 import org.openmrs.api.db.DAOException;
 import org.openmrs.module.kenyaemrorderentry.api.db.KenyaemrOrdersDAO;
@@ -128,5 +131,27 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
             return (LabManifest) criteria.list().get(0);
         }
         return null;
+    }
+
+    public Cohort getPatientsWithCadre(boolean includeTroupes, boolean includeCivilians) {
+
+        if (!includeTroupes && !includeCivilians) {
+            return new Cohort();
+        }
+
+        String prefixTerm = "";
+        StringBuilder query = new StringBuilder("select p.personId from Person p,PersonAttribute pa where p.personId = pa.person.personId and p.voided = false and ( ");
+        if (includeTroupes) {
+            query.append(" pa.value  = 'Troupe' ");
+            prefixTerm = " or";
+        }
+        if (includeCivilians) {
+            query.append(prefixTerm + " pa.value = 'Civilian'");
+        }
+
+        query.append(")");
+        Query q = sessionFactory.getCurrentSession().createQuery(query.toString());
+        q.setCacheMode(CacheMode.IGNORE);
+        return new Cohort(q.list());
     }
 }
