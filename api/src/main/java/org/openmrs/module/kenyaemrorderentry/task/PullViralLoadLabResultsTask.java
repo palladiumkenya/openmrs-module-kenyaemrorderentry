@@ -49,7 +49,7 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
             String updatesEndpoint = gpVLUpdateEndpoint.getPropertyValue();
 
             if (StringUtils.isBlank(serverUrl) || StringUtils.isBlank(API_KEY) || StringUtils.isBlank(updatesEndpoint)) {
-                System.out.println("Please set credentials for posting lab requests to the lab system");
+                System.out.println("Please set credentials for pulling lab requests from the lab system");
                 return;
             }
 

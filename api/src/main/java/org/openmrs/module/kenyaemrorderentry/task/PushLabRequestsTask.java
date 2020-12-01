@@ -72,8 +72,7 @@ public class PushLabRequestsTask extends AbstractTask {
 
             CloseableHttpClient httpClient = HttpClients.createDefault();
 
-            try
-            {
+            try  {
                 //Define a postRequest request
                 HttpPost postRequest = new HttpPost(serverUrl);
 
@@ -100,9 +99,10 @@ public class PushLabRequestsTask extends AbstractTask {
                         JSONParser parser = new JSONParser();
                         JSONObject responseObj = (JSONObject) parser.parse(EntityUtils.toString(response.getEntity()));
                         JSONObject errorObj = (JSONObject) responseObj.get("error");
-                        if (statusCode == 400) {// bad request
+                        /*if (statusCode == 400) {// bad request
                             manifestOrder.setStatus("Error - " + statusCode + ". Msg" + errorObj.get("message"));
-                        }
+                        }*/
+                        manifestOrder.setStatus("Error - " + statusCode + ". Msg" + errorObj.get("message"));
                        // throw new RuntimeException("Failed with HTTP error code : " + statusCode + ". Error msg: " + errorObj.get("message"));
                     } else {
                         manifestOrder.setStatus("Sent");
@@ -111,6 +111,9 @@ public class PushLabRequestsTask extends AbstractTask {
                     }
                     kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
                 }
+            } catch (Exception e) {
+                log.info("Could not push requests to the lab! " + e.getCause());
+                e.printStackTrace();
             }
             finally {
                 //Important: Close the connect
