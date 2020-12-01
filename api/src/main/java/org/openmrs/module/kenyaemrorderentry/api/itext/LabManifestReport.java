@@ -236,6 +236,11 @@ public class LabManifestReport {
         if (StringUtils.isNotBlank(regimenName )) {
             nascopCode = RegimenMappingUtils.getDrugNascopCodeByDrugNameAndRegimenLine(regimenName, regimenLine);
         }
+
+        if (StringUtils.isBlank(nascopCode) && StringUtils.isNotBlank(regimenLine)) {
+            nascopCode = Utils.getNonStandardCodeFromRegimenLine(regimenLine);
+        }
+
         table.addCell(new Paragraph(WordUtils.capitalizeFully(fullName))).setFontSize(10);
         table.addCell(new Paragraph(patient.getPatientIdentifier(Utils.getUniquePatientNumberIdentifierType()).getIdentifier())).setFontSize(10);
         table.addCell(new Paragraph(Utils.getSimpleDateFormat("dd/MM/yyyy").format(sample.getOrder().getPatient().getBirthdate()))).setFontSize(10);
