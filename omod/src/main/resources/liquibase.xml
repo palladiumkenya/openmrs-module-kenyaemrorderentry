@@ -39,6 +39,27 @@
             <column name="status" type="varchar(255)">
                 <constraints nullable="true"/>
             </column>
+            <column name="facility_county" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="facility_sub_county" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="facility_email" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="facility_phone_contact" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="clinician_name" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="clinician_phone_contact" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="lab_poc_phone_number" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
             <column name="creator" type="int"/>
             <column name="date_created" type="datetime">
                 <constraints nullable="false"/>

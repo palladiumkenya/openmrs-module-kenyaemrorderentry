@@ -97,6 +97,8 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                     <th class="nameColumn">Patient Name</th>
                     <th class="cccNumberColumn">CCC Number</th>
                     <th class="dateRequestColumn">Date requested</th>
+                    <th class="dateRequestColumn">Status</th>
+                    <th class="dateRequestColumn">Result</th>
                     <th class="actionColumn"></th>
                     <th></th>
                 </tr>
@@ -105,8 +107,10 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                     <td class="nameColumn">${o.order.patient.givenName} ${o.order.patient.familyName} </td>
                     <td class="cccNumberColumn">${o.order.patient.getPatientIdentifier(cccNumberType)}</td>
                     <td class="dateRequestColumn">${kenyaui.formatDate(o.order.dateActivated)}</td>
+                    <td class="dateRequestColumn">${o.status}</td>
+                    <td class="dateRequestColumn">${o.result ? "Not ready" : o.result}</td>
                     <td class="actionColumn">
-                        <% if (manifest.status != "Sent" && manifest.status != "Sending") { %>
+                        <% if (o.status == "Pending") { %>
                         <button class="removeOrderFromManifest" value="od_${o.id}">Remove from manifest</button>
                         <% } %>
                         <a href="${ ui.pageLink("kenyaemrorderentry","manifest/printSpecimenLabel",[manifestOrder : o.id]) }"   target="_blank">

@@ -1,8 +1,6 @@
 package org.openmrs.module.kenyaemrorderentry.fragment.controller.manifest;
 
-import org.apache.commons.io.IOUtils;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.kenyaemrorderentry.api.itext.LabManifestReport;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaui.form.AbstractWebForm;
@@ -15,13 +13,7 @@ import org.openmrs.ui.framework.page.PageModel;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -34,9 +26,8 @@ public class ManifestFormFragmentController {
         model.addAttribute("labManifest", labManifest);
         model.addAttribute("command", newEditManifestForm(exists));
         model.addAttribute("manifestStatusOptions", manifestStatus());
+        model.addAttribute("countyList", getCountyList());
         model.addAttribute("returnUrl", returnUrl);
-
-
     }
 
     private List<String> manifestStatus() {
@@ -46,6 +37,60 @@ public class ManifestFormFragmentController {
                 new String("Sending"),
                 new String("Sent")
                 );
+    }
+
+    private List<String> getCountyList() {
+
+        return Arrays.asList(
+                new String("Kwale"),
+                new String("Bungoma"),
+                new String("Kisumu"),
+                new String("Meru"),
+                new String("Mandera"),
+                new String("Kirinyaga"),
+                new String("Lamu"),
+                new String("Uasin Gishu"),
+                new String("Kisii"),
+                new String("Nakuru"),
+                new String("Kitui"),
+                new String("Baringo"),
+                new String("Migori"),
+                new String("Vihiga"),
+                new String("Taita Taveta"),
+                new String("Tana River"),
+                new String("Kakamega"),
+                new String("Siaya"),
+                new String("Marsabit"),
+                new String("Laikipia"),
+                new String("Kilifi"),
+                new String("Isiolo"),
+                new String("Nyeri"),
+                new String("Nairobi"),
+                new String("Narok"),
+                new String("Kajiado"),
+                new String("Nyamira"),
+                new String("Elgeyo Marakwet"),
+                new String("Embu"),
+                new String("Turkana"),
+                new String("Samburu"),
+                new String("Muranga"),
+                new String("Nandi"),
+                new String("Tharaka Nithi"),
+                new String("Kericho"),
+                new String("Trans Nzoia"),
+                new String("Bomet"),
+                new String("Machakos"),
+                new String("West Pokot"),
+                new String("Garissa"),
+                new String("Mombasa"),
+                new String("Wajir"),
+                new String("Homa Bay"),
+                new String("Makueni"),
+                new String("Nyandarua"),
+                new String("Kiambu"),
+                new String("Busia")
+        );
+
     }
 
 
@@ -78,6 +123,13 @@ public class ManifestFormFragmentController {
         private String courierOfficer;
         private String status;
         private  Date dispatchDate;
+        private String county;
+        private String subCounty;
+        private String facilityEmail;
+        private String facilityPhoneContact;
+        private String clinicianPhoneContact;
+        private String clinicianName;
+        private String labPocPhoneNumber;
 
         public EditManifestForm() {
         }
@@ -90,6 +142,13 @@ public class ManifestFormFragmentController {
             this.courier = manifest.getCourier();
             this.courierOfficer = manifest.getCourierOfficer();
             this.dispatchDate = manifest.getDispatchDate();
+            this.county = manifest.getCounty();
+            this.subCounty = manifest.getSubCounty();
+            this.facilityEmail = manifest.getFacilityEmail();
+            this.facilityPhoneContact = manifest.getFacilityPhoneContact();
+            this.clinicianName = manifest.getClinicianName();
+            this.clinicianPhoneContact = manifest.getClinicianPhoneContact();
+            this.labPocPhoneNumber = manifest.getLabPocPhoneNumber();
 
         }
         public LabManifest save(){
@@ -107,6 +166,13 @@ public class ManifestFormFragmentController {
             toSave.setStatus(status);
             toSave.setCourier(courier);
             toSave.setCourierOfficer(courierOfficer);
+            toSave.setCounty(county);
+            toSave.setSubCounty(subCounty);
+            toSave.setFacilityEmail(facilityEmail);
+            toSave.setFacilityPhoneContact(facilityPhoneContact);
+            toSave.setClinicianName(clinicianName);
+            toSave.setClinicianPhoneContact(clinicianPhoneContact);
+            toSave.setLabPocPhoneNumber(labPocPhoneNumber);
 
             LabManifest lManifest = Context.getService(KenyaemrOrdersService.class).saveLabOrderManifest(toSave);
             return lManifest;
@@ -119,11 +185,7 @@ public class ManifestFormFragmentController {
             require(errors, "endDate");
             require(errors, "status");
 
-            System.out.println("startDate: " + startDate);
-            System.out.println("endDate: " + endDate);
-            System.out.println("now: " + new Date());
-
-            if (startDate != null) {
+            /*if (startDate != null) {
                 if (startDate.after(new Date())) {
                     errors.rejectValue("startDate", "Cannot be in the future");
                 } else {
@@ -136,8 +198,8 @@ public class ManifestFormFragmentController {
                 }
             }
             if (endDate != null) {
-                if (endDate.before(new Date())) {
-                    errors.rejectValue("endDate", "Cannot be in the past");
+                if (endDate.after(new Date())) {
+                    errors.rejectValue("endDate", "Cannot be in the future");
                 } else {
                     Calendar calendar = Calendar.getInstance();
                     calendar.setTime(new Date());
@@ -146,7 +208,7 @@ public class ManifestFormFragmentController {
                         errors.rejectValue("endDate", " Invalid date");
                     }
                 }
-            }
+            }*/
         }
 
         public LabManifest getOriginal() {
@@ -203,6 +265,62 @@ public class ManifestFormFragmentController {
 
         public void setDispatchDate(Date dispatchDate) {
             this.dispatchDate = dispatchDate;
+        }
+
+        public String getCounty() {
+            return county;
+        }
+
+        public void setCounty(String county) {
+            this.county = county;
+        }
+
+        public String getSubCounty() {
+            return subCounty;
+        }
+
+        public void setSubCounty(String subCounty) {
+            this.subCounty = subCounty;
+        }
+
+        public String getFacilityEmail() {
+            return facilityEmail;
+        }
+
+        public void setFacilityEmail(String facilityEmail) {
+            this.facilityEmail = facilityEmail;
+        }
+
+        public String getFacilityPhoneContact() {
+            return facilityPhoneContact;
+        }
+
+        public void setFacilityPhoneContact(String facilityPhoneContact) {
+            this.facilityPhoneContact = facilityPhoneContact;
+        }
+
+        public String getClinicianPhoneContact() {
+            return clinicianPhoneContact;
+        }
+
+        public void setClinicianPhoneContact(String clinicianPhoneContact) {
+            this.clinicianPhoneContact = clinicianPhoneContact;
+        }
+
+        public String getClinicianName() {
+            return clinicianName;
+        }
+
+        public void setClinicianName(String clinicianName) {
+            this.clinicianName = clinicianName;
+        }
+
+        public String getLabPocPhoneNumber() {
+            return labPocPhoneNumber;
+        }
+
+        public void setLabPocPhoneNumber(String labPocPhoneNumber) {
+            this.labPocPhoneNumber = labPocPhoneNumber;
         }
     }
 }
