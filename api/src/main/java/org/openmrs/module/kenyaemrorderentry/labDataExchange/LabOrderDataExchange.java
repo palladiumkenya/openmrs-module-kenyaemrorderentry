@@ -116,7 +116,7 @@ public class LabOrderDataExchange {
         }
 
         if (StringUtils.isBlank(nascopCode) && StringUtils.isNotBlank(regimenLine)) {
-            nascopCode = Utils.getNonStandardCodeFromRegimenLine(regimenLine);
+            nascopCode = RegimenMappingUtils.getNonStandardCodeFromRegimenLine(regimenLine);
         }
 
         //add to list only if code is found. This is a temp measure to avoid sending messages with null regimen codes
@@ -183,7 +183,7 @@ public class LabOrderDataExchange {
         }
 
         if (StringUtils.isBlank(nascopCode) && StringUtils.isNotBlank(regimenLine)) {
-            nascopCode = Utils.getNonStandardCodeFromRegimenLine(regimenLine);
+            nascopCode = RegimenMappingUtils.getNonStandardCodeFromRegimenLine(regimenLine);
         }
 
         //add to list only if code is found. This is a temp measure to avoid sending messages with null regimen codes

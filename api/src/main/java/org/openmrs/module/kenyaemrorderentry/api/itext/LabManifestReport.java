@@ -238,7 +238,7 @@ public class LabManifestReport {
         }
 
         if (StringUtils.isBlank(nascopCode) && StringUtils.isNotBlank(regimenLine)) {
-            nascopCode = Utils.getNonStandardCodeFromRegimenLine(regimenLine);
+            nascopCode = RegimenMappingUtils.getNonStandardCodeFromRegimenLine(regimenLine);
         }
 
         table.addCell(new Paragraph(WordUtils.capitalizeFully(fullName))).setFontSize(10);
