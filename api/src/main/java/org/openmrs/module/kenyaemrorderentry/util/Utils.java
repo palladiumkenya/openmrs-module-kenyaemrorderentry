@@ -1,6 +1,7 @@
 package org.openmrs.module.kenyaemrorderentry.util;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.openmrs.GlobalProperty;
 import org.openmrs.Location;
 import org.openmrs.LocationAttribute;

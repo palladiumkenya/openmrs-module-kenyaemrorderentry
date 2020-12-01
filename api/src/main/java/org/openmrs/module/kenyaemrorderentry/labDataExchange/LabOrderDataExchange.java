@@ -116,7 +116,7 @@ public class LabOrderDataExchange {
         }
 
         if (StringUtils.isBlank(nascopCode) && StringUtils.isNotBlank(regimenLine)) {
-            nascopCode = getNonStandardCodeFromRegimenLine(regimenLine);
+            nascopCode = RegimenMappingUtils.getNonStandardCodeFromRegimenLine(regimenLine);
         }
 
         //add to list only if code is found. This is a temp measure to avoid sending messages with null regimen codes
@@ -183,7 +183,7 @@ public class LabOrderDataExchange {
         }
 
         if (StringUtils.isBlank(nascopCode) && StringUtils.isNotBlank(regimenLine)) {
-            nascopCode = getNonStandardCodeFromRegimenLine(regimenLine);
+            nascopCode = RegimenMappingUtils.getNonStandardCodeFromRegimenLine(regimenLine);
         }
 
         //add to list only if code is found. This is a temp measure to avoid sending messages with null regimen codes
@@ -210,26 +210,7 @@ public class LabOrderDataExchange {
         return test;
     }
 
-    private String getNonStandardCodeFromRegimenLine(String regimenLine) {
-        if (StringUtils.isBlank(regimenLine)) {
-            return null;
-        }
 
-        if (regimenLine.equals("AF")) {
-                return "AF5X";
-        } else if (regimenLine.equals("AS")) {
-                return "AS6X";
-        } else if (regimenLine.equals("AT")) {
-                return "AT2X";
-        } else if (regimenLine.equals("CF")) {
-                return "CF5X";
-        } else if (regimenLine.equals("CS")) {
-                return "CS4X";
-        } else if (regimenLine.equals("CT")) {
-                return "CT3X";
-        }
-        return null;
-    }
 
 
     /**
