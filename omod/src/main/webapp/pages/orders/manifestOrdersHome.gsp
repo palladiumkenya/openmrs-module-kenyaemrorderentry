@@ -46,7 +46,10 @@ tr:nth-child(even) {background-color: #f2f2f2;}
     width: 150px;
 }
 .actionColumn {
-    width: 260px;
+    width: 150px;
+}
+.sampleStatusColumn {
+    width: 280px;
 }
 </style>
 
@@ -77,7 +80,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                 <tr>
                     <td>
                         <a href="${ ui.pageLink("kenyaemrorderentry","manifest/downloadManifest",[manifest : manifest.id]) }"   target="_blank">
-                            <button style="background-color: bisque;">
+                            <button style="background-color: cadetblue; color: white">
                                 Download Manifest
                             </button>
                         </a>
@@ -97,21 +100,22 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                     <th class="nameColumn">Patient Name</th>
                     <th class="cccNumberColumn">CCC Number</th>
                     <th class="dateRequestColumn">Date requested</th>
-                    <th class="dateRequestColumn">Status</th>
+                    <th class="sampleStatusColumn">Status</th>
                     <th class="dateRequestColumn">Result</th>
+                    <th class="dateRequestColumn">Result Date</th>
                     <th class="actionColumn"></th>
-                    <th></th>
                 </tr>
                 <% manifestOrders.each { o -> %>
                 <tr>
                     <td class="nameColumn">${o.order.patient.givenName} ${o.order.patient.familyName} </td>
                     <td class="cccNumberColumn">${o.order.patient.getPatientIdentifier(cccNumberType)}</td>
                     <td class="dateRequestColumn">${kenyaui.formatDate(o.order.dateActivated)}</td>
-                    <td class="dateRequestColumn">${o.status}</td>
-                    <td class="dateRequestColumn">${o.result ? "Not ready" : o.result}</td>
+                    <td class="sampleStatusColumn">${o.status}</td>
+                    <td class="dateRequestColumn">${o.result ?: "Not ready"}</td>
+                    <td class="dateRequestColumn">${o.resultDate ?: ""}</td>
                     <td class="actionColumn">
                         <% if (o.status == "Pending") { %>
-                        <button class="removeOrderFromManifest" value="od_${o.id}">Remove from manifest</button>
+                        <button class="removeOrderFromManifest" value="od_${o.id}">Remove</button>
                         <% } %>
                         <a href="${ ui.pageLink("kenyaemrorderentry","manifest/printSpecimenLabel",[manifestOrder : o.id]) }"   target="_blank">
                             <button style="background-color: cadetblue; color: white">
@@ -119,7 +123,6 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                             </button>
                         </a>
                     </td>
-                    <td></td>
                 </tr>
                 <% } %>
 
