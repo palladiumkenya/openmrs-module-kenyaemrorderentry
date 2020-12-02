@@ -245,10 +245,14 @@ public class LabManifestReport {
         table.addCell(new Paragraph(patient.getPatientIdentifier(Utils.getUniquePatientNumberIdentifierType()).getIdentifier())).setFontSize(10);
         table.addCell(new Paragraph(Utils.getSimpleDateFormat("dd/MM/yyyy").format(sample.getOrder().getPatient().getBirthdate()))).setFontSize(10);
         table.addCell(new Paragraph(sample.getOrder().getPatient().getGender())).setFontSize(10);
-        table.addCell(new Paragraph("3")).setFontSize(10);
+        if (patient.getGender().equals("F")) {
+            table.addCell(new Paragraph("3")).setFontSize(10);
+        } else {
+            table.addCell(new Paragraph(""));
+        }
         table.addCell(new Paragraph("1")).setFontSize(10);
-        table.addCell(new Paragraph(Utils.getSimpleDateFormat("dd/MM/yyyy").format(sample.getOrder().getDateActivated()))).setFontSize(10);
-        table.addCell(new Paragraph(Utils.getSimpleDateFormat("dd/MM/yyyy").format(sample.getDateCreated()))).setFontSize(10);
+        table.addCell(new Paragraph(sample.getSampleCollectionDate() != null ? Utils.getSimpleDateFormat("dd/MM/yyyy").format(sample.getSampleCollectionDate()) : "")).setFontSize(10);
+        table.addCell(new Paragraph(sample.getSampleSeparationDate() != null ? Utils.getSimpleDateFormat("dd/MM/yyyy").format(sample.getSampleSeparationDate()) : "")).setFontSize(10);
         table.addCell(new Paragraph(originalRegimenEncounter != null ? Utils.getSimpleDateFormat("dd/MM/yyyy").format(originalRegimenEncounter.getEncounterDatetime()) : "")).setFontSize(10);
         table.addCell(new Paragraph(nascopCode)).setFontSize(10);
         table.addCell(new Paragraph(currentRegimenEncounter != null ? Utils.getSimpleDateFormat("dd/MM/yyyy").format(currentRegimenEncounter.getEncounterDatetime()) : "")).setFontSize(10);

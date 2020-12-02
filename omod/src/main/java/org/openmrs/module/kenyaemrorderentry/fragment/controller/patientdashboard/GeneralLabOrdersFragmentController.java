@@ -117,19 +117,23 @@ public class GeneralLabOrdersFragmentController {
         labOrder.setStatus("Pending");
 
         kenyaemrOrdersService.saveLabManifestOrder(labOrder);
-
-        System.out.println("Generated payload:::::" + payload.toString());
-
         SimpleObject simpleObject = SimpleObject.create("status", "successful");
         return simpleObject;
     }
 
-    public SimpleObject addOrderToManifest(@RequestParam(value = "manifestId") LabManifest manifest, @RequestParam(value = "orderId")Order order) {
+    public SimpleObject addOrderToManifest(@RequestParam(value = "manifestId") LabManifest manifest,
+                                           @RequestParam(value = "orderId")Order order,
+                                           @RequestParam(value = "dateSampleCollected") Date dateSampleCollected,
+                                           @RequestParam(value = "dateSampleSeparated") Date dateSampleSeparated
+                                           ) {
 
         if (manifest != null && order != null) {
             LabManifestOrder labOrder = new LabManifestOrder();
             labOrder.setLabManifest(manifest);
             labOrder.setOrder(order);
+
+            labOrder.setSampleCollectionDate(dateSampleCollected);
+            labOrder.setSampleSeparationDate(dateSampleSeparated);
 
             LabOrderDataExchange dataExchange = new LabOrderDataExchange();
             ObjectNode payload = dataExchange.generatePayloadForLabOrder(order);

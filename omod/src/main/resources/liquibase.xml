@@ -113,6 +113,12 @@
             <column name="result_date" type="date">
                 <constraints nullable="true"/>
             </column>
+            <column name="sample_collection_date" type="date">
+                <constraints nullable="true"/>
+            </column>
+            <column name="sample_separation_date" type="date">
+                <constraints nullable="true"/>
+            </column>
             <column name="date_created" type="datetime">
                 <constraints nullable="false"/>
             </column>

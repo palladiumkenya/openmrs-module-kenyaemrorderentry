@@ -174,6 +174,9 @@ public class LabOrderDataExchange {
         PatientIdentifier cccNumber = patient.getPatientIdentifier(Utils.getUniquePatientNumberIdentifierType());
         Encounter originalRegimenEncounter = RegimenMappingUtils.getFirstEncounterForProgram(patient, "ARV");
         Encounter currentRegimenEncounter = RegimenMappingUtils.getLastEncounterForProgram(patient, "ARV");
+        if (currentRegimenEncounter == null) {
+            return test;
+        }
         SimpleObject regimenDetails = RegimenMappingUtils.buildRegimenChangeObject(currentRegimenEncounter.getObs(), currentRegimenEncounter);
         String regimenName = (String) regimenDetails.get("regimenShortDisplay");
         String regimenLine = (String) regimenDetails.get("regimenLine");
