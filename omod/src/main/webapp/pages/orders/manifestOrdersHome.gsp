@@ -3,6 +3,9 @@
     def menuItems = [
             [label: "Back", iconProvider: "kenyaui", icon: "buttons/back.png", label: "Back to manifest list", href: ui.pageLink("kenyaemrorderentry", "orders/labOrdersManifestHome")]
     ]
+
+    ui.includeJavascript("kenyaemrorderentry", "bootstrap.min.js")
+    ui.includeCss("kenyaemrorderentry", "bootstrap.min.css")
 %>
 <style>
 .simple-table {
@@ -46,7 +49,10 @@ tr:nth-child(even) {background-color: #f2f2f2;}
     width: 150px;
 }
 .actionColumn {
-    width: 260px;
+    width: 150px;
+}
+.sampleStatusColumn {
+    width: 280px;
 }
 </style>
 
@@ -74,10 +80,12 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                 </tr>
 
                 <tr></tr>
+            </table>
+            <table>
                 <tr>
                     <td>
                         <a href="${ ui.pageLink("kenyaemrorderentry","manifest/downloadManifest",[manifest : manifest.id]) }"   target="_blank">
-                            <button style="background-color: bisque;">
+                            <button style="background-color: cadetblue; color: white">
                                 Download Manifest
                             </button>
                         </a>
@@ -97,17 +105,22 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                     <th class="nameColumn">Patient Name</th>
                     <th class="cccNumberColumn">CCC Number</th>
                     <th class="dateRequestColumn">Date requested</th>
+                    <th class="sampleStatusColumn">Status</th>
+                    <th class="dateRequestColumn">Result</th>
+                    <th class="dateRequestColumn">Result Date</th>
                     <th class="actionColumn"></th>
-                    <th></th>
                 </tr>
                 <% manifestOrders.each { o -> %>
                 <tr>
                     <td class="nameColumn">${o.order.patient.givenName} ${o.order.patient.familyName} </td>
                     <td class="cccNumberColumn">${o.order.patient.getPatientIdentifier(cccNumberType)}</td>
                     <td class="dateRequestColumn">${kenyaui.formatDate(o.order.dateActivated)}</td>
+                    <td class="sampleStatusColumn">${o.status}</td>
+                    <td class="dateRequestColumn">${o.result ?: "Not ready"}</td>
+                    <td class="dateRequestColumn">${o.resultDate ?: ""}</td>
                     <td class="actionColumn">
-                        <% if (manifest.status != "Sent" && manifest.status != "Sending") { %>
-                        <button class="removeOrderFromManifest" value="od_${o.id}">Remove from manifest</button>
+                        <% if (o.status == "Pending") { %>
+                        <button class="removeOrderFromManifest" value="od_${o.id}">Remove</button>
                         <% } %>
                         <a href="${ ui.pageLink("kenyaemrorderentry","manifest/printSpecimenLabel",[manifestOrder : o.id]) }"   target="_blank">
                             <button style="background-color: cadetblue; color: white">
@@ -115,7 +128,6 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                             </button>
                         </a>
                     </td>
-                    <td></td>
                 </tr>
                 <% } %>
 
@@ -139,7 +151,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                     <td class="cccNumberColumn">${o.patient.getPatientIdentifier(cccNumberType)}</td>
                     <td class="dateRequestColumn">${kenyaui.formatDate(o.dateActivated)}</td>
                     <td class="actionColumn">
-                        <button class="addOrderToManifest" value="od_${o.orderId}">Add to manifest</button>
+                        <button class="addOrderToManifest" value="od_${o.orderId}" data-target="#updateSampleDetails">Add to manifest</button>
                     </td>
                     <td><span id="alert_${o.orderId}"></span></td>
                 </tr>
@@ -148,6 +160,39 @@ tr:nth-child(even) {background-color: #f2f2f2;}
             </table>
         </fieldset>
         <% } %>
+    </div>
+
+    <!-- Modal date for vl results -->
+    <div class="modal fade" id="updateSampleDetails" tabindex="-1" role="dialog" aria-labelledby="dateModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header modal-header-primary">
+                    <h5 class="modal-title" id="dateVlModalCenterTitle">Update sample details</h5>
+                    <button type="button" class="close" data-dismiss="modal">&times;
+
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input hidden="text" id="selectedOrderId"/>
+                    <span style="color: firebrick" id="msgBox"></span>
+                    <table>
+                        <tr>
+                            <td>Sample collection date</td>
+                            <td>${ ui.includeFragment("kenyaui", "field/java.util.Date", [ id: "dateSampleCollected", formFieldName: "dateSampleCollected"]) }</td>
+                        </tr>
+                        <tr>
+                            <td>Sample separation/centrifugation date</td>
+                            <td>${ ui.includeFragment("kenyaui", "field/java.util.Date", [ id: "dateSampleSeparated", formFieldName: "dateSampleSeparated"]) }</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" data-dismiss="modal">Close</button>
+                    <button type="button" id="addSample">
+                        <img src="${ ui.resourceLink("kenyaui", "images/glyphs/ok.png") }" /> Save</button>
+                </div>
+            </div>
+        </div>
     </div>
 
 </div>
@@ -159,24 +204,49 @@ tr:nth-child(even) {background-color: #f2f2f2;}
     jq(function () {
         // a function that adds an order to a manifest
         jq('#eligibleList').on('click','.addOrderToManifest',function () {
+            // clear previously entered values
+            jq(".modal-body #selectedOrderId").val("");
+            jq(".modal-body #dateSampleCollected").val("");
+            jq(".modal-body #dateSampleSeparated").val("");
+
             var concatOrderId = jq(this).val();
             var orderId = concatOrderId.split("_")[1];
 
-            jq.getJSON('${ ui.actionLink("kenyaemrorderentry", "patientdashboard/generalLabOrders", "addOrderToManifest") }',{
-                'manifestId': ${ manifest.id },
-                'orderId': orderId
-            })
-                .success(function (data) {
-                    if (data.status == 'successful') {
-                        jq('#alert_' + orderId).text("Sample successfully added to manifest ");
-                        jq(this).prop('disabled', true);
-                    } else {
-                        jq('#alert_' + orderId).text("Could not add to the manifest!. Please check that the patient's regimen line is correctly captured and try again ");
-                    }
+            jq(".modal-body #selectedOrderId").val( orderId );
+            jq('#updateSampleDetails').modal('show');
+        });
+
+        jq('#addSample').click(function () {
+
+            var selOrder = jq(".modal-body #selectedOrderId").val();
+            var dateSampleCollected = jq(".modal-body #dateSampleCollected").val();
+            var dateSampleSeparated = jq(".modal-body #dateSampleSeparated").val();
+
+            if (dateSampleCollected == "" || dateSampleSeparated == "") {
+                jq('.modal-body #msgBox').text('Please provide dates for sample collection and separation');
+            } else {
+                jq.getJSON('${ ui.actionLink("kenyaemrorderentry", "patientdashboard/generalLabOrders", "addOrderToManifest") }',{
+                    'manifestId': ${ manifest.id },
+                    'orderId': selOrder,
+                    'dateSampleCollected': dateSampleCollected,
+                    'dateSampleSeparated': dateSampleSeparated
                 })
-                .error(function (xhr, status, err) {
-                    jq('#alert_' + orderId).text("A problem was encountered when adding sample to the manifest ");
-                })
+                    .success(function (data) {
+                        if (data.status == 'successful') {
+                            jq('#updateSampleDetails').modal('toggle');
+                            kenyaui.openAlertDialog({ heading: 'Alert', message: 'Sample successfully added to the manifest' })
+                            setTimeout(function () {
+                                window.location.reload();
+                            }, 2000);
+                        } else {
+                            jq('.modal-body #msgBox').text('Could not add to the manifest!. Please check that current regimen shows the regimen line');
+
+                        }
+                    })
+                    .error(function (xhr, status, err) {
+                        jq('.modal-body #msgBox').text('The system encountered a problem while adding the sample. Please try again');
+                    })
+            }
         });
     });
 

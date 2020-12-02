@@ -20,8 +20,33 @@
             ]
     ]
 
-%>
+    def facilityContactFields = [
+            [
 
+                    [object: command, property: "facilityEmail", label: "Facility Email"],
+                    [object: command, property: "facilityPhoneContact", label: "Facility Phone contact"]
+
+            ]
+    ]
+
+    def clinicianContactFields = [
+            [
+
+                    [object: command, property: "clinicianName", label: "Clinician Name"],
+                    [object: command, property: "clinicianPhoneContact", label: "Clinician Phone contact"]
+
+            ]
+    ]
+
+    def labPocFields = [
+            [
+
+                    [object: command, property: "labPocPhoneNumber", label: "Lab person Phone number"]
+            ]
+    ]
+
+%>
+<script type="text/javascript" src="/${ contextPath }/moduleResources/kenyaemr/scripts/KenyaAddressHierarchy.js"></script>
 <form id="new-edit-manifest-form" method="post"
       action="${ui.actionLink("kenyaemrorderentry", "manifest/manifestForm", "saveManifest")}">
     <% if (command.original) { %>
@@ -50,11 +75,49 @@
             <% } %>
         </fieldset>
 
+    <fieldset>
+        <legend>Address</legend>
+
+        <table>
+            <tr>
+                <td class="ke-field-label" style="width: 265px">County</td>
+                <td class="ke-field-label" style="width: 260px">Sub-County</td>
+            </tr>
+
+            <tr>
+                <td style="width: 265px">
+                    <select id="county" name="county">
+                        <option></option>
+                        <%countyList.each { %>
+                        <option value="${it}">${it}</option>
+                        <%}%>
+                    </select>
+                </td>
+                <td style="width: 260px">
+                    <select id="subCounty" name="subCounty">
+                        <option></option>
+                    </select>
+                </td>
+            </tr>
+        </table>
+        <% facilityContactFields.each { %>
+        ${ui.includeFragment("kenyaui", "widget/rowOfFields", [fields: it])}
+        <% } %>
+
+        <% clinicianContactFields.each { %>
+        ${ui.includeFragment("kenyaui", "widget/rowOfFields", [fields: it])}
+        <% } %>
+
+        <% labPocFields.each { %>
+        ${ui.includeFragment("kenyaui", "widget/rowOfFields", [fields: it])}
+        <% } %>
+    </fieldset>
+
         <fieldset>
-            <legend>Mark manifest as ready to be sent</legend>
+            <legend>Manifest status</legend>
             <table>
                 <tr>
-                    <td class="ke-field-label">Ready to send</td>
+                    <td class="ke-field-label">Status</td>
                 </tr>
                 <tr>
                     <td>

@@ -17,6 +17,13 @@ public class LabManifest extends BaseOpenmrsData implements Serializable {
     private String courier;
     private String courierOfficer;
     private String status;
+    private String county;
+    private String subCounty;
+    private String facilityEmail;
+    private String facilityPhoneContact;
+    private String clinicianPhoneContact;
+    private String clinicianName;
+    private String labPocPhoneNumber;
     private String uuid;
 
     public LabManifest() {
@@ -89,6 +96,62 @@ public class LabManifest extends BaseOpenmrsData implements Serializable {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getCounty() {
+        return county;
+    }
+
+    public void setCounty(String county) {
+        this.county = county;
+    }
+
+    public String getSubCounty() {
+        return subCounty;
+    }
+
+    public void setSubCounty(String subCounty) {
+        this.subCounty = subCounty;
+    }
+
+    public String getFacilityEmail() {
+        return facilityEmail;
+    }
+
+    public void setFacilityEmail(String facilityEmail) {
+        this.facilityEmail = facilityEmail;
+    }
+
+    public String getFacilityPhoneContact() {
+        return facilityPhoneContact;
+    }
+
+    public void setFacilityPhoneContact(String facilityPhoneContact) {
+        this.facilityPhoneContact = facilityPhoneContact;
+    }
+
+    public String getClinicianPhoneContact() {
+        return clinicianPhoneContact;
+    }
+
+    public void setClinicianPhoneContact(String clinicianPhoneContact) {
+        this.clinicianPhoneContact = clinicianPhoneContact;
+    }
+
+    public String getClinicianName() {
+        return clinicianName;
+    }
+
+    public void setClinicianName(String clinicianName) {
+        this.clinicianName = clinicianName;
+    }
+
+    public String getLabPocPhoneNumber() {
+        return labPocPhoneNumber;
+    }
+
+    public void setLabPocPhoneNumber(String labPocPhoneNumber) {
+        this.labPocPhoneNumber = labPocPhoneNumber;
     }
 
     @Override

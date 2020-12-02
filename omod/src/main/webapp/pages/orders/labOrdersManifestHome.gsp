@@ -27,7 +27,7 @@
     text-shadow: 1px 1px 1px #fff;
 }
 table {
-    width: 50%;
+    width: 95%;
 }
 th, td {
     padding: 5px;
@@ -62,25 +62,40 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                 <th>Start Date</th>
                 <th>End Date</th>
                 <th>Courier</th>
+                <th>County/Sub-county</th>
+                <th>Facility Email</th>
+                <th>Facility Phone</th>
+                <th>Clinician name</th>
+                <th>Clinician contact</th>
+                <th>Lab person contact</th>
                 <th>Status</th>
+                <th>Dispatch</th>
                 <th></th>
             </tr>
             <% allManifest.each { m -> %>
             <tr>
                 <td>${kenyaui.formatDate(m.startDate)}</td>
                 <td>${kenyaui.formatDate(m.endDate)}</td>
-                <td>${m.courier}</td>
-                <td>${m.status}</td>
-                <td>
+                <td>${m.courier ?: ""}</td>
+                <td>${m.county ?: ""} / ${m.subCounty ?: ""}</td>
+                <td>${m.facilityEmail ?: ""}</td>
+                <td>${m.facilityPhoneContact ?: ""}</td>
+                <td>${m.clinicianName ?: ""}</td>
+                <td>${m.clinicianPhoneContact ?: ""}</td>
+                <td>${m.labPocPhoneNumber ?: ""}</td>
+                <td>${m.status ?: ""}</td>
+                <td>${m.dispatchDate ?: ""}</td>
+
+            <td>
                     <button type="button"
                             onclick="ui.navigate('${ ui.pageLink("kenyaemrorderentry", "orders/manifestOrdersHome", [ manifest: m.id,  returnUrl: ui.thisUrl() ])}')">
-                       View details
+                       View
                     </button>
                     <% if(m.status != "Sent") { %>
                     <button type="button"
                             onclick="ui.navigate('${ ui.pageLink("kenyaemrorderentry", "manifest/createManifest", [ manifestId:m.id, returnUrl: ui.thisUrl() ])}')">
 
-                        Edit details
+                        Edit
                     </button>
                     <% } %>
                 </td>

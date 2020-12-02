@@ -100,26 +100,26 @@ public class LabManifestReport {
         Text facilityNameLabel = new Text("Facility Name: " + Utils.getDefaultLocation().getName()).setFontSize(10);
         Text mflCodeLabel = new Text("MFL Code: " + Utils.getDefaultLocationMflCode(Utils.getDefaultLocation())).setFontSize(10);
 
-        Text facilityEmailLabel = new Text("Facility/CCC email: ...........").setFontSize(10);
-        Text facilityPhoneNoLabel = new Text("Facility/CCC phone no: ..........").setFontSize(10);
+        Text facilityEmailLabel = new Text("Facility/CCC email: " + (manifest.getFacilityEmail() != null ? manifest.getFacilityEmail() : "")).setFontSize(10);
+        Text facilityPhoneNoLabel = new Text("Facility/CCC phone no: " + (manifest.getFacilityPhoneContact() != null ? manifest.getFacilityPhoneContact() : "")).setFontSize(10);
         fDetailsCol1.setFixedLeading(13); // sets line spacing
         fDetailsCol1.add(column1Label).add("\n").add(facilityNameLabel).add("\n").add(mflCodeLabel).add("\n").add(facilityEmailLabel).add("\n").add(facilityPhoneNoLabel);
 
         // adding column 2
         Paragraph fDetailsCol2 = new Paragraph();
         Text column2Label = new Text("");
-        Text countyLabel = new Text("County: ........................").setFontSize(10);
-        Text subCountyLabel = new Text("Sub-county: ....................").setFontSize(10);
-        Text clinicianPhoneNoLabel = new Text("Clinician's phone no: .................").setFontSize(10);
-        Text clinicianNameLabel = new Text("Clinician's Name: ........................").setFontSize(10);
+        Text countyLabel = new Text("County: " + (manifest.getCounty() != null ? manifest.getCounty() : "")).setFontSize(10);
+        Text subCountyLabel = new Text("Sub-county: " + (manifest.getSubCounty() != null ? manifest.getSubCounty() : "")).setFontSize(10);
+        Text clinicianPhoneNoLabel = new Text("Clinician's phone no: " + (manifest.getClinicianPhoneContact() != null ? manifest.getClinicianPhoneContact() : "")).setFontSize(10);
+        Text clinicianNameLabel = new Text("Clinician's Name: " + (manifest.getClinicianName() != null ? manifest.getClinicianName() : "")).setFontSize(10);
         fDetailsCol2.setFixedLeading(13);
         fDetailsCol2.add(column2Label).add("\n").add(countyLabel).add("\n").add(subCountyLabel).add("\n").add(clinicianPhoneNoLabel).add("\n").add(clinicianNameLabel);
 
         Paragraph fDetailsCol3 = new Paragraph();
         Text column3Label = new Text("Facility Laboratory details").setBold().setFontSize(10).setUnderline();
         //Text facilityDispatchLabel = new Text("Date & time sample dispatched: " + this.manifest.getDispatchDate() != null ? Utils.getSimpleDateFormat("dd/MM/yyyy").format(this.manifest.getDispatchDate()) : "").setFontSize(10);
-        Text facilityDispatchLabel = new Text("Date & time sample dispatched: ........................").setFontSize(10);
-        Text facilityFocalPointLabel = new Text("Lab focal person phone contact: ........................").setFontSize(10);
+        Text facilityDispatchLabel = new Text("Date & time sample dispatched: " + (manifest.getDispatchDate() != null ? Utils.getSimpleDateFormat("dd/MM/yyyy").format(manifest.getDispatchDate()) : "")).setFontSize(10);
+        Text facilityFocalPointLabel = new Text("Lab focal person phone contact: " + (manifest.getLabPocPhoneNumber() != null ? manifest.getLabPocPhoneNumber() : "")).setFontSize(10);
         Text hubDetailsLabel = new Text("Hub details").setFontSize(10).setBold().setFontSize(10).setUnderline();
         Text hubDispatchLabel = new Text("Date & time sample dispatched: ........................").setFontSize(10);
         Text hubFocalPointLabel = new Text("Lab focal person phone contact: ........................").setFontSize(10);
@@ -245,10 +245,14 @@ public class LabManifestReport {
         table.addCell(new Paragraph(patient.getPatientIdentifier(Utils.getUniquePatientNumberIdentifierType()).getIdentifier())).setFontSize(10);
         table.addCell(new Paragraph(Utils.getSimpleDateFormat("dd/MM/yyyy").format(sample.getOrder().getPatient().getBirthdate()))).setFontSize(10);
         table.addCell(new Paragraph(sample.getOrder().getPatient().getGender())).setFontSize(10);
-        table.addCell(new Paragraph("3")).setFontSize(10);
+        if (patient.getGender().equals("F")) {
+            table.addCell(new Paragraph("3")).setFontSize(10);
+        } else {
+            table.addCell(new Paragraph(""));
+        }
         table.addCell(new Paragraph("1")).setFontSize(10);
-        table.addCell(new Paragraph(Utils.getSimpleDateFormat("dd/MM/yyyy").format(sample.getOrder().getDateActivated()))).setFontSize(10);
-        table.addCell(new Paragraph(Utils.getSimpleDateFormat("dd/MM/yyyy").format(sample.getDateCreated()))).setFontSize(10);
+        table.addCell(new Paragraph(sample.getSampleCollectionDate() != null ? Utils.getSimpleDateFormat("dd/MM/yyyy").format(sample.getSampleCollectionDate()) : "")).setFontSize(10);
+        table.addCell(new Paragraph(sample.getSampleSeparationDate() != null ? Utils.getSimpleDateFormat("dd/MM/yyyy").format(sample.getSampleSeparationDate()) : "")).setFontSize(10);
         table.addCell(new Paragraph(originalRegimenEncounter != null ? Utils.getSimpleDateFormat("dd/MM/yyyy").format(originalRegimenEncounter.getEncounterDatetime()) : "")).setFontSize(10);
         table.addCell(new Paragraph(nascopCode)).setFontSize(10);
         table.addCell(new Paragraph(currentRegimenEncounter != null ? Utils.getSimpleDateFormat("dd/MM/yyyy").format(currentRegimenEncounter.getEncounterDatetime()) : "")).setFontSize(10);

@@ -18,6 +18,15 @@
         <property name="courier" type="java.lang.String" column="courier" length="255"/>
         <property name="courierOfficer" type="java.lang.String" column="courier_officer" length="255"/>
         <property name="status" type="java.lang.String" column="status" length="255"/>
+
+        <property name="county" type="java.lang.String" column="facility_county" length="255"/>
+        <property name="subCounty" type="java.lang.String" column="facility_sub_county" length="255"/>
+        <property name="facilityEmail" type="java.lang.String" column="facility_email" length="255"/>
+        <property name="facilityPhoneContact" type="java.lang.String" column="facility_phone_contact" length="255"/>
+        <property name="clinicianName" type="java.lang.String" column="clinician_name" length="255"/>
+        <property name="clinicianPhoneContact" type="java.lang.String" column="clinician_phone_contact" length="255"/>
+        <property name="labPocPhoneNumber" type="java.lang.String" column="lab_poc_phone_number" length="255"/>
+
         <!-- bi-directional many-to-one association to User -->
         <many-to-one name="creator" class="org.openmrs.User" not-null="true">
         <column name="creator" />
