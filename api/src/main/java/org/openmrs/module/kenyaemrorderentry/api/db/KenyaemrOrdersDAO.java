@@ -1,5 +1,6 @@
 package org.openmrs.module.kenyaemrorderentry.api.db;
 
+import org.openmrs.Cohort;
 import org.openmrs.Order;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
@@ -28,4 +29,6 @@ public interface KenyaemrOrdersDAO {
     List<LabManifestOrder> getLabManifestOrderByManifestAndStatus(LabManifest labManifestOrder, String status);
 
     LabManifest getLabOrderManifestByStatus(String status);
+    public Cohort getPatientsWithCadre(boolean includeTroupes, boolean includeCivilians);
+
 }

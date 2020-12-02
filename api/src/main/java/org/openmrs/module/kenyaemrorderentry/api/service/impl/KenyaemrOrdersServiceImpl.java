@@ -2,6 +2,7 @@ package org.openmrs.module.kenyaemrorderentry.api.service.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openmrs.Cohort;
 import org.openmrs.Order;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.kenyaemrorderentry.api.db.hibernate.HibernateKenyaemrOrdersDAO;
@@ -87,6 +88,10 @@ public class KenyaemrOrdersServiceImpl extends BaseOpenmrsService implements Ken
     @Override
     public List<LabManifestOrder> getLabManifestOrderByManifestAndStatus(LabManifest labManifestOrder, String status) {
         return dao.getLabManifestOrderByManifestAndStatus(labManifestOrder, status);
+    }
+
+    public Cohort getPatientsWithCadre(boolean includeTroupes, boolean includeCivilians) {
+        return dao.getPatientsWithCadre(includeTroupes, includeCivilians);
     }
 
     public HibernateKenyaemrOrdersDAO getDao() {
