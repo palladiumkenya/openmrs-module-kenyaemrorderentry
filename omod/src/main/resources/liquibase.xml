@@ -86,7 +86,7 @@
             </not>
         </preConditions>
         <comment>
-            Create table to store Lab manifest orders
+            Create table to store Lab manifest order
         </comment>
         <createTable tableName="kenyaemr_order_entry_lab_manifest_order">
             <column name="id" autoIncrement="true" type="int">
@@ -96,6 +96,9 @@
                 <constraints nullable="false"/>
             </column>
             <column name="order_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sample_type" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
             <column name="payload" type="text">

@@ -122,7 +122,8 @@ public class GeneralLabOrdersFragmentController {
     }
 
     public SimpleObject addOrderToManifest(@RequestParam(value = "manifestId") LabManifest manifest,
-                                           @RequestParam(value = "orderId")Order order,
+                                           @RequestParam(value = "orderId") Order order,
+                                           @RequestParam(value = "sampleType") String sampleType,
                                            @RequestParam(value = "dateSampleCollected") Date dateSampleCollected,
                                            @RequestParam(value = "dateSampleSeparated") Date dateSampleSeparated
                                            ) {
@@ -131,12 +132,12 @@ public class GeneralLabOrdersFragmentController {
             LabManifestOrder labOrder = new LabManifestOrder();
             labOrder.setLabManifest(manifest);
             labOrder.setOrder(order);
-
+            labOrder.setSampleType(sampleType);
             labOrder.setSampleCollectionDate(dateSampleCollected);
             labOrder.setSampleSeparationDate(dateSampleSeparated);
 
             LabOrderDataExchange dataExchange = new LabOrderDataExchange();
-            ObjectNode payload = dataExchange.generatePayloadForLabOrder(order);
+            ObjectNode payload = dataExchange.generatePayloadForLabOrder(order, dateSampleCollected, sampleType);
             // TODO: check if the payload is not null. Currently, an empty payload is generated if nascop code is null
             if (!payload.isEmpty()) {
                 labOrder.setPayload(payload.toString());

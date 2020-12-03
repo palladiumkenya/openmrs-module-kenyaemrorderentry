@@ -94,9 +94,7 @@
                     </select>
                 </td>
                 <td style="width: 260px">
-                    <select id="subCounty" name="subCounty">
-                        <option></option>
-                    </select>
+                    <input type="text" id="subCounty" name="subCounty" size="30"></input>
                 </td>
             </tr>
         </table>

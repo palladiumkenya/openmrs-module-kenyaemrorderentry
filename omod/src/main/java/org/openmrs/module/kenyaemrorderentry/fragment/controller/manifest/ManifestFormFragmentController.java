@@ -32,10 +32,9 @@ public class ManifestFormFragmentController {
 
     private List<String> manifestStatus() {
         return Arrays.asList(
-                new String("Open"),
+                new String("Draft"),
                 new String("Ready to send"),
-                new String("Sending"),
-                new String("Sent")
+                new String("On hold")
                 );
     }
 

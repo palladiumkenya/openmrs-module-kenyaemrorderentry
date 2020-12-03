@@ -53,7 +53,7 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
                 return;
             }
 
-            LabManifest allManifest = kenyaemrOrdersService.getLabOrderManifestByStatus("Ready to send");
+            LabManifest allManifest = kenyaemrOrdersService.getLabOrderManifestByStatus("Completed");
 
             if (allManifest == null) {
                 System.out.println("There are no manifests to pull results for");
@@ -64,6 +64,8 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
 
             if (ordersInManifest.size() < 1) {
                 System.out.println("There are no active labs to pull results for");
+                allManifest.setStatus("Received result");
+                kenyaemrOrdersService.saveLabOrderManifest(allManifest);
                 return;
             }
 
