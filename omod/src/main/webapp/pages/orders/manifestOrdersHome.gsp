@@ -85,11 +85,17 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                 <tr></tr>
             </table>
             <% if (manifest.status == 'Draft') { %>
-            <button type="button"
+            <table>
+                <tr>
+                    <td>
+            <button type="button" style="background-color: cadetblue; color: white"
                     onclick="ui.navigate('${ ui.pageLink("kenyaemrorderentry", "manifest/createManifest", [ manifestId:manifest.id, returnUrl: ui.thisUrl() ])}')">
 
                 Edit
             </button>
+                    </td>
+                </tr>
+        </table>
             <% } %>
             <% if (manifestOrders.size() > 0) { %>
             <table>

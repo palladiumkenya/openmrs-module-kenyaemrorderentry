@@ -1,6 +1,6 @@
 <%
     ui.decorateWith("kenyaui", "panel", [heading: (command.original ? "Edit" : "Add") + " Lab Manifest", frameOnly: true])
-
+    def countyName = command.county
     def manifestCoverage = [
             [
                     [object: command, property: "startDate", label: "Start Date"],
@@ -89,12 +89,12 @@
                     <select id="county" name="county">
                         <option></option>
                         <%countyList.each { %>
-                        <option value="${it}">${it}</option>
+                        <option ${!countyName? "" : it.trim().toLowerCase() == countyName.trim().toLowerCase() ? "selected" : ""} value="${it}">${it}</option>
                         <%}%>
                     </select>
                 </td>
                 <td style="width: 260px">
-                    <input type="text" id="subCounty" name="subCounty" size="30"></input>
+                    <input type="text" id="subCounty" name="subCounty" value="${command.subCounty ?: ''}" size="30"></input>
                 </td>
             </tr>
         </table>
