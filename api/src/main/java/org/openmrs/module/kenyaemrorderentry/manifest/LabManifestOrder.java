@@ -14,6 +14,7 @@ public class LabManifestOrder extends BaseOpenmrsData implements Serializable {
     private Integer id;
     private LabManifest labManifest;
     private Order order;
+    private String sampleType;
     private String payload;
     private Date dateSent;
     private String status;
@@ -116,6 +117,14 @@ public class LabManifestOrder extends BaseOpenmrsData implements Serializable {
 
     public void setSampleSeparationDate(Date sampleSeparationDate) {
         this.sampleSeparationDate = sampleSeparationDate;
+    }
+
+    public String getSampleType() {
+        return sampleType;
+    }
+
+    public void setSampleType(String sampleType) {
+        this.sampleType = sampleType;
     }
 
     @Override

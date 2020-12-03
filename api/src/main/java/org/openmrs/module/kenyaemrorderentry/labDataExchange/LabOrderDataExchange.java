@@ -149,9 +149,10 @@ public class LabOrderDataExchange {
      * Returns a single object for an active lab order
      *
      * @param o
-     * @return
+     * @param dateSampleCollected
+     *@param sampleType @return
      */
-    public ObjectNode generatePayloadForLabOrder(Order o) {
+    public ObjectNode generatePayloadForLabOrder(Order o, Date dateSampleCollected, String sampleType) {
         Patient patient = o.getPatient();
         ObjectNode test = Utils.getJsonNodeFactory().objectNode();
 
@@ -197,12 +198,11 @@ public class LabOrderDataExchange {
             test.put("dob", dob);
             test.put("patient_name", fullName);
             test.put("sex", patient.getGender().equals("M") ? "1" : patient.getGender().equals("F") ? "2" : "3");
-            test.put("sampletype", "1");
-            test.put("datecollected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(o.getDateActivated()));
+            test.put("sampletype", StringUtils.isNotBlank(sampleType)? LabOrderDataExchange.getSampleTypeCode(sampleType) : "");
+            test.put("datecollected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
             test.put("order_no", o.getOrderId().toString());
             test.put("lab", "");
             test.put("justification", o.getOrderReason() != null ? getOrderReasonCode(o.getOrderReason().getUuid()) : "");
-            //test.put("justification", "1");
             test.put("prophylaxis", nascopCode);
             if (patient.getGender().equals("F")) {
                 test.put("pmtct", "3");
@@ -267,24 +267,19 @@ public class LabOrderDataExchange {
      * @param type
      * @return
      */
-    private String getSampleTypeCode(String type) {
+    public static String getSampleTypeCode(String type) {
 
         if (type == null) {
             return "";
         }
+
         Integer code = null;
-        if (type.equals("Blood")) {
-            code = 3;
-        } else if (type.equals("OP Swab")) {
-            code = 2;
-        } else if (type.equals("Tracheal Aspirate")) {
-            code = 5;
-        } else if (type.equals("Sputum")) {
-            code = 4;
-        } else if (type.equals("OP and NP Swabs")) {
+        if (type.equals("Frozen plasma")) {
             code = 1;
-        } else {
-            code = 6;
+        } else if (type.equals("Whole Blood")) {
+            code = 2;
+        } else if (type.equals("DBS")) {
+            code = 3;
         }
         return code.toString();
     }
@@ -454,6 +449,7 @@ public class LabOrderDataExchange {
                     e.printStackTrace();
                 }
                 manifestOrder.setStatus(discontinuationReason);
+                manifestOrder.setResult(result);
                 manifestOrder.setResultDate(orderDiscontinuationDate);
                 kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
             } else if (StringUtils.isNotBlank(specimenStatus) && specimenStatus.equalsIgnoreCase("Complete") && StringUtils.isNotBlank(result)) {
@@ -514,6 +510,7 @@ public class LabOrderDataExchange {
                         e.printStackTrace();
                     }
                     manifestOrder.setStatus("Result received");
+                    manifestOrder.setResult(result);
                     manifestOrder.setResultDate(orderDiscontinuationDate);
                     kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
                 }

@@ -54,6 +54,9 @@ tr:nth-child(even) {background-color: #f2f2f2;}
 .sampleStatusColumn {
     width: 280px;
 }
+.sampleTypeColumn {
+    width: 100px;
+}
 </style>
 
 <div class="ke-page-sidebar">
@@ -81,6 +84,14 @@ tr:nth-child(even) {background-color: #f2f2f2;}
 
                 <tr></tr>
             </table>
+            <% if (manifest.status == 'Draft') { %>
+            <button type="button"
+                    onclick="ui.navigate('${ ui.pageLink("kenyaemrorderentry", "manifest/createManifest", [ manifestId:manifest.id, returnUrl: ui.thisUrl() ])}')">
+
+                Edit
+            </button>
+            <% } %>
+            <% if (manifestOrders.size() > 0) { %>
             <table>
                 <tr>
                     <td>
@@ -89,12 +100,10 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                                 Download Manifest
                             </button>
                         </a>
-                        <% if(manifest.status == "Ready to send") { %>
-                        <button id="refresh" onclick="window.location.reload()">Refresh page</button>
-                        <% } %>
                     </td>
                 </tr>
             </table>
+            <% } %>
         </fieldset>
         <br/>
         <br/>
@@ -104,6 +113,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                 <tr>
                     <th class="nameColumn">Patient Name</th>
                     <th class="cccNumberColumn">CCC Number</th>
+                    <th class="sampleTypeColumn">Sample type</th>
                     <th class="dateRequestColumn">Date requested</th>
                     <th class="sampleStatusColumn">Status</th>
                     <th class="dateRequestColumn">Result</th>
@@ -114,14 +124,12 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                 <tr>
                     <td class="nameColumn">${o.order.patient.givenName} ${o.order.patient.familyName} </td>
                     <td class="cccNumberColumn">${o.order.patient.getPatientIdentifier(cccNumberType)}</td>
+                    <td class="sampleTypeColumn">${o.sampleType}</td>
                     <td class="dateRequestColumn">${kenyaui.formatDate(o.order.dateActivated)}</td>
                     <td class="sampleStatusColumn">${o.status}</td>
                     <td class="dateRequestColumn">${o.result ?: "Not ready"}</td>
                     <td class="dateRequestColumn">${o.resultDate ?: ""}</td>
                     <td class="actionColumn">
-                        <% if (o.status == "Pending") { %>
-                        <button class="removeOrderFromManifest" value="od_${o.id}">Remove</button>
-                        <% } %>
                         <a href="${ ui.pageLink("kenyaemrorderentry","manifest/printSpecimenLabel",[manifestOrder : o.id]) }"   target="_blank">
                             <button style="background-color: cadetblue; color: white">
                                 Print Label
@@ -134,7 +142,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
             </table>
         </fieldset>
 
-        <% if (manifest.status != "Sent") { %>
+        <% if (manifest.status == "Draft") { %>
         <fieldset>
             <legend>Active requests</legend>
             <table class="simple-table" width="90%">
@@ -168,7 +176,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
             <div class="modal-content">
                 <div class="modal-header modal-header-primary">
                     <h5 class="modal-title" id="dateVlModalCenterTitle">Update sample details</h5>
-                    <button type="button" class="close" data-dismiss="modal">&times;
+                    <button type="button" class="close closeDialog" data-dismiss="modal">&times;
 
                     </button>
                 </div>
@@ -176,6 +184,17 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                     <input hidden="text" id="selectedOrderId"/>
                     <span style="color: firebrick" id="msgBox"></span>
                     <table>
+                        <tr>
+                            <td>Sample type</td>
+                            <td>
+                                <select id="sampleType">
+                                    <option>select ...</option>
+                                    <option value="Frozen plasma">Frozen plasma</option>
+                                    <option value="Whole Blood">Whole Blood</option>
+                                    <option value="DBS">DBS</option>
+                                </select>
+                            </td>
+                        </tr>
                         <tr>
                             <td>Sample collection date</td>
                             <td>${ ui.includeFragment("kenyaui", "field/java.util.Date", [ id: "dateSampleCollected", formFieldName: "dateSampleCollected"]) }</td>
@@ -187,7 +206,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                     </table>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" data-dismiss="modal">Close</button>
+                    <button type="button" class="close closeDialog" data-dismiss="modal">Close</button>
                     <button type="button" id="addSample">
                         <img src="${ ui.resourceLink("kenyaui", "images/glyphs/ok.png") }" /> Save</button>
                 </div>
@@ -208,6 +227,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
             jq(".modal-body #selectedOrderId").val("");
             jq(".modal-body #dateSampleCollected").val("");
             jq(".modal-body #dateSampleSeparated").val("");
+            jq(".modal-body #sampleType").val("");
 
             var concatOrderId = jq(this).val();
             var orderId = concatOrderId.split("_")[1];
@@ -221,13 +241,19 @@ tr:nth-child(even) {background-color: #f2f2f2;}
             var selOrder = jq(".modal-body #selectedOrderId").val();
             var dateSampleCollected = jq(".modal-body #dateSampleCollected").val();
             var dateSampleSeparated = jq(".modal-body #dateSampleSeparated").val();
+            var sampleType = jq(".modal-body #sampleType").val();
 
-            if (dateSampleCollected == "" || dateSampleSeparated == "") {
-                jq('.modal-body #msgBox').text('Please provide dates for sample collection and separation');
+            var dCollected = new Date(dateSampleCollected);
+            var dSeparated = new Date(dateSampleSeparated);
+            var dToday = new Date();
+
+            if (dateSampleCollected == "" || dateSampleSeparated == "" || sampleType == "") {
+                jq('.modal-body #msgBox').text('Please fill all fields');
             } else {
                 jq.getJSON('${ ui.actionLink("kenyaemrorderentry", "patientdashboard/generalLabOrders", "addOrderToManifest") }',{
                     'manifestId': ${ manifest.id },
                     'orderId': selOrder,
+                    'sampleType': sampleType,
                     'dateSampleCollected': dateSampleCollected,
                     'dateSampleSeparated': dateSampleSeparated
                 })
@@ -247,6 +273,18 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                         jq('.modal-body #msgBox').text('The system encountered a problem while adding the sample. Please try again');
                     })
             }
+        });
+
+        jq('.closeDialog').click(function () {
+
+            jq(".modal-body #selectedOrderId").val("");
+            jq(".modal-body #dateSampleCollected").val("");
+            jq(".modal-body #dateSampleCollected_date").val("");
+            jq(".modal-body #dateSampleSeparated").val("");
+            jq(".modal-body #dateSampleSeparated_date").val("");
+            jq(".modal-body #sampleType").val("");
+            jq(".modal-body #msgBox").text("");
+
         });
     });
 

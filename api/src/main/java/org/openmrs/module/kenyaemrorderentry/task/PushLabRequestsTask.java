@@ -53,18 +53,30 @@ public class PushLabRequestsTask extends AbstractTask {
 
             // Get a manifest ready to be sent
             LabManifest readyManifest = kenyaemrOrdersService.getLabOrderManifestByStatus("Ready to send");
+            LabManifest currentlyProcessingManifest = kenyaemrOrdersService.getLabOrderManifestByStatus("Sending");
 
 
-            if (readyManifest == null) {
-                System.out.println("There are no active manifests to push to the lab system");
-                System.out.println("Manifest : " + readyManifest);
+            if (readyManifest == null && currentlyProcessingManifest == null) {
+                System.out.println("There are no viral load request to push to the lab system");
                 return;
             }
 
-            List<LabManifestOrder> ordersInManifest = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(readyManifest, "Pending");
+            List<LabManifestOrder> ordersInManifest = null;
+            if (readyManifest != null) {
+                ordersInManifest = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(readyManifest, "Pending");
+            } else if (currentlyProcessingManifest != null){
+                ordersInManifest = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(currentlyProcessingManifest, "Pending");
+            }
 
             if (ordersInManifest.size() < 1) {
-                System.out.println("Found no lab requests to post. Will attempt again in the next schedule");
+                System.out.println("Found no lab requests to post. Will mark the manifest as complete");
+                if (readyManifest != null) {
+                    readyManifest.setStatus("Completed");
+                    kenyaemrOrdersService.saveLabOrderManifest(readyManifest);
+                } else {
+                    currentlyProcessingManifest.setStatus("Completed");
+                    kenyaemrOrdersService.saveLabOrderManifest(currentlyProcessingManifest);
+                }
                 return;
             } else {
                 System.out.println("No of labs to push: " + ordersInManifest.size());
@@ -110,6 +122,13 @@ public class PushLabRequestsTask extends AbstractTask {
                         log.info("Successfully executed the task that pushes lab requests");
                     }
                     kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
+                    if (readyManifest != null && !readyManifest.getStatus().equals("Sending")) {
+                        readyManifest.setStatus("Sending");
+                        kenyaemrOrdersService.saveLabOrderManifest(readyManifest);
+                    } else if (currentlyProcessingManifest != null && !currentlyProcessingManifest.getStatus().equals("Sending")){
+                        currentlyProcessingManifest.setStatus("Sending");
+                        kenyaemrOrdersService.saveLabOrderManifest(currentlyProcessingManifest);
+                    }
                 }
             } catch (Exception e) {
                 log.info("Could not push requests to the lab! " + e.getCause());

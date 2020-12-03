@@ -91,7 +91,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                             onclick="ui.navigate('${ ui.pageLink("kenyaemrorderentry", "orders/manifestOrdersHome", [ manifest: m.id,  returnUrl: ui.thisUrl() ])}')">
                        View
                     </button>
-                    <% if(m.status != "Sent") { %>
+                    <% if(m.status == "Draft") { %>
                     <button type="button"
                             onclick="ui.navigate('${ ui.pageLink("kenyaemrorderentry", "manifest/createManifest", [ manifestId:m.id, returnUrl: ui.thisUrl() ])}')">
 
