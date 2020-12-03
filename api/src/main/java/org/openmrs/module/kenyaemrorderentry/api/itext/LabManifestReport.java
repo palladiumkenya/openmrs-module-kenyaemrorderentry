@@ -97,34 +97,43 @@ public class LabManifestReport {
 
         Paragraph fDetailsCol1 = new Paragraph();
         Text column1Label = new Text("Facility Details").setBold().setFontSize(10).setUnderline();
-        Text facilityNameLabel = new Text("Facility Name: " + Utils.getDefaultLocation().getName()).setFontSize(10);
-        Text mflCodeLabel = new Text("MFL Code: " + Utils.getDefaultLocationMflCode(Utils.getDefaultLocation())).setFontSize(10);
+        Text facilityNameLabel = new Text("Facility Name: ").setFontSize(10);
+        Text facilityNameVal = new Text(Utils.getDefaultLocation().getName()).setFontSize(10).setItalic();
+        Text mflCodeLabel = new Text("MFL Code: ").setFontSize(10);
+        Text mflCodeVal = new Text(Utils.getDefaultLocationMflCode(Utils.getDefaultLocation())).setFontSize(10).setItalic();
 
-        Text facilityEmailLabel = new Text("Facility/CCC email: " + (manifest.getFacilityEmail() != null ? manifest.getFacilityEmail() : "")).setFontSize(10);
-        Text facilityPhoneNoLabel = new Text("Facility/CCC phone no: " + (manifest.getFacilityPhoneContact() != null ? manifest.getFacilityPhoneContact() : "")).setFontSize(10);
+        Text facilityEmailLabel = new Text("Facility/CCC email: ").setFontSize(10);
+        Text facilityEmailVal = new Text((manifest.getFacilityEmail() != null ? manifest.getFacilityEmail() : "")).setFontSize(10).setItalic();
+        Text facilityPhoneNoLabel = new Text("Facility/CCC phone no: ").setFontSize(10);
+        Text facilityPhoneNoVal = new Text((manifest.getFacilityPhoneContact() != null ? manifest.getFacilityPhoneContact() : "")).setFontSize(10).setItalic();
         fDetailsCol1.setFixedLeading(13); // sets line spacing
-        fDetailsCol1.add(column1Label).add("\n").add(facilityNameLabel).add("\n").add(mflCodeLabel).add("\n").add(facilityEmailLabel).add("\n").add(facilityPhoneNoLabel);
+        fDetailsCol1.add(column1Label).add("\n").add(facilityNameLabel).add(facilityNameVal).add("\n").add(mflCodeLabel).add(mflCodeVal).add("\n").add(facilityEmailLabel).add(facilityEmailVal).add("\n").add(facilityPhoneNoLabel).add(facilityPhoneNoVal);
 
         // adding column 2
         Paragraph fDetailsCol2 = new Paragraph();
         Text column2Label = new Text("");
-        Text countyLabel = new Text("County: " + (manifest.getCounty() != null ? manifest.getCounty() : "")).setFontSize(10);
-        Text subCountyLabel = new Text("Sub-county: " + (manifest.getSubCounty() != null ? manifest.getSubCounty() : "")).setFontSize(10);
-        Text clinicianPhoneNoLabel = new Text("Clinician's phone no: " + (manifest.getClinicianPhoneContact() != null ? manifest.getClinicianPhoneContact() : "")).setFontSize(10);
-        Text clinicianNameLabel = new Text("Clinician's Name: " + (manifest.getClinicianName() != null ? manifest.getClinicianName() : "")).setFontSize(10);
+        Text countyLabel = new Text("County: ").setFontSize(10);
+        Text countyVal = new Text((manifest.getCounty() != null ? manifest.getCounty() : "")).setFontSize(10).setItalic();
+        Text subCountyLabel = new Text("Sub-county: ").setFontSize(10);
+        Text subCountyVal = new Text((manifest.getSubCounty() != null ? manifest.getSubCounty() : "")).setFontSize(10).setItalic();
+        Text clinicianPhoneNoLabel = new Text("Clinician's phone no: ").setFontSize(10);
+        Text clinicianPhoneNoVal = new Text((manifest.getClinicianPhoneContact() != null ? manifest.getClinicianPhoneContact() : "")).setFontSize(10).setItalic();
+        Text clinicianNameLabel = new Text("Clinician's Name: ").setFontSize(10);
+        Text clinicianNameVal = new Text((manifest.getClinicianName() != null ? manifest.getClinicianName() : "")).setFontSize(10).setItalic();
         fDetailsCol2.setFixedLeading(13);
-        fDetailsCol2.add(column2Label).add("\n").add(countyLabel).add("\n").add(subCountyLabel).add("\n").add(clinicianPhoneNoLabel).add("\n").add(clinicianNameLabel);
+        fDetailsCol2.add(column2Label).add("\n").add(countyLabel).add(countyVal).add("\n").add(subCountyLabel).add(subCountyVal).add("\n").add(clinicianPhoneNoLabel).add(clinicianPhoneNoVal).add("\n").add(clinicianNameLabel).add(clinicianNameVal);
 
         Paragraph fDetailsCol3 = new Paragraph();
         Text column3Label = new Text("Facility Laboratory details").setBold().setFontSize(10).setUnderline();
-        //Text facilityDispatchLabel = new Text("Date & time sample dispatched: " + this.manifest.getDispatchDate() != null ? Utils.getSimpleDateFormat("dd/MM/yyyy").format(this.manifest.getDispatchDate()) : "").setFontSize(10);
-        Text facilityDispatchLabel = new Text("Date & time sample dispatched: " + (manifest.getDispatchDate() != null ? Utils.getSimpleDateFormat("dd/MM/yyyy").format(manifest.getDispatchDate()) : "")).setFontSize(10);
-        Text facilityFocalPointLabel = new Text("Lab focal person phone contact: " + (manifest.getLabPocPhoneNumber() != null ? manifest.getLabPocPhoneNumber() : "")).setFontSize(10);
+        Text facilityDispatchLabel = new Text("Date & time sample dispatched: ").setFontSize(10);
+        Text facilityDispatchVal = new Text((manifest.getDispatchDate() != null ? Utils.getSimpleDateFormat("dd/MM/yyyy").format(manifest.getDispatchDate()) : "")).setFontSize(10).setItalic();
+        Text facilityFocalPointLabel = new Text("Lab focal person phone contact: ").setFontSize(10);
+        Text facilityFocalPointVal = new Text((manifest.getLabPocPhoneNumber() != null ? manifest.getLabPocPhoneNumber() : "")).setFontSize(10).setItalic();
         Text hubDetailsLabel = new Text("Hub details").setFontSize(10).setBold().setFontSize(10).setUnderline();
         Text hubDispatchLabel = new Text("Date & time sample dispatched: ........................").setFontSize(10);
         Text hubFocalPointLabel = new Text("Lab focal person phone contact: ........................").setFontSize(10);
         fDetailsCol3.setFixedLeading(13);
-        fDetailsCol3.add(column3Label).add("\n").add(facilityDispatchLabel).add("\n").add(facilityFocalPointLabel).add("\n").add(hubDetailsLabel).add("\n").add(hubDispatchLabel).add("\n").add(hubFocalPointLabel);
+        fDetailsCol3.add(column3Label).add("\n").add(facilityDispatchLabel).add(facilityDispatchVal).add("\n").add(facilityFocalPointLabel).add(facilityFocalPointVal).add("\n").add(hubDetailsLabel).add("\n").add(hubDispatchLabel).add("\n").add(hubFocalPointLabel);
 
         Cell col1 = new Cell();
         col1.setBorder(Border.NO_BORDER);
