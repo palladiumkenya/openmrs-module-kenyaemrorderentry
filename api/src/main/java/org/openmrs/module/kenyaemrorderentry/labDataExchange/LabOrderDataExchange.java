@@ -357,7 +357,16 @@ public class LabOrderDataExchange {
         Set<Order> activeLabs = new HashSet<Order>();
         String sql = "select o.order_id from orders o\n" +
                 "left join kenyaemr_order_entry_lab_manifest_order mo on mo.order_id = o.order_id\n" +
-                "where o.order_action='NEW' and o.concept_id = 856 and o.date_stopped is null and o.voided=0 and mo.order_id is null;";
+                "where o.order_action='NEW' and o.concept_id = 856 and o.date_stopped is null and o.voided=0 and mo.order_id is null ";
+
+        if (startDate != null && endDate != null) {
+            sql = sql + " and date(o.date_activated) between ':startDate' and ':endDate' ";
+            String pStartDate = Utils.getSimpleDateFormat("yyyy-MM-dd").format(startDate);
+            String pEndDate = Utils.getSimpleDateFormat("yyyy-MM-dd").format(endDate);
+
+            sql = sql.replace(":startDate", pStartDate);
+            sql = sql.replace(":endDate", pEndDate);
+        }
 
         List<List<Object>> activeOrders = Context.getAdministrationService().executeSQL(sql, true);
         if (!activeOrders.isEmpty()) {
