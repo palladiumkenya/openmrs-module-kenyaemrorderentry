@@ -253,7 +253,14 @@ tr:nth-child(even) {background-color: #f2f2f2;}
 
             if (dateSampleCollected == "" || dateSampleSeparated == "" || sampleType == "") {
                 jq('.modal-body #msgBox').text('Please fill all fields');
-            } else {
+            }else if (dateSampleCollected > dToday){
+                jq('.modal-body #msgBox').text('Sample collection date cannot be in future');
+            }else if (dSeparated > dToday){
+                jq('.modal-body #msgBox').text('Sample separation date cannot be in future');
+            }else if (dCollected > dSeparated ){
+                jq('.modal-body #msgBox').text('Sample separation date cannot be before sample collection');
+            }
+            else {
                 jq.getJSON('${ ui.actionLink("kenyaemrorderentry", "patientdashboard/generalLabOrders", "addOrderToManifest") }',{
                     'manifestId': ${ manifest.id },
                     'orderId': selOrder,
