@@ -25,7 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-@AppPage("kenyaemr.laborder")
+@AppPage("kenyaemr.labmanifest")
 public class ManifestOrdersHomePageController {
 
     public void get(@RequestParam(value = "manifest") LabManifest manifest, @SpringBean KenyaUiUtils kenyaUi,

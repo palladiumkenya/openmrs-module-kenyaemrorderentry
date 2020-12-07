@@ -31,4 +31,6 @@ public interface KenyaemrOrdersDAO {
     LabManifest getLabOrderManifestByStatus(String status);
     public Cohort getPatientsWithCadre(boolean includeTroupes, boolean includeCivilians);
 
+
+    List<LabManifestOrder> getLabManifestOrdersToSend(LabManifest labManifestOrder);
 }

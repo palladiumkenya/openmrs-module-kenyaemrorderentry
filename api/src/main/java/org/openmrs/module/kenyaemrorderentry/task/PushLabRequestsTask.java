@@ -29,7 +29,6 @@ public class PushLabRequestsTask extends AbstractTask {
     private Log log = LogFactory.getLog(getClass());
     KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
 
-
     /**
      * @see AbstractTask#execute()
      */
@@ -63,9 +62,9 @@ public class PushLabRequestsTask extends AbstractTask {
 
             List<LabManifestOrder> ordersInManifest = null;
             if (readyManifest != null) {
-                ordersInManifest = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(readyManifest, "Pending");
+                ordersInManifest = kenyaemrOrdersService.getLabManifestOrdersToSend(readyManifest);
             } else if (currentlyProcessingManifest != null){
-                ordersInManifest = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(currentlyProcessingManifest, "Pending");
+                ordersInManifest = kenyaemrOrdersService.getLabManifestOrdersToSend(currentlyProcessingManifest);
             }
 
             if (ordersInManifest.size() < 1) {
@@ -94,11 +93,8 @@ public class PushLabRequestsTask extends AbstractTask {
 
                 for (LabManifestOrder manifestOrder : ordersInManifest) {
 
-                    //LabManifestOrder od = manifestOrder;
-
                     //Set the request post body
                     String payload = manifestOrder.getPayload();
-                    System.out.println("Payload: " + payload);
                     StringEntity userEntity = new StringEntity(payload);
                     postRequest.setEntity(userEntity);
 
@@ -111,9 +107,6 @@ public class PushLabRequestsTask extends AbstractTask {
                         JSONParser parser = new JSONParser();
                         JSONObject responseObj = (JSONObject) parser.parse(EntityUtils.toString(response.getEntity()));
                         JSONObject errorObj = (JSONObject) responseObj.get("error");
-                        /*if (statusCode == 400) {// bad request
-                            manifestOrder.setStatus("Error - " + statusCode + ". Msg" + errorObj.get("message"));
-                        }*/
                         manifestOrder.setStatus("Error - " + statusCode + ". Msg" + errorObj.get("message"));
                        // throw new RuntimeException("Failed with HTTP error code : " + statusCode + ". Error msg: " + errorObj.get("message"));
                     } else {
@@ -135,7 +128,6 @@ public class PushLabRequestsTask extends AbstractTask {
                 e.printStackTrace();
             }
             finally {
-                //Important: Close the connect
                 httpClient.close();
             }
 

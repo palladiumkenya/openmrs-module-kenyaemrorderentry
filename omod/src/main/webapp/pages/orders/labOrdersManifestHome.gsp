@@ -2,7 +2,7 @@
     ui.decorateWith("kenyaemr", "standardPage", [layout: "sidebar"])
 
     def menuItems = [
-            [label: "Back", iconProvider: "kenyaui", icon: "buttons/back.png", label: "Back to Labs", href: ui.pageLink("kenyaemrorderentry", "orders/labOrderHome")]
+            [label: "Back", iconProvider: "kenyaui", icon: "buttons/back.png", label: "Back", href: ui.pageLink("kenyaemr", "userHome")]
     ]
 %>
 <style>
@@ -70,7 +70,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                 <th>Lab person contact</th>
                 <th>Status</th>
                 <th>Dispatch</th>
-                <th></th>
+                <th>Action</th>
             </tr>
             <% allManifest.each { m -> %>
             <tr>
@@ -87,12 +87,12 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                 <td>${m.dispatchDate ?: ""}</td>
 
             <td>
-                    <button type="button"
+                    <button type="button" style="background-color: cadetblue; color: white"
                             onclick="ui.navigate('${ ui.pageLink("kenyaemrorderentry", "orders/manifestOrdersHome", [ manifest: m.id,  returnUrl: ui.thisUrl() ])}')">
                        View
                     </button>
                     <% if(m.status == "Draft") { %>
-                    <button type="button"
+                    <button type="button" style="background-color: cadetblue; color: white"
                             onclick="ui.navigate('${ ui.pageLink("kenyaemrorderentry", "manifest/createManifest", [ manifestId:m.id, returnUrl: ui.thisUrl() ])}')">
 
                         Edit

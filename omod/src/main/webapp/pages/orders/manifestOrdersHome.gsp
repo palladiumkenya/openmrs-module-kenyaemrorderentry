@@ -84,9 +84,10 @@ tr:nth-child(even) {background-color: #f2f2f2;}
 
                 <tr></tr>
             </table>
-            <% if (manifest.status == 'Draft') { %>
-            <table>
+            <table width="12%">
                 <tr>
+            <% if (manifest.status == 'Draft') { %>
+
                     <td>
             <button type="button" style="background-color: cadetblue; color: white"
                     onclick="ui.navigate('${ ui.pageLink("kenyaemrorderentry", "manifest/createManifest", [ manifestId:manifest.id, returnUrl: ui.thisUrl() ])}')">
@@ -94,22 +95,19 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                 Edit
             </button>
                     </td>
-                </tr>
-        </table>
             <% } %>
             <% if (manifestOrders.size() > 0) { %>
-            <table>
-                <tr>
                     <td>
                         <a href="${ ui.pageLink("kenyaemrorderentry","manifest/downloadManifest",[manifest : manifest.id]) }"   target="_blank">
                             <button style="background-color: cadetblue; color: white">
-                                Download Manifest
+                                Print Manifest
                             </button>
                         </a>
                     </td>
+
+            <% } %>
                 </tr>
             </table>
-            <% } %>
         </fieldset>
         <br/>
         <br/>
@@ -165,7 +163,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                     <td class="cccNumberColumn">${o.patient.getPatientIdentifier(cccNumberType)}</td>
                     <td class="dateRequestColumn">${kenyaui.formatDate(o.dateActivated)}</td>
                     <td class="actionColumn">
-                        <button class="addOrderToManifest" value="od_${o.orderId}" data-target="#updateSampleDetails">Add to manifest</button>
+                        <button class="addOrderToManifest" style="background-color: cadetblue; color: white" value="od_${o.orderId}" data-target="#updateSampleDetails">Add to manifest</button>
                     </td>
                     <td><span id="alert_${o.orderId}"></span></td>
                 </tr>

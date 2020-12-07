@@ -46,6 +46,8 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
     public List<LabManifest> getLabOrderManifest() throws DataException {
         Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifest.class);
         criteria.add(Restrictions.eq("voided", false));
+        criteria.addOrder(org.hibernate.criterion.Order.desc("id"));
+        criteria.setMaxResults(25);
         return criteria.list();
     }
 
@@ -153,5 +155,15 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
         Query q = sessionFactory.getCurrentSession().createQuery(query.toString());
         q.setCacheMode(CacheMode.IGNORE);
         return new Cohort(q.list());
+    }
+
+    @Override
+    public List<LabManifestOrder> getLabManifestOrdersToSend(LabManifest labManifestOrder) {
+        Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifestOrder.class);
+        criteria.add(Restrictions.eq("labManifest", labManifestOrder));
+        criteria.add(Restrictions.eq("status", "Pending"));
+        criteria.addOrder(org.hibernate.criterion.Order.asc("id"));
+        criteria.setMaxResults(30);
+        return criteria.list();
     }
 }

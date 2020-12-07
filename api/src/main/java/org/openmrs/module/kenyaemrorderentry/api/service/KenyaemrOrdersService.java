@@ -29,6 +29,7 @@ public interface KenyaemrOrdersService extends OpenmrsService {
     LabManifestOrder getLabManifestOrderByOrderId(Order specimenId);
     List<LabManifestOrder> getLabManifestOrderByStatus(String status);
     List<LabManifestOrder> getLabManifestOrderByManifestAndStatus(LabManifest labManifestOrder, String status);
+    List<LabManifestOrder> getLabManifestOrdersToSend(LabManifest labManifestOrder);
     public Cohort getPatientsWithCadre(boolean includeTroupes, boolean includeCivilians);
 
 

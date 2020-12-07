@@ -11,7 +11,7 @@ import org.openmrs.ui.framework.page.PageModel;
 
 import java.util.List;
 
-@AppPage("kenyaemr.laborder")
+@AppPage("kenyaemr.labmanifest")
 public class LabOrdersManifestHomePageController {
 
     public void get(@SpringBean KenyaUiUtils kenyaUi,
