@@ -94,6 +94,11 @@ public class KenyaemrOrdersServiceImpl extends BaseOpenmrsService implements Ken
         return dao.getPatientsWithCadre(includeTroupes, includeCivilians);
     }
 
+    @Override
+    public List<LabManifestOrder> getLabManifestOrdersToSend(LabManifest labManifestOrder) {
+        return dao.getLabManifestOrdersToSend(labManifestOrder);
+    }
+
     public HibernateKenyaemrOrdersDAO getDao() {
         return dao;
     }
