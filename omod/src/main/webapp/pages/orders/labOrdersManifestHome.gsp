@@ -84,7 +84,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                 <td>${m.clinicianPhoneContact ?: ""}</td>
                 <td>${m.labPocPhoneNumber ?: ""}</td>
                 <td>${m.status ?: ""}</td>
-                <td>${m.dispatchDate ?: ""}</td>
+                <td>${m.dispatchDate != null ? kenyaui.formatDate(m.dispatchDate) : ""}</td>
 
             <td>
                     <button type="button" style="background-color: cadetblue; color: white"
