@@ -9,10 +9,12 @@ import org.openmrs.module.kenyaemrorderentry.api.db.hibernate.HibernateKenyaemrO
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
 
+@Transactional
 public class KenyaemrOrdersServiceImpl extends BaseOpenmrsService implements KenyaemrOrdersService {
     protected final Log log = LogFactory.getLog(this.getClass());
 
@@ -24,21 +26,25 @@ public class KenyaemrOrdersServiceImpl extends BaseOpenmrsService implements Ken
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<LabManifest> getLabOrderManifest() {
         return dao.getLabOrderManifest();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public LabManifest getLabOrderManifestById(Integer id) {
         return dao.getLabOrderManifestById(id);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public LabManifest getLabOrderManifestByStatus(String status) {
         return dao.getLabOrderManifestByStatus(status);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<LabManifest> getLabOrderManifestBetweenDates(Date startDate, Date endDate) {
         return dao.getLabOrderManifestBetweenDates(startDate,endDate);
     }
@@ -56,16 +62,19 @@ public class KenyaemrOrdersServiceImpl extends BaseOpenmrsService implements Ken
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<LabManifestOrder> getLabManifestOrders() {
         return dao.getLabManifestOrders();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public LabManifestOrder getLabManifestOrderById(Integer id) {
         return dao.getLabManifestOrderById(id);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<LabManifestOrder> getLabManifestOrderByManifest(LabManifest labManifest) {
         return dao.getLabManifestOrderByManifest(labManifest);
     }
@@ -76,25 +85,31 @@ public class KenyaemrOrdersServiceImpl extends BaseOpenmrsService implements Ken
     }
 
     @Override
+    @Transactional(readOnly = true)
     public LabManifestOrder getLabManifestOrderByOrderId(Order specimenId) {
         return dao.getLabManifestOrderByManifest(specimenId);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<LabManifestOrder> getLabManifestOrderByStatus(String status) {
         return dao.getLabManifestOrderByStatus(status);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<LabManifestOrder> getLabManifestOrderByManifestAndStatus(LabManifest labManifestOrder, String status) {
         return dao.getLabManifestOrderByManifestAndStatus(labManifestOrder, status);
     }
 
+    @Override
+    @Transactional(readOnly = true)
     public Cohort getPatientsWithCadre(boolean includeTroupes, boolean includeCivilians) {
         return dao.getPatientsWithCadre(includeTroupes, includeCivilians);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<LabManifestOrder> getLabManifestOrdersToSend(LabManifest labManifestOrder) {
         return dao.getLabManifestOrdersToSend(labManifestOrder);
     }

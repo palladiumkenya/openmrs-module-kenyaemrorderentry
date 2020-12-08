@@ -129,6 +129,7 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
     public LabManifest getLabOrderManifestByStatus(String status) {
         Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifest.class);
         criteria.add(Restrictions.eq("status", status));
+        criteria.addOrder(org.hibernate.criterion.Order.asc("id"));
         if (criteria.list().size() > 0) {
             return (LabManifest) criteria.list().get(0);
         }
@@ -163,7 +164,7 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
         criteria.add(Restrictions.eq("labManifest", labManifestOrder));
         criteria.add(Restrictions.eq("status", "Pending"));
         criteria.addOrder(org.hibernate.criterion.Order.asc("id"));
-        criteria.setMaxResults(30);
+        criteria.setMaxResults(50);
         return criteria.list();
     }
 }
