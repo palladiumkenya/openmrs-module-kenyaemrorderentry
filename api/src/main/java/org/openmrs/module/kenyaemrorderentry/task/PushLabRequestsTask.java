@@ -10,15 +10,23 @@ import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.openmrs.GlobalProperty;
+import org.openmrs.Role;
+import org.openmrs.User;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
+import org.openmrs.notification.Alert;
 import org.openmrs.scheduler.tasks.AbstractTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -27,6 +35,8 @@ import java.util.List;
 public class PushLabRequestsTask extends AbstractTask {
 
     private static final Logger log = LoggerFactory.getLogger(PushLabRequestsTask.class);
+    private String url = "http://www.google.com:80/index.html";
+
 
     KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
 
@@ -81,53 +91,70 @@ public class PushLabRequestsTask extends AbstractTask {
                 System.out.println("No of labs to push: " + ordersInManifest.size());
             }
 
-            for (LabManifestOrder manifestOrder : ordersInManifest) {
+            // check first if there is internet connectivity before pushing
 
-                CloseableHttpClient httpClient = HttpClients.createDefault();
+            try {
+                URLConnection connection = new URL(url).openConnection();
+                connection.connect();
+
+                for (LabManifestOrder manifestOrder : ordersInManifest) {
+
+                    CloseableHttpClient httpClient = HttpClients.createDefault();
+
+                    try {
+
+                        //Define a postRequest request
+                        HttpPost postRequest = new HttpPost(serverUrl);
+
+                        //Set the API media type in http content-type header
+                        postRequest.addHeader("content-type", "application/json");
+                        postRequest.addHeader("apikey", API_KEY);
+                        //Set the request post body
+                        String payload = manifestOrder.getPayload();
+                        StringEntity userEntity = new StringEntity(payload);
+                        postRequest.setEntity(userEntity);
+
+                        //Send the request; It will immediately return the response in HttpResponse object if any
+                        HttpResponse response = httpClient.execute(postRequest);
+
+                        //verify the valid error code first
+                        int statusCode = response.getStatusLine().getStatusCode();
+                        if (statusCode != 201) {
+                            JSONParser parser = new JSONParser();
+                            JSONObject responseObj = (JSONObject) parser.parse(EntityUtils.toString(response.getEntity()));
+                            JSONObject errorObj = (JSONObject) responseObj.get("error");
+                            manifestOrder.setStatus("Error - " + statusCode + ". Msg" + errorObj.get("message"));
+                            System.out.println("There was an error sending lab id = " + manifestOrder.getId());
+                            log.warn("There was an error sending lab id = " + manifestOrder.getId());
+                            // throw new RuntimeException("Failed with HTTP error code : " + statusCode + ". Error msg: " + errorObj.get("message"));
+                        } else {
+                            manifestOrder.setStatus("Sent");
+                            log.info("Successfully pushed a VL lab test id " + manifestOrder.getId());
+                        }
+                        kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
+
+                        if (toProcess != null && manifestStatus.equals("Ready to send")) {
+                            toProcess.setStatus("Sending");
+                            kenyaemrOrdersService.saveLabOrderManifest(toProcess);
+                        }
+                        Context.flushSession();
+                    } catch (Exception e) {
+                        System.out.println("Could not push requests to the lab! " + e.getCause());
+                        log.error("Could not push requests to the lab! " + e.getCause());
+                        e.printStackTrace();
+                    } finally {
+                        httpClient.close();
+                    }
+                }
+            }
+            catch (IOException ioe) {
 
                 try {
-
-                    //Define a postRequest request
-                    HttpPost postRequest = new HttpPost(serverUrl);
-
-                    //Set the API media type in http content-type header
-                    postRequest.addHeader("content-type", "application/json");
-                    postRequest.addHeader("apikey", API_KEY);
-                    //Set the request post body
-                    String payload = manifestOrder.getPayload();
-                    StringEntity userEntity = new StringEntity(payload);
-                    postRequest.setEntity(userEntity);
-
-                    //Send the request; It will immediately return the response in HttpResponse object if any
-                    HttpResponse response = httpClient.execute(postRequest);
-
-                    //verify the valid error code first
-                    int statusCode = response.getStatusLine().getStatusCode();
-                    if (statusCode != 201) {
-                        JSONParser parser = new JSONParser();
-                        JSONObject responseObj = (JSONObject) parser.parse(EntityUtils.toString(response.getEntity()));
-                        JSONObject errorObj = (JSONObject) responseObj.get("error");
-                        manifestOrder.setStatus("Error - " + statusCode + ". Msg" + errorObj.get("message"));
-                        System.out.println("There was an error sending lab id = " + manifestOrder.getId());
-                        log.warn("There was an error sending lab id = " + manifestOrder.getId());
-                        // throw new RuntimeException("Failed with HTTP error code : " + statusCode + ". Error msg: " + errorObj.get("message"));
-                    } else {
-                        manifestOrder.setStatus("Sent");
-                        log.info("Successfully pushed a VL lab test id " + manifestOrder.getId());
-                    }
-                    kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
-
-                    if (toProcess != null && manifestStatus.equals("Ready to send")) {
-                        toProcess.setStatus("Sending");
-                        kenyaemrOrdersService.saveLabOrderManifest(toProcess);
-                    }
-                    Context.flushSession();
-                } catch (Exception e) {
-                    System.out.println("Could not push requests to the lab! " + e.getCause());
-                    log.error("Could not push requests to the lab! " + e.getCause());
-                    e.printStackTrace();
-                } finally {
-                    httpClient.close();
+                    String text = "At " + new Date() + " there was an error reported connecting to the internet. Will not attempt pushing viral load manifest although there exists lab requests to push ";
+                    log.warn(text);
+                }
+                catch (Exception e) {
+                    log.error("Failed to check internet connectivity", e);
                 }
             }
         } catch (Exception e) {
