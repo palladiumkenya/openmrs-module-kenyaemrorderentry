@@ -164,7 +164,7 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
         criteria.add(Restrictions.eq("labManifest", labManifestOrder));
         criteria.add(Restrictions.eq("status", "Pending"));
         criteria.addOrder(org.hibernate.criterion.Order.asc("id"));
-        criteria.setMaxResults(30);
+        criteria.setMaxResults(50);
         return criteria.list();
     }
 }
