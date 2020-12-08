@@ -1,11 +1,8 @@
 package org.openmrs.module.kenyaemrorderentry.task;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.HttpClientUtils;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -31,7 +28,6 @@ public class PushLabRequestsTask extends AbstractTask {
 
     private static final Logger log = LoggerFactory.getLogger(PushLabRequestsTask.class);
 
-    //private Log log = LogFactory.getLog(getClass());
     KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
 
     /**
@@ -40,8 +36,6 @@ public class PushLabRequestsTask extends AbstractTask {
     public void execute() {
         Context.openSession();
         try {
-
-            System.out.println("Attempting to push to lab...");
 
             GlobalProperty gpServerUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LAB_SERVER_REQUEST_URL);
             GlobalProperty gpApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LAB_SERVER_API_TOKEN);
@@ -87,7 +81,6 @@ public class PushLabRequestsTask extends AbstractTask {
                 System.out.println("No of labs to push: " + ordersInManifest.size());
             }
 
-
             for (LabManifestOrder manifestOrder : ordersInManifest) {
 
                 CloseableHttpClient httpClient = HttpClients.createDefault();
@@ -120,7 +113,6 @@ public class PushLabRequestsTask extends AbstractTask {
                         // throw new RuntimeException("Failed with HTTP error code : " + statusCode + ". Error msg: " + errorObj.get("message"));
                     } else {
                         manifestOrder.setStatus("Sent");
-                        System.out.println("Successfully pushed a VL lab test id " + manifestOrder.getId());
                         log.info("Successfully pushed a VL lab test id " + manifestOrder.getId());
                     }
                     kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
@@ -139,7 +131,7 @@ public class PushLabRequestsTask extends AbstractTask {
                 }
             }
         } catch (Exception e) {
-            throw new IllegalArgumentException("Unable to execute task that pushes lab requests", e);
+            throw new IllegalArgumentException("Unable to execute task that pushes viral load lab manifest", e);
         } finally {
             Context.closeSession();
 

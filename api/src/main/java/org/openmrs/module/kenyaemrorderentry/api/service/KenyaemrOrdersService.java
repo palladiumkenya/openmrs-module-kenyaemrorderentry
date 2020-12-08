@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Date;
 import java.util.List;
 
-@Transactional
 public interface KenyaemrOrdersService extends OpenmrsService {
     LabManifest saveLabOrderManifest(LabManifest labManifest);
     List<LabManifest> getLabOrderManifest();
@@ -30,7 +29,7 @@ public interface KenyaemrOrdersService extends OpenmrsService {
     List<LabManifestOrder> getLabManifestOrderByStatus(String status);
     List<LabManifestOrder> getLabManifestOrderByManifestAndStatus(LabManifest labManifestOrder, String status);
     List<LabManifestOrder> getLabManifestOrdersToSend(LabManifest labManifestOrder);
-    public Cohort getPatientsWithCadre(boolean includeTroupes, boolean includeCivilians);
+    Cohort getPatientsWithCadre(boolean includeTroupes, boolean includeCivilians);
 
 
 

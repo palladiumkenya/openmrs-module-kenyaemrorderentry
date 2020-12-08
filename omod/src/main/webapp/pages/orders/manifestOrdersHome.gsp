@@ -84,7 +84,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
 
                 <tr></tr>
             </table>
-            <table width="12%">
+            <table width="14%">
                 <tr>
             <% if (manifest.status == 'Draft') { %>
 
