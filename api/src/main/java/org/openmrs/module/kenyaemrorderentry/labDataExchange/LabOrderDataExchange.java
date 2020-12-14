@@ -73,7 +73,6 @@ public class LabOrderDataExchange {
                 activeRequests = generateActiveVLPayload(order, activeRequests);
             }
         }
-        System.out.println("Preparing lab requests for " + ordersFound + " VL orders");
         requestWrapper.put("samples", activeRequests);
         return requestWrapper;
 
@@ -524,7 +523,7 @@ public class LabOrderDataExchange {
                     kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
                 }
             } else if (StringUtils.isNotBlank(specimenStatus) && specimenStatus.equalsIgnoreCase("Incomplete")) {
-                System.out.println("Status for " + orderId + " sample not yet ready");
+                // do nothing
             }
         }
 
