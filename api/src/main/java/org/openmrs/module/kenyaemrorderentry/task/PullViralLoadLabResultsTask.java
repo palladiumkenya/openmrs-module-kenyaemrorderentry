@@ -120,7 +120,6 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
 
                 if (resultArray != null && !resultArray.isEmpty()) {
                     ProcessViralLoadResults.processPayload(resultArray.toString());// the only way that works for now is posting this through REST
-                    //dataExchange.processIncomingViralLoadLabResults(resultArray.toString());
                 }
 
                 System.out.println("Successfully executed the task that pulls lab requests");

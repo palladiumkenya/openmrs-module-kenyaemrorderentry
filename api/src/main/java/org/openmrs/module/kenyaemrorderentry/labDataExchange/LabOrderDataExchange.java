@@ -73,7 +73,6 @@ public class LabOrderDataExchange {
                 activeRequests = generateActiveVLPayload(order, activeRequests);
             }
         }
-        System.out.println("Preparing lab requests for " + ordersFound + " VL orders");
         requestWrapper.put("samples", activeRequests);
         return requestWrapper;
 
@@ -431,9 +430,6 @@ public class LabOrderDataExchange {
         LabManifestOrder manifestOrder = kenyaemrOrdersService.getLabManifestOrderByOrderId(orderService.getOrder(orderId));
         Date orderDiscontinuationDate = aMomentBefore(new Date());
 
-        SimpleDateFormat df = Utils.getSimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-        String formatedDiscDate = df.format(orderDiscontinuationDate);
-
         if (od != null && od.isActive()) {
             if ((StringUtils.isNotBlank(specimenStatus) && specimenStatus.equals("Rejected")) || StringUtils.isNotBlank(rejectedReason) || (StringUtils.isNotBlank(result) && result.equals("Collect New Sample"))) {
                 // Get all active VL orders and discontinue them
@@ -513,7 +509,6 @@ public class LabOrderDataExchange {
                         // this is really a hack to ensure that order date_stopped is filled, otherwise the order will remain active
                         // the issue here is that even though disc order is created, the original order is not stopped
                         // an alternative is to discontinue this order via REST which works well
-                        //Context.getAdministrationService().executeSQL("update orders o1 inner join orders o2 on o1.order_id=o2.previous_order_id and o1.date_stopped is null set o1.date_stopped = '" +  formatedDiscDate + "' where o1.order_id = " + orderToRetain.getOrderId().intValue() , false);
                     } catch (Exception e) {
                         System.out.println("An error was encountered while updating orders for viral load");
                         e.printStackTrace();
@@ -524,7 +519,7 @@ public class LabOrderDataExchange {
                     kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
                 }
             } else if (StringUtils.isNotBlank(specimenStatus) && specimenStatus.equalsIgnoreCase("Incomplete")) {
-                System.out.println("Status for " + orderId + " sample not yet ready");
+                // do nothing
             }
         }
 
