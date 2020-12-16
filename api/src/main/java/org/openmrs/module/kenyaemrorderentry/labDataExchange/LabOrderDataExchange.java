@@ -25,6 +25,7 @@ import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 import org.openmrs.module.kenyaemrorderentry.util.Utils;
 import org.openmrs.ui.framework.SimpleObject;
+import org.openmrs.util.PrivilegeConstants;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -329,7 +330,7 @@ public class LabOrderDataExchange {
      * @return a list of order_id
      */
     protected Set<Integer> getActiveViralLoadOrders() {
-
+        Context.addProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
         Set<Integer> activeLabs = new HashSet<Integer>();
         String sql = "select order_id from orders where order_action='NEW' and concept_id = 856 and date_stopped is null and voided=0;";
 
@@ -340,7 +341,7 @@ public class LabOrderDataExchange {
                 activeLabs.add(orderId);
             }
         }
-
+        Context.removeProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
         return activeLabs;
     }
 
@@ -352,7 +353,7 @@ public class LabOrderDataExchange {
      * @return
      */
     public Set<Order> getActiveViralLoadOrdersNotInManifest(Integer manifestId, Date startDate, Date endDate) {
-
+        Context.addProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
         Set<Order> activeLabs = new HashSet<Order>();
         String sql = "select o.order_id from orders o\n" +
                 "left join kenyaemr_order_entry_lab_manifest_order mo on mo.order_id = o.order_id\n" +
@@ -377,7 +378,7 @@ public class LabOrderDataExchange {
                 }
             }
         }
-
+        Context.removeProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
         return activeLabs;
     }
 
