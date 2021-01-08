@@ -80,8 +80,8 @@ public class KenyaemrOrdersServiceImpl extends BaseOpenmrsService implements Ken
     }
 
     @Override
-    public void voidLabManifestOrder(Integer id) {
-        dao.voidLabManifestOrder(id);
+    public void voidLabManifestOrder(Integer labManifestOrder) {
+        dao.voidLabManifestOrder(labManifestOrder);
     }
 
     @Override

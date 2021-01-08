@@ -121,6 +121,15 @@ public class GeneralLabOrdersFragmentController {
         return simpleObject;
     }
 
+    /**
+     * Fragment action method that adds viral load sample to a draft manifest
+     * @param manifest
+     * @param order
+     * @param sampleType
+     * @param dateSampleCollected
+     * @param dateSampleSeparated
+     * @return
+     */
     public SimpleObject addOrderToManifest(@RequestParam(value = "manifestId") LabManifest manifest,
                                            @RequestParam(value = "orderId") Order order,
                                            @RequestParam(value = "sampleType") String sampleType,
@@ -146,6 +155,21 @@ public class GeneralLabOrdersFragmentController {
                 kenyaemrOrdersService.saveLabManifestOrder(labOrder);
                 return SimpleObject.create("status", "successful");
             }
+        }
+        return SimpleObject.create("status", "Not successful");
+    }
+
+    /**
+     * A fragment action method that removes a viral lab sample from a draft manifest
+     * @param manifestOrder
+     * @return
+     */
+    public SimpleObject removeManifestOrder(@RequestParam(value = "manifestOrderId") Integer manifestOrder
+    ) {
+
+        if (manifestOrder != null) {
+            kenyaemrOrdersService.voidLabManifestOrder(manifestOrder);
+            return SimpleObject.create("status", "successful");
         }
         return SimpleObject.create("status", "Not successful");
     }
