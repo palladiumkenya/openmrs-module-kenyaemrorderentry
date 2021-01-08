@@ -134,6 +134,8 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                     <td class="dateRequestColumn">${o.result ?: "Not ready"}</td>
                     <td class="dateRequestColumn">${o.resultDate ?: ""}</td>
                     <td class="actionColumn">
+                        <button class="removeManifestOrder" style="background-color: cadetblue; color: white" value="od_${o.id}" data-target="#removeManifestOrder">Remove</button>
+
                         <a href="${ ui.pageLink("kenyaemrorderentry","manifest/printSpecimenLabel",[manifestOrder : o.id]) }"   target="_blank">
                             <button style="background-color: cadetblue; color: white">
                                 Print Label
@@ -218,6 +220,29 @@ tr:nth-child(even) {background-color: #f2f2f2;}
         </div>
     </div>
 
+    <div class="modal fade" id="removeManifestOrder" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header modal-header-primary">
+                    <h5 class="modal-title">Are you sure you want to remove sample?</h5>
+                    <button type="button" class="close closeDialog" data-dismiss="modal">&times;
+
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input hidden="text" id="selectedManifestOrderId"/>
+                    <span style="color: firebrick" id="alertBox"></span>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="close closeDialog" data-dismiss="modal">Close</button>
+                    <button type="button" id="removeSample">
+                        <img src="${ ui.resourceLink("kenyaui", "images/glyphs/ok.png") }" /> Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <script type="text/javascript">
@@ -277,6 +302,43 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                         jq('.modal-body #msgBox').text('The system encountered a problem while adding the sample. Please try again');
                     })
             }
+        });
+
+        // a function that removes an order from a manifest
+        jq('#eligibleList').on('click','.removeManifestOrder',function () {
+
+
+            var concatOrderId = jq(this).val();
+            var orderId = concatOrderId.split("_")[1];
+
+            jq(".modal-body #selectedManifestOrderId").val( orderId );
+            jq('#removeManifestOrder').modal('show');
+        });
+
+
+        jq('#removeSample').click(function () {
+
+            var selManifestOrder = jq(".modal-body #selectedManifestOrderId").val();
+            console.log('Manifest order: ' + selManifestOrder)
+
+            jq.getJSON('${ ui.actionLink("kenyaemrorderentry", "patientdashboard/generalLabOrders", "removeManifestOrder") }',{
+                'manifestOrderId': selManifestOrder
+            })
+                .success(function (data) {
+                    if (data.status == 'successful') {
+                        jq('#removeManifestOrder').modal('toggle');
+                        kenyaui.openAlertDialog({ heading: 'Alert', message: 'Sample successfully removed from the manifest' })
+                        setTimeout(function () {
+                            window.location.reload();
+                        }, 2000);
+                    } else {
+                        jq('.modal-body #alertBox').text('Could not remove sample from the manifest!.');
+
+                    }
+                })
+                .error(function (xhr, status, err) {
+                    jq('.modal-body #alertBox').text('The system encountered a problem while removing the sample. Please try again');
+                })
         });
 
         jq('.closeDialog').click(function () {

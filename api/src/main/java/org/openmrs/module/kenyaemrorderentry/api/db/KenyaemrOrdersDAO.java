@@ -20,7 +20,7 @@ public interface KenyaemrOrdersDAO {
     List<LabManifestOrder> getLabManifestOrders();
     LabManifestOrder getLabManifestOrderById(Integer id);
     List<LabManifestOrder> getLabManifestOrderByManifest(LabManifest labManifestOrder);
-    void voidLabManifestOrder(Integer id);
+    void voidLabManifestOrder(Integer labManifestOrder);
 
     LabManifestOrder getLabManifestOrderByManifest(Order specimenId);
 
