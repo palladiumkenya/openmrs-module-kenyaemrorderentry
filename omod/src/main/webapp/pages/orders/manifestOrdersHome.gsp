@@ -224,7 +224,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header modal-header-primary">
-                    <h5 class="modal-title">Are you sure you want to remove sample?</h5>
+                    <h5 class="modal-title">Remove sample from manifest</h5>
                     <button type="button" class="close closeDialog" data-dismiss="modal">&times;
 
                     </button>
@@ -232,12 +232,13 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                 <div class="modal-body">
                     <input hidden="text" id="selectedManifestOrderId"/>
                     <span style="color: firebrick" id="alertBox"></span>
+                    <h5 class="modal-title">Are you sure you want to remove sample from the manifest?</h5>
 
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="close closeDialog" data-dismiss="modal">Close</button>
                     <button type="button" id="removeSample">
-                        <img src="${ ui.resourceLink("kenyaui", "images/glyphs/ok.png") }" /> Save</button>
+                        <img src="${ ui.resourceLink("kenyaui", "images/glyphs/ok.png") }" /> Yes</button>
                 </div>
             </div>
         </div>
