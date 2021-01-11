@@ -212,7 +212,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                     </table>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="close closeDialog" data-dismiss="modal">Close</button>
+                    <button type="button" class="close closeDialog" data-dismiss="modal">Cancel</button>
                     <button type="button" id="addSample">
                         <img src="${ ui.resourceLink("kenyaui", "images/glyphs/ok.png") }" /> Save</button>
                 </div>
@@ -236,7 +236,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
 
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="close closeDialog" data-dismiss="modal">Close</button>
+                    <button type="button" class="close closeDialog" data-dismiss="modal">Cancel</button>
                     <button type="button" id="removeSample">
                         <img src="${ ui.resourceLink("kenyaui", "images/glyphs/ok.png") }" /> Yes</button>
                 </div>
