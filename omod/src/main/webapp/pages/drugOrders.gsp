@@ -121,15 +121,17 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
     <div class="ke-panel-frame" style="background-color: #d1d0c9;font-weight: bold">
         <br/>
         <p style="color: midnightblue;text-align: center">
-            Please prescribe all medication and use the button below to queue message to ADT.
+            Please prescribe all medication and post to ADT queue.
         </p>
         <br/>
+        <% if (hasActiveOrders) { %>
         <div style="text-align: center">
             <button style="border: solid" id="postMessagetoAdt">Post prescriptions to ADT queue</button>
         </div>
         <br/>
         <br/>
         <span id="msgBox" style="color: white"></span>
+        <% } %>
     </div>
 </div>
 
