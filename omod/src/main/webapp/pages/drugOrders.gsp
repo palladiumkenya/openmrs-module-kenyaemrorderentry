@@ -105,10 +105,10 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
                     'patient': ${ patient.patientId }
                 })
                 .success(function(data) {
-                    jq('#msgBox').html("Successfully posted to ADT");
+                    jq('#msgBox').html("Successfully posted to ADT queue");
                 })
                 .error(function(xhr, status, err) {
-                    jq('#msgBox').html("Could not post to ADT");
+                    jq('#msgBox').html("Could not post to ADT queue. Kindly contact an admin user for help");
                 })
         });
     });
@@ -117,13 +117,16 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
     <div class="ke-panel-frame">
         ${ui.includeFragment("kenyaui", "widget/panelMenu", [heading: "Navigation", items: menuItems])}
     </div>
-    <div class="ke-panel-frame">
+    <div></div>
+    <div class="ke-panel-frame" style="background-color: #d1d0c9;font-weight: bold">
         <br/>
-        <p style="color: white;">
-            Please prescribe all medication and use the button below to queueu message to ADT.
+        <p style="color: midnightblue;text-align: center">
+            Please prescribe all medication and use the button below to queue message to ADT.
         </p>
         <br/>
-        <button id="postMessagetoAdt">Post prescriptions to ADT</button>
+        <div style="text-align: center">
+            <button style="border: solid" id="postMessagetoAdt">Post prescriptions to ADT queue</button>
+        </div>
         <br/>
         <br/>
         <span id="msgBox" style="color: white"></span>
