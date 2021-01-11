@@ -181,7 +181,7 @@ public class DrugOrdersPageController {
         activeOrdersResponse.put("order_groups",orderGroupArray);
         activeOrdersResponse.put("single_drugs",orderArray);
         model.put("activeOrdersResponse",ui.toJson(activeOrdersResponse));
-        //model.put("currentApp",app);
+        model.put("hasActiveOrders",activeDrugOrders.size() > 0 ? true : false);
         //model.addAttribute("appHomepageUrl", app.getUrl());
         getPastDrugOrders(orderService, conceptService,careSetting,ui, patient, model,obsService);
 
