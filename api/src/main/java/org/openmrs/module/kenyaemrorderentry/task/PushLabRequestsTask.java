@@ -119,7 +119,7 @@ public class PushLabRequestsTask extends AbstractTask {
 
                         //verify the valid error code first
                         int statusCode = response.getStatusLine().getStatusCode();
-                        if (statusCode != 201) {
+                        if (statusCode != 201 && statusCode != 422 && statusCode != 403) { // skip for status code 422: unprocessable entity, and status code 403 for forbidden response
                             JSONParser parser = new JSONParser();
                             JSONObject responseObj = (JSONObject) parser.parse(EntityUtils.toString(response.getEntity()));
                             JSONObject errorObj = (JSONObject) responseObj.get("error");
@@ -127,7 +127,7 @@ public class PushLabRequestsTask extends AbstractTask {
                             System.out.println("There was an error sending lab id = " + manifestOrder.getId());
                             log.warn("There was an error sending lab id = " + manifestOrder.getId());
                             // throw new RuntimeException("Failed with HTTP error code : " + statusCode + ". Error msg: " + errorObj.get("message"));
-                        } else {
+                        } else if (statusCode == 201){
                             manifestOrder.setStatus("Sent");
                             log.info("Successfully pushed a VL lab test id " + manifestOrder.getId());
                         }
