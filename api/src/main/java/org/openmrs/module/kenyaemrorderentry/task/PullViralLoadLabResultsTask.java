@@ -10,9 +10,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.ssl.SSLContexts;
 import org.apache.http.util.EntityUtils;
 import org.openmrs.GlobalProperty;
 import org.openmrs.api.context.Context;
@@ -69,7 +71,16 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
                 return;
             }
 
-            CloseableHttpClient httpClient = HttpClients.createDefault();
+            SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
+                    SSLContexts.createDefault(),
+                    new String[] { "TLSv1.2"},
+                    null,
+                    SSLConnectionSocketFactory.getDefaultHostnameVerifier());
+
+            CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
+
+            //CloseableHttpClient httpClient = HttpClients.createDefault();
+
 
             try {
                 //Define a postRequest request
