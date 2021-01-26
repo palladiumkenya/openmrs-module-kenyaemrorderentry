@@ -69,7 +69,7 @@ public class ProcessViralLoadResults {
                     }
                     throw new RuntimeException("Failed with HTTP error code : " + statusCode + ". Error msg: " + errorObj.get("message"));
                 } else {
-                    System.out.println("Successfully updated VL result");
+                    //System.out.println("Successfully updated VL result"); -- remain mute
                 }
             }
             finally {
