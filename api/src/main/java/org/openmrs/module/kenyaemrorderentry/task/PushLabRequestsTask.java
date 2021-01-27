@@ -128,6 +128,13 @@ public class PushLabRequestsTask extends AbstractTask {
 
                         //verify the valid error code first
                         int statusCode = response.getStatusLine().getStatusCode();
+
+                        if (statusCode == 429) { // too many requests. just terminate
+                            System.out.println("The push lab scheduler has been configured to run at very short intervals. Please change this to at least 30min");
+                            log.warn("The push scheduler has been configured to run at very short intervals. Please change this to at least 30min");
+                            return;
+                        }
+
                         if (statusCode != 201 && statusCode != 422 && statusCode != 403) { // skip for status code 422: unprocessable entity, and status code 403 for forbidden response
                             JSONParser parser = new JSONParser();
                             JSONObject responseObj = (JSONObject) parser.parse(EntityUtils.toString(response.getEntity()));

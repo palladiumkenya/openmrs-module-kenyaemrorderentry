@@ -120,6 +120,12 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
 
                     //verify the valid error code first
                     int statusCode = response.getStatusLine().getStatusCode();
+
+                    if (statusCode == 429) { // too many requests. just terminate
+                        System.out.println("The pull lab result scheduler has been configured to run at very short intervals. Please change this to at least 30min");
+                        log.warn("The pull lab result scheduler has been configured to run at very short intervals. Please change this to at least 30min");
+                        return;
+                    }
                     if (statusCode != 200) {
                         throw new RuntimeException("Failed with HTTP error code : " + statusCode);
                     }
