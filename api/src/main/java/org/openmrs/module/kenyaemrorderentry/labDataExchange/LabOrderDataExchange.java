@@ -8,6 +8,8 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openmrs.Concept;
 import org.openmrs.Encounter;
 import org.openmrs.EncounterType;
@@ -37,6 +39,7 @@ import java.util.Set;
 
 public class LabOrderDataExchange {
 
+    private Log log = LogFactory.getLog(getClass());
     public static final String GP_LAB_SERVER_REQUEST_URL = "chai.viral_load_server_url";
     public static final String GP_LAB_SERVER_RESULT_URL = "chai.viral_load_server_result_url";
     public static final String GP_LAB_SERVER_API_TOKEN = "chai.viral_load_server_api_token";
@@ -406,7 +409,7 @@ public class LabOrderDataExchange {
             for (int i = 0; i < resultsObj.size(); i++) {
                 ObjectNode o = (ObjectNode) resultsObj.get(i);
                 Integer specimenId = o.get("order_number").asInt();
-                String patientIdentifier = o.get("patient").textValue(); // holds CCC number
+               // String patientIdentifier = o.get("patient").textValue(); // holds CCC number
                 String specimenReceivedStatus = o.get("sample_status").textValue();// Complete, Incomplete, Rejected
 
                 String specimenRejectedReason = o.has("rejected_reason") ? o.get("rejected_reason").textValue() : "";
@@ -499,7 +502,7 @@ public class LabOrderDataExchange {
                 enc.setCreator(Context.getUserService().getUser(1));
 
                 enc.addObs(o);
-                if (orderToRetain != null && orderToVoid != null) {
+                if (orderToRetain != null && orderToVoid != null && orderToRetain.isActive()) {
 
                     try {
 
@@ -514,14 +517,22 @@ public class LabOrderDataExchange {
                         System.out.println("An error was encountered while updating orders for viral load");
                         e.printStackTrace();
                     }
-                    manifestOrder.setStatus("Result received");
+                    manifestOrder.setStatus("Complete");
                     manifestOrder.setResult(result);
                     manifestOrder.setResultDate(orderDiscontinuationDate);
                     kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
                 }
             } else if (StringUtils.isNotBlank(specimenStatus) && specimenStatus.equalsIgnoreCase("Incomplete")) {
-                // do nothing
+                // indicate the incomplete status
+                manifestOrder.setStatus("Incomplete");
+                manifestOrder.setResult("");
+                kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
             }
+        } else {
+            // a manifest order that may have been discontinued prior to results
+            manifestOrder.setStatus("Inactive");
+            manifestOrder.setResult("");
+            kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
         }
 
     }

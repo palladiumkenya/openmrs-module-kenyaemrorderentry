@@ -65,19 +65,36 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
                     return;
                 }
 
-                LabManifest allManifest = kenyaemrOrdersService.getLabOrderManifestByStatus("Completed");
+                LabManifest manifestToUpdateResults = kenyaemrOrdersService.getLabOrderManifestByStatus("Submitted");
 
-                if (allManifest == null) {
+                if (manifestToUpdateResults == null) {
                     System.out.println("There are no manifests to pull results for");
+                    log.info("There are no manifests to pull results for");
                     return;
                 }
 
-                List<LabManifestOrder> ordersInManifest = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(allManifest, "Sent");
+                List<LabManifestOrder> allSentOrders = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifestToUpdateResults, "Sent");
+                List<LabManifestOrder> ordersWithIncompleteResults = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifestToUpdateResults, "Incomplete");
 
-                if (ordersInManifest.size() < 1) {
+                if (allSentOrders.size() < 1 && ordersWithIncompleteResults.size() < 1) {
                     System.out.println("There are no active labs to pull results for");
-                    allManifest.setStatus("Received result");
-                    kenyaemrOrdersService.saveLabOrderManifest(allManifest);
+                    log.info("There are no active labs to pull results for");
+                    manifestToUpdateResults.setStatus("Complete results");
+                    manifestToUpdateResults.setDateChanged(new Date());
+                    kenyaemrOrdersService.saveLabOrderManifest(manifestToUpdateResults);
+                    return;
+                } else if (allSentOrders.size() < 1 && ordersWithIncompleteResults.size() > 0) {
+                    System.out.println("Manifest has incomplete results");
+                    log.info("Manifest has incomplete results");
+                    manifestToUpdateResults.setStatus("Incomplete results");
+                    manifestToUpdateResults.setDateChanged(new Date());
+                    kenyaemrOrdersService.saveLabOrderManifest(manifestToUpdateResults);
+                    return;
+                }
+
+                if (allSentOrders.size() < 1) { // exit if manifest has 0 orders with pending results
+                    System.out.println("Manifest doesn't have orders awaiting results");
+                    log.info("Manifest doesn't have orders awaiting results");
                     return;
                 }
 
@@ -90,6 +107,13 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
                 CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
 
                 try {
+
+                    // we want to create a comma separated list of order id
+                    List<Integer> orderIds = new ArrayList<Integer>();
+                    for (LabManifestOrder manifestOrder : allSentOrders) {
+                        orderIds.add(manifestOrder.getOrder().getOrderId());
+                    }
+
                     //Define a postRequest request
                     HttpPost postRequest = new HttpPost(serverUrl);
 
@@ -97,20 +121,12 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
                     postRequest.addHeader("content-type", "application/json");
                     postRequest.addHeader("apikey", API_KEY);
 
-                    // we want to create a comma separated list of order id
-                    List<Integer> orderIds = new ArrayList<Integer>();
-                    for (LabManifestOrder manifestOrder : ordersInManifest) {
-                        orderIds.add(manifestOrder.getOrder().getOrderId());
-                    }
                     ObjectNode request = Utils.getJsonNodeFactory().objectNode();
                     request.put("test", "2");
                     request.put("facility_code", Utils.getDefaultLocationMflCode(Utils.getDefaultLocation()));
                     request.put("order_numbers", StringUtils.join(orderIds, ","));
 
-                    if (orderIds.size() < 1) {
-                        System.out.println("There are no lab requests awaiting results");
-                        return;
-                    }
+
                     //Set the request post body
                     StringEntity userEntity = new StringEntity(request.toString());
                     postRequest.setEntity(userEntity);

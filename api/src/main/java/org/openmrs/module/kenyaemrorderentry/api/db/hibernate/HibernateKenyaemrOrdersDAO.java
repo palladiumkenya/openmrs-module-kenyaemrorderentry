@@ -139,6 +139,7 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
         criteria.add(Restrictions.eq("status", status));
         criteria.addOrder(org.hibernate.criterion.Order.asc("id"));
         criteria.add(Restrictions.eq("voided", false));
+        // return the earliest - the first in the list
         if (criteria.list().size() > 0) {
             return (LabManifest) criteria.list().get(0);
         }

@@ -69,14 +69,14 @@ public class PushLabRequestsTask extends AbstractTask {
                 // Get a manifest ready to be sent
                 LabManifest toProcess = null;
                 String manifestStatus = "";
-                toProcess = kenyaemrOrdersService.getLabOrderManifestByStatus("Sending");
+                toProcess = kenyaemrOrdersService.getLabOrderManifestByStatus("Currently submitting");
                 if (toProcess == null) {
-                    toProcess = kenyaemrOrdersService.getLabOrderManifestByStatus("Ready to send");
+                    toProcess = kenyaemrOrdersService.getLabOrderManifestByStatus("Submit");
                     if (toProcess != null) {
-                        manifestStatus = "Ready to send";
+                        manifestStatus = "Submit";
                     }
                 } else {
-                    manifestStatus = "Sending";
+                    manifestStatus = "Currently submitting";
                 }
 
 
@@ -89,9 +89,9 @@ public class PushLabRequestsTask extends AbstractTask {
                 ;
 
                 if (ordersInManifest.size() < 1) {
-                    System.out.println("Found no lab requests to post. Will mark the manifest as complete");
+                    System.out.println("Found no lab requests to post. Will mark the manifest as submitted");
                     if (toProcess != null) {
-                        toProcess.setStatus("Completed");
+                        toProcess.setStatus("Submitted");
                         kenyaemrOrdersService.saveLabOrderManifest(toProcess);
                     }
                     return;
@@ -149,8 +149,8 @@ public class PushLabRequestsTask extends AbstractTask {
                         }
                         kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
 
-                        if (toProcess != null && manifestStatus.equals("Ready to send")) {
-                            toProcess.setStatus("Sending");
+                        if (toProcess != null && manifestStatus.equals("Submit")) {
+                            toProcess.setStatus("Currently submitting");
                             kenyaemrOrdersService.saveLabOrderManifest(toProcess);
                         }
                         Context.flushSession();

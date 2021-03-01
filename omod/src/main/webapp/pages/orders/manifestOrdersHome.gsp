@@ -112,7 +112,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
         <br/>
         <br/>
         <fieldset>
-            <legend>Samples in the manifest</legend>
+            <legend>Samples in the manifest (Total: ${manifestOrders.size()})</legend>
             <table class="simple-table" width="90%">
                 <tr>
                     <th class="nameColumn">Patient Name</th>
