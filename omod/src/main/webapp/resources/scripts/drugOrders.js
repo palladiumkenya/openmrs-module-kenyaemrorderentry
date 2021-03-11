@@ -56,10 +56,19 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
         });
 
         // TODO changing dosingType of a draft order should reset defaults (and discard non-defaulted properties)
-          var programRegimens = OpenMRS.kenyaemrRegimenJsonPayload;
+          var programRegimens = "";
+          $scope.regimenLine = "";
+          $scope.patientNotOnRegimen = true;
+
+        if( OpenMRS.kenyaemrRegimenJsonPayload && OpenMRS.kenyaemrRegimenJsonPayload !== undefined) {
+            $scope.patientNotOnRegimen = false;
+            programRegimens = OpenMRS.kenyaemrRegimenJsonPayload;
+            $scope.regimenLine = programRegimens[0].regimenLine !== null || programRegimens[0].regimenLine !=="" ? programRegimens[0].regimenLine : "";
+
+          }
+
           $scope.customDurationUnits = OpenMRS.durationUnitsPayload.durationUnitsResponse;
           $scope.showRegimenPanel = false;
-          $scope.regimenLine = programRegimens[0].regimenLine !== null || programRegimens[0].regimenLine !=="" ? programRegimens[0].regimenLine : "";
 
         function loadExistingOrders() {
             $scope.activeDrugOrders = {loading: true};
@@ -94,6 +103,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                 $scope.regimenStatus = "absent";
                 if ($scope.patientRegimens.length == 0) {
                     $scope.showRegimenPanel = false;
+
                 }
                 if ($scope.patientActiveDrugOrders.order_groups.length > 0) {
                     $scope.disableButton = true
