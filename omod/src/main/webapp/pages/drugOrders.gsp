@@ -325,6 +325,7 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
                                 <div ng-show="showRegimenPanel">
                                     ${ui.includeFragment("kenyaemrorderentry", "patientdashboard/regimenDispensation", ["patient": patient])}
                                 </div>
+                                <span ng-show="patientNotOnRegimen">Patient is not on any regimen</span>
                             </div>
                         </div>
                     </div>
