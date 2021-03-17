@@ -50,8 +50,8 @@
         <htmlformentryVersion>3.9.2</htmlformentryVersion>
         <htmlformentryuiVersion>1.9.0</htmlformentryuiVersion>
         <coreappsVersion>1.23.0</coreappsVersion>
-        <kenyacoreVersion>2.4.2-SNAPSHOT</kenyacoreVersion>
-        <kenyauiVersion>2.1.2-SNAPSHOT</kenyauiVersion>
+        <kenyacoreVersion>2.4.2</kenyacoreVersion>
+        <kenyauiVersion>2.1.2</kenyauiVersion>
         <webservices.restVersion>2.26.0</webservices.restVersion>
         <jacksonVersion>2.10.1</jacksonVersion>
         <apacheHttpClientVersion>4.5.10</apacheHttpClientVersion>
