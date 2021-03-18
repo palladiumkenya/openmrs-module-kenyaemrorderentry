@@ -491,7 +491,7 @@ public class LabOrderDataExchange {
                 o.setConcept(conceptToRetain);
                 o.setDateCreated(orderDiscontinuationDate);
                 o.setCreator(Context.getUserService().getUser(1));
-                o.setObsDatetime(orderDiscontinuationDate);
+                o.setObsDatetime(orderToRetain.getDateActivated());
                 o.setPerson(od.getPatient());
                 o.setOrder(orderToRetain);
 

@@ -146,7 +146,15 @@ public class PushLabRequestsTask extends AbstractTask {
                         } else if (statusCode == 201) {
                             manifestOrder.setStatus("Sent");
                             log.info("Successfully pushed a VL lab test id " + manifestOrder.getId());
+                        } else if (statusCode == 403 || statusCode == 422) {
+                            //manifestOrder.setStatus("Sent");
+                            JSONParser parser = new JSONParser();
+                            JSONObject responseObj = (JSONObject) parser.parse(EntityUtils.toString(response.getEntity()));
+                            JSONObject errorObj = (JSONObject) responseObj.get("error");
+                            System.out.println("Error while submitting manifest sample. " + "Error - " + statusCode + ". Msg" + errorObj.get("message"));
+                            log.error("Error while submitting manifest sample. " + "Error - " + statusCode + ". Msg" + errorObj.get("message"));
                         }
+
                         kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
 
                         if (toProcess != null && manifestStatus.equals("Submit")) {
