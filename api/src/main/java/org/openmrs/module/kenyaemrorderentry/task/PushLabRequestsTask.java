@@ -69,14 +69,14 @@ public class PushLabRequestsTask extends AbstractTask {
                 // Get a manifest ready to be sent
                 LabManifest toProcess = null;
                 String manifestStatus = "";
-                toProcess = kenyaemrOrdersService.getLabOrderManifestByStatus("Sending");
+                toProcess = kenyaemrOrdersService.getLabOrderManifestByStatus("Currently submitting");
                 if (toProcess == null) {
-                    toProcess = kenyaemrOrdersService.getLabOrderManifestByStatus("Ready to send");
+                    toProcess = kenyaemrOrdersService.getLabOrderManifestByStatus("Submit");
                     if (toProcess != null) {
-                        manifestStatus = "Ready to send";
+                        manifestStatus = "Submit";
                     }
                 } else {
-                    manifestStatus = "Sending";
+                    manifestStatus = "Currently submitting";
                 }
 
 
@@ -89,9 +89,9 @@ public class PushLabRequestsTask extends AbstractTask {
                 ;
 
                 if (ordersInManifest.size() < 1) {
-                    System.out.println("Found no lab requests to post. Will mark the manifest as complete");
+                    System.out.println("Found no lab requests to post. Will mark the manifest as submitted");
                     if (toProcess != null) {
-                        toProcess.setStatus("Completed");
+                        toProcess.setStatus("Submitted");
                         kenyaemrOrdersService.saveLabOrderManifest(toProcess);
                     }
                     return;
@@ -146,11 +146,19 @@ public class PushLabRequestsTask extends AbstractTask {
                         } else if (statusCode == 201) {
                             manifestOrder.setStatus("Sent");
                             log.info("Successfully pushed a VL lab test id " + manifestOrder.getId());
+                        } else if (statusCode == 403 || statusCode == 422) {
+                            //manifestOrder.setStatus("Sent");
+                            JSONParser parser = new JSONParser();
+                            JSONObject responseObj = (JSONObject) parser.parse(EntityUtils.toString(response.getEntity()));
+                            JSONObject errorObj = (JSONObject) responseObj.get("error");
+                            System.out.println("Error while submitting manifest sample. " + "Error - " + statusCode + ". Msg" + errorObj.get("message"));
+                            log.error("Error while submitting manifest sample. " + "Error - " + statusCode + ". Msg" + errorObj.get("message"));
                         }
+
                         kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
 
-                        if (toProcess != null && manifestStatus.equals("Ready to send")) {
-                            toProcess.setStatus("Sending");
+                        if (toProcess != null && manifestStatus.equals("Submit")) {
+                            toProcess.setStatus("Currently submitting");
                             kenyaemrOrdersService.saveLabOrderManifest(toProcess);
                         }
                         Context.flushSession();
