@@ -67,8 +67,11 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
 
           }
 
-          $scope.customDurationUnits = OpenMRS.durationUnitsPayload.durationUnitsResponse;
-          $scope.showRegimenPanel = false;
+        $scope.customDurationUnits = "";
+        if( OpenMRS.durationUnitsPayload && OpenMRS.durationUnitsPayload !== undefined) {
+            $scope.customDurationUnits = OpenMRS.durationUnitsPayload.durationUnitsResponse;
+        }
+        $scope.showRegimenPanel = false;
 
         function loadExistingOrders() {
             $scope.activeDrugOrders = {loading: true};
@@ -251,14 +254,18 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
         $scope.showStandardRegimenTab = true;
 
 
-        var config = OpenMRS.drugOrdersConfig;
+        var config = "";
+
+        if( OpenMRS.drugOrdersConfig && OpenMRS.drugOrdersConfig !== undefined) {
+            config = OpenMRS.drugOrdersConfig;
+        }
         $scope.init = function () {
-            $scope.routes = config.routes;
-            $scope.doseUnits = config.doseUnits;
-            $scope.durationUnits = config.durationUnits;
-            $scope.quantityUnits = config.quantityUnits;
-            $scope.frequencies = config.frequencies;
-            $scope.careSettings = config.careSettings;
+            $scope.routes = config.routes !== undefined ? config.routes : "";
+            $scope.doseUnits = config.doseUnits !== undefined ? config.doseUnits : "";
+            $scope.durationUnits = config.durationUnits !== undefined ? config.durationUnits : "";
+            $scope.quantityUnits = config.quantityUnits !== undefined ? config.quantityUnits : "";
+            $scope.frequencies = config.frequencies !== undefined ? config.frequencies : "";
+            $scope.careSettings = config && config.careSettings && config !== "" && config.careSettings !=="" && config.careSettings !== undefined ? config.careSettings : "";
             $scope.careSetting = config.intialCareSetting ?
                 _.findWhere(config.careSettings, {uuid: config.intialCareSetting}) :
                 config.careSettings[0];
