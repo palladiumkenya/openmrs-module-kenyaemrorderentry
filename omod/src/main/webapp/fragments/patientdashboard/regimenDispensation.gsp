@@ -6,8 +6,12 @@
 
 %>
 <script type="text/javascript">
-    var patient = OpenMRS.drugOrdersConfig.patient.uuid;
-    var provider = OpenMRS.drugOrdersConfig.provider.uuid;
+    var patient = "";
+    var provider = "";
+    if(OpenMRS.drugOrdersConfig && OpenMRS.drugOrdersConfig !==undefined) {
+        patient=OpenMRS.drugOrdersConfig.patient.uuid;
+        provider = OpenMRS.drugOrdersConfig.provider.uuid;
+    }
 
     jq(document).ready(function () {
         jq(document).on("click", ".edit-order", function () {
