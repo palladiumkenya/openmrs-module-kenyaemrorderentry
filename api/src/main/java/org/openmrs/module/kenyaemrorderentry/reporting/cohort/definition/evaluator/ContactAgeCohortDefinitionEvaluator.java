@@ -45,7 +45,7 @@ public class ContactAgeCohortDefinitionEvaluator implements CohortDefinitionEval
 		ContactAgeCohortDefinition acd = (ContactAgeCohortDefinition) cohortDefinition;
 		KenyaemrOrdersService cqs = Context.getService(KenyaemrOrdersService.class);
     	
-    	Cohort c = cqs.getPatientsWithAgeRange(acd.getMinAge(), acd.getMinAgeUnit(), acd.getMaxAge(), acd.getMaxAgeUnit(),
+    	Cohort c = cqs.getPatientContactWithAgeRange(acd.getMinAge(), acd.getMinAgeUnit(), acd.getMaxAge(), acd.getMaxAgeUnit(),
     									   acd.isUnknownAgeIncluded(), acd.getEffectiveDate());
     	return new EvaluatedCohort(c, cohortDefinition, context);
     }

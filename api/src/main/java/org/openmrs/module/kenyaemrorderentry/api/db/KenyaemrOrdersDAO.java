@@ -35,9 +35,9 @@ public interface KenyaemrOrdersDAO {
     List<LabManifestOrder> getLabManifestOrdersToSend(LabManifest labManifestOrder);
 
     //Patient Contact dimensions methods
-    public Cohort getPatientsWithGender(boolean includeMales, boolean includeFemales, boolean includeUnknownGender);
+    public Cohort getPatientContactWithGender(boolean includeMales, boolean includeFemales, boolean includeUnknownGender);
 
-    public Cohort getPatientsWithAgeRange(Integer minAge, DurationUnit minAgeUnit, Integer maxAge, DurationUnit maxAgeUnit, boolean unknownAgeIncluded, Date effectiveDate);
+    public Cohort getPatientContactWithAgeRange(Integer minAge, DurationUnit minAgeUnit, Integer maxAge, DurationUnit maxAgeUnit, boolean unknownAgeIncluded, Date effectiveDate);
 
     //End of Patient Contact dimensions methods
 }

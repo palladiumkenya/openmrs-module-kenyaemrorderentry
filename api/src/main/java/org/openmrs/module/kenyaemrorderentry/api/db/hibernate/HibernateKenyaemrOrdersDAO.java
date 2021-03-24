@@ -181,7 +181,7 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
 
     //Patient contact dimensions methods
     @Override
-    public Cohort getPatientsWithGender(boolean includeMales, boolean includeFemales, boolean includeUnknownGender) {
+    public Cohort getPatientContactWithGender(boolean includeMales, boolean includeFemales, boolean includeUnknownGender) {
 
         if (!includeMales && !includeFemales && !includeUnknownGender) {
             return new Cohort();
@@ -207,7 +207,7 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
     }
 
     @Override
-    public Cohort getPatientsWithAgeRange(Integer minAge, DurationUnit minAgeUnit, Integer maxAge, DurationUnit maxAgeUnit, boolean unknownAgeIncluded, Date effectiveDate) {
+    public Cohort getPatientContactWithAgeRange(Integer minAge, DurationUnit minAgeUnit, Integer maxAge, DurationUnit maxAgeUnit, boolean unknownAgeIncluded, Date effectiveDate) {
 
         if (effectiveDate == null) {
             effectiveDate = new Date();
