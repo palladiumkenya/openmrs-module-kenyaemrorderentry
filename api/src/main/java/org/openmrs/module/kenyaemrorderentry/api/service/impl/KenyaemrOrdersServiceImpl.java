@@ -125,13 +125,13 @@ public class KenyaemrOrdersServiceImpl extends BaseOpenmrsService implements Ken
 
     //Patient contact dimensions service methods
     @Override
-    public Cohort getPatientsWithGender(boolean includeMales, boolean includeFemales, boolean includeUnknownGender) {
-        return dao.getPatientsWithGender(includeMales, includeFemales, includeUnknownGender);
+    public Cohort getPatientContactWithGender(boolean includeMales, boolean includeFemales, boolean includeUnknownGender) {
+        return dao.getPatientContactWithGender(includeMales, includeFemales, includeUnknownGender);
     }
 
     @Override
-    public Cohort getPatientsWithAgeRange(Integer minAge, DurationUnit minAgeUnit, Integer maxAge, DurationUnit maxAgeUnit, boolean unknownAgeIncluded, Date effectiveDate) {
-        return dao.getPatientsWithAgeRange(minAge, minAgeUnit, maxAge, maxAgeUnit, unknownAgeIncluded, effectiveDate);
+    public Cohort getPatientContactWithAgeRange(Integer minAge, DurationUnit minAgeUnit, Integer maxAge, DurationUnit maxAgeUnit, boolean unknownAgeIncluded, Date effectiveDate) {
+        return dao.getPatientContactWithAgeRange(minAge, minAgeUnit, maxAge, maxAgeUnit, unknownAgeIncluded, effectiveDate);
     }
     //End of Patient contact dimensions service methods
 

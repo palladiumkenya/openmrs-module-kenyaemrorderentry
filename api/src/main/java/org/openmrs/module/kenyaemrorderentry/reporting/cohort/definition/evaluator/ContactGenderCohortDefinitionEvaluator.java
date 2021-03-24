@@ -46,7 +46,7 @@ public class ContactGenderCohortDefinitionEvaluator implements CohortDefinitionE
     public EvaluatedCohort evaluate(CohortDefinition cohortDefinition, EvaluationContext context) {
 		ContactGenderCohortDefinition gcd = (ContactGenderCohortDefinition) cohortDefinition;
     	KenyaemrOrdersService cqs = Context.getService(KenyaemrOrdersService.class);
-    	Cohort c = cqs.getPatientsWithGender(gcd.isMaleIncluded(), gcd.isFemaleIncluded(), gcd.isUnknownGenderIncluded());
+    	Cohort c = cqs.getPatientContactWithGender(gcd.isMaleIncluded(), gcd.isFemaleIncluded(), gcd.isUnknownGenderIncluded());
     	return new EvaluatedCohort(c, cohortDefinition, context);
     }
 }
