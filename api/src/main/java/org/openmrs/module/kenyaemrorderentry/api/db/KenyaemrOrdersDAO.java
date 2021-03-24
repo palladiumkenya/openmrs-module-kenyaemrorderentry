@@ -4,6 +4,7 @@ import org.openmrs.Cohort;
 import org.openmrs.Order;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
+import org.openmrs.module.reporting.common.DurationUnit;
 
 import java.util.Date;
 import java.util.List;
@@ -31,6 +32,12 @@ public interface KenyaemrOrdersDAO {
     LabManifest getLabOrderManifestByStatus(String status);
     public Cohort getPatientsWithCadre(boolean includeTroupes, boolean includeCivilians);
 
-
     List<LabManifestOrder> getLabManifestOrdersToSend(LabManifest labManifestOrder);
+
+    //Patient Contact dimensions methods
+    public Cohort getPatientsWithGender(boolean includeMales, boolean includeFemales, boolean includeUnknownGender);
+
+    public Cohort getPatientsWithAgeRange(Integer minAge, DurationUnit minAgeUnit, Integer maxAge, DurationUnit maxAgeUnit, boolean unknownAgeIncluded, Date effectiveDate);
+
+    //End of Patient Contact dimensions methods
 }

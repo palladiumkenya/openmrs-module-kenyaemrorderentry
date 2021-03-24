@@ -9,6 +9,7 @@ import org.openmrs.module.kenyaemrorderentry.api.db.hibernate.HibernateKenyaemrO
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
+import org.openmrs.module.reporting.common.DurationUnit;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
@@ -121,6 +122,18 @@ public class KenyaemrOrdersServiceImpl extends BaseOpenmrsService implements Ken
     public void setDao(HibernateKenyaemrOrdersDAO dao) {
         this.dao = dao;
     }
+
+    //Patient contact dimensions service methods
+    @Override
+    public Cohort getPatientsWithGender(boolean includeMales, boolean includeFemales, boolean includeUnknownGender) {
+        return dao.getPatientsWithGender(includeMales, includeFemales, includeUnknownGender);
+    }
+
+    @Override
+    public Cohort getPatientsWithAgeRange(Integer minAge, DurationUnit minAgeUnit, Integer maxAge, DurationUnit maxAgeUnit, boolean unknownAgeIncluded, Date effectiveDate) {
+        return dao.getPatientsWithAgeRange(minAge, minAgeUnit, maxAge, maxAgeUnit, unknownAgeIncluded, effectiveDate);
+    }
+    //End of Patient contact dimensions service methods
 
     @Override
     public void onStartup() {

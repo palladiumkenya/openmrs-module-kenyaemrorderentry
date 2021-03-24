@@ -14,9 +14,9 @@ import org.openmrs.api.db.DAOException;
 import org.openmrs.module.kenyaemrorderentry.api.db.KenyaemrOrdersDAO;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
+import org.openmrs.module.reporting.common.DurationUnit;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
     protected final Log log = LogFactory.getLog(this.getClass());
@@ -178,4 +178,86 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
         criteria.setMaxResults(50);
         return criteria.list();
     }
+
+    //Patient contact dimensions methods
+    @Override
+    public Cohort getPatientsWithGender(boolean includeMales, boolean includeFemales, boolean includeUnknownGender) {
+
+        if (!includeMales && !includeFemales && !includeUnknownGender) {
+            return new Cohort();
+        }
+
+        String prefixTerm = "";
+        StringBuilder query = new StringBuilder("select c.id from kenyaemr_hiv_testing_patient_contact c where c.voided = 0 and ( ");
+        if (includeMales) {
+            query.append(" c.sex = 'M' ");
+            prefixTerm = " or";
+        }
+        if (includeFemales) {
+            query.append(prefixTerm + " c.sex = 'F'");
+            prefixTerm = " or";
+        }
+        if (includeUnknownGender) {
+            query.append(prefixTerm + " c.sex is null or (c.sex != 'M' and c.sex != 'F')");
+        }
+        query.append(")");
+        Query q = sessionFactory.getCurrentSession().createSQLQuery(query.toString());
+        q.setCacheMode(CacheMode.IGNORE);
+        return new Cohort(q.list());
+    }
+
+    @Override
+    public Cohort getPatientsWithAgeRange(Integer minAge, DurationUnit minAgeUnit, Integer maxAge, DurationUnit maxAgeUnit, boolean unknownAgeIncluded, Date effectiveDate) {
+
+        if (effectiveDate == null) {
+            effectiveDate = new Date();
+        }
+        if (minAgeUnit == null) {
+            minAgeUnit = DurationUnit.YEARS;
+        }
+        if (maxAgeUnit == null) {
+            maxAgeUnit = DurationUnit.YEARS;
+        }
+
+        String sql = "select c.id from kenyaemr_hiv_testing_patient_contact c where c.voided = 0 and ";
+        Map<String, Date> paramsToSet = new HashMap<String, Date>();
+
+        Date maxBirthFromAge = effectiveDate;
+        if (minAge != null) {
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(effectiveDate);
+            cal.add(minAgeUnit.getCalendarField(), -minAgeUnit.getFieldQuantity()*minAge);
+            maxBirthFromAge = cal.getTime();
+        }
+
+        String c = "c.birth_date <= :maxBirthFromAge";
+        paramsToSet.put("maxBirthFromAge", maxBirthFromAge);
+
+        Date minBirthFromAge = null;
+        if (maxAge != null) {
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(effectiveDate);
+            cal.add(maxAgeUnit.getCalendarField(), -(maxAgeUnit.getFieldQuantity()*maxAge + 1));
+            minBirthFromAge = cal.getTime();
+            c = "(" + c + " and c.birth_date >= :minBirthFromAge)";
+            paramsToSet.put("minBirthFromAge", minBirthFromAge);
+        }
+
+        if (unknownAgeIncluded) {
+            c = "(c.birth_date is null or " + c + ")";
+        }
+
+        sql += c;
+
+        log.debug("Executing: " + sql + " with params: " + paramsToSet);
+
+        Query query = sessionFactory.getCurrentSession().createSQLQuery(sql);
+        for (Map.Entry<String, Date> entry : paramsToSet.entrySet()) {
+            query.setDate(entry.getKey(), entry.getValue());
+        }
+
+        return new Cohort(query.list());
+    }
+
+    //End of Patient contact dimensions methods
 }
