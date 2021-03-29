@@ -270,10 +270,10 @@ angular.module("orderEntry", ['orderService', 'encounterService', 'session'])
             },
             // beginning of voiding orders
 
-            saveVoidedOrders: function(orderContext, uuid, successCallback, errorCallback) {
+            saveVoidedOrders: function(orderContext, uuid, voidReason, successCallback, errorCallback) {
               return  $http({
                     method: 'DELETE',
-                    url: '/openmrs/ws/rest/v1/order/' + uuid +'?!purge'
+                    url: '/openmrs/ws/rest/v1/order/' + uuid +'?' +'reason=' +voidReason
                 }).then(function successCallback(response) {
                     
                 }, function errorCallback(response) {
