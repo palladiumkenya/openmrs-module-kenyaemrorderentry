@@ -455,7 +455,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button"  data-dismiss="modal2" ng-click="closeModal()">Close</button>
-                                        <button type="button"  ng-disabled="voidOrders === ''" ng-click="voidAllHivViralLoadOrders()">
+                                        <button type="button"  ng-disabled="voidOrderReason === ''" ng-click="voidAllHivViralLoadOrders()">
                                             <img src="${ ui.resourceLink("kenyaui", "images/glyphs/ok.png") }" /> Save</button>
                                     </div>
                                 </div>
