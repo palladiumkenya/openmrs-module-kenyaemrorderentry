@@ -449,7 +449,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                     <div class="modal-body">
                                         <label >Reason(s) for voiding orders</label>
                                         <div>
-                                            <textarea class="form-control" ng-model="voidOrders">
+                                            <textarea class="form-control" ng-model="voidOrderReason">
                                             </textarea>
                                         </div>
                                     </div>
