@@ -958,11 +958,11 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             }
             var voidOrderPayload ={
                 voided: true,
-                voidReason: $scope.voidOrders
+                voidReason: $scope.voidOrderReason
             };
 
             $scope.loading = true;
-            OrderEntryService.saveVoidedOrders(voidOrderPayload, $scope.OrderUuidHvl)
+            OrderEntryService.saveVoidedOrders(voidOrderPayload, $scope.OrderUuidHvl,$scope.voidOrderReason)
                 .then(function(result) {
                  location.href = location.href;
             }, function(errorResponse) {
@@ -1133,7 +1133,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
         $scope.reviseOrder = function(activeOrder) {
             $scope.newDraftDrugOrder = activeOrder.createRevisionOrder();
         };
-        $scope.voidOrders = '';
+        $scope.voidOrderReason = '';
         $scope.OrderUuid = '';
         $scope.getOrderUuid = function(order) {
             $scope.OrderUuid = order.uuid;
@@ -1152,10 +1152,10 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
         $scope.voidActiveLabOrders = function() {
             var voidOrderPayload ={
                 voided: true,
-                voidReason: $scope.voidOrders
+                voidReason: $scope.voidOrderReason
             };
             $scope.loading = true;
-            OrderEntryService.saveVoidedOrders(voidOrderPayload, $scope.OrderUuid)
+            OrderEntryService.saveVoidedOrders(voidOrderPayload, $scope.OrderUuid,$scope.voidOrderReason)
                 .then(function(result) {
 
                 $('#voidOrdersModal').modal('hide');
@@ -1171,7 +1171,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
         };
 
         $scope.closeModal = function() {
-            $scope.voidOrders = '';
+            $scope.voidOrderReason = '';
 
             $('#orderUrgency').modal('hide');
             $('#generalMessage').modal('hide');
