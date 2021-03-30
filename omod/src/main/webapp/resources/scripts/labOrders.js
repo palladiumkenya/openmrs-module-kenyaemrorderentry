@@ -98,6 +98,26 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                     }
                 });
 
+                $scope.heiOrderReasons = [
+                    {
+                        name:'Initial PCR (6week or first contact)',
+                        uuid:'1040AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+                    },
+                    {
+                        name:'2nd PCR (6 months)',
+                        uuid:'1326AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+                    },
+                    {
+                        name:'3rd PCR (12months)',
+                        uuid:'164860AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+                    },
+                    {
+                        name:'Confirmatory PCR and Baseline VL',
+                        uuid:'162082AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+                    }
+
+                ];
+
                 $scope.labOrders = labs;
                 $scope.OrderReason = [
                     {
@@ -140,6 +160,10 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                         return o;
                     }
                 });
+
+                if(config.patient.person.age <= 5) {
+                    $scope.OrderReason = $scope.heiOrderReasons;
+                }
 
 
             });
