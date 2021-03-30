@@ -942,7 +942,17 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
         };
 
          function cancelOrder () {
-            for (var i = 0; i < $scope.activeTestOrdersForHvVl.length; ++i) {
+             var reasonForVoidingOrder = document.getElementById("ddlvoidReason");
+             $scope.voidOrderReason = reasonForVoidingOrder.options[reasonForVoidingOrder.selectedIndex].value;
+
+             if ($scope.voidOrderReason === '' || $scope.voidOrderReason === null ||
+                 $scope.voidOrderReason === undefined) {
+                 $scope.showErrorToast = 'Void reason is required';
+                 $('#orderError').modal('show');
+                 return;
+             }
+
+             for (var i = 0; i < $scope.activeTestOrdersForHvVl.length; ++i) {
                 var data = $scope.activeTestOrdersForHvVl[i];
 
                 for (var r in data) {
@@ -955,7 +965,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
                 }
 
-            }
+             }
             var voidOrderPayload ={
                 voided: true,
                 voidReason: $scope.voidOrderReason
@@ -1150,6 +1160,15 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
 
         $scope.voidActiveLabOrders = function() {
+            var reasonForVoidingOrder = document.getElementById("ddlvoidReason");
+            $scope.voidOrderReason = reasonForVoidingOrder.options[reasonForVoidingOrder.selectedIndex].value;
+            if ($scope.voidOrderReason === '' || $scope.voidOrderReason === null ||
+                $scope.voidOrderReason === undefined) {
+                $scope.showErrorToast = 'Void reason is required';
+                $('#orderError').modal('show');
+                return;
+            }
+
             var voidOrderPayload ={
                 voided: true,
                 voidReason: $scope.voidOrderReason
