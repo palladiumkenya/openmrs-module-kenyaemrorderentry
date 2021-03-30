@@ -135,7 +135,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 ];
                 $scope.OrderReason =  _.filter($scope.OrderReason, function(o) {
                     if(config.patient.person.gender !== 'F') {
-                        return o.uuid !== '1434AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
+                        return o.uuid !== '1434AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' && o.uuid !== '159882AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
                     } else {
                         return o;
                     }
