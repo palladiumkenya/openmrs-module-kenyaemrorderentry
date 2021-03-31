@@ -282,6 +282,19 @@ angular.module("orderEntry", ['orderService', 'encounterService', 'session'])
 
             },
 
+            purgOrders: function(orderContext, uuid, successCallback, errorCallback) {
+                return  $http({
+                    method: 'DELETE',
+                    url: '/openmrs/ws/rest/v1/order/' + uuid +'?!purge'
+                }).then(function successCallback(response) {
+
+                }, function errorCallback(response) {
+
+                });
+
+            },
+            
+
             voidObs: function(orderContext, uuid, successCallback, errorCallback) {
                return $http({
                     method: 'DELETE',
