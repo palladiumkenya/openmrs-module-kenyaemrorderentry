@@ -261,7 +261,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                         }
 
                         if (data.orderReasonCoded === '1040AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                            data['orderReasonCoded'] = "Initial PCR (6week or first contact";
+                            data['orderReasonCoded'] = "Initial PCR (6week or first contact)";
                         }
                         if (data.orderReasonCoded === '1326AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
                             data['orderReasonCoded'] = "2nd PCR (6 months)";
@@ -341,7 +341,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                                 data['orderReasonCoded'] = "Confirmation of persistent low level Viremia (PLLV)";
                             }
                             if (data.orderReason.uuid === '1040AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                                data['orderReasonCoded'] = "Initial PCR (6week or first contact";
+                                data['orderReasonCoded'] = "Initial PCR (6week or first contact)";
                             }
                             if (data.orderReason.uuid === '1326AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
                                 data['orderReasonCoded'] = "2nd PCR (6 months)";
