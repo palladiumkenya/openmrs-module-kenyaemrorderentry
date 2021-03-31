@@ -260,6 +260,19 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                             data['orderReasonCoded'] = "Confirmation of persistent low level Viremia (PLLV)";
                         }
 
+                        if (data.orderReasonCoded === '1040AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                            data['orderReasonCoded'] = "Initial PCR (6week or first contact";
+                        }
+                        if (data.orderReasonCoded === '1326AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                            data['orderReasonCoded'] = "2nd PCR (6 months)";
+                        }
+                        if (data.orderReasonCoded === '164860AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                            data['orderReasonCoded'] = "3rd PCR (12months)";
+                        }
+                        if (data.orderReasonCoded === '162082AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                            data['orderReasonCoded'] = "Confirmatory PCR and Baseline VL";
+                        }
+
                     }
 
                 }
@@ -326,6 +339,18 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
                             if (data.orderReason.uuid === '160032AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
                                 data['orderReasonCoded'] = "Confirmation of persistent low level Viremia (PLLV)";
+                            }
+                            if (data.orderReason.uuid === '1040AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                                data['orderReasonCoded'] = "Initial PCR (6week or first contact";
+                            }
+                            if (data.orderReason.uuid === '1326AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                                data['orderReasonCoded'] = "2nd PCR (6 months)";
+                            }
+                            if (data.orderReason.uuid === '164860AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                                data['orderReasonCoded'] = "3rd PCR (12months)";
+                            }
+                            if (data.orderReason.uuid === '162082AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                                data['orderReasonCoded'] = "Confirmatory PCR and Baseline VL";
                             }
                         }
 
@@ -884,7 +909,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                                     OrderEntryService.signAndSave({ draftOrders: [] }, encounterContextOldOrders,$scope.obs)
                                         .$promise.then(function(result) {
                                         if($scope.OrderUuid) {
-                                            $scope.voidActiveLabOrders();
+                                            $scope.voidSelectedOrders();
                                         }
 
                                         $scope.discontinueOrdersRetrospectively = _.filter($scope.discontinueOrdersRetrospectively, function(o) {
@@ -927,7 +952,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 OrderEntryService.signAndSave({ draftOrders: [] }, encounterContext, newObs)
                     .$promise.then(function(result) {
                     if($scope.OrderUuid) {
-                        $scope.voidActiveLabOrders();
+                        $scope.voidSelectedOrders();
                     }
 
                     $scope.discontinueFilledOrders = _.filter($scope.discontinueFilledOrders, function(o) {
@@ -1398,6 +1423,28 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             }
             $scope.ldlValue ='ldl';
         }
+
+
+        $scope.voidSelectedOrders = function() {
+            var voidOrderPayload ={
+                voided: true,
+                voidReason: $scope.voidOrderReason
+            };
+            $scope.loading = true;
+            OrderEntryService.purgOrders(voidOrderPayload, $scope.OrderUuid)
+                .then(function(result) {
+
+                    $('#voidOrdersModal').modal('hide');
+
+                    location.href = location.href;
+                }, function(errorResponse) {
+                    $('#voidOrdersModal').modal('hide');
+                    location.href = location.href;
+                    emr.errorMessage(errorResponse.data.error.message);
+                    $scope.loading = false;
+                });
+
+        };
 
         $scope.updateLabResults = function() {
             if($scope.valueNumericResults) {
