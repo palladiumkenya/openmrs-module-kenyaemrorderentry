@@ -142,6 +142,9 @@
                         <th>Drug</th>
                         <th>Dose</th>
                         <th>Units</th>
+                        <th>Frequency</th>
+                        <th>Quantity</th>
+                        <th>Units</th>
                     </tr>
                     <tr ng-repeat="component in components">
                         <td >
@@ -157,30 +160,25 @@
                             </select>
 
                         </td>
+                        <td>
+                            <select ng-model="component.frequency">
+                                <option ng-repeat="freq in frequencies" ng-selected="component.frequency==freq.uuid"
+                                        value="{{freq.uuid}}">{{freq.display}}</option>
+                            </select>
+
+                        </td>
+                        <td>
+                            <input ng-model="component.quantity" size="5">
+                        </td>
+                        <td>
+                            <select ng-model="component.quantity_units">
+                                <option ng-repeat="unit in quantityUnits" ng-selected="component.quantity_units==unit.uuid"
+                                        value="{{unit.uuid}}">{{unit.display}}</option>
+                            </select>
+                        </td>
 
                     </tr>
                 </table>
-            </div>
-            <div ng-if="components.length >0">
-                <span>
-                    Frequency:
-                    <select ng-model="frequency" id="frequency">
-                        <option ng-repeat="freq in frequencies" ng-selected="frequency==freq.uuid"
-                                value="{{freq.uuid}}">{{freq.display}}</option>
-                    </select>
-                </span>
-                <span>
-                    Quantity:
-                    <input ng-model="quantity" size="5" id="quantity">
-
-                </span>
-                <span>
-                    Units:
-                    <select ng-model="quantity_units" id="quantity_units">
-                        <option ng-repeat="unit in quantityUnits" ng-selected="quantity_units==unit.uuid"
-                                value="{{unit.uuid}}">{{unit.display}}</option>
-                    </select>
-                </span>
             </div>
 
             <div ng-if="components.length >0" style="padding-top: 10px">

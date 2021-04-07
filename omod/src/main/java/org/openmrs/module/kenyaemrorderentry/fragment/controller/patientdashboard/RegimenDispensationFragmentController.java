@@ -68,13 +68,13 @@ public class RegimenDispensationFragmentController {
         for(int i=0; i<drugGroupOrder.size();i++) {
             JSONObject drugOrderJson=(JSONObject)drugGroupOrder.get(i);
             DrugOrder drugOrder;
-            String drugId = drugOrderJson.get("drug_id").toString();
+            String drugId = drugOrderJson.get("drug_id") != null ? drugOrderJson.get("drug_id").toString() : "";
             Double dose = Double.parseDouble(drugOrderJson.get("dose").toString());
             int drugDuration = Integer.parseInt(drugOrderJson.get("drugDuration").toString());
-            String drugDurationUnitUuid = drugOrderJson.get("drugDurationUnit").toString();
-            String doseUnitConceptUuiId = drugOrderJson.get("units_uuid").toString();
-            String quantityUnitConceptUuiId = drugOrderJson.get("quantity_units").toString();
-            String frequencyUuId = drugOrderJson.get("frequency").toString();
+            String drugDurationUnitUuid = drugOrderJson.get("drugDurationUnit") != null ? drugOrderJson.get("drugDurationUnit").toString() :"";
+            String doseUnitConceptUuiId =  drugOrderJson.get("units_uuid") != null ? drugOrderJson.get("units_uuid").toString() : "";
+            String quantityUnitConceptUuiId = drugOrderJson.get("quantity_units") != null ? drugOrderJson.get("quantity_units").toString(): "";
+            String frequencyUuId = drugOrderJson.get("frequency") != null ? drugOrderJson.get("frequency").toString() : "";
             Double quantity = Double.parseDouble(drugOrderJson.get("quantity").toString());
             if(orderGroupExists){
                 drugOrder=(DrugOrder)orderService.getOrder(Integer.valueOf(drugOrderJson.get("order_id").toString())).cloneForRevision();
