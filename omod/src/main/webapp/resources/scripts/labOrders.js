@@ -98,7 +98,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                     }
                 });
 
-                $scope.heiOrderReasons = [
+                $scope.heiPCRTestOrderReasons = [
                     {
                         name:'Initial PCR (6week or first contact)',
                         uuid:'1040AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
@@ -114,6 +114,17 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                     {
                         name:'Confirmatory PCR and Baseline VL',
                         uuid:'162082AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+                    }
+
+                ];
+                $scope.heiAbTestOrderReasons = [
+                    {
+                        name:'Ab test 6 weeks after cessation of breastfeeding',
+                        uuid:'164460AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+                    },
+                    {
+                        name:'Ab test at 18 months (1.5 years)',
+                        uuid:'164860AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
                     }
 
                 ];
@@ -161,9 +172,6 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                     }
                 });
 
-                if(config.patient.person.age <= 5) {
-                    $scope.OrderReason = $scope.heiOrderReasons;
-                }
 
 
             });
@@ -272,6 +280,12 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                         if (data.orderReasonCoded === '162082AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
                             data['orderReasonCoded'] = "Confirmatory PCR and Baseline VL";
                         }
+                        if (data.orderReasonCoded === '164460AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                            data['orderReasonCoded'] = "Ab test 6 weeks after cessation of breastfeeding";
+                        }
+                        if (data.orderReasonCoded === '164860AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                            data['orderReasonCoded'] = "Ab test at 18 months (1.5 years)";
+                        }
 
                     }
 
@@ -351,6 +365,12 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                             }
                             if (data.orderReason.uuid === '162082AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
                                 data['orderReasonCoded'] = "Confirmatory PCR and Baseline VL";
+                            }
+                            if (data.orderReason.uuid === '164460AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                                data['orderReasonCoded'] = "Ab test 6 weeks after cessation of breastfeeding";
+                            }
+                            if (data.orderReason.uuid === '164860AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                                data['orderReasonCoded'] = "Ab test at 18 months (1.5 years)";
                             }
                         }
 
@@ -579,6 +599,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
             if(tests.selected === true) {
                 checkIfSelectedTestIsActiveOrder(tests);
+                customizeOrderReasonsToDisplay(tests);
                 $scope.selectedOrders.push(tests);
                 $scope.filteredOrders = _.uniq($scope.selectedOrders);
                 $scope.filteredOrders = addDefaultDateAndUrgency($scope.filteredOrders);
@@ -609,6 +630,18 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
 
         }
+
+        function customizeOrderReasonsToDisplay(test) {
+            // Antibody test
+            if (test.concept === '163722AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'&& config.patient.person.age <= 5) {
+                $scope.OrderReason = $scope.heiAbTestOrderReasons;
+            }
+            // PCR test
+            if (test.concept === '1030AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'&& config.patient.person.age <= 5) {
+                $scope.OrderReason = $scope.heiPCRTestOrderReasons;
+            }
+        }
+        
         function addDefaultDateAndUrgency(res) {
             var today = new Date();
             var dd = today.getDate();
