@@ -258,5 +258,16 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
         return new Cohort(query.list());
     }
 
+    @Override
+    public List<LabManifestOrder> getLabManifestOrderByStatusBeforeDate(String status, Date lastStatusCheckDate) {
+        Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifestOrder.class);
+        criteria.add(Restrictions.eq("status", status));
+        criteria.add(Restrictions.eq("voided", false));
+        criteria.add(Restrictions.or(Restrictions.isNull("lastStatusCheckDate"), Restrictions.le("lastStatusCheckDate", lastStatusCheckDate)));
+        criteria.addOrder(org.hibernate.criterion.Order.asc("id"));
+        criteria.setMaxResults(50);
+        return criteria.list();
+    }
+
     //End of Patient contact dimensions methods
 }

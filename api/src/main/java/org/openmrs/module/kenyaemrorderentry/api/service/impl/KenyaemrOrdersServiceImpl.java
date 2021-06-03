@@ -98,6 +98,11 @@ public class KenyaemrOrdersServiceImpl extends BaseOpenmrsService implements Ken
     }
 
     @Override
+    public List<LabManifestOrder> getLabManifestOrderByStatusBeforeDate(String status, Date lastStatusCheckDate) {
+        return dao.getLabManifestOrderByStatusBeforeDate(status, lastStatusCheckDate);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public List<LabManifestOrder> getLabManifestOrderByManifestAndStatus(LabManifest labManifestOrder, String status) {
         return dao.getLabManifestOrderByManifestAndStatus(labManifestOrder, status);

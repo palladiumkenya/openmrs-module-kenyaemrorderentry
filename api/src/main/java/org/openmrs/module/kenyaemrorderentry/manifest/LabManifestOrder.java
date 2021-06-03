@@ -22,6 +22,7 @@ public class LabManifestOrder extends BaseOpenmrsData implements Serializable {
     private Date resultDate;
     private Date sampleCollectionDate;
     private Date sampleSeparationDate;
+    private Date lastStatusCheckDate;
     private String uuid;
 
     public LabManifestOrder() {
@@ -125,6 +126,14 @@ public class LabManifestOrder extends BaseOpenmrsData implements Serializable {
 
     public void setSampleType(String sampleType) {
         this.sampleType = sampleType;
+    }
+
+    public Date getLastStatusCheckDate() {
+        return lastStatusCheckDate;
+    }
+
+    public void setLastStatusCheckDate(Date lastStatusCheckDate) {
+        this.lastStatusCheckDate = lastStatusCheckDate;
     }
 
     @Override

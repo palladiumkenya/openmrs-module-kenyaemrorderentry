@@ -520,7 +520,15 @@ public class LabOrderDataExchange {
                     kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
                 }
             } else if (StringUtils.isNotBlank(specimenStatus) && specimenStatus.equalsIgnoreCase("Incomplete")) {
+<<<<<<< HEAD
                 // do nothing
+=======
+                // indicate the incomplete status
+                manifestOrder.setStatus("Incomplete");
+                manifestOrder.setResult("");
+                manifestOrder.setLastStatusCheckDate(new Date());
+                kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
+>>>>>>> 05590ef... record attempted result check on a vl order
             }
         }
 
