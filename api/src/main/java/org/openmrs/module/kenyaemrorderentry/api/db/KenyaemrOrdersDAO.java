@@ -39,5 +39,7 @@ public interface KenyaemrOrdersDAO {
 
     public Cohort getPatientContactWithAgeRange(Integer minAge, DurationUnit minAgeUnit, Integer maxAge, DurationUnit maxAgeUnit, boolean unknownAgeIncluded, Date effectiveDate);
 
+    List<LabManifestOrder> getLabManifestOrderByStatusBeforeDate(String status, Date lastStatusCheckDate);
+
     //End of Patient Contact dimensions methods
 }

@@ -46,13 +46,13 @@ tr:nth-child(even) {background-color: #f2f2f2;}
     width: 150px;
 }
 .dateRequestColumn {
-    width: 150px;
+    width: 120px;
 }
 .actionColumn {
-    width: 150px;
+    width: 250px;
 }
 .sampleStatusColumn {
-    width: 280px;
+    width: 150px;
 }
 .sampleTypeColumn {
     width: 100px;
@@ -132,7 +132,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                     <td class="dateRequestColumn">${kenyaui.formatDate(o.order.dateActivated)}</td>
                     <td class="sampleStatusColumn">${o.status}</td>
                     <td class="dateRequestColumn">${o.result ?: "Not ready"}</td>
-                    <td class="dateRequestColumn">${o.resultDate ?: ""}</td>
+                    <td class="dateRequestColumn">${o.resultDate != null ? kenyaui.formatDate(o.resultDate) : ""}</td>
                     <td class="actionColumn">
                         <button class="removeManifestOrder" style="background-color: cadetblue; color: white" value="od_${o.id}" data-target="#removeManifestOrder">Remove</button>
 

@@ -29,15 +29,18 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 /**
+ * this task pulls viral load lab results from the lab system.
  *
  */
 public class PullViralLoadLabResultsTask extends AbstractTask {
     private Log log = LogFactory.getLog(getClass());
     private String url = "http://www.google.com:80/index.html";
+    private static final Integer GRACE_PERIOD_FOR_LAB_ORDERS = 2; // days
 
     KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
 
@@ -65,38 +68,67 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
                     return;
                 }
 
-                LabManifest manifestToUpdateResults = kenyaemrOrdersService.getLabOrderManifestByStatus("Submitted");
+                /**
+                 * the order of execution should be:
+                 * 1. the vl requests with incomplete results and were last checked over 1 day ago
+                 * 2. manifests with submitted status
+                 */
+                Calendar calendar = Calendar.getInstance();
+                calendar.set(Calendar.HOUR_OF_DAY, 23);
+                calendar.set(Calendar.MINUTE, 59);
+                calendar.set(Calendar.SECOND, 59);
+                calendar.add(Calendar.DATE, -GRACE_PERIOD_FOR_LAB_ORDERS);
 
-                if (manifestToUpdateResults == null) {
-                    System.out.println("There are no manifests to pull results for");
-                    log.info("There are no manifests to pull results for");
-                    return;
+
+                Date effectiveDate =  calendar.getTime();
+
+                System.out.println("Effective date: " + effectiveDate);
+                List<LabManifestOrder> ordersWithPendingResults = new ArrayList<LabManifestOrder>();
+
+                List<LabManifestOrder> previouslyCheckedOrders = kenyaemrOrdersService.getLabManifestOrderByStatusBeforeDate("Incomplete", effectiveDate );
+                System.out.println("Total samples : " + previouslyCheckedOrders.size());
+
+                if (previouslyCheckedOrders.size() > 0) {
+                    ordersWithPendingResults = previouslyCheckedOrders;
+                    System.out.println("Executing block for incomplete results. Total samples : " + previouslyCheckedOrders.size());
+
+                } else {
+                    LabManifest manifestToUpdateResults = kenyaemrOrdersService.getLabOrderManifestByStatus("Submitted");
+
+                    if (manifestToUpdateResults == null) {
+                        System.out.println("There are no manifests to pull results for");
+                        log.info("There are no manifests to pull results for");
+                        return;
+                    }
+
+                    ordersWithPendingResults = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifestToUpdateResults, "Sent");
+                    List<LabManifestOrder> ordersWithIncompleteResults = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifestToUpdateResults, "Incomplete");
+
+                    if (ordersWithPendingResults.size() < 1 && ordersWithIncompleteResults.size() < 1) {
+                        System.out.println("There are no active labs to pull results for");
+                        log.info("There are no active labs to pull results for");
+                        manifestToUpdateResults.setStatus("Complete results");
+                        manifestToUpdateResults.setDateChanged(new Date());
+                        kenyaemrOrdersService.saveLabOrderManifest(manifestToUpdateResults);
+                        return;
+                    } else if (ordersWithPendingResults.size() < 1 && ordersWithIncompleteResults.size() > 0) {
+                        System.out.println("Manifest has incomplete results");
+                        log.info("Manifest has incomplete results");
+                        manifestToUpdateResults.setStatus("Incomplete results");
+                        manifestToUpdateResults.setDateChanged(new Date());
+                        kenyaemrOrdersService.saveLabOrderManifest(manifestToUpdateResults);
+                        return;
+                    }
                 }
 
-                List<LabManifestOrder> allSentOrders = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifestToUpdateResults, "Sent");
-                List<LabManifestOrder> ordersWithIncompleteResults = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifestToUpdateResults, "Incomplete");
 
-                if (allSentOrders.size() < 1 && ordersWithIncompleteResults.size() < 1) {
-                    System.out.println("There are no active labs to pull results for");
-                    log.info("There are no active labs to pull results for");
-                    manifestToUpdateResults.setStatus("Complete results");
-                    manifestToUpdateResults.setDateChanged(new Date());
-                    kenyaemrOrdersService.saveLabOrderManifest(manifestToUpdateResults);
-                    return;
-                } else if (allSentOrders.size() < 1 && ordersWithIncompleteResults.size() > 0) {
-                    System.out.println("Manifest has incomplete results");
-                    log.info("Manifest has incomplete results");
-                    manifestToUpdateResults.setStatus("Incomplete results");
-                    manifestToUpdateResults.setDateChanged(new Date());
-                    kenyaemrOrdersService.saveLabOrderManifest(manifestToUpdateResults);
-                    return;
-                }
-
-                if (allSentOrders.size() < 1) { // exit if manifest has 0 orders with pending results
+                if (ordersWithPendingResults.size() < 1) { // exit if manifest has 0 orders with pending results
                     System.out.println("Manifest doesn't have orders awaiting results");
                     log.info("Manifest doesn't have orders awaiting results");
                     return;
                 }
+
+                System.out.println("Preparing to pull results ... ... ...");
 
                 SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
                         SSLContexts.createDefault(),
@@ -110,7 +142,7 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
 
                     // we want to create a comma separated list of order id
                     List<Integer> orderIds = new ArrayList<Integer>();
-                    for (LabManifestOrder manifestOrder : allSentOrders) {
+                    for (LabManifestOrder manifestOrder : ordersWithPendingResults) {
                         orderIds.add(manifestOrder.getOrder().getOrderId());
                     }
 

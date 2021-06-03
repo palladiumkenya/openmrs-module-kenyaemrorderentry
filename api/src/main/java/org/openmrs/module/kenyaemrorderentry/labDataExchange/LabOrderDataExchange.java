@@ -526,6 +526,7 @@ public class LabOrderDataExchange {
                 // indicate the incomplete status
                 manifestOrder.setStatus("Incomplete");
                 manifestOrder.setResult("");
+                manifestOrder.setLastStatusCheckDate(new Date());
                 kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
             }
         } else {
