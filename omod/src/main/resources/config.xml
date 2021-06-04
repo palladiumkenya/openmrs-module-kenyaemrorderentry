@@ -92,12 +92,29 @@
 	</globalProperty>
 
 	<globalProperty>
-		<property>local.viral_load_result_end_point</property>
+		<property>kemrorder.last_processed_manifest</property>
 		<defaultValue></defaultValue>
 		<description>
-			End point for processing viral load results from the lab
+			The manifest whose results were last checked
 		</description>
 	</globalProperty>
+
+	<globalProperty>
+		<property>kemrorder.viral_load_result_tat_in_days</property>
+		<defaultValue>4</defaultValue>
+		<description>
+			The turnaround time for VL results in days. This is to avoid premature polling for results. An empty value will default to 4 days
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>kemrorder.retry_period_for_incomplete_vl_result</property>
+		<defaultValue>2</defaultValue>
+		<description>
+			Retry period after which updates for incomplete results can be checked. An empty value will default to 2 days
+		</description>
+	</globalProperty>
+
 
 </module>
 

@@ -61,6 +61,8 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
         Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifest.class);
         criteria.add(Restrictions.ge("startDate",startDate));
         criteria.add(Restrictions.le("endDate",endDate));
+        criteria.add(Restrictions.eq("voided", false));
+
         return criteria.list();
     }
 
@@ -129,6 +131,15 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
         Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifestOrder.class);
         criteria.add(Restrictions.eq("labManifest", labManifestOrder));
         criteria.add(Restrictions.eq("status", status));
+        criteria.add(Restrictions.eq("voided", false));
+        return criteria.list();
+    }
+
+    @Override
+    public List<LabManifestOrder> getLabManifestOrderByManifestAndStatus(LabManifest labManifestOrder, String... status) {
+        Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifestOrder.class);
+        criteria.add(Restrictions.eq("labManifest", labManifestOrder));
+        criteria.add(Restrictions.in("status", status));
         criteria.add(Restrictions.eq("voided", false));
         return criteria.list();
     }
@@ -266,6 +277,29 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
         criteria.add(Restrictions.or(Restrictions.isNull("lastStatusCheckDate"), Restrictions.le("lastStatusCheckDate", lastStatusCheckDate)));
         criteria.addOrder(org.hibernate.criterion.Order.asc("id"));
         criteria.setMaxResults(50);
+        return criteria.list();
+    }
+
+    @Override
+    public LabManifest getLabOrderManifestByStatus(String status, Date onOrBefore) {
+        Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifest.class);
+        criteria.add(Restrictions.eq("status", status));
+        criteria.add(Restrictions.le("dispatchDate", onOrBefore));
+        criteria.addOrder(org.hibernate.criterion.Order.asc("id"));
+        criteria.add(Restrictions.eq("voided", false));
+        // return the earliest - the first in the list
+        if (criteria.list().size() > 0) {
+            return (LabManifest) criteria.list().get(0);
+        }
+        return null;
+    }
+
+    @Override
+    public List<LabManifest> getLabOrderManifest(String status) {
+        Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifest.class);
+        criteria.add(Restrictions.eq("status", status));
+        criteria.add(Restrictions.eq("voided", false));
+        criteria.addOrder(org.hibernate.criterion.Order.asc("id"));
         return criteria.list();
     }
 

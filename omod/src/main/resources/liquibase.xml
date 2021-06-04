@@ -209,5 +209,18 @@
         </addColumn>
     </changeSet>
 
+    <changeSet author="aojwang" id="kenyaemr_order_entry_006">
+        <createIndex indexName="index_manifest_status" tableName="kenyaemr_order_entry_lab_manifest">
+            <column name="status"/>
+            <column name="voided"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet author="aojwang" id="kenyaemr_order_entry_007">
+        <createIndex indexName="index_manifest_order_status" tableName="kenyaemr_order_entry_lab_manifest_order">
+            <column name="status"/>
+            <column name="voided"/>
+        </createIndex>
+    </changeSet>
 
 </databaseChangeLog>
