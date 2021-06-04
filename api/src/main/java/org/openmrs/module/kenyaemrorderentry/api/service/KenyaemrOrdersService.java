@@ -14,8 +14,10 @@ import java.util.List;
 public interface KenyaemrOrdersService extends OpenmrsService {
     LabManifest saveLabOrderManifest(LabManifest labManifest);
     List<LabManifest> getLabOrderManifest();
+    List<LabManifest> getLabOrderManifest(String status);
     LabManifest getLabOrderManifestById(Integer id);
     LabManifest getLabOrderManifestByStatus(String status);
+    LabManifest getLabOrderManifestByStatus(String status, Date onOrBefore);
     List<LabManifest> getLabOrderManifestBetweenDates(Date startDate, Date endDate);
     void voidLabOrderManifest(Integer id);
 
@@ -30,6 +32,7 @@ public interface KenyaemrOrdersService extends OpenmrsService {
     List<LabManifestOrder> getLabManifestOrderByStatus(String status);
     List<LabManifestOrder> getLabManifestOrderByStatusBeforeDate(String status, Date lastStatusCheckDate);
     List<LabManifestOrder> getLabManifestOrderByManifestAndStatus(LabManifest labManifestOrder, String status);
+    List<LabManifestOrder> getLabManifestOrderByManifestAndStatus(LabManifest labManifestOrder, String ... status);
     List<LabManifestOrder> getLabManifestOrdersToSend(LabManifest labManifestOrder);
     Cohort getPatientsWithCadre(boolean includeTroupes, boolean includeCivilians);
 

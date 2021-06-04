@@ -74,26 +74,32 @@ tr:nth-child(even) {background-color: #f2f2f2;}
             </tr>
             <% allManifest.each { m -> %>
             <tr>
-                <td>${kenyaui.formatDate(m.startDate)}</td>
-                <td>${kenyaui.formatDate(m.endDate)}</td>
-                <td>${m.courier ?: ""}</td>
-                <td>${m.county ?: ""} / ${m.subCounty ?: ""}</td>
-                <td>${m.facilityEmail ?: ""}</td>
-                <td>${m.facilityPhoneContact ?: ""}</td>
-                <td>${m.clinicianName ?: ""}</td>
-                <td>${m.clinicianPhoneContact ?: ""}</td>
-                <td>${m.labPocPhoneNumber ?: ""}</td>
-                <td>${m.status ?: ""}</td>
-                <td>${m.dispatchDate != null ? kenyaui.formatDate(m.dispatchDate) : ""}</td>
+                <td>${kenyaui.formatDate(m.manifest.startDate)}</td>
+                <td>${kenyaui.formatDate(m.manifest.endDate)}</td>
+                <td>${m.manifest.courier ?: ""}</td>
+                <td>${m.manifest.county ?: ""} / ${m.manifest.subCounty ?: ""}</td>
+                <td>${m.manifest.facilityEmail ?: ""}</td>
+                <td>${m.manifest.facilityPhoneContact ?: ""}</td>
+                <td>${m.manifest.clinicianName ?: ""}</td>
+                <td>${m.manifest.clinicianPhoneContact ?: ""}</td>
+                <td>${m.manifest.labPocPhoneNumber ?: ""}</td>
+                <td>
+                    <span style="font-weight: bold;font-size: 14px">${m.manifest.status ?: ""}</span>
+                    <% if (m.collectNewSample > 0) {%> <br/> <span style="color: darkred;font-style: italic">New samples required: ${m.collectNewSample} </span><%}%>
+                <% if (m.missingPhysicalSample > 0) {%> <br/> <span style="color: firebrick;font-style: italic">Missing physical sample: ${m.missingPhysicalSample} </span><%}%>
+                <% if (m.manualUpdates > 0) {%> <br/> <span style="color: orangered;font-style: italic">Manual updates required: ${m.manualUpdates} </span><%}%>
+                <% if (m.incompleteSample > 0) {%> <br/> <span style="font-style: italic;">Result not ready: ${m.incompleteSample} </span> <%}%>
+                </td>
+                <td>${m.manifest.dispatchDate != null ? kenyaui.formatDate(m.manifest.dispatchDate) : ""}</td>
 
             <td>
                     <button type="button" style="background-color: cadetblue; color: white"
-                            onclick="ui.navigate('${ ui.pageLink("kenyaemrorderentry", "orders/manifestOrdersHome", [ manifest: m.id,  returnUrl: ui.thisUrl() ])}')">
+                            onclick="ui.navigate('${ ui.pageLink("kenyaemrorderentry", "orders/manifestOrdersHome", [ manifest: m.manifest.id,  returnUrl: ui.thisUrl() ])}')">
                        View
                     </button>
                     <% if(m.status == "Draft") { %>
                     <button type="button" style="background-color: cadetblue; color: white"
-                            onclick="ui.navigate('${ ui.pageLink("kenyaemrorderentry", "manifest/createManifest", [ manifestId:m.id, returnUrl: ui.thisUrl() ])}')">
+                            onclick="ui.navigate('${ ui.pageLink("kenyaemrorderentry", "manifest/createManifest", [ manifestId:m.manifest.id, returnUrl: ui.thisUrl() ])}')">
 
                         Edit
                     </button>
