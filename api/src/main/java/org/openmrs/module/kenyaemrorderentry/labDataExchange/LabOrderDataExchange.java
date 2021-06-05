@@ -43,6 +43,9 @@ public class LabOrderDataExchange {
     public static final String GP_LAB_SERVER_REQUEST_URL = "chai.viral_load_server_url";
     public static final String GP_LAB_SERVER_RESULT_URL = "chai.viral_load_server_result_url";
     public static final String GP_LAB_SERVER_API_TOKEN = "chai.viral_load_server_api_token";
+    public static final String GP_MANIFEST_LAST_PROCESSED = "kemrorder.last_processed_manifest";// used when fetching results from the server
+    public static final String GP_RETRY_PERIOD_FOR_ORDERS_WITH_INCOMPLETE_RESULTS = "kemrorder.retry_period_for_incomplete_vl_result";
+    public static final String GP_LAB_TAT_FOR_VL_RESULTS = "kemrorder.viral_load_result_tat_in_days";
 
     ConceptService conceptService = Context.getConceptService();
     EncounterService encounterService = Context.getEncounterService();
@@ -521,11 +524,26 @@ public class LabOrderDataExchange {
                     manifestOrder.setResult(result);
                     manifestOrder.setResultDate(orderDiscontinuationDate);
                     kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
+                } else { //
+                    /**
+                     * the result could not be updated in the system
+                     * TODO: establish why one order for VL is missing. When a VL request is made, two orders (856 and 1305) are created
+                     * sometimes one order just misses and the code cannot find the one to update
+                     * We will mark these with errors for a user to manually update in the system.
+                     * An alternative is to create a similar order and update results
+                      */
+
+                    manifestOrder.setStatus("Requires manual update in the lab module");
+                    manifestOrder.setResult(result);
+                    manifestOrder.setResultDate(orderDiscontinuationDate);
+                    kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
+
                 }
             } else if (StringUtils.isNotBlank(specimenStatus) && specimenStatus.equalsIgnoreCase("Incomplete")) {
                 // indicate the incomplete status
                 manifestOrder.setStatus("Incomplete");
                 manifestOrder.setResult("");
+                manifestOrder.setLastStatusCheckDate(new Date());
                 kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
             }
         } else {

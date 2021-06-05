@@ -195,4 +195,32 @@
         </insert>
     </changeSet>
 
+    <changeSet id="kenyaemr_order_entry_005" author="aojwang">
+
+        <preConditions onFail="MARK_RAN">
+                <tableExists tableName="kenyaemr_order_entry_lab_manifest_order"/>
+        </preConditions>
+        <comment>
+            Adds a column to store the last time the system checked results for a particular order from the lab system
+        </comment>
+        <addColumn tableName="kenyaemr_order_entry_lab_manifest_order" >
+            <column name="last_status_check_date"
+                    type="datetime"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="aojwang" id="kenyaemr_order_entry_006">
+        <createIndex indexName="index_manifest_status" tableName="kenyaemr_order_entry_lab_manifest">
+            <column name="status"/>
+            <column name="voided"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet author="aojwang" id="kenyaemr_order_entry_007">
+        <createIndex indexName="index_manifest_order_status" tableName="kenyaemr_order_entry_lab_manifest_order">
+            <column name="status"/>
+            <column name="voided"/>
+        </createIndex>
+    </changeSet>
+
 </databaseChangeLog>

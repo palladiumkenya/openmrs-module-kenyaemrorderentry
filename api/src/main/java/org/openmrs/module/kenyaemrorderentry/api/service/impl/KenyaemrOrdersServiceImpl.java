@@ -33,6 +33,11 @@ public class KenyaemrOrdersServiceImpl extends BaseOpenmrsService implements Ken
     }
 
     @Override
+    public List<LabManifest> getLabOrderManifest(String status) {
+        return dao.getLabOrderManifest(status);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public LabManifest getLabOrderManifestById(Integer id) {
         return dao.getLabOrderManifestById(id);
@@ -42,6 +47,11 @@ public class KenyaemrOrdersServiceImpl extends BaseOpenmrsService implements Ken
     @Transactional(readOnly = true)
     public LabManifest getLabOrderManifestByStatus(String status) {
         return dao.getLabOrderManifestByStatus(status);
+    }
+
+    @Override
+    public LabManifest getLabOrderManifestByStatus(String status, Date onOrBefore) {
+        return dao.getLabOrderManifestByStatus(status, onOrBefore);
     }
 
     @Override
@@ -98,8 +108,18 @@ public class KenyaemrOrdersServiceImpl extends BaseOpenmrsService implements Ken
     }
 
     @Override
+    public List<LabManifestOrder> getLabManifestOrderByStatusBeforeDate(String status, Date lastStatusCheckDate) {
+        return dao.getLabManifestOrderByStatusBeforeDate(status, lastStatusCheckDate);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public List<LabManifestOrder> getLabManifestOrderByManifestAndStatus(LabManifest labManifestOrder, String status) {
+        return dao.getLabManifestOrderByManifestAndStatus(labManifestOrder, status);
+    }
+
+    @Override
+    public List<LabManifestOrder> getLabManifestOrderByManifestAndStatus(LabManifest labManifestOrder, String... status) {
         return dao.getLabManifestOrderByManifestAndStatus(labManifestOrder, status);
     }
 
