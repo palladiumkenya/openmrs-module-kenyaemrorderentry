@@ -327,7 +327,6 @@ tr:nth-child(even) {background-color: #f2f2f2;}
         jq('#removeSample').click(function () {
 
             var selManifestOrder = jq(".modal-body #selectedManifestOrderId").val();
-            console.log('Manifest order: ' + selManifestOrder)
 
             jq.getJSON('${ ui.actionLink("kenyaemrorderentry", "patientdashboard/generalLabOrders", "removeManifestOrder") }',{
                 'manifestOrderId': selManifestOrder
