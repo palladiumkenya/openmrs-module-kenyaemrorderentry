@@ -89,6 +89,13 @@ tr:nth-child(even) {background-color: #f2f2f2;}
     background-color: steelblue;
     color: white;
 }
+.page-content{
+    background: #eee;
+    display: inline-block;
+    padding: 10px;
+    max-width: 660px;
+    font-weight: bold;
+}
 </style>
 
 <div class="ke-page-sidebar">
@@ -108,6 +115,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
         </div>
         <br/>
         <br/>
+        <div id="page-content" class="page-content">Page 1</div>
 
         <table class="simple-table">
             <thead>
@@ -134,6 +142,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
         <div id="pager">
             <ul id="pagination" class="pagination-sm"></ul>
         </div>
+
     </div>
 
 </div>
@@ -155,24 +164,29 @@ tr:nth-child(even) {background-color: #f2f2f2;}
 
 
         var pagination = jq('#pagination');
-        var totalRecords = ${ jsonManifest.size() };
-        var records = ${ jsonManifest };
+        var totalRecords = ${ manifestListSize };
+        var records = ${ manifestList };
         var displayRecords = [];
         var recPerPage = 10;
         var page = 1;
         var totalPages = Math.ceil(totalRecords / recPerPage);
-
+        var visiblePages = 1;
+        if (totalPages <= 5) {
+            visiblePages = totalPages;
+        } else {
+            visiblePages = 5;
+        }
 
         apply_pagination();
 
         function apply_pagination() {
             pagination.twbsPagination({
                 totalPages: totalPages,
-                visiblePages: 2,
+                visiblePages: visiblePages,
                 onPageClick: function (event, page) {
                     displayRecordsIndex = Math.max(page - 1, 0) * recPerPage;
                     endRec = (displayRecordsIndex) + recPerPage;
-
+                    jq('#page-content').text('Page ' + page);
                     displayRecords = records.slice(displayRecordsIndex, endRec);
                     generate_table(displayRecords);
                 }
@@ -271,9 +285,5 @@ tr:nth-child(even) {background-color: #f2f2f2;}
             jq('#manifest-list').append(tr);
         }
     }
-
-
-
-
 
 </script>
