@@ -233,7 +233,7 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
 
                         if (manifestToUpdateResults != null) {
                             List<LabManifestOrder> pendingResultsForNextIteration = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifestToUpdateResults, "Sent");
-                            List<LabManifestOrder> incompleteResults = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifestToUpdateResults, "Incomplete");
+                            List<LabManifestOrder> incompleteResults = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifestToUpdateResults, incompleteStatuses);
 
                             if (pendingResultsForNextIteration.size() < 1 && incompleteResults.size() < 1) {
                                 manifestToUpdateResults.setStatus("Complete results");
@@ -253,22 +253,22 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
                                 gpLastProcessedManifest.setPropertyValue(""); // set value to null so that the execution gets to the next manifest
                                 Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifest);
                             }
-                        } else {
-                            /**
-                             * we can do some cleanup i.e loop through manifests with complete results but still marked as Incomplete
-                             */
-                            List<LabManifest> allManifests = kenyaemrOrdersService.getLabOrderManifest("Incomplete results");
-                            for (LabManifest manifest : allManifests) {
+                        }
 
-                                List<LabManifestOrder> manifestOrdersWithIncompleteResults = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifest, incompleteStatuses);
+                        /**
+                         * we can do some cleanup i.e close all manifests with results
+                         */
+                        List<LabManifest> allManifests = kenyaemrOrdersService.getLabOrderManifest("Incomplete results");
+                        for (LabManifest manifest : allManifests) {
 
-                                if (manifestOrdersWithIncompleteResults.size() < 1) {
-                                    manifest.setStatus("Complete results");
-                                    manifest.setDateChanged(new Date());
-                                    kenyaemrOrdersService.saveLabOrderManifest(manifest);
-                                }
+                            List<LabManifestOrder> manifestOrdersWithIncompleteResults = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifest, incompleteStatuses);
+
+                            if (manifestOrdersWithIncompleteResults.size() < 1) {
+                                manifest.setStatus("Complete results");
+                                manifest.setDateChanged(new Date());
+                                kenyaemrOrdersService.saveLabOrderManifest(manifest);
                             }
-                            }
+                        }
                     }
 
                     System.out.println("Successfully executed the task that pulls lab requests");
