@@ -57,7 +57,8 @@ public class LabOrdersManifestHomePageController {
                     "missingPhysicalSample", ordersWithMissingPhysicalSamples.size());
             manifestList1.add(o1);
         }
-        model.put("jsonManifest", ui.toJson(manifestList1));
+        model.put("manifestList", ui.toJson(manifestList1));
+        model.put("manifestListSize", ui.toJson(manifestList1.size()));
     }
 
 }
