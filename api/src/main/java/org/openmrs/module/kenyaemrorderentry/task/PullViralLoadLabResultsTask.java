@@ -24,13 +24,11 @@ import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 import org.openmrs.module.kenyaemrorderentry.util.Utils;
 import org.openmrs.scheduler.tasks.AbstractTask;
-import org.openmrs.ui.framework.SimpleObject;
 
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -97,22 +95,25 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
 
                 Date effectiveDate =  calendar.getTime();
 
-                String [] incompleteStatuses = new String []{"Incomplete", "Collect New Sample","Requires manual update in the lab module", "Missing Sample ( Physical Sample Missing)"};
+                //Collect New Sample, Missing Sample ( Physical Sample Missing) result is a complete result.
+                // Requires manual update in the lab module status will also not make a template be rendered incomplete as the result is already pulled
+                String [] incompleteStatuses = new String []{"Incomplete"};
 
-                System.out.println("Polling results for manifests dispatched on or before : " + effectiveDate);
+                System.out.println("Preparing to pull VL results for tests dispatched on or before : " + effectiveDate);
                 List<LabManifestOrder> ordersWithPendingResults = new ArrayList<LabManifestOrder>();
 
                 List<LabManifestOrder> previouslyCheckedOrders = kenyaemrOrdersService.getLabManifestOrderByStatusBeforeDate("Incomplete", effectiveDate );
-                System.out.println("Total samples : " + previouslyCheckedOrders.size());
 
                 if (previouslyCheckedOrders.size() > 0) {
                     ordersWithPendingResults = previouslyCheckedOrders;
-                    System.out.println("Executing block for incomplete results. Total samples : " + previouslyCheckedOrders.size());
+                    System.out.println("Polling results for  " + previouslyCheckedOrders.size() + " samples that were previously not ready");
 
                 } else {
 
                     if (StringUtils.isNotBlank(lastProcessedManifest)) {
                         manifestToUpdateResults = kenyaemrOrdersService.getLabOrderManifestById(Integer.valueOf(lastProcessedManifest));
+                        System.out.println("Polling results for  " + previouslyCheckedOrders.size() + " samples that were previously not ready");
+
                     } else {
 
                         int tatPeriod = 0;
@@ -158,12 +159,13 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
                         kenyaemrOrdersService.saveLabOrderManifest(manifestToUpdateResults);
                         return;
                     }
+
+                    System.out.println("Polling results for  " + ordersWithPendingResults.size() + " samples");
                 }
 
-
                 if (ordersWithPendingResults.size() < 1) { // exit if manifest has 0 orders with pending results
-                    System.out.println("Manifest doesn't have orders awaiting results");
-                    log.info("Manifest doesn't have orders awaiting results");
+                    System.out.println("All relevant VL results have been pulled");
+                    log.info("All relevant VL results have been pulled");
                     return;
                 }
 
