@@ -455,6 +455,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                 <option value="Sample not taken" >Sample not taken</option>
                                                 <option value="Sample rejected" >Sample rejected</option>
                                                 <option value="No reagents" >No reagents</option>
+                                                <option value="Order revision" >Order revision</option>
                                             </select>
 
                                         </div>
