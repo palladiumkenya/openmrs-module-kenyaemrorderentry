@@ -100,6 +100,14 @@
 	</globalProperty>
 
 	<globalProperty>
+		<property>kemrorder.manifest_last_update_time</property>
+		<defaultValue></defaultValue>
+		<description>
+			The time the manifest last updated
+		</description>
+	</globalProperty>
+
+	<globalProperty>
 		<property>kemrorder.viral_load_result_tat_in_days</property>
 		<defaultValue>4</defaultValue>
 		<description>
