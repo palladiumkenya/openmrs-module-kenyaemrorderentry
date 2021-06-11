@@ -51,13 +51,14 @@ public class ProcessViralLoadResults {
                         auth.getBytes("UTF-8"));
                 String authHeader = "Basic " + new String(encodedAuth);
                 postRequest.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
-
+                System.out.println("Posting to the endpoint: string => " + payload);
                 //Set the request post body
                 StringEntity userEntity = new StringEntity(payload);
                 postRequest.setEntity(userEntity);
 
                 //Send the request; It will immediately return the response in HttpResponse object if any
                 HttpResponse response = httpClient.execute(postRequest);
+                System.out.println("Posted to the endpoint");
 
                 //verify the valid error code first
                 int statusCode = response.getStatusLine().getStatusCode();

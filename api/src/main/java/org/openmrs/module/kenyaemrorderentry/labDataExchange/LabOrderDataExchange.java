@@ -1,11 +1,12 @@
 package org.openmrs.module.kenyaemrorderentry.labDataExchange;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.openmrs.Concept;
@@ -18,7 +19,6 @@ import org.openmrs.PatientIdentifier;
 import org.openmrs.TestOrder;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.EncounterService;
-import org.openmrs.api.ObsService;
 import org.openmrs.api.OrderService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyacore.RegimenMappingUtils;
@@ -28,7 +28,6 @@ import org.openmrs.module.kenyaemrorderentry.util.Utils;
 import org.openmrs.ui.framework.SimpleObject;
 import org.openmrs.util.PrivilegeConstants;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -44,6 +43,8 @@ public class LabOrderDataExchange {
     public static final String GP_MANIFEST_LAST_PROCESSED = "kemrorder.last_processed_manifest";// used when fetching results from the server
     public static final String GP_RETRY_PERIOD_FOR_ORDERS_WITH_INCOMPLETE_RESULTS = "kemrorder.retry_period_for_incomplete_vl_result";
     public static final String GP_LAB_TAT_FOR_VL_RESULTS = "kemrorder.viral_load_result_tat_in_days";
+    public static final String GP_MANIFEST_LAST_UPDATETIME = "kemrorder.manifest_last_update_time";
+    public static final String MANIFEST_LAST_UPDATE_PATTERN = "yyyy-MM-dd HH:mm:ss";
 
     ConceptService conceptService = Context.getConceptService();
     EncounterService encounterService = Context.getEncounterService();
@@ -394,27 +395,35 @@ public class LabOrderDataExchange {
      */
     public String processIncomingViralLoadLabResults(String resultPayload) {
 
+        JsonParser parser = new JsonParser();
+        JsonElement rootNode = parser.parse(resultPayload);
+
+        JsonArray resultsObj = null;
         String statusMsg;
-        ObjectMapper mapper = new ObjectMapper();
-        ArrayNode resultsObj = null;
         try {
-            JsonNode actualObj = mapper.readTree(resultPayload);
-            resultsObj = (ArrayNode) actualObj;
-        } catch (JsonProcessingException e) {
-            statusMsg = "The payload could not be understood. An array is expected!";
+            if(rootNode.isJsonArray()){
+                resultsObj = rootNode.getAsJsonArray();
+
+            } else {
+                System.out.println("The payload could not be understood. An array is expected!:::: ");
+
+                statusMsg = "The payload could not be understood. An array is expected!";
+                return statusMsg;
+            }
+        } catch (Exception e) {
             e.printStackTrace();
-            return statusMsg;
         }
+
 
         if (resultsObj.size() > 0) {
             for (int i = 0; i < resultsObj.size(); i++) {
-                ObjectNode o = (ObjectNode) resultsObj.get(i);
-                Integer specimenId = o.get("order_number").asInt();
-                String patientIdentifier = o.get("patient").textValue(); // holds CCC number
-                String specimenReceivedStatus = o.get("sample_status").textValue();// Complete, Incomplete, Rejected
 
-                String specimenRejectedReason = o.has("rejected_reason") ? o.get("rejected_reason").textValue() : "";
-                String results = o.get("result").textValue(); //1 - negative, 2 - positive, 5 - inconclusive
+                JsonObject o =  resultsObj.get(i).getAsJsonObject();
+                Integer specimenId = o.get("order_number").getAsInt();
+               // String patientIdentifier = o.get("patient").textValue(); // holds CCC number
+                String specimenReceivedStatus = o.get("sample_status").getAsString();// Complete, Incomplete, Rejected
+                String specimenRejectedReason = o.has("rejected_reason") ? o.get("rejected_reason").getAsString() : "";
+                String results = !o.get("result").isJsonNull() ? o.get("result").getAsString() : null; //1 - negative, 2 - positive, 5 - inconclusive
                 updateOrder(specimenId, results, specimenReceivedStatus, specimenRejectedReason);
                 // update manifest object to reflect received status
             }

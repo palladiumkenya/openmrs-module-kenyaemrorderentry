@@ -4,7 +4,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange;
 import org.openmrs.module.kenyaemrorderentry.util.Utils;
-import org.openmrs.module.webservices.rest.SimpleObject;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.v1_0.controller.BaseRestController;
 import org.springframework.stereotype.Controller;
@@ -28,9 +27,14 @@ public class KenyaemrOrderRestController extends BaseRestController {
     public Object processIncomingViralLoadResults(HttpServletRequest request) {
         String requestBody = null;
         try {
+
             requestBody = Utils.fetchRequestBody(request.getReader());
+
         } catch (IOException e) {
-            return new SimpleObject().add("ServerResponse", "Error extracting request body");
+            e.printStackTrace();
+            String msg = e.getMessage();
+
+            return "Error extracting request body" + msg;
         }
 
         if (requestBody != null) {
@@ -38,7 +42,7 @@ public class KenyaemrOrderRestController extends BaseRestController {
             return shr.processIncomingViralLoadLabResults(requestBody);
 
         }
-        return new SimpleObject().add("Report", "The request could not be interpreted properly");
+        return  "The request could not be interpreted by the internal vl result end point";
     }
 
     /**

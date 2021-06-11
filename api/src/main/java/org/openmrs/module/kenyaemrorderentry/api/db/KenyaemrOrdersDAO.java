@@ -48,5 +48,9 @@ public interface KenyaemrOrdersDAO {
 
     List<LabManifest> getLabOrderManifest(String status);
 
+    List<LabManifestOrder> getLabManifestOrderByNotFoundInLabSystem(Integer... ordersList);
+
+    List<LabManifestOrder> getLabManifestOrderByManifestAndStatus(LabManifest labManifestOrder, Date updatedBefore, String... status);
+
     //End of Patient Contact dimensions methods
 }

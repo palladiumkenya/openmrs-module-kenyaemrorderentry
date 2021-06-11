@@ -109,6 +109,26 @@ public class Utils {
         }
         return requestBodyJsonStr;
     }
+
+    /**
+     * Used to strip off unicode literals from string
+     */
+    public static void stripUnicodeLiterals () {
+        //String fullName = result.get("full_names").getAsString();
+
+                            /*for (int j = 0; j < fullName.length(); j++) {
+                                if (Character.UnicodeBlock.of(fullName.charAt(j)) != Character.UnicodeBlock.BASIC_LATIN) {
+                                    fullName = "Replaced name";//result.addProperty("full_names", "Replaced Name");
+                                    break;
+                                    // replace with Y
+                                }
+                            }
+
+                            String escapeName = StringEscapeUtils.escapeJava(fullName);
+                            String stripUnicode = new UnicodeUnescaper().translate(escapeName);
+
+                            String cleanedName = StringEscapeUtils.unescapeJava(stripUnicode);*/
+    }
 }
 
 

@@ -56,6 +56,9 @@
         <jacksonVersion>2.10.1</jacksonVersion>
         <apacheHttpClientVersion>4.5.10</apacheHttpClientVersion>
         <itextPdfVersion>7.1.13</itextPdfVersion>
+        <gsonVersion>2.8.7</gsonVersion>
+        <apacheCommonsVersion>1.3</apacheCommonsVersion>
+
     </properties>
 
     <dependencyManagement>
@@ -639,6 +642,20 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+            <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
+            <dependency>
+                <groupId>com.google.code.gson</groupId>
+                <artifactId>gson</artifactId>
+                <version>${gsonVersion}</version>
+            </dependency>
+
+            <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-text -->
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-text</artifactId>
+                <version>${apacheCommonsVersion}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 	<build>

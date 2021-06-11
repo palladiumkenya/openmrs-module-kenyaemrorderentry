@@ -1,13 +1,16 @@
 package org.openmrs.module.kenyaemrorderentry.task;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.text.StringEscapeUtils;
+import org.apache.commons.text.translate.UnicodeUnescaper;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
@@ -60,6 +63,7 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
                 GlobalProperty gpLastProcessedManifest = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_MANIFEST_LAST_PROCESSED);
                 GlobalProperty gpRetryPeriodForIncompleteResults = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_RETRY_PERIOD_FOR_ORDERS_WITH_INCOMPLETE_RESULTS);
                 GlobalProperty gpLabTatForVlResults = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LAB_TAT_FOR_VL_RESULTS);
+                GlobalProperty gpLastProcessedManifestUpdatetime = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_MANIFEST_LAST_UPDATETIME);
 
                 String serverUrl = gpServerUrl.getPropertyValue();
                 String API_KEY = gpApiToken.getPropertyValue();
@@ -67,12 +71,36 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
                 String lastProcessedManifest = gpLastProcessedManifest.getPropertyValue();
                 String retryPeriodForIncompleteResults = gpRetryPeriodForIncompleteResults.getPropertyValue();
                 String labTatForVlResults = gpLabTatForVlResults.getPropertyValue();
+                String currentManifestLastUpdatetime = gpLastProcessedManifestUpdatetime.getPropertyValue();
                 LabManifest manifestToUpdateResults = null;
 
                 if (StringUtils.isBlank(serverUrl) || StringUtils.isBlank(API_KEY) || StringUtils.isBlank(updatesEndpoint)) {
                     System.out.println("Please set credentials for pulling lab requests from the lab system");
                     return;
                 }
+
+
+                //Collect New Sample, Missing Sample ( Physical Sample Missing) result is a complete result.
+                // Requires manual update in the lab module status will also not make a template be rendered incomplete as the result is already pulled
+                String [] incompleteStatuses = new String []{"Incomplete"};
+
+                /**
+                 * we can do some cleanup i.e close all manifests with results
+                 */
+                List<LabManifest> allManifests = kenyaemrOrdersService.getLabOrderManifest("Incomplete results");
+                for (LabManifest manifest : allManifests) {
+
+                    List<LabManifestOrder> manifestOrdersWithIncompleteResults = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifest, incompleteStatuses);
+
+                    if (manifestOrdersWithIncompleteResults.size() < 1) {
+                        manifest.setStatus("Complete results");
+                        manifest.setDateChanged(new Date());
+                        kenyaemrOrdersService.saveLabOrderManifest(manifest);
+                        System.out.println("Manifest with ID " + manifest.getId() + " has no pending orders. It has been marked as complete");
+
+                    }
+                }
+
 
                 /**
                  * the order of execution should be:
@@ -94,11 +122,6 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
 
 
                 Date effectiveDate =  calendar.getTime();
-
-                //Collect New Sample, Missing Sample ( Physical Sample Missing) result is a complete result.
-                // Requires manual update in the lab module status will also not make a template be rendered incomplete as the result is already pulled
-                String [] incompleteStatuses = new String []{"Incomplete"};
-
                 System.out.println("Preparing to pull VL results for tests dispatched on or before : " + effectiveDate);
                 List<LabManifestOrder> ordersWithPendingResults = new ArrayList<LabManifestOrder>();
 
@@ -106,13 +129,13 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
 
                 if (previouslyCheckedOrders.size() > 0) {
                     ordersWithPendingResults = previouslyCheckedOrders;
-                    System.out.println("Polling results for  " + previouslyCheckedOrders.size() + " samples that were previously not ready");
+                    System.out.println("Number of samples with results previously not ready:  " + previouslyCheckedOrders.size() + "");
 
                 } else {
 
                     if (StringUtils.isNotBlank(lastProcessedManifest)) {
                         manifestToUpdateResults = kenyaemrOrdersService.getLabOrderManifestById(Integer.valueOf(lastProcessedManifest));
-                        System.out.println("Polling results for  " + previouslyCheckedOrders.size() + " samples that were previously not ready");
+                        System.out.println("Currently processing manifest: " + manifestToUpdateResults.getId());
 
                     } else {
 
@@ -137,35 +160,87 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
                     if (manifestToUpdateResults == null) {
                         System.out.println("There are no manifests to pull results for");
                         log.info("There are no manifests to pull results for");
+
+                        // reset global properties
+                        gpLastProcessedManifest.setPropertyValue("");
+                        Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifest);
+
+                        gpLastProcessedManifestUpdatetime.setPropertyValue("");
+                        Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifestUpdatetime);
                         return;
                     }
 
 
-                    ordersWithPendingResults = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifestToUpdateResults, "Sent");
-                    List<LabManifestOrder> ordersWithIncompleteResults = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifestToUpdateResults, incompleteStatuses);
+                    Date currentManifestLastupdate = null;
 
-                    if (ordersWithPendingResults.size() < 1 && ordersWithIncompleteResults.size() < 1) {
+                    if (StringUtils.isNotBlank(currentManifestLastUpdatetime)) {
+                        currentManifestLastupdate = Utils.getSimpleDateFormat(LabOrderDataExchange.MANIFEST_LAST_UPDATE_PATTERN).parse(currentManifestLastUpdatetime);
+                    }
+
+                    System.out.println("Effective date: " + currentManifestLastupdate);
+
+                    if (StringUtils.isNotBlank(retryPeriodForIncompleteResults)) {
+                        retryPeriod = Integer.valueOf(retryPeriodForIncompleteResults);
+                    }
+
+                    ordersWithPendingResults = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifestToUpdateResults, "Sent");
+
+                    // terminate if there are no pending results
+                    if (ordersWithPendingResults.size() < 1) {
+                        System.out.println("The manifest : " + manifestToUpdateResults.getId() + " in queueu has no pending samples. It will be marked as incomplete");
+
+                        manifestToUpdateResults.setStatus("Incomplete results");
+                        manifestToUpdateResults.setDateChanged(new Date());
+                        kenyaemrOrdersService.saveLabOrderManifest(manifestToUpdateResults);
+                        // reset global properties
+                        gpLastProcessedManifest.setPropertyValue("");
+                        Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifest);
+
+                        gpLastProcessedManifestUpdatetime.setPropertyValue("");
+                        Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifestUpdatetime);
+
+                        return;
+                    }
+
+                    //List<LabManifestOrder> ordersWithIncompleteResults = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifestToUpdateResults, incompleteStatuses);
+                    /*List<LabManifestOrder> manifestOrdersForFutureIterations = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifestToUpdateResults, incompleteStatuses);
+
+                    if (currentManifestLastupdate != null) {
+                        ordersWithIncompleteResults = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifestToUpdateResults, currentManifestLastupdate, incompleteStatuses);
+                    }*/
+                    /*if (currentManifestLastupdate != null) {
+                        ordersWithIncompleteResults = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifestToUpdateResults, currentManifestLastupdate, incompleteStatuses);
+                    } else {
+                        ordersWithIncompleteResults = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifestToUpdateResults, incompleteStatuses);
+
+                    }*/
+
+                    /*if (ordersWithPendingResults.size() < 1 && ordersWithIncompleteResults.size() < 1) {
                         System.out.println("There are no active labs to pull results for");
                         log.info("There are no active labs to pull results for");
                         manifestToUpdateResults.setStatus("Complete results");
                         manifestToUpdateResults.setDateChanged(new Date());
                         kenyaemrOrdersService.saveLabOrderManifest(manifestToUpdateResults);
+
+                        gpLastProcessedManifest.setPropertyValue("");
+                        Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifest);
                         return;
                     } else if (ordersWithPendingResults.size() < 1 && ordersWithIncompleteResults.size() > 0) {
                         System.out.println("Manifest has incomplete results");
-                        log.info("Manifest has incomplete results");
+                        log.info("Manifest has incomplete results: " + ordersWithIncompleteResults.size());
                         manifestToUpdateResults.setStatus("Incomplete results");
                         manifestToUpdateResults.setDateChanged(new Date());
                         kenyaemrOrdersService.saveLabOrderManifest(manifestToUpdateResults);
-                        return;
-                    }
 
-                    System.out.println("Polling results for  " + ordersWithPendingResults.size() + " samples");
+                        *//*gpLastProcessedManifest.setPropertyValue("");
+                        Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifest);*//*
+                        return;
+                    }*/
+
+                    System.out.println("Polling results for  " + ordersWithPendingResults.size() + " samples in currently processing manifest with id :" + manifestToUpdateResults.getId());
                 }
 
-                if (ordersWithPendingResults.size() < 1) { // exit if manifest has 0 orders with pending results
-                    System.out.println("All relevant VL results have been pulled");
-                    log.info("All relevant VL results have been pulled");
+                if (ordersWithPendingResults.size() < 1) { // exit there are no pending samples
                     return;
                 }
 
@@ -181,8 +256,10 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
 
                     // we want to create a comma separated list of order id
                     List<Integer> orderIds = new ArrayList<Integer>();
+                    List<Integer> manifestOrderIds = new ArrayList<Integer>();
                     for (LabManifestOrder manifestOrder : ordersWithPendingResults) {
                         orderIds.add(manifestOrder.getOrder().getOrderId());
+                        manifestOrderIds.add(manifestOrder.getId());
                     }
 
                     //Define a postRequest request
@@ -204,6 +281,7 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
                     //Send the request; It will immediately return the response in HttpResponse object if any
                     HttpResponse response = httpClient.execute(postRequest);
 
+
                     //verify the valid error code first
                     int statusCode = response.getStatusLine().getStatusCode();
 
@@ -215,21 +293,41 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
                     if (statusCode != 200) {
                         throw new RuntimeException("Failed with HTTP error code : " + statusCode);
                     }
-                    String responseString = EntityUtils.toString(response.getEntity());
 
-                    ObjectMapper mapper = new ObjectMapper();
-                    ObjectNode resultsObj = null;
-                    try {
-                        JsonNode actualObj = mapper.readTree(responseString);
-                        resultsObj = (ObjectNode) actualObj;
-                    } catch (JsonProcessingException e) {
-                        e.printStackTrace();
+                    String responseStringRaw = EntityUtils.toString(response.getEntity());
+                    String responseStringEscape = StringEscapeUtils.escapeJava(responseStringRaw);
+                    String strippedUnicodeChars = new UnicodeUnescaper().translate(responseStringEscape);
+
+                    String finalChars = StringEscapeUtils.unescapeJava(strippedUnicodeChars);
+                    String removeBackslash = finalChars.replace("\\", "");
+
+
+                    Gson gson = new GsonBuilder().serializeNulls().create();
+                    JsonElement rootNode = gson.fromJson(finalChars, JsonElement.class);
+
+                    JsonArray resultArray = null;
+                    if(rootNode.isJsonObject()){
+                        JsonObject jsonObject = rootNode.getAsJsonObject();
+                        JsonElement vlResultArray = jsonObject.get("data");
+                        if(vlResultArray.isJsonArray()){
+                            resultArray = vlResultArray.getAsJsonArray();
+                        }
                     }
 
-                    ArrayNode resultArray = (ArrayNode) resultsObj.get("data");
+                    JsonArray cleanedArray = new JsonArray();
+                    if (resultArray != null && !resultArray.isEmpty()) {
+                        for (int i =0; i < resultArray.size(); i++) {
+                            JsonObject result = resultArray.get(i).getAsJsonObject();
+                            result.addProperty("full_names", "Replaced Name"); // this is a short workaround to handle data coming from eid/vl system and were pushed from kenyaemr with unicode literals
+                            cleanedArray.add(result);
+
+                        }
+                    }
+
 
                     if (resultArray != null && !resultArray.isEmpty()) {
-                        ProcessViralLoadResults.processPayload(resultArray.toString());// the only way that works for now is posting this through REST
+                        String json = gson.toJson(cleanedArray);
+                        ProcessViralLoadResults.processPayload(json);// the only way that works for now is posting this through REST
 
                     // update manifest details appropriately for the next execution
 
@@ -241,40 +339,45 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
                                 manifestToUpdateResults.setStatus("Complete results");
                                 manifestToUpdateResults.setDateChanged(new Date());
                                 kenyaemrOrdersService.saveLabOrderManifest(manifestToUpdateResults);
+
+                                gpLastProcessedManifest.setPropertyValue(""); // set value to null so that the execution gets to the next manifest
+                                Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifest);
                             } else if (pendingResultsForNextIteration.size() < 1 && incompleteResults.size() > 0) {
                                 manifestToUpdateResults.setStatus("Incomplete results");
                                 manifestToUpdateResults.setDateChanged(new Date());
                                 kenyaemrOrdersService.saveLabOrderManifest(manifestToUpdateResults);
+
+                                gpLastProcessedManifest.setPropertyValue(""); // set value to null so that the execution gets to the next manifest
+                                Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifest);
                             }
 
                             // update manifest global property
                             if (pendingResultsForNextIteration.size() > 0) {
                                 gpLastProcessedManifest.setPropertyValue(manifestToUpdateResults.getId().toString());
+                                gpLastProcessedManifestUpdatetime.setPropertyValue(Utils.getSimpleDateFormat(LabOrderDataExchange.MANIFEST_LAST_UPDATE_PATTERN).format(new Date()));
                                 Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifest);
-                            } else {
-                                gpLastProcessedManifest.setPropertyValue(""); // set value to null so that the execution gets to the next manifest
-                                Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifest);
+                                Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifestUpdatetime);
                             }
                         }
 
-                        /**
-                         * we can do some cleanup i.e close all manifests with results
-                         */
-                        List<LabManifest> allManifests = kenyaemrOrdersService.getLabOrderManifest("Incomplete results");
-                        for (LabManifest manifest : allManifests) {
+                    }
 
-                            List<LabManifestOrder> manifestOrdersWithIncompleteResults = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifest, incompleteStatuses);
+                    // check and mark status for all orders that may have not been found in the lab system. It is still not clear how this happens since the records are marked as sent in the manifest
 
-                            if (manifestOrdersWithIncompleteResults.size() < 1) {
-                                manifest.setStatus("Complete results");
-                                manifest.setDateChanged(new Date());
-                                kenyaemrOrdersService.saveLabOrderManifest(manifest);
-                            }
-                        }
+                    Integer[] intArray = new Integer[manifestOrderIds.size()];
+                    intArray = manifestOrderIds.toArray(intArray);
+
+                    List<LabManifestOrder> ordersNotInLabSystem = kenyaemrOrdersService.getLabManifestOrderByNotFoundInLabSystem(intArray);
+
+                    for (LabManifestOrder o : ordersNotInLabSystem) {
+                        o.setStatus("Record not found");
+                        o.setDateChanged(new Date());
+                        kenyaemrOrdersService.saveLabManifestOrder(o);
                     }
 
                     System.out.println("Successfully executed the task that pulls lab requests");
                     log.info("Successfully executed the task that pulls lab requests");
+
                 } finally {
                     httpClient.close();
                 }
@@ -294,4 +397,5 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
             }
         }
     }
+
 }
