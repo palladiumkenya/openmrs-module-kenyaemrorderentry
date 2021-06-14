@@ -141,6 +141,14 @@
 			<groupId>com.itextpdf</groupId>
 			<artifactId>font-asian</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-text</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>

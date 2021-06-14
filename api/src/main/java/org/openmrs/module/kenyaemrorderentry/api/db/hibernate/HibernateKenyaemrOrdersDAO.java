@@ -47,7 +47,6 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
         Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifest.class);
         criteria.add(Restrictions.eq("voided", false));
         criteria.addOrder(org.hibernate.criterion.Order.desc("id"));
-        criteria.setMaxResults(25);
         return criteria.list();
     }
 
@@ -92,6 +91,7 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
         Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifestOrder.class);
         criteria.add(Restrictions.eq("labManifest", labManifest));
         criteria.add(Restrictions.eq("voided", false));
+        criteria.addOrder(org.hibernate.criterion.Order.asc("id"));
         return criteria.list();
     }
 
@@ -123,6 +123,7 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
         Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifestOrder.class);
         criteria.add(Restrictions.eq("status", status));
         criteria.add(Restrictions.eq("voided", false));
+        criteria.addOrder(org.hibernate.criterion.Order.asc("id"));
         return criteria.list();
     }
 
@@ -132,6 +133,7 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
         criteria.add(Restrictions.eq("labManifest", labManifestOrder));
         criteria.add(Restrictions.eq("status", status));
         criteria.add(Restrictions.eq("voided", false));
+        criteria.addOrder(org.hibernate.criterion.Order.asc("id"));
         return criteria.list();
     }
 
@@ -141,6 +143,7 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
         criteria.add(Restrictions.eq("labManifest", labManifestOrder));
         criteria.add(Restrictions.in("status", status));
         criteria.add(Restrictions.eq("voided", false));
+        criteria.addOrder(org.hibernate.criterion.Order.asc("id"));
         return criteria.list();
     }
 
@@ -304,5 +307,27 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
         return criteria.list();
     }
 
-    //End of Patient contact dimensions methods
+    @Override
+    public List<LabManifestOrder> getLabManifestOrderByNotFoundInLabSystem(Integer... ordersList) {
+        Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifestOrder.class);
+        criteria.add(Restrictions.in("id", ordersList));
+        criteria.add(Restrictions.eq("status", "Sent")); // samples marked as sent in the manifest but are not part of the result from lab
+        criteria.add(Restrictions.eq("voided", false));
+        criteria.addOrder(org.hibernate.criterion.Order.asc("id"));
+        return criteria.list();
+    }
+
+    @Override
+    public List<LabManifestOrder> getLabManifestOrderByManifestAndStatus(LabManifest labManifestOrder, Date updatedBefore, String... status) {
+        Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifestOrder.class);
+        criteria.add(Restrictions.le("lastStatusCheckDate", updatedBefore));
+        criteria.add(Restrictions.eq("labManifest", labManifestOrder));
+        criteria.add(Restrictions.in("status", status));
+        criteria.add(Restrictions.eq("voided", false));
+        criteria.addOrder(org.hibernate.criterion.Order.asc("id"));
+        criteria.setMaxResults(50);
+
+        return criteria.list();
+    }
+
 }

@@ -51,7 +51,6 @@ public class ProcessViralLoadResults {
                         auth.getBytes("UTF-8"));
                 String authHeader = "Basic " + new String(encodedAuth);
                 postRequest.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
-
                 //Set the request post body
                 StringEntity userEntity = new StringEntity(payload);
                 postRequest.setEntity(userEntity);

@@ -108,6 +108,11 @@ public class KenyaemrOrdersServiceImpl extends BaseOpenmrsService implements Ken
     }
 
     @Override
+    public List<LabManifestOrder> getLabManifestOrderByNotFoundInLabSystem(Integer... ordersList) {
+        return dao.getLabManifestOrderByNotFoundInLabSystem(ordersList);
+    }
+
+    @Override
     public List<LabManifestOrder> getLabManifestOrderByStatusBeforeDate(String status, Date lastStatusCheckDate) {
         return dao.getLabManifestOrderByStatusBeforeDate(status, lastStatusCheckDate);
     }
@@ -121,6 +126,11 @@ public class KenyaemrOrdersServiceImpl extends BaseOpenmrsService implements Ken
     @Override
     public List<LabManifestOrder> getLabManifestOrderByManifestAndStatus(LabManifest labManifestOrder, String... status) {
         return dao.getLabManifestOrderByManifestAndStatus(labManifestOrder, status);
+    }
+
+    @Override
+    public List<LabManifestOrder> getLabManifestOrderByManifestAndStatus(LabManifest labManifestOrder, Date updatedBefore, String... status) {
+        return dao.getLabManifestOrderByManifestAndStatus(labManifestOrder, updatedBefore, status);
     }
 
     @Override
