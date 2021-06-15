@@ -224,6 +224,13 @@ tr:nth-child(even) {background-color: #f2f2f2;}
             });
             tdStatus.append(spanStatus);
 
+            var spanTotalSamples = jq('<span/>', {
+                class: 'result-not-ready',
+                text: 'Total samples: ' + displayRecords[i].totalSamples
+            });
+            tdStatus.append(jq('<br/>'));
+            tdStatus.append(spanTotalSamples);
+
             // add alert for new sample
             if (displayRecords[i].collectNewSample > 0) {
                 var spanSampleRequired = jq('<span/>', {
@@ -242,6 +249,16 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                 });
                 tdStatus.append(jq('<br/>'));
                 tdStatus.append(spanMissingSample);
+            }
+
+            // samples missing in the lab system - not sure how this status is arrived at though
+            if (displayRecords[i].recordsNotFound > 0) {
+                var spanRecordsNotFound = jq('<span/>', {
+                    class: 'missing-physical-sample',
+                    text: 'Records missing in the Lab: ' + displayRecords[i].recordsNotFound
+                });
+                tdStatus.append(jq('<br/>'));
+                tdStatus.append(spanRecordsNotFound);
             }
             // add alert for Manual updates required
             if (displayRecords[i].manualUpdates > 0) {

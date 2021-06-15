@@ -134,8 +134,9 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                     <td class="dateRequestColumn">${o.result ?: "Not ready"}</td>
                     <td class="dateRequestColumn">${o.resultDate != null ? kenyaui.formatDate(o.resultDate) : ""}</td>
                     <td class="actionColumn">
-                        <button class="removeManifestOrder" style="background-color: cadetblue; color: white" value="od_${o.id}" data-target="#removeManifestOrder">Remove</button>
-
+                        <% if (manifest.status == 'Draft') { %>
+                            <button class="removeManifestOrder" style="background-color: cadetblue; color: white" value="od_${o.id}" data-target="#removeManifestOrder">Remove</button>
+                        <% } %>
                         <a href="${ ui.pageLink("kenyaemrorderentry","manifest/printSpecimenLabel",[manifestOrder : o.id]) }"   target="_blank">
                             <button style="background-color: cadetblue; color: white">
                                 Print Label
