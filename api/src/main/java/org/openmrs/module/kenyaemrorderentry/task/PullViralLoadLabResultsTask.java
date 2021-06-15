@@ -71,7 +71,6 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
                 String lastProcessedManifest = gpLastProcessedManifest.getPropertyValue();
                 String retryPeriodForIncompleteResults = gpRetryPeriodForIncompleteResults.getPropertyValue();
                 String labTatForVlResults = gpLabTatForVlResults.getPropertyValue();
-                String currentManifestLastUpdatetime = gpLastProcessedManifestUpdatetime.getPropertyValue();
                 LabManifest manifestToUpdateResults = null;
 
                 if (StringUtils.isBlank(serverUrl) || StringUtils.isBlank(API_KEY) || StringUtils.isBlank(updatesEndpoint)) {
@@ -96,6 +95,11 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
                         manifest.setStatus("Complete results");
                         manifest.setDateChanged(new Date());
                         kenyaemrOrdersService.saveLabOrderManifest(manifest);
+                        if(StringUtils.isNotBlank(lastProcessedManifest) && Integer.valueOf(lastProcessedManifest).equals(manifest.getId())) {
+                            lastProcessedManifest = "";
+                            gpLastProcessedManifest.setPropertyValue(""); // set value to null so that the execution gets to the next manifest
+                            Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifest);
+                        }
                         System.out.println("Manifest with ID " + manifest.getId() + " has no pending orders. It has been marked as complete");
 
                     }
@@ -170,19 +174,6 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
                         return;
                     }
 
-
-                    Date currentManifestLastupdate = null;
-
-                    if (StringUtils.isNotBlank(currentManifestLastUpdatetime)) {
-                        currentManifestLastupdate = Utils.getSimpleDateFormat(LabOrderDataExchange.MANIFEST_LAST_UPDATE_PATTERN).parse(currentManifestLastUpdatetime);
-                    }
-
-                    System.out.println("Effective date: " + currentManifestLastupdate);
-
-                    if (StringUtils.isNotBlank(retryPeriodForIncompleteResults)) {
-                        retryPeriod = Integer.valueOf(retryPeriodForIncompleteResults);
-                    }
-
                     ordersWithPendingResults = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifestToUpdateResults, "Sent");
 
                     // terminate if there are no pending results
@@ -201,41 +192,6 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
 
                         return;
                     }
-
-                    //List<LabManifestOrder> ordersWithIncompleteResults = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifestToUpdateResults, incompleteStatuses);
-                    /*List<LabManifestOrder> manifestOrdersForFutureIterations = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifestToUpdateResults, incompleteStatuses);
-
-                    if (currentManifestLastupdate != null) {
-                        ordersWithIncompleteResults = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifestToUpdateResults, currentManifestLastupdate, incompleteStatuses);
-                    }*/
-                    /*if (currentManifestLastupdate != null) {
-                        ordersWithIncompleteResults = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifestToUpdateResults, currentManifestLastupdate, incompleteStatuses);
-                    } else {
-                        ordersWithIncompleteResults = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifestToUpdateResults, incompleteStatuses);
-
-                    }*/
-
-                    /*if (ordersWithPendingResults.size() < 1 && ordersWithIncompleteResults.size() < 1) {
-                        System.out.println("There are no active labs to pull results for");
-                        log.info("There are no active labs to pull results for");
-                        manifestToUpdateResults.setStatus("Complete results");
-                        manifestToUpdateResults.setDateChanged(new Date());
-                        kenyaemrOrdersService.saveLabOrderManifest(manifestToUpdateResults);
-
-                        gpLastProcessedManifest.setPropertyValue("");
-                        Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifest);
-                        return;
-                    } else if (ordersWithPendingResults.size() < 1 && ordersWithIncompleteResults.size() > 0) {
-                        System.out.println("Manifest has incomplete results");
-                        log.info("Manifest has incomplete results: " + ordersWithIncompleteResults.size());
-                        manifestToUpdateResults.setStatus("Incomplete results");
-                        manifestToUpdateResults.setDateChanged(new Date());
-                        kenyaemrOrdersService.saveLabOrderManifest(manifestToUpdateResults);
-
-                        *//*gpLastProcessedManifest.setPropertyValue("");
-                        Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifest);*//*
-                        return;
-                    }*/
 
                     System.out.println("Polling results for  " + ordersWithPendingResults.size() + " samples in currently processing manifest with id :" + manifestToUpdateResults.getId());
                 }

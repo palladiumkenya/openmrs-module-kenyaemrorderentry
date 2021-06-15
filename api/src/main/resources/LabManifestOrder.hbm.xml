@@ -23,6 +23,8 @@
         <property name="sampleCollectionDate" type="java.util.Date" column="sample_collection_date" length="19"/>
         <property name="sampleSeparationDate" type="java.util.Date" column="sample_separation_date" length="19"/>
         <property name="lastStatusCheckDate" type="java.util.Date" column="last_status_check_date" length="19"/>
+        <property name="sampleReceivedDate" type="java.util.Date" column="date_sample_received" length="19"/>
+        <property name="sampleTestedDate" type="java.util.Date" column="date_sample_tested" length="19"/>
         <property name="dateCreated" type="java.util.Date"
                   column="date_created" not-null="true" length="19" />
         <property name="voided" type="java.lang.Boolean" column="voided" length="1"/>

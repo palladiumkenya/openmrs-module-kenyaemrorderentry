@@ -30,6 +30,8 @@ public class LabOrdersManifestHomePageController {
             List<LabManifestOrder> collectNewSampleOrders = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifest, "Collect New Sample");
             List<LabManifestOrder> manualDiscontinuationOrders = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifest, "Requires manual update in the lab module");
             List<LabManifestOrder> ordersWithMissingPhysicalSamples = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifest, "Missing Sample ( Physical Sample Missing)");
+            List<LabManifestOrder> missingInLab = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifest, "Record not found");
+            List<LabManifestOrder> allSamples = kenyaemrOrdersService.getLabManifestOrderByManifest(manifest);
 
             SimpleObject m = SimpleObject.create(
                     "id", manifest.getId(),
@@ -54,6 +56,8 @@ public class LabOrdersManifestHomePageController {
                     "collectNewSample", collectNewSampleOrders.size(),
                     "incompleteSample", ordersWithIncompleteResult.size(),
                     "manualUpdates", manualDiscontinuationOrders.size(),
+                    "recordsNotFound", missingInLab.size(),
+                    "totalSamples", allSamples.size(),
                     "missingPhysicalSample", ordersWithMissingPhysicalSamples.size());
             manifestList1.add(o1);
         }

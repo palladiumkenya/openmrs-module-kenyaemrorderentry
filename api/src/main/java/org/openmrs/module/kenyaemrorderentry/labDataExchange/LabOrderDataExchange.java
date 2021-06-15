@@ -30,6 +30,7 @@ import org.openmrs.module.kenyaemrorderentry.util.Utils;
 import org.openmrs.ui.framework.SimpleObject;
 import org.openmrs.util.PrivilegeConstants;
 
+import java.text.ParseException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -48,6 +49,7 @@ public class LabOrderDataExchange {
     public static final String GP_LAB_TAT_FOR_VL_RESULTS = "kemrorder.viral_load_result_tat_in_days";
     public static final String GP_MANIFEST_LAST_UPDATETIME = "kemrorder.manifest_last_update_time";
     public static final String MANIFEST_LAST_UPDATE_PATTERN = "yyyy-MM-dd HH:mm:ss";
+    public static final String LAB_SYSTEM_DATE_PATTERN = "yyyy-MM-dd";
 
     ConceptService conceptService = Context.getConceptService();
     EncounterService encounterService = Context.getEncounterService();
@@ -422,12 +424,32 @@ public class LabOrderDataExchange {
             for (int i = 0; i < resultsObj.size(); i++) {
                 JsonObject o =  resultsObj.get(i).getAsJsonObject();
                 Integer specimenId = o.get("order_number").getAsInt();
-               // String patientIdentifier = o.get("patient").textValue(); // holds CCC number
+                String dateSampleReceived = !o.get("date_received").isJsonNull() ? o.get("date_received").getAsString() : "";
+                String dateSampleTested = !o.get("date_tested").isJsonNull() ? o.get("date_tested").getAsString() : "";
+                Date sampleReceivedDate = null;
+                Date sampleTestedDate = null;
+
+                if (StringUtils.isNotBlank(dateSampleReceived)) {
+                    try {
+                        sampleReceivedDate = Utils.getSimpleDateFormat(LAB_SYSTEM_DATE_PATTERN).parse(dateSampleReceived);
+                    } catch (ParseException e) {
+                        //e.printStackTrace();
+                    }
+                }
+
+                if (StringUtils.isNotBlank(dateSampleTested)) {
+                    try {
+                        sampleTestedDate = Utils.getSimpleDateFormat(LAB_SYSTEM_DATE_PATTERN).parse(dateSampleTested);
+                    } catch (ParseException e) {
+                        //e.printStackTrace();
+                    }
+                }
+
                 String specimenReceivedStatus = o.get("sample_status").getAsString();// Complete, Incomplete, Rejected
 
                 String specimenRejectedReason = o.has("rejected_reason") ? o.get("rejected_reason").getAsString() : "";
                 String results = !o.get("result").isJsonNull() ? o.get("result").getAsString() : null; //1 - negative, 2 - positive, 5 - inconclusive
-                updateOrder(specimenId, results, specimenReceivedStatus, specimenRejectedReason);
+                updateOrder(specimenId, results, specimenReceivedStatus, specimenRejectedReason, sampleReceivedDate, sampleTestedDate);
                 // update manifest object to reflect received status
             }
         }
@@ -441,11 +463,16 @@ public class LabOrderDataExchange {
      * @param specimenStatus
      * @param rejectedReason
      */
-    private void updateOrder(Integer orderId, String result, String specimenStatus, String rejectedReason) {
+    private void updateOrder(Integer orderId, String result, String specimenStatus, String rejectedReason, Date dateSampleReceived, Date dateSampleTested) {
 
         Order od = orderService.getOrder(orderId);
         LabManifestOrder manifestOrder = kenyaemrOrdersService.getLabManifestOrderByOrderId(orderService.getOrder(orderId));
-        Date orderDiscontinuationDate = aMomentBefore(new Date());
+        Date orderDiscontinuationDate = null;
+        if (dateSampleTested != null) {
+            orderDiscontinuationDate = dateSampleTested;
+        } else {
+            orderDiscontinuationDate = aMomentBefore(new Date());
+        }
 
         if (od != null && od.isActive()) {
             if ((StringUtils.isNotBlank(specimenStatus) && specimenStatus.equals("Rejected")) || StringUtils.isNotBlank(rejectedReason) || (StringUtils.isNotBlank(result) && result.equals("Collect New Sample"))) {
@@ -473,6 +500,13 @@ public class LabOrderDataExchange {
                 manifestOrder.setStatus(discontinuationReason);
                 manifestOrder.setResult(result);
                 manifestOrder.setResultDate(orderDiscontinuationDate);
+                if (dateSampleReceived != null) {
+                    manifestOrder.setSampleReceivedDate(dateSampleReceived);
+                }
+
+                if (dateSampleTested != null) {
+                    manifestOrder.setSampleTestedDate(dateSampleTested);
+                }
                 kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
             } else if (StringUtils.isNotBlank(specimenStatus) && specimenStatus.equalsIgnoreCase("Complete") && StringUtils.isNotBlank(result)) {
 
@@ -530,6 +564,13 @@ public class LabOrderDataExchange {
                         manifestOrder.setStatus("Complete");
                         manifestOrder.setResult(result);
                         manifestOrder.setResultDate(orderDiscontinuationDate);
+                        if (dateSampleReceived != null) {
+                            manifestOrder.setSampleReceivedDate(dateSampleReceived);
+                        }
+
+                        if (dateSampleTested != null) {
+                            manifestOrder.setSampleTestedDate(dateSampleTested);
+                        }
                         kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
                     } catch (Exception e) {
                         System.out.println("An error was encountered while updating orders for viral load");
@@ -551,6 +592,13 @@ public class LabOrderDataExchange {
                         manifestOrder.setStatus("Complete");
                         manifestOrder.setResult(result);
                         manifestOrder.setResultDate(orderDiscontinuationDate);
+                        if (dateSampleReceived != null) {
+                            manifestOrder.setSampleReceivedDate(dateSampleReceived);
+                        }
+
+                        if (dateSampleTested != null) {
+                            manifestOrder.setSampleTestedDate(dateSampleTested);
+                        }
                         kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
                     } catch (Exception e) {
                         System.out.println("An error was encountered while updating orders for viral load");
@@ -591,6 +639,13 @@ public class LabOrderDataExchange {
                             manifestOrder.setStatus("Complete");
                             manifestOrder.setResult(result);
                             manifestOrder.setResultDate(orderDiscontinuationDate);
+                            if (dateSampleReceived != null) {
+                                manifestOrder.setSampleReceivedDate(dateSampleReceived);
+                            }
+
+                            if (dateSampleTested != null) {
+                                manifestOrder.setSampleTestedDate(dateSampleTested);
+                            }
                             kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
                         } catch (Exception e) {
                             System.out.println("An error was encountered while updating orders for viral load");
@@ -608,6 +663,15 @@ public class LabOrderDataExchange {
                         manifestOrder.setStatus("Requires manual update in the lab module");
                         manifestOrder.setResult(result);
                         manifestOrder.setResultDate(orderDiscontinuationDate);
+
+                        if (dateSampleReceived != null) {
+                            manifestOrder.setSampleReceivedDate(dateSampleReceived);
+                        }
+
+                        if (dateSampleTested != null) {
+                            manifestOrder.setSampleTestedDate(dateSampleTested);
+                        }
+
                         kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
                     }
 

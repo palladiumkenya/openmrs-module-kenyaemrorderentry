@@ -223,4 +223,32 @@
         </createIndex>
     </changeSet>
 
+    <changeSet id="kenyaemr_order_entry_008" author="aojwang">
+
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="kenyaemr_order_entry_lab_manifest_order"/>
+        </preConditions>
+        <comment>
+            Adds a column to record date when a sample was received at the testing lab
+        </comment>
+        <addColumn tableName="kenyaemr_order_entry_lab_manifest_order" >
+            <column name="date_sample_received"
+                    type="date"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="kenyaemr_order_entry_009" author="aojwang">
+
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="kenyaemr_order_entry_lab_manifest_order"/>
+        </preConditions>
+        <comment>
+            Adds a column to record date when a sample was tested at the testing lab and results made available
+        </comment>
+        <addColumn tableName="kenyaemr_order_entry_lab_manifest_order" >
+            <column name="date_sample_tested"
+                    type="date"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>
