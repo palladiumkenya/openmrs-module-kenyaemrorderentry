@@ -148,7 +148,7 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
                             tatPeriod = Integer.valueOf(labTatForVlResults);
                         }
                         if (tatPeriod == 0) {
-                            tatPeriod = 4; // defaults to 4 days if left blank
+                            tatPeriod = 10; // defaults to 10 days if left blank
                         }
                         Calendar calendar1 = Calendar.getInstance();
                         calendar1.set(Calendar.HOUR_OF_DAY, 23);
