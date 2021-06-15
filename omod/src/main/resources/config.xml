@@ -109,7 +109,7 @@
 
 	<globalProperty>
 		<property>kemrorder.viral_load_result_tat_in_days</property>
-		<defaultValue>4</defaultValue>
+		<defaultValue>10</defaultValue>
 		<description>
 			The turnaround time for VL results in days. This is to avoid premature polling for results. An empty value will default to 4 days
 		</description>
