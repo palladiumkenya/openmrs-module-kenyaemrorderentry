@@ -35,9 +35,9 @@ public class LabOrdersManifestHomePageController {
 
             SimpleObject m = SimpleObject.create(
                     "id", manifest.getId(),
-                    "startDate", ui.formatDatePretty(manifest.getStartDate()),
-                    "endDate", ui.formatDatePretty(manifest.getEndDate()),
-                    "dispatchDate", ui.formatDatePretty(manifest.getDispatchDate()),
+                    "startDate", manifest.getStartDate() != null ? ui.formatDatePretty(manifest.getStartDate()) : "",
+                    "endDate", manifest.getEndDate() != null ? ui.formatDatePretty(manifest.getEndDate()) : "",
+                    "dispatchDate", manifest.getDispatchDate() != null ? ui.formatDatePretty(manifest.getDispatchDate()) : "",
                     "courier", StringUtils.capitalize(manifest.getCourier() != null ? manifest.getCourier().toLowerCase() : ""),
                     "courierOfficer", StringUtils.capitalize(manifest.getCourierOfficer() != null ? manifest.getCourierOfficer().toLowerCase() : ""),
                     "status", manifest.getStatus(),
