@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.openmrs.module</groupId>
     <artifactId>kenyaemrorderentry</artifactId>
-    <version>1.1.6</version>
+    <version>1.2.0</version>
     <packaging>pom</packaging>
     <name>KenyaEMR Order Entry Module</name>
     <description>Drug Order Entry for OpenMRS 2.x</description>
@@ -51,7 +51,7 @@
         <htmlformentryuiVersion>1.9.0</htmlformentryuiVersion>
         <coreappsVersion>1.23.0</coreappsVersion>
         <kenyacoreVersion>2.4.2</kenyacoreVersion>
-        <kenyauiVersion>2.1.2</kenyauiVersion>
+        <kenyauiVersion>3.0.0</kenyauiVersion>
         <webservices.restVersion>2.26.0</webservices.restVersion>
         <jacksonVersion>2.10.1</jacksonVersion>
         <apacheHttpClientVersion>4.5.10</apacheHttpClientVersion>
@@ -513,11 +513,6 @@
             <classifier>tests</classifier>
         </dependency>
 
-        <dependency>
-            <groupId>org.openmrs.test</groupId>
-            <artifactId>openmrs-test</artifactId>
-            <type>pom</type>
-        </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-core</artifactId>
