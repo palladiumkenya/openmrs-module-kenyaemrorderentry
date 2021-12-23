@@ -1462,12 +1462,24 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             }
 
         }
-        function fetchConceptAnswers(res) {
+        function fetchConceptAnswers(conceptUuid) {
             $scope.answers = [];
-                OrderEntryService.getConceptAnswers(res)
+                OrderEntryService.getConceptAnswers(conceptUuid)
                     .then(function(posts) {
-                        $scope.answers = posts.answers;
+                        if (conceptUuid === '1029AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                            $scope.answers = [{
+                                display:'NEGATIVE',
+                                uuid:'664AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+                            }, {
+                                display:'POSITIVE',
+                                uuid:'703AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+                            }]
+                        } else {
+                            $scope.answers = posts.answers;
+
+                        }
                     });
+
 
         }
 
