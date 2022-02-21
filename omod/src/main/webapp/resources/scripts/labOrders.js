@@ -981,7 +981,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                                     OrderEntryService.signAndSave({ draftOrders: [] }, encounterContextOldOrders,$scope.obs)
                                         .$promise.then(function(result) {
                                         if($scope.OrderUuid) {
-                                            $scope.voidSelectedOrders();
+                                           $scope.voidSelectedOrders();
                                         }
 
                                         $scope.discontinueOrdersRetrospectively = _.filter($scope.discontinueOrdersRetrospectively, function(o) {
@@ -993,7 +993,6 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                                         discontinueLabOrdersRetrospectivelyAndPoc($scope.discontinueOrdersRetrospectively);
                                         $('#spinner').modal('hide');
 
-                                         $window.location.reload();
                                          location.href = location.href;
                                     }, function(errorResponse) {
                                         $('#spinner').modal('hide');
@@ -1035,8 +1034,6 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                     $scope.discontinueOrdersRetrospectively = checkForDateActivated($scope.discontinueOrdersRetrospectively);
                     discontinueLabOrdersRetrospectivelyAndPoc($scope.discontinueOrdersRetrospectively);
                     $('#spinner').modal('hide');
-
-
                       location.href = location.href;
                 }, function(errorResponse) {
                     emr.errorMessage(errorResponse.data.error.message);
@@ -1865,8 +1862,6 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                                     .$promise.then(function(result) {
                                     $('#spinner').modal('hide');
                                     loadExistingOrders();
-                                    $window.location.reload();
-                                    location.href = location.href;
                                 }, function(errorResponse) {
                                     $('#spinner').modal('hide');
                                     emr.errorMessage(errorResponse.data.error.message);
