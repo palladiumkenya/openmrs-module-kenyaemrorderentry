@@ -123,7 +123,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                 <th>Start Date</th>
                 <th>End Date</th>
                 <th>Courier</th>
-                <th>County/Sub-county</th>
+                <th>Manifest ID</th>
                 <th>Facility Email</th>
                 <th>Facility Phone</th>
                 <th>Clinician name</th>
@@ -211,7 +211,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
             tr.append("<td>" + displayRecords[i].manifest.startDate + "</td>");
             tr.append("<td>" + displayRecords[i].manifest.endDate + "</td>");
             tr.append("<td>" + displayRecords[i].manifest.courier + "</td>");
-            tr.append("<td>" + displayRecords[i].manifest.county + "/" + displayRecords[i].manifest.subCounty + "</td>");
+            tr.append("<td>" + displayRecords[i].manifest.identifier + "</td>");
             tr.append("<td>" + displayRecords[i].manifest.facilityEmail + "</td>");
             tr.append("<td>" + displayRecords[i].manifest.facilityPhoneContact + "</td>");
             tr.append("<td>" + displayRecords[i].manifest.clinicianName + "</td>");

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.PriorityQueue;
 
 public class ManifestFormFragmentController {
     public void controller(@FragmentParam(value = "manifestId", required = false) LabManifest labManifest,
@@ -116,6 +117,7 @@ public class ManifestFormFragmentController {
 
     public class EditManifestForm extends AbstractWebForm {
         private LabManifest original;
+        private String identifier;
         private Date startDate;
         private  Date endDate;
         private String courier;
@@ -135,6 +137,7 @@ public class ManifestFormFragmentController {
 
         public EditManifestForm(LabManifest manifest) {
             this.original = manifest;
+            this.identifier = manifest.getIdentifier();
             this.startDate = manifest.getStartDate();
             this.status = manifest.getStatus();
             this.endDate = manifest.getEndDate();
@@ -159,6 +162,7 @@ public class ManifestFormFragmentController {
             else{
                 toSave = new LabManifest();
             }
+            toSave.setIdentifier(identifier);
             toSave.setStartDate(startDate);
             toSave.setEndDate(endDate);
             toSave.setDispatchDate(dispatchDate);
@@ -212,6 +216,14 @@ public class ManifestFormFragmentController {
 
         public LabManifest getOriginal() {
             return original;
+        }
+
+        public String getIdentifier() {
+            return identifier;
+        }
+
+        public void setIdentifier(String identifier) {
+            this.identifier = identifier;
         }
 
         public void setOriginal(LabManifest original) {

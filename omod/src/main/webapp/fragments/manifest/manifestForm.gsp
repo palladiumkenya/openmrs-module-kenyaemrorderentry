@@ -14,6 +14,7 @@
             [
 
                     [object: command, property: "dispatchDate", label: "Dispatch Date"],
+                    [object: command, property: "identifier", label: "Manifest/Dispatch ID"],
                     [object: command, property: "courier", label: "Courier Name"],
                     [object: command, property: "courierOfficer", label: "Person handed to"]
 
