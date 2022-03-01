@@ -1,6 +1,7 @@
 package org.openmrs.module.kenyaemrorderentry.task;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
@@ -110,6 +111,8 @@ public class PushLabRequestsTask extends AbstractTask {
 
                     CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
 
+
+
                     try {
 
                         //Define a postRequest request
@@ -117,7 +120,12 @@ public class PushLabRequestsTask extends AbstractTask {
 
                         //Set the API media type in http content-type header
                         postRequest.addHeader("content-type", "application/json");
-                        postRequest.addHeader("apikey", API_KEY);
+                        if (LabOrderDataExchange.isChaiLabSystem()) {
+                            postRequest.addHeader("apikey", API_KEY);
+                        } else {
+                            postRequest.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + API_KEY);
+                            //postRequest.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + API_KEY);
+                        }
                         //Set the request post body
                         String payload = manifestOrder.getPayload();
                         StringEntity userEntity = new StringEntity(payload);
@@ -135,7 +143,7 @@ public class PushLabRequestsTask extends AbstractTask {
                             return;
                         }
 
-                        if (statusCode != 201 && statusCode != 422 && statusCode != 403) { // skip for status code 422: unprocessable entity, and status code 403 for forbidden response
+                        if (statusCode != 201 && statusCode != 200 && statusCode != 422 && statusCode != 403) { // skip for status code 422: unprocessable entity, and status code 403 for forbidden response
                             JSONParser parser = new JSONParser();
                             JSONObject responseObj = (JSONObject) parser.parse(EntityUtils.toString(response.getEntity()));
                             JSONObject errorObj = (JSONObject) responseObj.get("error");
@@ -143,11 +151,10 @@ public class PushLabRequestsTask extends AbstractTask {
                             System.out.println("There was an error sending lab id = " + manifestOrder.getId());
                             log.warn("There was an error sending lab id = " + manifestOrder.getId());
                             // throw new RuntimeException("Failed with HTTP error code : " + statusCode + ". Error msg: " + errorObj.get("message"));
-                        } else if (statusCode == 201) {
+                        } else if (statusCode == 201 || statusCode == 200) {
                             manifestOrder.setStatus("Sent");
                             log.info("Successfully pushed a VL lab test id " + manifestOrder.getId());
                         } else if (statusCode == 403 || statusCode == 422) {
-                            //manifestOrder.setStatus("Sent");
                             JSONParser parser = new JSONParser();
                             JSONObject responseObj = (JSONObject) parser.parse(EntityUtils.toString(response.getEntity()));
                             JSONObject errorObj = (JSONObject) responseObj.get("error");

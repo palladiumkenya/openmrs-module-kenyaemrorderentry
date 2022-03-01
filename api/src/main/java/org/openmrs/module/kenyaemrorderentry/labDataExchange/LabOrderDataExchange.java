@@ -1,7 +1,6 @@
 package org.openmrs.module.kenyaemrorderentry.labDataExchange;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -14,6 +13,7 @@ import org.apache.commons.logging.LogFactory;
 import org.openmrs.Concept;
 import org.openmrs.Encounter;
 import org.openmrs.EncounterType;
+import org.openmrs.GlobalProperty;
 import org.openmrs.Obs;
 import org.openmrs.Order;
 import org.openmrs.Patient;
@@ -50,6 +50,7 @@ public class LabOrderDataExchange {
     public static final String GP_MANIFEST_LAST_UPDATETIME = "kemrorder.manifest_last_update_time";
     public static final String MANIFEST_LAST_UPDATE_PATTERN = "yyyy-MM-dd HH:mm:ss";
     public static final String LAB_SYSTEM_DATE_PATTERN = "yyyy-MM-dd";
+    public static final String GP_LAB_SYSTEM_IN_USE = "kemrorder.labsystem_identifier";
 
     ConceptService conceptService = Context.getConceptService();
     EncounterService encounterService = Context.getEncounterService();
@@ -63,31 +64,6 @@ public class LabOrderDataExchange {
     Concept vlTestConceptQuantitative = conceptService.getConcept(856);
     EncounterType labEncounterType = encounterService.getEncounterTypeByUuid(LAB_ENCOUNTER_TYPE_UUID);
 
-    /**
-     * Returns a list of active lab requests
-     *
-     * @param gpLastOrderId
-     * @param lastId
-     * @return
-     */
-    public ObjectNode getLabRequests(Integer gpLastOrderId, Integer lastId) {
-
-        JsonNodeFactory factory = Utils.getJsonNodeFactory();
-        ArrayNode activeRequests = factory.arrayNode();
-        ObjectNode requestWrapper = factory.objectNode();
-        Set<Integer> allActiveVLOrders = getActiveViralLoadOrders();
-        Integer ordersFound = 0;
-        if (!allActiveVLOrders.isEmpty()) {
-            ordersFound = allActiveVLOrders.size();
-            for (Integer orderId : allActiveVLOrders) {
-                Order order = orderService.getOrder(orderId);
-                activeRequests = generateActiveVLPayload(order, activeRequests);
-            }
-        }
-        requestWrapper.put("samples", activeRequests);
-        return requestWrapper;
-
-    }
 
     /**
      * Returns an array of active lab request
@@ -162,7 +138,7 @@ public class LabOrderDataExchange {
      * @param dateSampleCollected
      *@param sampleType @return
      */
-    public ObjectNode generatePayloadForLabOrder(Order o, Date dateSampleCollected, String sampleType) {
+    public ObjectNode generatePayloadForLabOrder(Order o, Date dateSampleCollected, Date dateSampleSeparated, String sampleType, String manifestID) {
         Patient patient = o.getPatient();
         ObjectNode test = Utils.getJsonNodeFactory().objectNode();
 
@@ -203,12 +179,12 @@ public class LabOrderDataExchange {
         //add to list only if code is found. This is a temp measure to avoid sending messages with null regimen codes
         if (StringUtils.isNotBlank(nascopCode)) {
 
-            test.put("mflCode", Utils.getDefaultLocationMflCode(null));
+            test.put(isChaiLabSystem() ? "mflCode" : "mfl_code", Utils.getDefaultLocationMflCode(null));
             test.put("patient_identifier", cccNumber != null ? cccNumber.getIdentifier() : "");
             test.put("dob", dob);
             test.put("patient_name", fullName);
             test.put("sex", patient.getGender().equals("M") ? "1" : patient.getGender().equals("F") ? "2" : "3");
-            test.put("sampletype", StringUtils.isNotBlank(sampleType)? LabOrderDataExchange.getSampleTypeCode(sampleType) : "");
+            test.put("sampletype", StringUtils.isNotBlank(sampleType) && isChaiLabSystem() ? LabOrderDataExchange.getSampleTypeCode(sampleType) : StringUtils.isNotBlank(sampleType) && !isChaiLabSystem() ? sampleType : "");
             test.put("datecollected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
             test.put("order_no", o.getOrderId().toString());
             test.put("lab", "");
@@ -219,11 +195,33 @@ public class LabOrderDataExchange {
             }
             test.put("initiation_date", originalRegimenEncounter != null ? Utils.getSimpleDateFormat("yyyy-MM-dd").format(originalRegimenEncounter.getEncounterDatetime()) : "");
             test.put("dateinitiatedonregimen", currentRegimenEncounter != null ? Utils.getSimpleDateFormat("yyyy-MM-dd").format(currentRegimenEncounter.getEncounterDatetime()) : "");
+
+            if (!isChaiLabSystem()) { // if labware
+
+                if (patient.getGender().equals("F")) {
+                    test.put("female_status", "none");
+                }
+
+                test.put("lab", "7");
+                test.put("facility_email", "");
+                test.put("recency_id", "");
+                test.put("emr_shipment", StringUtils.isNotBlank(manifestID) ? manifestID : "");
+                test.put("date_separated", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleSeparated));
+
+            }
         }
         return test;
     }
 
 
+    public static boolean isChaiLabSystem() {
+        GlobalProperty gpLabSystemInUse = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LAB_SYSTEM_IN_USE);
+        if (gpLabSystemInUse == null) {
+            return false;
+        }
+        String labSystemName = gpLabSystemInUse.getPropertyValue();
+        return "CHAI".equalsIgnoreCase(labSystemName);
+    }
 
 
     /**
