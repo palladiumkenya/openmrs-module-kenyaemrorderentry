@@ -92,7 +92,7 @@ public class GeneralLabOrdersFragmentController {
         return object == null ? null : ConversionUtil.convertToRepresentation(object, Representation.FULL);
     }
 
-    public SimpleObject generateViralLoadPayload() {
+    /*public SimpleObject generateViralLoadPayload() {
 
         LabOrderDataExchange dataExchange = new LabOrderDataExchange();
         ObjectNode payload = dataExchange.getLabRequests(null, null);
@@ -119,7 +119,7 @@ public class GeneralLabOrdersFragmentController {
         kenyaemrOrdersService.saveLabManifestOrder(labOrder);
         SimpleObject simpleObject = SimpleObject.create("status", "successful");
         return simpleObject;
-    }
+    }*/
 
     /**
      * Fragment action method that adds viral load sample to a draft manifest
@@ -146,7 +146,7 @@ public class GeneralLabOrdersFragmentController {
             labOrder.setSampleSeparationDate(dateSampleSeparated);
 
             LabOrderDataExchange dataExchange = new LabOrderDataExchange();
-            ObjectNode payload = dataExchange.generatePayloadForLabOrder(order, dateSampleCollected, sampleType);
+            ObjectNode payload = dataExchange.generatePayloadForLabOrder(order, dateSampleCollected, dateSampleSeparated, sampleType, manifest.getIdentifier());
             // TODO: check if the payload is not null. Currently, an empty payload is generated if nascop code is null
             if (!payload.isEmpty()) {
                 labOrder.setPayload(payload.toString());
