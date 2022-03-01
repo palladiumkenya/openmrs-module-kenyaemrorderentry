@@ -80,6 +80,7 @@ public class LabManifestReport {
 
         //logoSection.add(logiImage);
 
+
         document.add(logiImage);
         // Create a PdfFont
         PdfFont font = PdfFontFactory.createFont(StandardFonts.TIMES_ROMAN);
@@ -91,6 +92,7 @@ public class LabManifestReport {
         document.add(new Paragraph("\n"));
         document.add(new Paragraph("MINISTRY OF HEALTH").setTextAlignment(TextAlignment.CENTER).setFontSize(12));
         document.add(new Paragraph("Viral Load Request Form").setTextAlignment(TextAlignment.CENTER).setBold().setFontSize(16));
+        document.add(new Paragraph("Manifest/Shipping ID: " + manifest.getIdentifier()).setTextAlignment(TextAlignment.LEFT).setBold().setFontSize(10).setFont(courier));
 
         Table manifestMetadata = new Table(4);
         manifestMetadata.setWidth(UnitValue.createPercentValue(100));
