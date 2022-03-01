@@ -251,4 +251,18 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="kenyaemr_order_entry_010" author="aojwang">
+
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="kenyaemr_order_entry_lab_manifest"/>
+        </preConditions>
+        <comment>
+            Adds a column to record a manifest/shipment identifier for ease of tracking at the lab
+        </comment>
+        <addColumn tableName="kenyaemr_order_entry_lab_manifest" >
+            <column name="identifier"
+                    type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

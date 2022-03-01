@@ -11,6 +11,7 @@ import java.util.UUID;
  */
 public class LabManifest extends BaseOpenmrsData implements Serializable {
     private Integer id;
+    private String identifier;
     private Date startDate;
     private Date endDate;
     private Date dispatchDate;
@@ -48,6 +49,14 @@ public class LabManifest extends BaseOpenmrsData implements Serializable {
     @Override
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
     }
 
     public Date getStartDate() {
