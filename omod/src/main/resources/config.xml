@@ -123,6 +123,14 @@
 		</description>
 	</globalProperty>
 
+	<globalProperty>
+		<property>kemrorder.labsystem_identifier</property>
+		<defaultValue></defaultValue>
+		<description>
+			The name of the lab system in use. Answers should be CHAI,LABWARE
+		</description>
+	</globalProperty>
+
 
 </module>
 
