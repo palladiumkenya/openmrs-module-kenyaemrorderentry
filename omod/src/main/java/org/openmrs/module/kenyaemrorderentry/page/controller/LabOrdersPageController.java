@@ -213,6 +213,10 @@ public class LabOrdersPageController {
                         concService.getConcept(1465),
                         concService.getConcept(162202) // GeneXpert MTB/RIF
                 ));
+        JSONArray urinePregnacyTest = buildTestPanelWithoutPanelConcept("Urine", labTestJsonPayload,
+                "PREGNANCY TEST", Arrays.asList(
+                        concService.getConcept(45) // Urine pregnancy test
+                ));
 
         model.put("labTestJsonPayload", labTestJsonPayload.toString());
 
