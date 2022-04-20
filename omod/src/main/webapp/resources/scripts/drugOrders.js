@@ -124,8 +124,8 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
             }).then(function (results) {
 
                 $scope.patientPastDrugOrders = OpenMRS.pastDrugOrdersPayload;
-                $scope.addQuantity = $scope.patientPastDrugOrders.pastOrder_groups;
-                $scope.addQuantity.sort(function(a, b) {
+                $scope.pastDrugOrderGroups = $scope.patientPastDrugOrders.pastOrder_groups;
+                $scope.pastDrugOrderGroups.sort(function(a, b) {
                     var key1 = a.date;
                     var key2 = b.date;
                     if (key1 > key2) {
@@ -196,7 +196,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
         }
 
         function prefillDrugComponentsWithPastValues(completedFields) {
-            var pastOrders = $scope.addQuantity[0].components;
+            var pastOrders = $scope.pastDrugOrderGroups[0].components;
             var reg = [];
             for (var i = 0; i < completedFields.length; ++i) {
                 var data = completedFields[i];
@@ -551,8 +551,10 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
         }
 
         $scope.getCurrentRegimen = function (res) {
-            if($scope.addQuantity && $scope.addQuantity[0] !== undefined) {
+            var isDrugComponentSizeEqual = pastDrugOrdersComponent($scope.pastDrugOrderGroups)
+            if($scope.pastDrugOrderGroups && $scope.pastDrugOrderGroups[0] !== undefined && isDrugComponentSizeEqual) {
                 $scope.components = prefillDrugComponentsWithPastValues(res.orderSetComponents);
+
             }else {
                 $scope.components = res.orderSetComponents
             }
@@ -688,6 +690,28 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
 
             return instructionDesc;
 
+        }
+
+        function pastDrugOrdersComponent (pastOrders) {
+            /* hack for migrated sites, some regimens ordered individually but 
+               still have order group id(not sure if order group ids were assigned for migration purposes), 
+               we cannot therefore rely on order group id in this case to distinguish between regimens ordered as a group and 
+               those not ordered as a group.
+            */
+            for (var i = 0; i < pastOrders.length; ++i) {
+                var firstComponentSize = pastOrders[0].components.length;
+                var secondComponentSize = pastOrders[1].components.length;
+                // If lengths of drug components are not equal and size is one, it means the drugs were not ordered has a group
+                if (firstComponentSize != secondComponentSize) {
+                    return false;
+
+                } else if(firstComponentSize == secondComponentSize && (firstComponentSize == 1 || secondComponentSize == 1)) {
+                    return false;
+
+                } else {
+                    return true;
+                }
+            }
         }
 
         function formatDisplayOfPastSingleDrugInstructions(res) {
