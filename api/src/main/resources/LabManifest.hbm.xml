@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd" >
+
+<hibernate-mapping package="org.openmrs.module.kenyaemrorderentry.manifest">
+
+    <class name="org.openmrs.module.kenyaemrorderentry.manifest.LabManifest"
+           table="kenyaemr_order_entry_lab_manifest">
+        <id name="id" type="int" column="id" unsaved-value="0">
+            <generator class="native" />
+        </id>
+        <discriminator column="id" insert="false" />
+        <property name="uuid" type="java.lang.String" column="uuid" length="38" unique="true" />
+        <property name="startDate" type="java.util.Date" column="start_date" length="19"/>
+        <property name="endDate" type="java.util.Date" column="end_date" length="19"/>
+        <property name="dispatchDate" type ="java.util.Date" column ="dispatch_date" length="19"/>
+        <property name="courier" type="java.lang.String" column="courier" length="255"/>
+        <property name="courierOfficer" type="java.lang.String" column="courier_officer" length="255"/>
+        <property name="status" type="java.lang.String" column="status" length="255"/>
+
+        <property name="county" type="java.lang.String" column="facility_county" length="255"/>
+        <property name="subCounty" type="java.lang.String" column="facility_sub_county" length="255"/>
+        <property name="facilityEmail" type="java.lang.String" column="facility_email" length="255"/>
+        <property name="facilityPhoneContact" type="java.lang.String" column="facility_phone_contact" length="255"/>
+        <property name="clinicianName" type="java.lang.String" column="clinician_name" length="255"/>
+        <property name="clinicianPhoneContact" type="java.lang.String" column="clinician_phone_contact" length="255"/>
+        <property name="labPocPhoneNumber" type="java.lang.String" column="lab_poc_phone_number" length="255"/>
+
+        <!-- bi-directional many-to-one association to User -->
+        <many-to-one name="creator" class="org.openmrs.User" not-null="true">
+        <column name="creator" />
+        </many-to-one>
+        <property name="dateCreated" type="java.util.Date" column="date_created" length="19"/>
+        <property name="dateChanged" type="java.util.Date" column="date_changed" length="19"/>
+        <many-to-one name="changedBy" class="org.openmrs.User" column="changed_by"/>
+        <property name="voided" type="java.lang.Boolean" column="voided" length="1"/>
+        <many-to-one name="voidedBy" class="org.openmrs.User" column="voided_by"/>
+        <property name="dateVoided" type ="java.util.Date" column ="date_voided" length="19"/>
+        <property name="voidReason" type="java.lang.String" column="voided_reason" length="255"/>
+
+    </class>
+
+</hibernate-mapping>

@@ -6,8 +6,12 @@
 
 %>
 <script type="text/javascript">
-    var patient = OpenMRS.drugOrdersConfig.patient.uuid;
-    var provider = OpenMRS.drugOrdersConfig.provider.uuid;
+    var patient = "";
+    var provider = "";
+    if(OpenMRS.drugOrdersConfig && OpenMRS.drugOrdersConfig !==undefined) {
+        patient=OpenMRS.drugOrdersConfig.patient.uuid;
+        provider = OpenMRS.drugOrdersConfig.provider.uuid;
+    }
 
     jq(document).ready(function () {
         jq(document).on("click", ".edit-order", function () {
@@ -125,7 +129,7 @@
 
         <div ng-show="regimenNames.length > 0" style="border-style:groove; border-width:2px;border-color:gray;padding:10px;">
             <div style="font-size: 16px">
-                <b>Program:</b>{{programName}} | <b>Regimen Line:</b>{{regimenLines}} | <b>Regimen:</b>{{regimenNames}}
+                <b>Program:</b>{{programName}} | <b>Regimen Line:</b>{{regimenLine}} | <b>Regimen:</b>{{regimenNames}}
             </div>
 
         </div>
@@ -175,6 +179,20 @@
 
                     </tr>
                 </table>
+            </div>
+
+            <div ng-if="components.length >0" style="padding-top: 10px">
+                <span>
+                    Duration: <input ng-model="drugDuration" size="5" id="drugDuration">
+                </span>
+                <span>
+                    Units: <select ng-model="drugDurationUnit" id="duration_units">
+                    <option value=""></option>
+                    <option ng-repeat="unit in customDurationUnits" ng-selected="drugDurationUnit==unit.uuid"
+                            value="{{unit.uuid}}">{{unit.name}}</option>
+                </select>
+                </span>
+
             </div>
 
             <div style="margin-top:5px;"><textarea ng-model="regimenDosingInstructions" rows="2" cols="80"

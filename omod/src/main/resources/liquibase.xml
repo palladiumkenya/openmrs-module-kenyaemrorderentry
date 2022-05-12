@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <!--  LAB ORDER MANIFEST TABLE DESIGN -->
+
+    <changeSet id="kenyaemr_order_entry_001" author="schege">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="kenyaemr_order_entry_lab_manifest"/>
+            </not>
+        </preConditions>
+        <comment>
+            Create table to store Lab order manifests
+        </comment>
+        <createTable tableName="kenyaemr_order_entry_lab_manifest">
+            <column name="id" autoIncrement="true" type="int">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="start_date" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="end_date" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="dispatch_date" type="datetime">
+                <constraints nullable="true"/>
+            </column>
+            <column name="courier" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="courier_officer" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="status" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="facility_county" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="facility_sub_county" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="facility_email" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="facility_phone_contact" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="clinician_name" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="clinician_phone_contact" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="lab_poc_phone_number" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="creator" type="int"/>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int"/>
+            <column name="date_changed" type="datetime"/>
+            <column defaultValueBoolean="false" name="voided" type="boolean">
+                <constraints nullable="true"/>
+            </column>
+            <column name="voided_by" type="int"/>
+            <column name="date_voided" type="datetime"/>
+            <column name="voided_reason" type="varchar(255)"/>
+            <column name="uuid" type="char(38)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="kenyaemr_order_entry_002" author="schege">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="kenyaemr_order_entry_lab_manifest_order"/>
+            </not>
+        </preConditions>
+        <comment>
+            Create table to store Lab manifest order
+        </comment>
+        <createTable tableName="kenyaemr_order_entry_lab_manifest_order">
+            <column name="id" autoIncrement="true" type="int">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="manifest_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="order_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sample_type" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="payload" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_sent" type="datetime">
+                <constraints nullable="true"/>
+            </column>
+            <column name="status" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="result" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="result_date" type="date">
+                <constraints nullable="true"/>
+            </column>
+            <column name="sample_collection_date" type="date">
+                <constraints nullable="true"/>
+            </column>
+            <column name="sample_separation_date" type="date">
+                <constraints nullable="true"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueBoolean="false" name="voided" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_voided" type="datetime"/>
+            <column name="voided_reason" type="varchar(255)"/>
+            <column name="uuid" type="char(38)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="kenyaemr_order_entry_lab_manifest_order" baseColumnNames="manifest_id"
+                                 constraintName="manifest_reference"
+                                 referencedTableName="kenyaemr_order_entry_lab_manifest"
+                                 referencedColumnNames="id"
+                                 deferrable="false" initiallyDeferred="false"/>
+
+        <addForeignKeyConstraint baseTableName="kenyaemr_order_entry_lab_manifest_order" baseColumnNames="order_id"
+                                 constraintName="manifest_order_reference"
+                                 referencedTableName="orders" referencedColumnNames="order_id"
+                                 deferrable="false" initiallyDeferred="false"/>
+    </changeSet>
+
+    <!--Adding scheduled task to process lab requests to the lab system-->
+    <changeSet id="kenyaemr_order_entry_003" author="aojwang">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM scheduler_task_config
+                WHERE schedulable_class = 'org.openmrs.module.kenyaemrorderentry.task.PushLabRequestsTask'
+                And name = 'Push Lab Requests to Lab'
+            </sqlCheck>
+        </preConditions>
+        <comment>Inserting processor for lab requests into 'schedule_task_config' table</comment>
+        <insert tableName="scheduler_task_config">
+            <column name="name" value="Push Lab Requests to Lab" />
+            <column name="description" value="Push lab requests to CHAI lab system" />
+            <column name="schedulable_class" value="org.openmrs.module.kenyaemrorderentry.task.PushLabRequestsTask" />
+            <column name="start_time_pattern" value="MM/dd/yyyy HH:mm:ss" />
+            <column name="start_time" valueDate="2020-04-01T23:59:59" />
+            <column name="repeat_interval" value="1800" />
+            <column name="date_created" valueDate="CURRENT_TIMESTAMP" />
+            <column name="created_by" value="1" />
+            <column name="start_on_startup" value="1" />
+            <column name="started" value="1" />
+            <column name="uuid" value="67b980ec-dbf3-4662-95da-d9dba9d356d2" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="kenyaemr_order_entry_004" author="aojwang">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM scheduler_task_config
+                WHERE schedulable_class = 'org.openmrs.module.kenyaemrorderentry.task.PullViralLoadLabResultsTask'
+                And name = 'Pull Viral Load results'
+            </sqlCheck>
+        </preConditions>
+        <comment>Inserting processor for lab requests into 'schedule_task_config' table</comment>
+        <insert tableName="scheduler_task_config">
+            <column name="name" value="Pull Viral Load results" />
+            <column name="description" value="Pull viral load lab results from CHAI lab system" />
+            <column name="schedulable_class" value="org.openmrs.module.kenyaemrorderentry.task.PullViralLoadLabResultsTask" />
+            <column name="start_time_pattern" value="MM/dd/yyyy HH:mm:ss" />
+            <column name="start_time" valueDate="2020-04-01T23:59:59" />
+            <column name="repeat_interval" value="1800" />
+            <column name="date_created" valueDate="CURRENT_TIMESTAMP" />
+            <column name="created_by" value="1" />
+            <column name="start_on_startup" value="1" />
+            <column name="started" value="1" />
+            <column name="uuid" value="a78ff983-defc-4b90-a8bf-7f7e6b16f5b1" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="kenyaemr_order_entry_005" author="aojwang">
+
+        <preConditions onFail="MARK_RAN">
+                <tableExists tableName="kenyaemr_order_entry_lab_manifest_order"/>
+        </preConditions>
+        <comment>
+            Adds a column to store the last time the system checked results for a particular order from the lab system
+        </comment>
+        <addColumn tableName="kenyaemr_order_entry_lab_manifest_order" >
+            <column name="last_status_check_date"
+                    type="datetime"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="aojwang" id="kenyaemr_order_entry_006">
+        <createIndex indexName="index_manifest_status" tableName="kenyaemr_order_entry_lab_manifest">
+            <column name="status"/>
+            <column name="voided"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet author="aojwang" id="kenyaemr_order_entry_007">
+        <createIndex indexName="index_manifest_order_status" tableName="kenyaemr_order_entry_lab_manifest_order">
+            <column name="status"/>
+            <column name="voided"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="kenyaemr_order_entry_008" author="aojwang">
+
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="kenyaemr_order_entry_lab_manifest_order"/>
+        </preConditions>
+        <comment>
+            Adds a column to record date when a sample was received at the testing lab
+        </comment>
+        <addColumn tableName="kenyaemr_order_entry_lab_manifest_order" >
+            <column name="date_sample_received"
+                    type="date"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="kenyaemr_order_entry_009" author="aojwang">
+
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="kenyaemr_order_entry_lab_manifest_order"/>
+        </preConditions>
+        <comment>
+            Adds a column to record date when a sample was tested at the testing lab and results made available
+        </comment>
+        <addColumn tableName="kenyaemr_order_entry_lab_manifest_order" >
+            <column name="date_sample_tested"
+                    type="date"/>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>

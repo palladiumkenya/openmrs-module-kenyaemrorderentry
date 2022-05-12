@@ -9,4 +9,9 @@
         <property name="moduleId" value="kenyaemrorderentry"/>
     </bean>
 
+    <bean class="org.openmrs.module.kenyaemrorderentry.converter.IntegerToLabManifestConverter"/>
+    <bean class="org.openmrs.module.kenyaemrorderentry.converter.IntegerToLabManifestOrderConverter"/>
+    <bean class="org.openmrs.module.kenyaemrorderentry.converter.StringToLabManifestConverter"/>
+    <bean class="org.openmrs.module.kenyaemrorderentry.converter.StringToLabManifestOrderConverter"/>
+
 </beans>

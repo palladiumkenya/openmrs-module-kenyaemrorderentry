@@ -98,6 +98,37 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                     }
                 });
 
+                $scope.heiPCRTestOrderReasons = [
+                    {
+                        name:'Initial PCR (6week or first contact)',
+                        uuid:'1040AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+                    },
+                    {
+                        name:'2nd PCR (6 months)',
+                        uuid:'1326AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+                    },
+                    {
+                        name:'3rd PCR (12months)',
+                        uuid:'164860AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+                    },
+                    {
+                        name:'Confirmatory PCR and Baseline VL',
+                        uuid:'162082AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+                    }
+
+                ];
+                $scope.heiAbTestOrderReasons = [
+                    {
+                        name:'Ab test 6 weeks after cessation of breastfeeding',
+                        uuid:'164460AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+                    },
+                    {
+                        name:'Ab test at 18 months (1.5 years)',
+                        uuid:'164860AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+                    }
+
+                ];
+
                 $scope.labOrders = labs;
                 $scope.OrderReason = [
                     {
@@ -127,15 +158,20 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                     {
                         name:'Routine',
                         uuid:'161236AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+                    },
+                    {
+                        name: 'Confirmation of persistent low level Viremia (PLLV)',
+                        uuid: '160032AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
                     }
                 ];
                 $scope.OrderReason =  _.filter($scope.OrderReason, function(o) {
                     if(config.patient.person.gender !== 'F') {
-                        return o.uuid !== '1434AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
+                        return o.uuid !== '1434AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' && o.uuid !== '159882AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
                     } else {
                         return o;
                     }
                 });
+
 
 
             });
@@ -228,7 +264,28 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                         if (data.orderReasonCoded === '161236AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' ) {
                             data['orderReasonCoded'] = "Routine";
                         }
+                        if (data.orderReasonCoded === '160032AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                            data['orderReasonCoded'] = "Confirmation of persistent low level Viremia (PLLV)";
+                        }
 
+                        if (data.orderReasonCoded === '1040AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                            data['orderReasonCoded'] = "Initial PCR (6week or first contact)";
+                        }
+                        if (data.orderReasonCoded === '1326AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                            data['orderReasonCoded'] = "2nd PCR (6 months)";
+                        }
+                        if (data.orderReasonCoded === '164860AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                            data['orderReasonCoded'] = "3rd PCR (12months)";
+                        }
+                        if (data.orderReasonCoded === '162082AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                            data['orderReasonCoded'] = "Confirmatory PCR and Baseline VL";
+                        }
+                        if (data.orderReasonCoded === '164460AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                            data['orderReasonCoded'] = "Ab test 6 weeks after cessation of breastfeeding";
+                        }
+                        if (data.orderReasonCoded === '164860AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                            data['orderReasonCoded'] = "Ab test at 18 months (1.5 years)";
+                        }
 
                     }
 
@@ -292,6 +349,28 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                             }
                             if (data.orderReason.uuid === '161236AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
                                 data['orderReasonCoded'] = "Routine";
+                            }
+
+                            if (data.orderReason.uuid === '160032AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                                data['orderReasonCoded'] = "Confirmation of persistent low level Viremia (PLLV)";
+                            }
+                            if (data.orderReason.uuid === '1040AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                                data['orderReasonCoded'] = "Initial PCR (6week or first contact)";
+                            }
+                            if (data.orderReason.uuid === '1326AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                                data['orderReasonCoded'] = "2nd PCR (6 months)";
+                            }
+                            if (data.orderReason.uuid === '164860AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                                data['orderReasonCoded'] = "3rd PCR (12months)";
+                            }
+                            if (data.orderReason.uuid === '162082AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                                data['orderReasonCoded'] = "Confirmatory PCR and Baseline VL";
+                            }
+                            if (data.orderReason.uuid === '164460AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                                data['orderReasonCoded'] = "Ab test 6 weeks after cessation of breastfeeding";
+                            }
+                            if (data.orderReason.uuid === '164860AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                                data['orderReasonCoded'] = "Ab test at 18 months (1.5 years)";
                             }
                         }
 
@@ -409,7 +488,6 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
         var pastOrders = OpenMRS.pastLabOrdersResults;
 
 
-        // labObsResults
         $scope.init = function() {
             $scope.routes = config.routes;
             $scope.careSettings = config.careSettings;
@@ -520,6 +598,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
             if(tests.selected === true) {
                 checkIfSelectedTestIsActiveOrder(tests);
+                customizeOrderReasonsToDisplay(tests);
                 $scope.selectedOrders.push(tests);
                 $scope.filteredOrders = _.uniq($scope.selectedOrders);
                 $scope.filteredOrders = addDefaultDateAndUrgency($scope.filteredOrders);
@@ -550,6 +629,18 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
 
         }
+
+        function customizeOrderReasonsToDisplay(test) {
+            // Antibody test
+            if (test.concept === '163722AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'&& config.patient.person.age <= 5) {
+                $scope.OrderReason = $scope.heiAbTestOrderReasons;
+            }
+            // PCR test
+            if (test.concept === '1030AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'&& config.patient.person.age <= 5) {
+                $scope.OrderReason = $scope.heiPCRTestOrderReasons;
+            }
+        }
+        
         function addDefaultDateAndUrgency(res) {
             var today = new Date();
             var dd = today.getDate();
@@ -675,54 +766,97 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             var newOrders = _.filter($scope.lOrdersPayload, function(o) {
                 return !o.dateActivated;
             });
-            _.each($scope.lOrdersPayload, function(o) {
 
-                if (o.dateActivated) {
-                    var encounterContextOldOrders = {};
-                    $scope.oldOrdrs = [];
-                    for (var property in o) {
-                        if (o.hasOwnProperty(property)) {
-                            if(property ==='dateActivated') {
-                                encounterContextOldOrders = {
-                                    patient: config.patient,
-                                    encounterType: uuid,
-                                    location: null, // TODO
-                                    encounterDatetime: o.dateActivated,
-                                    encounterRole: config.encounterRole
-                                };
-                                $scope.oldOrdrs.push(o);
-                                OrderEntryService.signAndSave({ draftOrders: $scope.oldOrdrs }, encounterContextOldOrders)
-                                    .$promise.then(function(result) {
-                                    $('#spinner').modal('hide');
-                                    loadExistingOrders();
-                                    $window.location.reload();
-                                    location.href = location.href;
-                                }, function(errorResponse) {
-                                    $('#spinner').modal('hide');
-                                    emr.errorMessage(errorResponse.data.error.message);
-                                    $scope.loading = false;
-                                });
+            $scope.groupedVlOrders = _.filter($scope.lOrdersPayload, function(o) {
+                return o.concept ==="856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" || o.concept ==="1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+            });
+
+            $scope.otherOrdersExcludingVL = removeHivVl($scope.lOrdersPayload);
+            $scope.otherOrdersNotVL = removeHivLdl($scope.otherOrdersExcludingVL);
+
+            if(!_.isEmpty($scope.groupedVlOrders)) {
+                $scope.loading = true;
+                for (var i = 0; i < $scope.groupedVlOrders.length; ++i) {
+                    $scope.encounterDatetime = $scope.groupedVlOrders[i].dateActivated;
+                }
+                var encounterContextForVL = {
+                    patient: config.patient,
+                    encounterType: uuid,
+                    encounterDatetime:  $scope.encounterDatetime,
+                    encounterRole: config.encounterRole
+                };
+                OrderEntryService.signAndSave({ draftOrders: $scope.groupedVlOrders }, encounterContextForVL)
+                    .$promise.then(function(result) {
+                    $('#spinner').modal('hide');
+                    loadExistingOrders();
+                    $window.location.reload();
+                    location.href = location.href;
+                }, function(errorResponse) {
+                    $('#spinner').modal('hide');
+                    emr.errorMessage(errorResponse.data.error.message);
+                    $scope.loading = false;
+                });
+
+            }
+
+
+            if(!_.isEmpty($scope.otherOrdersNotVL)) {
+                $scope.loading = true;
+                _.each($scope.otherOrdersNotVL, function(o) {
+
+                    if (o.dateActivated) {
+                        var encounterContextOldOrders = {};
+                        $scope.oldOrdrs = [];
+                        for (var property in o) {
+                            if (o.hasOwnProperty(property)) {
+                                if(property ==='dateActivated') {
+                                    encounterContextOldOrders = {
+                                        patient: config.patient,
+                                        encounterType: uuid,
+                                        location: null, // TODO
+                                        encounterDatetime: o.dateActivated,
+                                        encounterRole: config.encounterRole
+                                    };
+                                    $scope.oldOrdrs.push(o);
+                                    OrderEntryService.signAndSave({ draftOrders: $scope.oldOrdrs }, encounterContextOldOrders)
+                                        .$promise.then(function(result) {
+                                        $('#spinner').modal('hide');
+                                        loadExistingOrders();
+                                        $window.location.reload();
+                                        location.href = location.href;
+                                    }, function(errorResponse) {
+                                        $('#spinner').modal('hide');
+                                        emr.errorMessage(errorResponse.data.error.message);
+                                        $scope.loading = false;
+                                    });
+                                }
+
                             }
-
                         }
+
                     }
 
-                }
+                });
 
-            });
+            }
 
-            $scope.loading = true;
-            OrderEntryService.signAndSave({ draftOrders: newOrders }, encounterContext)
-                .$promise.then(function(result) {
-                $('#spinner').modal('hide');
-                loadExistingOrders();
-                $window.location.reload();
-                location.href = location.href;
-            }, function(errorResponse) {
-                $('#spinner').modal('hide');
-                emr.errorMessage(errorResponse.data.error.message);
-                $scope.loading = false;
-            });
+
+            if(!_.isEmpty(newOrders)) {
+                $scope.loading = true;
+                OrderEntryService.signAndSave({ draftOrders: newOrders }, encounterContext)
+                    .$promise.then(function(result) {
+                    $('#spinner').modal('hide');
+                    loadExistingOrders();
+                    $window.location.reload();
+                    location.href = location.href;
+                }, function(errorResponse) {
+                    $('#spinner').modal('hide');
+                    emr.errorMessage(errorResponse.data.error.message);
+                    $scope.loading = false;
+                });
+
+            }
+
         }
 
 
@@ -818,7 +952,6 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 encounterType: uuid,
                 location: null, // TODO
                 encounterDatetime: obsDate,
-                //encounterDatetime: "2018-09-20",
                 encounterRole: config.encounterRole
             };
             var newObs = _.filter($scope.obsPayload, function(o) {
@@ -835,8 +968,6 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                     for (var property in o) {
                         if (o.hasOwnProperty(property)) {
                             if(property ==='obsDatetime') {
-
-// an obs
                                 $scope.oldObResults.push(o);
                                 _.each($scope.oldObResults, function(r) {
                                     encounterContextOldOrders = {
@@ -850,7 +981,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                                     OrderEntryService.signAndSave({ draftOrders: [] }, encounterContextOldOrders,$scope.obs)
                                         .$promise.then(function(result) {
                                         if($scope.OrderUuid) {
-                                            $scope.voidActiveLabOrders();
+                                           $scope.voidSelectedOrders();
                                         }
 
                                         $scope.discontinueOrdersRetrospectively = _.filter($scope.discontinueOrdersRetrospectively, function(o) {
@@ -862,7 +993,6 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                                         discontinueLabOrdersRetrospectivelyAndPoc($scope.discontinueOrdersRetrospectively);
                                         $('#spinner').modal('hide');
 
-                                         $window.location.reload();
                                          location.href = location.href;
                                     }, function(errorResponse) {
                                         $('#spinner').modal('hide');
@@ -893,7 +1023,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 OrderEntryService.signAndSave({ draftOrders: [] }, encounterContext, newObs)
                     .$promise.then(function(result) {
                     if($scope.OrderUuid) {
-                        $scope.voidActiveLabOrders();
+                        $scope.voidSelectedOrders();
                     }
 
                     $scope.discontinueFilledOrders = _.filter($scope.discontinueFilledOrders, function(o) {
@@ -904,8 +1034,6 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                     $scope.discontinueOrdersRetrospectively = checkForDateActivated($scope.discontinueOrdersRetrospectively);
                     discontinueLabOrdersRetrospectivelyAndPoc($scope.discontinueOrdersRetrospectively);
                     $('#spinner').modal('hide');
-
-
                       location.href = location.href;
                 }, function(errorResponse) {
                     emr.errorMessage(errorResponse.data.error.message);
@@ -932,7 +1060,17 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
         };
 
          function cancelOrder () {
-            for (var i = 0; i < $scope.activeTestOrdersForHvVl.length; ++i) {
+             var reasonForVoidingOrder = document.getElementById("ddlvoidReason");
+             $scope.voidOrderReason = reasonForVoidingOrder.options[reasonForVoidingOrder.selectedIndex].value;
+
+             if ($scope.voidOrderReason === '' || $scope.voidOrderReason === null ||
+                 $scope.voidOrderReason === undefined) {
+                 $scope.showErrorToast = 'Void reason is required';
+                 $('#orderError').modal('show');
+                 return;
+             }
+
+             for (var i = 0; i < $scope.activeTestOrdersForHvVl.length; ++i) {
                 var data = $scope.activeTestOrdersForHvVl[i];
 
                 for (var r in data) {
@@ -945,14 +1083,14 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
                 }
 
-            }
+             }
             var voidOrderPayload ={
                 voided: true,
-                voidReason: $scope.voidOrders
+                voidReason: $scope.voidOrderReason
             };
 
             $scope.loading = true;
-            OrderEntryService.saveVoidedOrders(voidOrderPayload, $scope.OrderUuidHvl)
+            OrderEntryService.saveVoidedOrders(voidOrderPayload, $scope.OrderUuidHvl,$scope.voidOrderReason)
                 .then(function(result) {
                  location.href = location.href;
             }, function(errorResponse) {
@@ -1052,7 +1190,6 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                         data['action'] = "DISCONTINUE";
                         data['careSetting'] = $scope.careSetting.uuid;
                         data['orderReasonNonCoded'] = "";
-                       // data['dateActivated'] = "2020-07-05";
                     }
 
                 }
@@ -1123,7 +1260,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
         $scope.reviseOrder = function(activeOrder) {
             $scope.newDraftDrugOrder = activeOrder.createRevisionOrder();
         };
-        $scope.voidOrders = '';
+        $scope.voidOrderReason = '';
         $scope.OrderUuid = '';
         $scope.getOrderUuid = function(order) {
             $scope.OrderUuid = order.uuid;
@@ -1140,12 +1277,21 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
 
         $scope.voidActiveLabOrders = function() {
+            var reasonForVoidingOrder = document.getElementById("ddlvoidReason");
+            $scope.voidOrderReason = reasonForVoidingOrder.options[reasonForVoidingOrder.selectedIndex].value;
+            if ($scope.voidOrderReason === '' || $scope.voidOrderReason === null ||
+                $scope.voidOrderReason === undefined) {
+                $scope.showErrorToast = 'Void reason is required';
+                $('#orderError').modal('show');
+                return;
+            }
+
             var voidOrderPayload ={
                 voided: true,
-                voidReason: $scope.voidOrders
+                voidReason: $scope.voidOrderReason
             };
             $scope.loading = true;
-            OrderEntryService.saveVoidedOrders(voidOrderPayload, $scope.OrderUuid)
+            OrderEntryService.saveVoidedOrders(voidOrderPayload, $scope.OrderUuid,$scope.voidOrderReason)
                 .then(function(result) {
 
                 $('#voidOrdersModal').modal('hide');
@@ -1161,7 +1307,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
         };
 
         $scope.closeModal = function() {
-            $scope.voidOrders = '';
+            $scope.voidOrderReason = '';
 
             $('#orderUrgency').modal('hide');
             $('#generalMessage').modal('hide');
@@ -1193,7 +1339,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 return;
             }
             if($scope.GivenDate < $scope.resultDateSelected){
-                $scope.showErrorToast = 'Result date can not be before the order date.';
+                $scope.showErrorToast = 'Result date cannot be before the order date.';
 
                 $('#orderError').modal('show');
                 return;
@@ -1313,12 +1459,24 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             }
 
         }
-        function fetchConceptAnswers(res) {
+        function fetchConceptAnswers(conceptUuid) {
             $scope.answers = [];
-                OrderEntryService.getConceptAnswers(res)
+                OrderEntryService.getConceptAnswers(conceptUuid)
                     .then(function(posts) {
-                        $scope.answers = posts.answers;
+                        if (conceptUuid === '1029AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                            $scope.answers = [{
+                                display:'NEGATIVE',
+                                uuid:'664AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+                            }, {
+                                display:'POSITIVE',
+                                uuid:'703AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+                            }]
+                        } else {
+                            $scope.answers = posts.answers;
+
+                        }
                     });
+
 
         }
 
@@ -1345,6 +1503,28 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             }
             $scope.ldlValue ='ldl';
         }
+
+
+        $scope.voidSelectedOrders = function() {
+            var voidOrderPayload ={
+                voided: true,
+                voidReason: $scope.voidOrderReason
+            };
+            $scope.loading = true;
+            OrderEntryService.purgOrders(voidOrderPayload, $scope.OrderUuid)
+                .then(function(result) {
+
+                    $('#voidOrdersModal').modal('hide');
+
+                    location.href = location.href;
+                }, function(errorResponse) {
+                    $('#voidOrdersModal').modal('hide');
+                    location.href = location.href;
+                    emr.errorMessage(errorResponse.data.error.message);
+                    $scope.loading = false;
+                });
+
+        };
 
         $scope.updateLabResults = function() {
             if($scope.valueNumericResults) {
@@ -1682,8 +1862,6 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                                     .$promise.then(function(result) {
                                     $('#spinner').modal('hide');
                                     loadExistingOrders();
-                                    $window.location.reload();
-                                    location.href = location.href;
                                 }, function(errorResponse) {
                                     $('#spinner').modal('hide');
                                     emr.errorMessage(errorResponse.data.error.message);

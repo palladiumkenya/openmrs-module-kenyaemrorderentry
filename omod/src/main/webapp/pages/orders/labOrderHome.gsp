@@ -1,6 +1,5 @@
 <%
 	ui.decorateWith("kenyaemr", "standardPage", [ layout: "sidebar" ])
-
 %>
 
 <div class="ke-page-sidebar">
@@ -12,7 +11,7 @@
 </div>
 
 <script type="text/javascript">
-	jQuery(function() {
-		jQuery('input[name="query"]').focus();
-	});
+    jQuery(function() {
+        jQuery('input[name="query"]').focus();
+    });
 </script>

@@ -56,7 +56,21 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
         });
 
         // TODO changing dosingType of a draft order should reset defaults (and discard non-defaulted properties)
-          var programRegimens = OpenMRS.kenyaemrRegimenJsonPayload;
+          var programRegimens = "";
+          $scope.regimenLine = "";
+          $scope.patientNotOnRegimen = true;
+
+        if( OpenMRS.kenyaemrRegimenJsonPayload && OpenMRS.kenyaemrRegimenJsonPayload !== undefined) {
+            $scope.patientNotOnRegimen = false;
+            programRegimens = OpenMRS.kenyaemrRegimenJsonPayload;
+            $scope.regimenLine = programRegimens[0].regimenLine !== null || programRegimens[0].regimenLine !=="" ? programRegimens[0].regimenLine : "";
+
+          }
+
+        $scope.customDurationUnits = "";
+        if( OpenMRS.durationUnitsPayload && OpenMRS.durationUnitsPayload !== undefined) {
+            $scope.customDurationUnits = OpenMRS.durationUnitsPayload.durationUnitsResponse;
+        }
         $scope.showRegimenPanel = false;
 
         function loadExistingOrders() {
@@ -92,6 +106,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                 $scope.regimenStatus = "absent";
                 if ($scope.patientRegimens.length == 0) {
                     $scope.showRegimenPanel = false;
+
                 }
                 if ($scope.patientActiveDrugOrders.order_groups.length > 0) {
                     $scope.disableButton = true
@@ -109,8 +124,8 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
             }).then(function (results) {
 
                 $scope.patientPastDrugOrders = OpenMRS.pastDrugOrdersPayload;
-                $scope.addQuantity = $scope.patientPastDrugOrders.pastOrder_groups;
-                $scope.addQuantity.sort(function(a, b) {
+                $scope.pastDrugOrderGroups = $scope.patientPastDrugOrders.pastOrder_groups;
+                $scope.pastDrugOrderGroups.sort(function(a, b) {
                     var key1 = a.date;
                     var key2 = b.date;
                     if (key1 > key2) {
@@ -181,7 +196,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
         }
 
         function prefillDrugComponentsWithPastValues(completedFields) {
-            var pastOrders = $scope.addQuantity[0].components;
+            var pastOrders = $scope.pastDrugOrderGroups[0].components;
             var reg = [];
             for (var i = 0; i < completedFields.length; ++i) {
                 var data = completedFields[i];
@@ -190,11 +205,13 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                         for (var r in data) {
                             if (data.hasOwnProperty(r)) {
                                 if(pastOrders[t].name === data.name ) {
+                                    $scope.quantity_units = pastOrders[t].quantity_units;
+                                    $scope.quantity = pastOrders[t].quantity;
+                                    $scope.frequency = pastOrders[t].frequency;
 
-
-                                    data['quantity_units'] = pastOrders[t].quantity_units;
-                                    data['quantity'] = pastOrders[t].quantity;
-                                    data['frequency'] = pastOrders[t].frequency;
+                                 //   data['quantity_units'] = pastOrders[t].quantity_units;
+                                 //   data['quantity'] = pastOrders[t].quantity;
+                                 //   data['frequency'] = pastOrders[t].frequency;
                                     data['units_uuid'] = pastOrders[t].units_uuid;
                                     data['dose'] = pastOrders[t].dose;
                                     data['name'] = pastOrders[t].name;
@@ -237,14 +254,18 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
         $scope.showStandardRegimenTab = true;
 
 
-        var config = OpenMRS.drugOrdersConfig;
+        var config = "";
+
+        if( OpenMRS.drugOrdersConfig && OpenMRS.drugOrdersConfig !== undefined) {
+            config = OpenMRS.drugOrdersConfig;
+        }
         $scope.init = function () {
-            $scope.routes = config.routes;
-            $scope.doseUnits = config.doseUnits;
-            $scope.durationUnits = config.durationUnits;
-            $scope.quantityUnits = config.quantityUnits;
-            $scope.frequencies = config.frequencies;
-            $scope.careSettings = config.careSettings;
+            $scope.routes = config.routes !== undefined ? config.routes : "";
+            $scope.doseUnits = config.doseUnits !== undefined ? config.doseUnits : "";
+            $scope.durationUnits = config.durationUnits !== undefined ? config.durationUnits : "";
+            $scope.quantityUnits = config.quantityUnits !== undefined ? config.quantityUnits : "";
+            $scope.frequencies = config.frequencies !== undefined ? config.frequencies : "";
+            $scope.careSettings = config && config.careSettings && config !== "" && config.careSettings !=="" && config.careSettings !== undefined ? config.careSettings : "";
             $scope.careSetting = config.intialCareSetting ?
                 _.findWhere(config.careSettings, {uuid: config.intialCareSetting}) :
                 config.careSettings[0];
@@ -327,9 +348,10 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
         }
 
         $scope.signAndSaveDraftDrugOrders = function () {
+            var uuid = {uuid:"7df67b83-1b84-4fe2-b1b7-794b4e9bfcc3"};
             var encounterContext = {
                 patient: config.patient,
-                encounterType: config.drugOrderEncounterType,
+                encounterType: uuid,
                 location: null, // TODO
                 encounterRole: config.encounterRole
             };
@@ -376,10 +398,17 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
         $scope.activeRegimens = [];
         $scope.components = [];
         $scope.components.quantity = [];
+        $scope.drugDurationUnit= "";
+
         $scope.setProgramRegimens = function (regimens) {
             $scope.activeRegimens = [];
             $scope.oldComponents = [];
             $scope.regimenDosingInstructions = "";
+            $scope.quantity_units = "";
+            $scope.quantity = "";
+            $scope.frequency = "";
+            $scope.drugDuration = "";
+
             $scope.activeRegimens = regimens;
         }
         $scope.setRegimenMembers = function (regimen) {
@@ -396,6 +425,23 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
         window.orderSetSelected = {};
         window.regimenDosingInstructions = null;
         $scope.saveOrderSet = function (orderset) {
+            $scope.drugDuration = angular.element('#drugDuration').val();
+            $scope.drugDurationUnit = angular.element('#duration_units').val();
+            var orderSetComponents = [];
+
+            if($scope.drugDuration === '' || $scope.drugDuration === undefined || $scope.drugDuration === null) {
+                $scope.showErrorToast ='Please provide duration for the drugs';
+                $('#orderError').modal('show');
+                return;
+
+            }
+            if($scope.drugDurationUnit === '' || $scope.drugDurationUnit === undefined || $scope.drugDurationUnit === null) {
+                $scope.showErrorToast ='Please provide duration unit';
+                $('#orderError').modal('show');
+                return;
+
+            }
+
             if(config.provider === '' || config.provider === undefined || config.provider === null) {
                 $scope.showErrorToast ='You are not login as provider, please contact System Administrator';
                 $('#orderError').modal('show');
@@ -406,6 +452,8 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                 var data = orderset[i];
 
                 for (var r in data) {
+                    data['drugDuration'] = $scope.drugDuration;
+                    data['drugDurationUnit'] = $scope.drugDurationUnit;
                     if (data.hasOwnProperty(r)) {
                         if(isNaN(data.dose)) {
                             $scope.showErrorToast ='Dose value is not a number. Please enter a number';
@@ -418,11 +466,17 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                             $('#orderError').modal('show');
                             return;
                         }
+                        if(isNaN(data.drugDuration)) {
+                            $scope.showErrorToast ='Duration value is not a number. Please enter a number';
+                            $('#orderError').modal('show');
+                            return;
+                        }
                     }
                 }
+                orderSetComponents.push(data)
             }
 
-            drugOrderMembers = orderset;
+            drugOrderMembers = orderSetComponents;
             regimenDosingInstructions = $scope.regimenDosingInstructions;
             orderSetId = $scope.orderSetId;
         }
@@ -497,8 +551,10 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
         }
 
         $scope.getCurrentRegimen = function (res) {
-            if($scope.addQuantity && $scope.addQuantity[0] !== undefined) {
+            var isDrugComponentSizeEqual = pastDrugOrdersComponent($scope.pastDrugOrderGroups)
+            if($scope.pastDrugOrderGroups && $scope.pastDrugOrderGroups[0] !== undefined && isDrugComponentSizeEqual) {
                 $scope.components = prefillDrugComponentsWithPastValues(res.orderSetComponents);
+
             }else {
                 $scope.components = res.orderSetComponents
             }
@@ -562,15 +618,16 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
         function formatDisplayOfRegimenInstructions(res) {
             var orders = [];
             var instructionDesc = [];
+            var duration = res[0].drugDuration;
+            var durationUnitName = res[0].drugDurationUnitName;
+
             for (var i = 0; i < res.length; ++i) {
                 var data = res[i];
-
                 for (var r in data) {
                     if (data.hasOwnProperty(r)) {
                         data['instructionDetails'] = data.name +"(" + data.dose + " "+data.units_name +',' + data.frequency_name
-                        +','+'Quantity:' +data.quantity +' ' +data.quantity_units_name+")" ;
+                            +','+'Quantity:' +data.quantity +' ' +data.quantity_units_name+")" ;
                     }
-
                 }
                 orders.push(data);
 
@@ -578,13 +635,12 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
             var str = orders.map(function(elem){
                 return elem.instructionDetails;
             }).join(" + ");
-            instructionDesc.push({instructionDetailsFinal:str});
-
+            var durationInstruction = '  for ' +duration +" " +durationUnitName;
+            instructionDesc.push({instructionDetailsFinal:str + durationInstruction });
             return instructionDesc;
 
         }
         function formatDisplayOfPastRegimenInstructions(res) {
-
             var orders = [];
             var instructionDesc = [];
             for (var i = 0; i < res.length; ++i) {
@@ -594,6 +650,8 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                     for (var r in data) {
                         if (data.hasOwnProperty(r)) {
                             if(data.drug_id) {
+                                data['duration']= data.drugDuration;
+                                data['durationUnitName']= data.drugDurationUnitName;
                                 data['instructionDetails'] = data.name + "(" + data.dose + " " + data.units_name + ',' + data.frequency_name
                                     + ',' + 'Quantity:' + data.quantity + ' ' + data.quantity_units_name + ")";
                             }
@@ -614,12 +672,15 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                 Object.keys(grouped).forEach(function (key) {
                     valueForGroupedOrder = grouped[key];
                     var dateActivated = valueForGroupedOrder[0].dateActivated;
+                    var duration = valueForGroupedOrder[0].duration;
+                    var durationUnitName = valueForGroupedOrder[0].durationUnitName;
                     var dateStopped = valueForGroupedOrder[0].dateStopped;
                     var str = valueForGroupedOrder.map(function (elem) {
                         return elem.instructionDetails;
                     }).join(" + ");
+                    var durationInstruction = '  for ' +duration +" " +durationUnitName;
                     instructionDesc.push({
-                        instructionDetailsFinal: str,
+                        instructionDetailsFinal: str + durationInstruction,
                         dateActivated: dateActivated,
                         dateStopped: dateStopped
                     });
@@ -629,6 +690,28 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
 
             return instructionDesc;
 
+        }
+
+        function pastDrugOrdersComponent (pastOrders) {
+            /* hack for migrated sites, some regimens ordered individually but 
+               still have order group id(not sure if order group ids were assigned for migration purposes), 
+               we cannot therefore rely on order group id in this case to distinguish between regimens ordered as a group and 
+               those not ordered as a group.
+            */
+            for (var i = 0; i < pastOrders.length; ++i) {
+                var firstComponentSize = pastOrders[0].components.length;
+                var secondComponentSize = pastOrders[1].components.length;
+                // If lengths of drug components are not equal and size is one, it means the drugs were not ordered has a group
+                if (firstComponentSize != secondComponentSize) {
+                    return false;
+
+                } else if(firstComponentSize == secondComponentSize && (firstComponentSize == 1 || secondComponentSize == 1)) {
+                    return false;
+
+                } else {
+                    return true;
+                }
+            }
         }
 
         function formatDisplayOfPastSingleDrugInstructions(res) {

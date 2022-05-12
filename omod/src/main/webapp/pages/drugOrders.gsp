@@ -93,13 +93,45 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
     window.OpenMRS.drugOrdersConfig = ${ jsonConfig };
     window.sessionContext = {'locale': 'en_GB'}
     window.OpenMRS.activeOrdersPayload =${activeOrdersResponse};
+    window.OpenMRS.durationUnitsPayload =${durationUnitsResponse};
     window.OpenMRS.pastDrugOrdersPayload =${pastDrugOrdersPayload};
 
+    jq = jQuery;
 
+    jq(function() {
+        jq('#postMessagetoAdt').click(function() {
+            jq.getJSON('${ ui.actionLink("kenyaemrIL", "interopManager", "postPrescriptionMessage") }',
+                {
+                    'patient': ${ patient.patientId }
+                })
+                .success(function(data) {
+                    jq('#msgBox').html("Successfully posted to ADT queue");
+                })
+                .error(function(xhr, status, err) {
+                    jq('#msgBox').html("Could not post to ADT queue. Kindly contact an admin user for help");
+                })
+        });
+    });
 </script>
 <div class="ke-page-sidebar">
     <div class="ke-panel-frame">
         ${ui.includeFragment("kenyaui", "widget/panelMenu", [heading: "Navigation", items: menuItems])}
+    </div>
+    <div></div>
+    <div class="ke-panel-frame" style="background-color: #d1d0c9;font-weight: bold">
+        <br/>
+        <p style="color: midnightblue;text-align: center">
+            Please prescribe all medication and post to ADT queue.
+        </p>
+        <br/>
+        <% if (hasActiveOrders) { %>
+        <div style="text-align: center">
+            <button style="border: solid" id="postMessagetoAdt">Post prescriptions to ADT queue</button>
+        </div>
+        <br/>
+        <br/>
+        <span id="msgBox" style="color: white"></span>
+        <% } %>
     </div>
 </div>
 
@@ -281,7 +313,7 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
                                             <div class="link-item" >
                                                 <b>Current {{regimen.program}} Regimen:</b> {{regimen.regimenName}}
                                                 <button ng-click="getCurrentRegimen(regimen)" ng-disabled="disableButton"
-                                                        class="refill-regimen pull-right">Refill</button>
+                                                        class="refill-regimen pull-right">Prescribe regimen</button>
                                             </div>
                                         </div>
                                     </div>
@@ -293,6 +325,7 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
                                 <div ng-show="showRegimenPanel">
                                     ${ui.includeFragment("kenyaemrorderentry", "patientdashboard/regimenDispensation", ["patient": patient])}
                                 </div>
+                                <span ng-show="patientNotOnRegimen">Patient is not on any regimen</span>
                             </div>
                         </div>
                     </div>
@@ -436,14 +469,10 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
                                 <div class="table-responsive" ng-show="pastOrders.length > 0">
                                     <table ng-hide="pastOrders.loading" class="table table-striped">
                                         <tr>
-                                            <th width="10%">Replacement</th>
                                             <th width="25%">Dates</th>
                                             <th width="65%">Instructions</th>
                                         </tr>
                                         <tr ng-repeat="order in pastOrders">
-                                            <td>
-                                                {{ replacementForPastOrder(order) | replacement }}
-                                            </td>
                                             <td>
                                                 {{ order.dateActivated }} - {{order.dateStopped}}
                                             </td>
@@ -462,6 +491,7 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
         </div>
 
     </div>
+
 </div>
 
 <script type="text/javascript">

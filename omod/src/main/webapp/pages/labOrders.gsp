@@ -447,15 +447,22 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                         </button>
                                     </div>
                                     <div class="modal-body">
-                                        <label >Reason(s) for voiding orders</label>
+                                        <label >Reason for cancellation of order</label>
                                         <div>
-                                            <textarea class="form-control" ng-model="voidOrders">
-                                            </textarea>
+                                            <select id="ddlvoidReason" class="form-control">
+                                                <option value=""></option>
+                                                <option value="Collect new sample" >Collect new sample</option>
+                                                <option value="Sample not taken" >Sample not taken</option>
+                                                <option value="Sample rejected" >Sample rejected</option>
+                                                <option value="No reagents" >No reagents</option>
+                                                <option value="Order revision" >Order revision</option>
+                                            </select>
+
                                         </div>
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button"  data-dismiss="modal2" ng-click="closeModal()">Close</button>
-                                        <button type="button"  ng-disabled="voidOrders === ''" ng-click="voidAllHivViralLoadOrders()">
+                                        <button type="button"   ng-click="voidAllHivViralLoadOrders()">
                                             <img src="${ ui.resourceLink("kenyaui", "images/glyphs/ok.png") }" /> Save</button>
                                     </div>
                                 </div>

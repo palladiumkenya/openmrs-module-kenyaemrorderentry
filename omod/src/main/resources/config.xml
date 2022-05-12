@@ -28,6 +28,9 @@
 		<require_module version="${kenyauiVersion}">
 			org.openmrs.module.kenyaui
 		</require_module>
+		<require_module version="${kenyacoreVersion}">
+			org.openmrs.module.kenyacore
+		</require_module>
     </require_modules>
 
     <!-- Module Activator -->
@@ -36,7 +39,8 @@
 	
 	<!-- Maps hibernate file's, if present -->
 	<mappingFiles>
-
+		LabManifest.hbm.xml
+		LabManifestOrder.hbm.xml
 	</mappingFiles>
 
 	<!-- Internationalization -->
@@ -54,6 +58,71 @@
 		<file>messages_es.properties</file>
 	</messages>
 	<!-- /Internationalization -->
+
+	<globalProperty>
+		<property>kenyaemrorderentry.drugsMappingDirectory</property>
+		<defaultValue>kenyaemrorderentry</defaultValue>
+		<description>
+			A directory that contains KenyaEMR order entry specific configs
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>chai.viral_load_server_url</property>
+		<defaultValue></defaultValue>
+		<description>
+			The POST URL for pushing requests to the viral load server
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>chai.viral_load_server_result_url</property>
+		<defaultValue></defaultValue>
+		<description>
+			The POST URL for fetching viral load result
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>chai.viral_load_server_api_token</property>
+		<defaultValue></defaultValue>
+		<description>
+			API token to authenticate communication to the CHAI lab system API
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>kemrorder.last_processed_manifest</property>
+		<defaultValue></defaultValue>
+		<description>
+			The manifest whose results were last checked
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>kemrorder.manifest_last_update_time</property>
+		<defaultValue></defaultValue>
+		<description>
+			The time the manifest last updated
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>kemrorder.viral_load_result_tat_in_days</property>
+		<defaultValue>10</defaultValue>
+		<description>
+			The turnaround time for VL results in days. This is to avoid premature polling for results. An empty value will default to 4 days
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>kemrorder.retry_period_for_incomplete_vl_result</property>
+		<defaultValue>2</defaultValue>
+		<description>
+			Retry period after which updates for incomplete results can be checked. An empty value will default to 2 days
+		</description>
+	</globalProperty>
+
 
 </module>
 

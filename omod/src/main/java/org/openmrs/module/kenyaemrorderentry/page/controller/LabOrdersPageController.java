@@ -213,6 +213,10 @@ public class LabOrdersPageController {
                         concService.getConcept(1465),
                         concService.getConcept(162202) // GeneXpert MTB/RIF
                 ));
+        JSONArray urinePregnacyTest = buildTestPanelWithoutPanelConcept("Urine", labTestJsonPayload,
+                "PREGNANCY TEST", Arrays.asList(
+                        concService.getConcept(45) // Urine pregnancy test
+                ));
 
         model.put("labTestJsonPayload", labTestJsonPayload.toString());
 
@@ -249,15 +253,22 @@ public class LabOrdersPageController {
 
             if (labTestConcept.getDatatype().isCoded()) {
                 inputType = "select";
+                // construct answers for VDRL TITRE
+                JSONArray vdrlAnsList = new JSONArray();
+                if(labTestConcept.getConceptId() == 1029) {
+                    vdrlAnsList = constructVDRLAnswers();
+                    testResultList.addAll(vdrlAnsList);
+
+                }
                 for (ConceptAnswer ans : labTestConcept.getAnswers()) {
                     JSONObject testResultObject = new JSONObject();
+
                     testResultObject.put("concept", ans.getAnswerConcept().getUuid());
                     testResultObject.put("label", ans.getAnswerConcept().getName(LOCALE).getName());
                     testResultList.add(testResultObject);
                 }
 
                 labOrderObject.put("answers", testResultList);
-
 
             } else if (labTestConcept.getDatatype().isNumeric()) {
                 inputType = "inputnumeric";
@@ -351,6 +362,19 @@ public class LabOrdersPageController {
         JSONArray ansList = new JSONArray();
 
         for (Integer ans : Arrays.asList(1065, 1066)) {
+            Concept concept = concService.getConcept(ans);
+            JSONObject testResultObject = new JSONObject();
+            testResultObject.put("concept", concept.getUuid());
+            testResultObject.put("label", concept.getName(LOCALE).getName());
+            ansList.add(testResultObject);
+        }
+        return ansList;
+
+    }
+    private JSONArray constructVDRLAnswers() {
+        JSONArray ansList = new JSONArray();
+
+        for (Integer ans : Arrays.asList(664, 703)) {
             Concept concept = concService.getConcept(ans);
             JSONObject testResultObject = new JSONObject();
             testResultObject.put("concept", concept.getUuid());
