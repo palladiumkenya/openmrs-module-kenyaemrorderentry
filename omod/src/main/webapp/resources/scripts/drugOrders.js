@@ -692,8 +692,8 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                those not ordered as a group.
             */
             for (var i = 0; i < pastOrders.length; ++i) {
-                var firstComponentSize = pastOrders[0].components.length;
-                var secondComponentSize = pastOrders[1].components.length;
+                var firstComponentSize = pastOrders[0]?.components.length;
+                var secondComponentSize = pastOrders[1]?.components.length;
                 // If lengths of drug components are not equal and size is one, it means the drugs were not ordered has a group
                 if (firstComponentSize != secondComponentSize) {
                     return false;
