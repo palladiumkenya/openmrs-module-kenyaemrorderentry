@@ -351,6 +351,10 @@ public class DrugOrdersPageController {
        else if(conceptUuid.equalsIgnoreCase("d1fd0e18-e0b9-46ae-ac0e-0452a927a94b")) {
             name = "DTG";
         }
+        else if(conceptUuid.equalsIgnoreCase("167205AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
+            name = "B";
+        }
+        
         return name;
 
     }
