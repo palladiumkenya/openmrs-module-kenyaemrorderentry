@@ -155,22 +155,22 @@ tr:nth-child(even) {background-color: #f2f2f2;}
             <table class="simple-table" width="90%">
                 <tr>
                     <th class="nameColumn">Patient Name</th>
-                    <th class="cccNumberColumn">CCC Number</th>
+                    <th class="cccNumberColumn">Unique Number</th>
                     <th class="dateRequestColumn">Date requested</th>
                     <th class="actionColumn"></th>
                     <th></th>
                 </tr>
-                <% eligibleOrders.each { o -> %>
-                <tr>
-                    <td class="nameColumn">${o.patient.givenName} ${o.patient.familyName} </td>
-                    <td class="cccNumberColumn">${o.patient.getPatientIdentifier(cccNumberType)}</td>
-                    <td class="dateRequestColumn">${kenyaui.formatDate(o.dateActivated)}</td>
-                    <td class="actionColumn">
-                        <button class="addOrderToManifest" style="background-color: cadetblue; color: white" value="od_${o.orderId}" data-target="#updateSampleDetails">Add to manifest</button>
-                    </td>
-                    <td><span id="alert_${o.orderId}"></span></td>
-                </tr>
-                <% } %>
+                        <% eligibleVlOrders.each { o -> %>
+                        <tr>
+                            <td class="nameColumn">${o.patient.givenName} ${o.patient.familyName} </td>
+                            <td class="cccNumberColumn">${o.patient.getPatientIdentifier(cccNumberType)}</td>
+                            <td class="dateRequestColumn">${kenyaui.formatDate(o.dateActivated)}</td>
+                            <td class="actionColumn">
+                                <button class="addOrderToManifest" style="background-color: cadetblue; color: white" value="od_${o.orderId}" data-target="#updateSampleDetails">Add to manifest</button>
+                            </td>
+                            <td><span id="alert_${o.orderId}"></span></td>
+                        </tr>
+                  <% } %>
 
             </table>
         </fieldset>
