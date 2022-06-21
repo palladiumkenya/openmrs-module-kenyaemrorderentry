@@ -28,10 +28,6 @@ public class LabManifestOrder extends BaseOpenmrsData implements Serializable {
     private String uuid;
     private Integer orderType;
 
-    //Order Type
-    public static final int EID_ORDER_TYPE = 1;
-    public static final int VL_ORDER_TYPE = 2;
-
     public LabManifestOrder() {
         prePersist();
     }
