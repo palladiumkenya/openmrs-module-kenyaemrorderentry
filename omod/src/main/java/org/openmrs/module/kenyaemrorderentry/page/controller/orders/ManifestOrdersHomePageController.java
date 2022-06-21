@@ -38,29 +38,33 @@ public class ManifestOrdersHomePageController {
 
         List<LabManifestOrder> allOrdersForManifest = Context.getService(KenyaemrOrdersService.class).getLabManifestOrderByManifest(manifest);
         PatientIdentifierType pat = Utils.getUniquePatientNumberIdentifierType();
+        PatientIdentifierType hei = Utils.getHeiNumberIdentifierType();
         LabOrderDataExchange e = new LabOrderDataExchange();
-        Set<Order> activeOrdersNotManifested = new HashSet<Order>();
         Integer orderType = null;
         Set<Order> activeOrdersNotInManifest = new HashSet<Order>();
+        Set<Order> activeVlOrdersNotInManifest = new HashSet<Order>();
+        Set<Order> activeEidOrdersNotInManifest = new HashSet<Order>();
         activeOrdersNotInManifest = e.getActiveOrdersNotInManifest(null, manifest.getStartDate(),manifest.getEndDate());
 
        if(!activeOrdersNotInManifest.isEmpty()) {
            for (Order o : activeOrdersNotInManifest) {
                if (o.getPatient().getAge() >= 2) {   // this is a vl order
-                   activeOrdersNotManifested = e.getActiveViralLoadOrdersNotInManifest(null, manifest.getStartDate(), manifest.getEndDate());
+                   activeVlOrdersNotInManifest = e.getActiveViralLoadOrdersNotInManifest(null, manifest.getStartDate(), manifest.getEndDate());
                    orderType = LabManifestOrder.VL_ORDER_TYPE;
                }
                else if(o.getPatient().getAge() < 2){  // this is a eid order
-                   activeOrdersNotManifested = e.getActiveEidOrdersNotInManifest(null, manifest.getStartDate(), manifest.getEndDate());
+                   activeEidOrdersNotInManifest = e.getActiveEidOrdersNotInManifest(null, manifest.getStartDate(), manifest.getEndDate());
                    orderType = LabManifestOrder.EID_ORDER_TYPE;
                }
            }
 
-           model.put("eligibleOrders", activeOrdersNotManifested );
+           model.put("eligibleVlOrders", activeVlOrdersNotInManifest );
+           model.put("eligibleEidOrders", activeEidOrdersNotInManifest );
            model.put("orderType", orderType);
            model.put("manifest", manifest);
            model.put("manifestOrders", allOrdersForManifest);
            model.put("cccNumberType", pat.getPatientIdentifierTypeId());
+           model.put("heiNumberType", hei.getPatientIdentifierTypeId());
         }
 
     }
