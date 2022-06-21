@@ -357,6 +357,43 @@ public class LabOrderDataExchange {
      * @param endDate
      * @return
      */
+    public Set<Order> getActiveOrdersNotInManifest(Integer manifestId, Date startDate, Date endDate) {
+        Context.addProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
+        Set<Order> activeLabs = new HashSet<Order>();
+        String sql = "select o.order_id from orders o\n" +
+                "left join kenyaemr_order_entry_lab_manifest_order mo on mo.order_id = o.order_id\n" +
+                "where o.order_action='NEW' and o.concept_id in (856,1030) and o.date_stopped is null and o.voided=0 and mo.order_id is null ";
+
+        if (startDate != null && endDate != null) {
+            sql = sql + " and date(o.date_activated) between ':startDate' and ':endDate' ";
+            String pStartDate = Utils.getSimpleDateFormat("yyyy-MM-dd").format(startDate);
+            String pEndDate = Utils.getSimpleDateFormat("yyyy-MM-dd").format(endDate);
+
+            sql = sql.replace(":startDate", pStartDate);
+            sql = sql.replace(":endDate", pEndDate);
+        }
+
+        List<List<Object>> activeOrders = Context.getAdministrationService().executeSQL(sql, true);
+        if (!activeOrders.isEmpty()) {
+            for (List<Object> res : activeOrders) {
+                Integer orderId = (Integer) res.get(0);
+                Order o = orderService.getOrder(orderId);
+                if (o != null) {
+                    activeLabs.add(o);
+                }
+            }
+        }
+        Context.removeProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
+        return activeLabs;
+    }
+
+    /**
+     * Returns active vl orders which have not been added to any manifest
+     * @param manifestId
+     * @param startDate
+     * @param endDate
+     * @return
+     */
     public Set<Order> getActiveViralLoadOrdersNotInManifest(Integer manifestId, Date startDate, Date endDate) {
         Context.addProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
         Set<Order> activeLabs = new HashSet<Order>();
@@ -387,6 +424,42 @@ public class LabOrderDataExchange {
         return activeLabs;
     }
 
+    /**
+     * Returns active Eid orders which have not been added to any manifest
+     * @param manifestId
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    public Set<Order> getActiveEidOrdersNotInManifest(Integer manifestId, Date startDate, Date endDate) {
+        Context.addProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
+        Set<Order> activeLabs = new HashSet<Order>();
+        String sql = "select o.order_id from orders o\n" +
+                "left join kenyaemr_order_entry_lab_manifest_order mo on mo.order_id = o.order_id\n" +
+                "where o.order_action='NEW' and o.concept_id = 1030 and o.date_stopped is null and o.voided=0 and mo.order_id is null ";
+
+        if (startDate != null && endDate != null) {
+            sql = sql + " and date(o.date_activated) between ':startDate' and ':endDate' ";
+            String pStartDate = Utils.getSimpleDateFormat("yyyy-MM-dd").format(startDate);
+            String pEndDate = Utils.getSimpleDateFormat("yyyy-MM-dd").format(endDate);
+
+            sql = sql.replace(":startDate", pStartDate);
+            sql = sql.replace(":endDate", pEndDate);
+        }
+
+        List<List<Object>> activeOrders = Context.getAdministrationService().executeSQL(sql, true);
+        if (!activeOrders.isEmpty()) {
+            for (List<Object> res : activeOrders) {
+                Integer orderId = (Integer) res.get(0);
+                Order o = orderService.getOrder(orderId);
+                if (o != null) {
+                    activeLabs.add(o);
+                }
+            }
+        }
+        Context.removeProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
+        return activeLabs;
+    }
     /**
      * processes results from lab     *
      *
