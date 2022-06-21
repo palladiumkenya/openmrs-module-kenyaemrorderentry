@@ -101,6 +101,14 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
     }
 
     @Override
+    public LabManifestOrder getLabManifestOrderByOrderType(Integer orderType) throws DataException {
+        Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifestOrder.class);
+        criteria.add(Restrictions.eq("orderType", orderType));
+        criteria.addOrder(org.hibernate.criterion.Order.asc("id"));
+        return (LabManifestOrder) criteria.uniqueResult();
+    }
+
+    @Override
     public void voidLabManifestOrder(Integer labManifestOrder) throws DAOException{
         LabManifestOrder mfo =  (LabManifestOrder) this.sessionFactory.getCurrentSession().get(LabManifestOrder.class, labManifestOrder);
         if (mfo != null) {
