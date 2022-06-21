@@ -1,7 +1,7 @@
 name: deploy to prod 8600
 on:
   push:
-    branches: [ labware-intergration ]
+    branches: [master ]
 jobs:
 
   build:
@@ -19,7 +19,7 @@ jobs:
         script: |
           git config --global --add safe.directory /apps/github-workflows/kenyaemr-modules/openmrs-module-kenyaemrorderentry      
           cd /apps/github-workflows/kenyaemr-modules/openmrs-module-kenyaemrorderentry
-          git pull origin labware-intergration
+          git pull origin master
           git status
           mvn clean install -DskipTests
           sudo rm -rf /var/lib/OpenMRS/modules/kenyaemrorderentry-*.omod
