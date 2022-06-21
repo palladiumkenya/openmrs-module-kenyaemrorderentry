@@ -251,6 +251,20 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="kenyaemr_order_entry_011" author="pwaweru">
+
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="kenyaemr_order_entry_lab_manifest_order"/>
+        </preConditions>
+        <comment>
+            Adds a column to record order type there are various types of lab orders
+        </comment>
+        <addColumn tableName="kenyaemr_order_entry_lab_manifest_order" >
+            <column name="order_type"
+                    type="int"/>
+        </addColumn>
+    </changeSet>
+
     <changeSet id="kenyaemr_order_entry_010" author="aojwang">
 
         <preConditions onFail="MARK_RAN">
