@@ -25,7 +25,12 @@ public class LabManifest extends BaseOpenmrsData implements Serializable {
     private String clinicianPhoneContact;
     private String clinicianName;
     private String labPocPhoneNumber;
+    private Integer manifestType;
     private String uuid;
+
+    //Manifest Type and Order Type
+    public static final int EID_TYPE = 1;
+    public static final int VL_TYPE = 2;
 
     public LabManifest() {
         prePersist();
@@ -161,6 +166,14 @@ public class LabManifest extends BaseOpenmrsData implements Serializable {
 
     public void setLabPocPhoneNumber(String labPocPhoneNumber) {
         this.labPocPhoneNumber = labPocPhoneNumber;
+    }
+
+    public Integer getManifestType() {
+        return manifestType;
+    }
+
+    public void setManifestType(Integer manifestType) {
+        this.manifestType = manifestType;
     }
 
     @Override

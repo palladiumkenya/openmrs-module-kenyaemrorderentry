@@ -27,6 +27,7 @@
         <property name="clinicianName" type="java.lang.String" column="clinician_name" length="255"/>
         <property name="clinicianPhoneContact" type="java.lang.String" column="clinician_phone_contact" length="255"/>
         <property name="labPocPhoneNumber" type="java.lang.String" column="lab_poc_phone_number" length="255"/>
+        <property name="manifestType" type="java.lang.Integer" column="manifest_type"/>
 
         <!-- bi-directional many-to-one association to User -->
         <many-to-one name="creator" class="org.openmrs.User" not-null="true">
