@@ -1,5 +1,6 @@
 package org.openmrs.module.kenyaemrorderentry.fragment.controller.manifest;
 
+import org.openmrs.Concept;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
@@ -13,9 +14,12 @@ import org.openmrs.ui.framework.page.PageModel;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.PriorityQueue;
 
 public class ManifestFormFragmentController {
@@ -25,11 +29,12 @@ public class ManifestFormFragmentController {
 
         LabManifest exists = labManifest != null ? labManifest : null;
         model.addAttribute("labManifest", labManifest);
+        model.addAttribute("manifestTypeOptions", manifestTypeOptions());
         model.addAttribute("command", newEditManifestForm(exists));
         model.addAttribute("manifestStatusOptions", manifestStatus());
-        model.addAttribute("manifestOrderTypeOptions", manifestOrderType());
         model.addAttribute("countyList", getCountyList());
         model.addAttribute("returnUrl", returnUrl);
+
     }
 
     private List<String> manifestStatus() {
@@ -40,12 +45,18 @@ public class ManifestFormFragmentController {
                 );
     }
 
-    private List<String> manifestOrderType() {
-        return Arrays.asList(
-                new String("Viral Load"),
-                new String("EID")
+    protected List<SimpleObject> manifestTypeOptions() {
+        List<SimpleObject> options = new ArrayList<SimpleObject>();
+        for (Map.Entry<Integer, String> option : createManifestTypeOptions().entrySet())
+            options.add(SimpleObject.create("value", option.getKey(), "label", option.getValue()));
 
-        );
+        return options;
+    }
+    private Map<Integer, String> createManifestTypeOptions() {
+        Map<Integer, String> options = new HashMap<Integer, String>();
+        options.put(LabManifest.VL_TYPE, "Viral Load");
+        options.put(LabManifest.EID_TYPE, "EID");
+        return options;
     }
 
     private List<String> getCountyList() {
@@ -132,6 +143,7 @@ public class ManifestFormFragmentController {
         private String courier;
         private String courierOfficer;
         private String status;
+        private Integer manifestType;
         private  Date dispatchDate;
         private String county;
         private String subCounty;
@@ -149,6 +161,7 @@ public class ManifestFormFragmentController {
             this.identifier = manifest.getIdentifier();
             this.startDate = manifest.getStartDate();
             this.status = manifest.getStatus();
+            this.manifestType = manifest.getManifestType();
             this.endDate = manifest.getEndDate();
             this.courier = manifest.getCourier();
             this.courierOfficer = manifest.getCourierOfficer();
@@ -176,6 +189,7 @@ public class ManifestFormFragmentController {
             toSave.setEndDate(endDate);
             toSave.setDispatchDate(dispatchDate);
             toSave.setStatus(status);
+            toSave.setManifestType(manifestType);
             toSave.setCourier(courier);
             toSave.setCourierOfficer(courierOfficer);
             toSave.setCounty(county);
@@ -277,6 +291,14 @@ public class ManifestFormFragmentController {
 
         public void setStatus(String status) {
             this.status = status;
+        }
+
+        public Integer getManifestType() {
+            return manifestType;
+        }
+
+        public void setManifestType(Integer manifestType) {
+            this.manifestType = manifestType;
         }
 
         public Date getDispatchDate() {
