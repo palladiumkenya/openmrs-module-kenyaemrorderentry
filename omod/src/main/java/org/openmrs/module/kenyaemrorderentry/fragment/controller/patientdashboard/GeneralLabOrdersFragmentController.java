@@ -18,7 +18,10 @@ import org.openmrs.api.ProviderService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appui.UiSessionContext;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
+import org.openmrs.module.kenyaemrorderentry.labDataExchange.EIDVLLabSystemWebRequest;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange;
+import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabWebRequest;
+import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabwareSystemWebRequest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 import org.openmrs.module.webservices.rest.web.ConversionUtil;
@@ -92,35 +95,6 @@ public class GeneralLabOrdersFragmentController {
         return object == null ? null : ConversionUtil.convertToRepresentation(object, Representation.FULL);
     }
 
-    /*public SimpleObject generateViralLoadPayload() {
-
-        LabOrderDataExchange dataExchange = new LabOrderDataExchange();
-        ObjectNode payload = dataExchange.getLabRequests(null, null);
-
-        LabManifest manifest = new LabManifest();
-        manifest.setCourier("G4S");
-        manifest.setCourierOfficer("Mangiti Fred");
-        manifest.setStatus("Pending");
-        manifest.setStartDate(new Date());
-        manifest.setEndDate(new Date());
-        manifest.setCreator(Context.getAuthenticatedUser());
-        manifest.setDateCreated(new Date());
-
-        kenyaemrOrdersService.saveLabOrderManifest(manifest);
-
-        LabManifest savedManifest = kenyaemrOrdersService.getLabOrderManifestById(1);
-
-        LabManifestOrder labOrder = new LabManifestOrder();
-        labOrder.setLabManifest(savedManifest);
-        labOrder.setOrder(Context.getOrderService().getOrder(16243));
-        labOrder.setPayload(payload.toString());
-        labOrder.setStatus("Pending");
-
-        kenyaemrOrdersService.saveLabManifestOrder(labOrder);
-        SimpleObject simpleObject = SimpleObject.create("status", "successful");
-        return simpleObject;
-    }*/
-
     /**
      * Fragment action method that adds viral load sample to a draft manifest
      * @param manifest
@@ -145,8 +119,14 @@ public class GeneralLabOrdersFragmentController {
             labOrder.setSampleCollectionDate(dateSampleCollected);
             labOrder.setSampleSeparationDate(dateSampleSeparated);
 
-            LabOrderDataExchange dataExchange = new LabOrderDataExchange();
-            ObjectNode payload = dataExchange.generatePayloadForLabOrder(order, dateSampleCollected, dateSampleSeparated, sampleType, manifest.getIdentifier());
+            LabWebRequest postRequest;
+
+            if (LabOrderDataExchange.isEidVlLabSystem()) {
+                postRequest = new EIDVLLabSystemWebRequest();
+            } else {
+                postRequest = new LabwareSystemWebRequest();
+            }
+            ObjectNode payload = postRequest.completePostPayload(order, dateSampleCollected, dateSampleSeparated, sampleType, manifest.getIdentifier());
             // TODO: check if the payload is not null. Currently, an empty payload is generated if nascop code is null
             if (!payload.isEmpty()) {
                 labOrder.setPayload(payload.toString());
