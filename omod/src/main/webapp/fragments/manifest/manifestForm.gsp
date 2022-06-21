@@ -74,7 +74,7 @@
                <td>
                    <select name="status">
                        <option></option>
-                       <% manifestTypeOptions.each { %>
+                       <% manifestOrderTypeOptions.each { %>
                        <option ${(command.status == null)? "" : it == command.status ? "selected" : ""} value="${it}">${it}</option>
                        <% } %>
                    </select>
