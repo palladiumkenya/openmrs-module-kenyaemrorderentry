@@ -27,6 +27,7 @@ public class ManifestFormFragmentController {
         model.addAttribute("labManifest", labManifest);
         model.addAttribute("command", newEditManifestForm(exists));
         model.addAttribute("manifestStatusOptions", manifestStatus());
+        model.addAttribute("manifestTypeOptions", manifestType());
         model.addAttribute("countyList", getCountyList());
         model.addAttribute("returnUrl", returnUrl);
     }
@@ -37,6 +38,14 @@ public class ManifestFormFragmentController {
                 new String("Submit"),
                 new String("On hold")
                 );
+    }
+
+    private List<String> manifestType() {
+        return Arrays.asList(
+                new String("Viral Load"),
+                new String("EID")
+
+        );
     }
 
     private List<String> getCountyList() {

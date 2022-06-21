@@ -196,8 +196,10 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                             <td>
                                 <select id="sampleType">
                                     <option>select ...</option>
-                                    <option value="Frozen plasma">Frozen plasma</option>
-                                    <option value="Whole Blood">Whole Blood</option>
+                                    <% if(orderType == 2) { %>
+                                        <option value="Frozen plasma">Frozen plasma</option>
+                                        <option value="Whole Blood">Whole Blood</option>
+                                    <% } %>
                                     <option value="DBS">DBS</option>
                                 </select>
                             </td>

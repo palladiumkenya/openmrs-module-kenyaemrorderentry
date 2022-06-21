@@ -64,10 +64,23 @@
 
         <fieldset>
             <legend>Manifest date range</legend>
-
-            <% manifestCoverage.each { %>
-            ${ui.includeFragment("kenyaui", "widget/rowOfFields", [fields: it])}
-            <% } %>
+           <table>
+               <tr>
+                   <td>
+                        <% manifestCoverage.each { %>
+                        ${ui.includeFragment("kenyaui", "widget/rowOfFields", [fields: it])}
+                        <% } %>
+                   </td>
+               <td>
+                   <select name="status">
+                       <option></option>
+                       <% manifestTypeOptions.each { %>
+                       <option ${(command.status == null)? "" : it == command.status ? "selected" : ""} value="${it}">${it}</option>
+                       <% } %>
+                   </select>
+               </td>
+               </tr>
+           </table>
         </fieldset>
         <fieldset>
             <legend>Dispatch Details</legend>
