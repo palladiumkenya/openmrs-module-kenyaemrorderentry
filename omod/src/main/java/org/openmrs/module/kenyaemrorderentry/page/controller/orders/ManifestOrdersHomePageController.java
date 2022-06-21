@@ -50,11 +50,11 @@ public class ManifestOrdersHomePageController {
            for (Order o : activeOrdersNotInManifest) {
                if (o.getPatient().getAge() >= 2) {   // this is a vl order
                    activeVlOrdersNotInManifest = e.getActiveViralLoadOrdersNotInManifest(null, manifest.getStartDate(), manifest.getEndDate());
-                   orderType = LabManifestOrder.VL_ORDER_TYPE;
+                   orderType = LabManifest.VL_TYPE;
                }
                else if(o.getPatient().getAge() < 2){  // this is a eid order
                    activeEidOrdersNotInManifest = e.getActiveEidOrdersNotInManifest(null, manifest.getStartDate(), manifest.getEndDate());
-                   orderType = LabManifestOrder.EID_ORDER_TYPE;
+                   orderType = LabManifest.EID_TYPE;
                }
            }
 
