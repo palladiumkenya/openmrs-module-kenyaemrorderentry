@@ -12,11 +12,7 @@ import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.borders.Border;
 import com.itextpdf.layout.borders.SolidBorder;
-import com.itextpdf.layout.element.Cell;
-import com.itextpdf.layout.element.Image;
-import com.itextpdf.layout.element.Paragraph;
-import com.itextpdf.layout.element.Table;
-import com.itextpdf.layout.element.Text;
+import com.itextpdf.layout.element.*;
 import com.itextpdf.layout.property.TextAlignment;
 import com.itextpdf.layout.property.UnitValue;
 import org.apache.commons.lang.WordUtils;
@@ -37,17 +33,17 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 
-public class LabManifestReport {
+public class HeiLabManifestReport {
 
     public static final String LOGO = "src/main/resources/img/moh.png";
     public static final PdfNumber LANDSCAPE = new PdfNumber(90);
     LabManifest manifest;
 
 
-    public LabManifestReport() {
+    public HeiLabManifestReport() {
     }
 
-    public LabManifestReport(LabManifest manifest) {
+    public HeiLabManifestReport(LabManifest manifest) {
         this.manifest = manifest;
     }
 
@@ -91,7 +87,7 @@ public class LabManifestReport {
         document.add(new Paragraph("\n"));
         document.add(new Paragraph("\n"));
         document.add(new Paragraph("MINISTRY OF HEALTH").setTextAlignment(TextAlignment.CENTER).setFontSize(12));
-        document.add(new Paragraph("Viral Load Request Form").setTextAlignment(TextAlignment.CENTER).setBold().setFontSize(16));
+        document.add(new Paragraph("EID (DNA-PCR) Laboratory Requisition Form").setTextAlignment(TextAlignment.CENTER).setBold().setFontSize(16));
         document.add(new Paragraph("Manifest/Shipping ID: " + manifest.getIdentifier()).setTextAlignment(TextAlignment.LEFT).setBold().setFontSize(10).setFont(courier));
 
         Table manifestMetadata = new Table(4);
@@ -179,21 +175,17 @@ public class LabManifestReport {
     }
     private Table addHeaderRow(Table table) {
 
-        table.addHeaderCell(new Paragraph("Patient Name").setBold());
+        table.addHeaderCell(new Paragraph("Infant Name").setBold());
 
         Paragraph cccNumberCol = new Paragraph();
-        Text cccNoText = new Text("CCC No \n").setBold();
-        Text cccNoDetail1 = new Text("Indicate full ccc number of the\n").setItalic().setFontSize(8);
-        Text cccNoDetail2 = new Text("clients as it appears in the patient\n").setItalic().setFontSize(8);
-        Text cccNoDetail3 = new Text("file. (MFL-XXXXX)\n").setItalic().setFontSize(8);
+        Text cccNoText = new Text("HEI ID Number \n").setBold();
+        Text cccNoDetail1 = new Text("(MFL-YYYY-NNNN)").setItalic().setFontSize(8);
         cccNumberCol.add(cccNoText);
         cccNumberCol.add(cccNoDetail1);
-        cccNumberCol.add(cccNoDetail2);
-        cccNumberCol.add(cccNoDetail3);
         table.addHeaderCell(cccNumberCol);
 
         Paragraph dobCol = new Paragraph();
-        Text dobText = new Text("DOB \n").setBold();
+        Text dobText = new Text("Date of Birth \n").setBold();
         Text dobDetails = new Text("(dd/mm/yyy)").setItalic().setFontSize(8).setBold();
         dobCol.add(dobText);
         dobCol.add(dobDetails);
@@ -202,11 +194,9 @@ public class LabManifestReport {
         table.addHeaderCell(new Paragraph("Sex").setBold());
 
         Paragraph pregnancyCol = new Paragraph();
-        Text pregnancyText = new Text("If female, \nselect the \nfollowing \n").setBold();
-        Text pregnancyDetails = new Text("1= Pregnant\n2= Breast feeding\n3= None of the above").setItalic().setFontSize(8);
+        Text pregnancyText = new Text("(M/F)").setBold();
 
         pregnancyCol.add(pregnancyText);
-        pregnancyCol.add(pregnancyDetails);
 
         table.addHeaderCell(pregnancyCol);
         table.addHeaderCell(new Paragraph("Sample \ntype").setBold().setTextAlignment(TextAlignment.CENTER));
@@ -239,22 +229,10 @@ public class LabManifestReport {
                 patient.getMiddleName() != null ? sample.getOrder().getPatient().getMiddleName() : ""
         );
 
-        Encounter originalRegimenEncounter = RegimenMappingUtils.getFirstEncounterForProgram(patient, "ARV");
-        Encounter currentRegimenEncounter = RegimenMappingUtils.getLastEncounterForProgram(patient, "ARV");
-        SimpleObject regimenDetails = RegimenMappingUtils.buildRegimenChangeObject(currentRegimenEncounter.getObs(), currentRegimenEncounter);
-        String regimenName = (String) regimenDetails.get("regimenShortDisplay");
-        String regimenLine = (String) regimenDetails.get("regimenLine");
-        String nascopCode = "";
-        if (StringUtils.isNotBlank(regimenName )) {
-            nascopCode = RegimenMappingUtils.getDrugNascopCodeByDrugNameAndRegimenLine(regimenName, regimenLine);
-        }
 
-        if (StringUtils.isBlank(nascopCode) && StringUtils.isNotBlank(regimenLine)) {
-            nascopCode = RegimenMappingUtils.getNonStandardCodeFromRegimenLine(regimenLine);
-        }
 
         table.addCell(new Paragraph(WordUtils.capitalizeFully(fullName))).setFontSize(10);
-        table.addCell(new Paragraph(patient.getPatientIdentifier(Utils.getUniquePatientNumberIdentifierType()).getIdentifier())).setFontSize(10);
+        table.addCell(new Paragraph(patient.getPatientIdentifier(Utils.getHeiNumberIdentifierType()).getIdentifier())).setFontSize(10);
         table.addCell(new Paragraph(Utils.getSimpleDateFormat("dd/MM/yyyy").format(sample.getOrder().getPatient().getBirthdate()))).setFontSize(10);
         table.addCell(new Paragraph(sample.getOrder().getPatient().getGender())).setFontSize(10);
         if (patient.getGender().equals("F")) {
@@ -265,9 +243,9 @@ public class LabManifestReport {
         table.addCell(new Paragraph(LabOrderDataExchange.getSampleTypeCode(sample.getSampleType()))).setFontSize(10);
         table.addCell(new Paragraph(sample.getSampleCollectionDate() != null ? Utils.getSimpleDateFormat("dd/MM/yyyy").format(sample.getSampleCollectionDate()) : "")).setFontSize(10);
         table.addCell(new Paragraph(sample.getSampleSeparationDate() != null ? Utils.getSimpleDateFormat("dd/MM/yyyy").format(sample.getSampleSeparationDate()) : "")).setFontSize(10);
-        table.addCell(new Paragraph(originalRegimenEncounter != null ? Utils.getSimpleDateFormat("dd/MM/yyyy").format(originalRegimenEncounter.getEncounterDatetime()) : "")).setFontSize(10);
-        table.addCell(new Paragraph(nascopCode)).setFontSize(10);
-        table.addCell(new Paragraph(currentRegimenEncounter != null ? Utils.getSimpleDateFormat("dd/MM/yyyy").format(currentRegimenEncounter.getEncounterDatetime()) : "")).setFontSize(10);
+        table.addCell(new Paragraph("")).setFontSize(10);
+        table.addCell(new Paragraph("")).setFontSize(10);
+        table.addCell(new Paragraph( "")).setFontSize(10);
         table.addCell(new Paragraph(sample.getOrder().getOrderReason() != null ? LabOrderDataExchange.getOrderReasonCode(sample.getOrder().getOrderReason().getUuid()) : "")).setFontSize(10);
 
     }
