@@ -77,18 +77,28 @@
                         ${ui.includeFragment("kenyaui", "widget/rowOfFields", [fields: it])}
                         <% } %>
                    </td>
-               <td>
-                   <select name="manifestType" id="manifestType">
-                       <option></option>
-                       <% manifestTypeOptions.each { %>
-                       <option ${
-                               (command.manifestType == null) ? "" : it.value == command.manifestType ? "selected" : ""}
-                               value="${it.value}">${it.label}</option>
-                       <% } %>
-                   </select>
-               </td>
                </tr>
            </table>
+        </fieldset>
+        <fieldset>
+            <legend>Manifest type</legend>
+            <table>
+                <tr>
+                    <td>Type</td>
+                </tr>
+                <tr>
+                    <td>
+                        <select name="manifestType" id="manifestType">
+                            <option></option>
+                            <% manifestTypeOptions.each { %>
+                            <option ${
+                                    (command.manifestType == null) ? "" : it.value == command.manifestType ? "selected" : ""}
+                                    value="${it.value}">${it.label}</option>
+                            <% } %>
+                        </select>
+                    </td>
+                </tr>
+            </table>
         </fieldset>
         <fieldset>
             <legend>Dispatch Details</legend>

@@ -92,20 +92,15 @@ public class LabwareSystemWebRequest extends LabWebRequest {
 
             //Set the API media type in http content-type header
             postRequest.addHeader("content-type", "application/json");
-            if (LabOrderDataExchange.isEidVlLabSystem()) {
-                postRequest.addHeader("apikey", API_KEY);
-            } else {
-                postRequest.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + API_KEY);
-            }
+            postRequest.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + API_KEY);
+
             //Set the request post body
             String payload = manifestOrder.getPayload();
             StringEntity userEntity = new StringEntity(payload);
             postRequest.setEntity(userEntity);
 
-            //Send the request; It will immediately return the response in HttpResponse object if any
             HttpResponse response = httpClient.execute(postRequest);
 
-            //return response;
             //verify the valid error code first
             int statusCode = response.getStatusLine().getStatusCode();
 
@@ -118,7 +113,7 @@ public class LabwareSystemWebRequest extends LabWebRequest {
             if (statusCode != 201 && statusCode != 200 && statusCode != 422 && statusCode != 403) { // skip for status code 422: unprocessable entity, and status code 403 for forbidden response
                 JSONParser parser = new JSONParser();
                 JSONObject responseObj = (JSONObject) parser.parse(EntityUtils.toString(response.getEntity()));
-                JSONObject errorObj = (JSONObject) responseObj.get("error");
+                JSONObject errorObj = (JSONObject) responseObj.get("errors");
                 manifestOrder.setStatus("Error - " + statusCode + ". Msg" + errorObj.get("message"));
                 System.out.println("There was an error sending lab id = " + manifestOrder.getId());
                 log.warn("There was an error sending lab id = " + manifestOrder.getId());
@@ -129,7 +124,7 @@ public class LabwareSystemWebRequest extends LabWebRequest {
             } else if (statusCode == 403 || statusCode == 422) {
                 JSONParser parser = new JSONParser();
                 JSONObject responseObj = (JSONObject) parser.parse(EntityUtils.toString(response.getEntity()));
-                JSONObject errorObj = (JSONObject) responseObj.get("error");
+                JSONObject errorObj = (JSONObject) responseObj.get("errors");
                 System.out.println("Error while submitting manifest sample. " + "Error - " + statusCode + ". Msg" + errorObj.get("message"));
                 log.error("Error while submitting manifest sample. " + "Error - " + statusCode + ". Msg" + errorObj.get("message"));
             }
@@ -289,10 +284,9 @@ public class LabwareSystemWebRequest extends LabWebRequest {
     public ObjectNode completePostPayload(Order o, Date dateSampleCollected, Date dateSampleSeparated, String sampleType, String manifestID) {
         ObjectNode node = baselinePostRequestPayload(o, dateSampleCollected, dateSampleSeparated, sampleType, manifestID);
         node.put("mfl_code", Utils.getDefaultLocationMflCode(null));
-        if (!o.getPatient().getGender().equals("F")) {
+        if (o.getPatient().getGender().equals("F")) {
             node.put("female_status", "none");
         }
-
         node.put("lab", "7");
         node.put("facility_email", "");
         node.put("recency_id", "");

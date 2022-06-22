@@ -192,4 +192,26 @@ public class LabManifest extends BaseOpenmrsData implements Serializable {
             setUuid(UUID.randomUUID().toString());
     }
 
+    @Override
+    public String toString() {
+        return "LabManifest{" +
+                "id=" + id +
+                ", identifier='" + identifier + '\'' +
+                ", startDate=" + startDate +
+                ", endDate=" + endDate +
+                ", dispatchDate=" + dispatchDate +
+                ", courier='" + courier + '\'' +
+                ", courierOfficer='" + courierOfficer + '\'' +
+                ", status='" + status + '\'' +
+                ", county='" + county + '\'' +
+                ", subCounty='" + subCounty + '\'' +
+                ", facilityEmail='" + facilityEmail + '\'' +
+                ", facilityPhoneContact='" + facilityPhoneContact + '\'' +
+                ", clinicianPhoneContact='" + clinicianPhoneContact + '\'' +
+                ", clinicianName='" + clinicianName + '\'' +
+                ", labPocPhoneNumber='" + labPocPhoneNumber + '\'' +
+                ", manifestType=" + manifestType +
+                ", uuid='" + uuid + '\'' +
+                '}';
+    }
 }
