@@ -7,10 +7,15 @@ import org.apache.commons.text.StringEscapeUtils;
 import org.apache.commons.text.translate.UnicodeUnescaper;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContexts;
 import org.apache.http.util.EntityUtils;
@@ -29,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.Date;
 import java.util.List;
 
@@ -152,47 +158,35 @@ public class LabwareSystemWebRequest extends LabWebRequest {
         String API_KEY = gpApiToken.getPropertyValue();
         LabManifest manifestToUpdateResults = null;
 
-        SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
-                SSLContexts.createDefault(),
-                new String[]{"TLSv1.2"},
-                null,
-                SSLConnectionSocketFactory.getDefaultHostnameVerifier());
-
-        CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
-
+//Not using SSL
+//        SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
+//                SSLContexts.createDefault(),
+//                new String[]{"TLSv1.2"},
+//                null,
+//                SSLConnectionSocketFactory.getDefaultHostnameVerifier());
+//
+//        CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
+        CloseableHttpClient httpClient = HttpClientBuilder.create().build();
         try {
+            // CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+            String facilityCode = Utils.getDefaultLocationMflCode(Utils.getDefaultLocation());
+            String orderNumbers = StringUtils.join(orderIds, ",");
+            URIBuilder builder = new URIBuilder(serverUrl);
+            builder.addParameter("mfl_code", facilityCode);
+            builder.addParameter("order_no", orderNumbers);
+            URI uri = builder.build();
+            System.out.println("Get Lab Results URL: " + uri);
 
+            HttpGet httpget = new HttpGet(uri);
+            httpget.addHeader("content-type", "application/x-www-form-urlencoded");
+            httpget.addHeader("Authorization", "Bearer " +API_KEY);
+            httpget.addHeader("Accept", "application/json");
 
-            //Define a postRequest request
-            HttpPost postRequest = new HttpPost(serverUrl);
+            CloseableHttpResponse response = httpClient.execute(httpget);
 
-            //Set the API media type in http content-type header
-            postRequest.addHeader("content-type", "application/json");
-            postRequest.addHeader("apikey", API_KEY);
-
-            ObjectNode request = Utils.getJsonNodeFactory().objectNode();
-            request.put("test", "2");
-            request.put("facility_code", Utils.getDefaultLocationMflCode(Utils.getDefaultLocation()));
-            request.put("order_numbers", StringUtils.join(orderIds, ","));
-
-            //Set the request post body
-            StringEntity userEntity = new StringEntity(request.toString());
-            postRequest.setEntity(userEntity);
-
-            //Send the request; It will immediately return the response in HttpResponse object if any
-            HttpResponse response = httpClient.execute(postRequest);
-
-
-            //verify the valid error code first
-            int statusCode = response.getStatusLine().getStatusCode();
-
-            if (statusCode == 429) { // too many requests. just terminate
-                System.out.println("The pull lab result scheduler has been configured to run at very short intervals. Please change this to at least 30min");
-                log.warn("The pull lab result scheduler has been configured to run at very short intervals. Please change this to at least 30min");
-                return;
-            }
+            final int statusCode = response.getStatusLine().getStatusCode();
             if (statusCode != 200) {
-                throw new RuntimeException("Failed with HTTP error code : " + statusCode);
+                throw new RuntimeException("Get Lab Results Failed with HTTP error code : " + statusCode);
             }
 
             String responseStringRaw = EntityUtils.toString(response.getEntity());
@@ -278,7 +272,9 @@ public class LabwareSystemWebRequest extends LabWebRequest {
 
             System.out.println("Successfully executed the task that pulls lab requests");
             log.info("Successfully executed the task that pulls lab requests");
-
+        } catch (Exception e) {
+            System.err.println("Get Lab Results Error: " + e.getMessage());
+            e.printStackTrace();
         } finally {
             httpClient.close();
         }
