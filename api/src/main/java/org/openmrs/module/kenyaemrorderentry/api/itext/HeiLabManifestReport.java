@@ -12,11 +12,7 @@ import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.borders.Border;
 import com.itextpdf.layout.borders.SolidBorder;
-import com.itextpdf.layout.element.Cell;
-import com.itextpdf.layout.element.Image;
-import com.itextpdf.layout.element.Paragraph;
-import com.itextpdf.layout.element.Table;
-import com.itextpdf.layout.element.Text;
+import com.itextpdf.layout.element.*;
 import com.itextpdf.layout.property.TextAlignment;
 import com.itextpdf.layout.property.UnitValue;
 import org.apache.commons.lang.WordUtils;
@@ -37,17 +33,17 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 
-public class LabManifestReport {
+public class HeiLabManifestReport {
 
     public static final String LOGO = "src/main/resources/img/moh.png";
     public static final PdfNumber LANDSCAPE = new PdfNumber(90);
     LabManifest manifest;
 
 
-    public LabManifestReport() {
+    public HeiLabManifestReport() {
     }
 
-    public LabManifestReport(LabManifest manifest) {
+    public HeiLabManifestReport(LabManifest manifest) {
         this.manifest = manifest;
     }
 
@@ -179,21 +175,17 @@ public class LabManifestReport {
     }
     private Table addHeaderRow(Table table) {
 
-        table.addHeaderCell(new Paragraph("Patient Name").setBold());
+        table.addHeaderCell(new Paragraph("Infant Name").setBold());
 
         Paragraph cccNumberCol = new Paragraph();
-        Text cccNoText = new Text("CCC No \n").setBold();
-        Text cccNoDetail1 = new Text("Indicate full ccc number of the\n").setItalic().setFontSize(8);
-        Text cccNoDetail2 = new Text("clients as it appears in the patient\n").setItalic().setFontSize(8);
-        Text cccNoDetail3 = new Text("file. (MFL-XXXXX)\n").setItalic().setFontSize(8);
+        Text cccNoText = new Text("HEI ID Number \n").setBold();
+        Text cccNoDetail1 = new Text("(MFL-YYYY-NNNN)").setItalic().setFontSize(8);
         cccNumberCol.add(cccNoText);
         cccNumberCol.add(cccNoDetail1);
-        cccNumberCol.add(cccNoDetail2);
-        cccNumberCol.add(cccNoDetail3);
         table.addHeaderCell(cccNumberCol);
 
         Paragraph dobCol = new Paragraph();
-        Text dobText = new Text("DOB \n").setBold();
+        Text dobText = new Text("Date of Birth \n").setBold();
         Text dobDetails = new Text("(dd/mm/yyy)").setItalic().setFontSize(8).setBold();
         dobCol.add(dobText);
         dobCol.add(dobDetails);
@@ -202,11 +194,9 @@ public class LabManifestReport {
         table.addHeaderCell(new Paragraph("Sex").setBold());
 
         Paragraph pregnancyCol = new Paragraph();
-        Text pregnancyText = new Text("If female, \nselect the \nfollowing \n").setBold();
-        Text pregnancyDetails = new Text("1= Pregnant\n2= Breast feeding\n3= None of the above").setItalic().setFontSize(8);
+        Text pregnancyText = new Text("(M/F)").setBold();
 
         pregnancyCol.add(pregnancyText);
-        pregnancyCol.add(pregnancyDetails);
 
         table.addHeaderCell(pregnancyCol);
         table.addHeaderCell(new Paragraph("Sample \ntype").setBold().setTextAlignment(TextAlignment.CENTER));
