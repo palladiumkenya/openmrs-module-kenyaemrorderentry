@@ -1,12 +1,9 @@
 package org.openmrs.module.kenyaemrorderentry.page.controller.manifest;
 
 import org.apache.commons.io.IOUtils;
-import org.openmrs.module.kenyaemrorderentry.api.itext.LabManifestReport;
+import org.openmrs.module.kenyaemrorderentry.api.itext.HeiLabManifestReport;
+import org.openmrs.module.kenyaemrorderentry.api.itext.ViralLoadLabManifestReport;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
-import org.openmrs.module.kenyaui.KenyaUiUtils;
-import org.openmrs.ui.framework.UiUtils;
-import org.openmrs.ui.framework.annotation.SpringBean;
-import org.openmrs.ui.framework.page.PageModel;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletResponse;
@@ -20,13 +17,24 @@ public class DownloadManifestPageController {
 
     public void controller(@RequestParam(value = "manifest") LabManifest manifest, HttpServletResponse response) {
 
-        LabManifestReport report = new LabManifestReport(manifest);
         File generatedManifest = null;
-        try {
-            generatedManifest = report.generateReport("");
-        } catch (IOException ex) {
-            ex.printStackTrace();
+
+        if (manifest.getManifestType().intValue() == 1) {
+            HeiLabManifestReport report = new HeiLabManifestReport(manifest);
+            try {
+                generatedManifest = report.generateReport("");
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        } else {
+            ViralLoadLabManifestReport report = new ViralLoadLabManifestReport(manifest);
+            try {
+                generatedManifest = report.generateReport("");
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
         }
+
 
         if (generatedManifest != null) {
             try {

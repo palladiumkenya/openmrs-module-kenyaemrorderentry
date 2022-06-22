@@ -1,9 +1,7 @@
 package org.openmrs.module.kenyaemrorderentry.page.controller.manifest;
 
 import org.apache.commons.io.IOUtils;
-import org.openmrs.module.kenyaemrorderentry.api.itext.LabManifestReport;
 import org.openmrs.module.kenyaemrorderentry.api.itext.PrintSpecimenLabel;
-import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 import org.springframework.web.bind.annotation.RequestParam;
 
