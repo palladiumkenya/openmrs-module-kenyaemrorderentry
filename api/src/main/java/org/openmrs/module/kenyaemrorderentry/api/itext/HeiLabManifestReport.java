@@ -87,7 +87,7 @@ public class HeiLabManifestReport {
         document.add(new Paragraph("\n"));
         document.add(new Paragraph("\n"));
         document.add(new Paragraph("MINISTRY OF HEALTH").setTextAlignment(TextAlignment.CENTER).setFontSize(12));
-        document.add(new Paragraph("Viral Load Request Form").setTextAlignment(TextAlignment.CENTER).setBold().setFontSize(16));
+        document.add(new Paragraph("EID (DNA-PCR) Laboratory Requisition Form").setTextAlignment(TextAlignment.CENTER).setBold().setFontSize(16));
         document.add(new Paragraph("Manifest/Shipping ID: " + manifest.getIdentifier()).setTextAlignment(TextAlignment.LEFT).setBold().setFontSize(10).setFont(courier));
 
         Table manifestMetadata = new Table(4);
@@ -229,22 +229,10 @@ public class HeiLabManifestReport {
                 patient.getMiddleName() != null ? sample.getOrder().getPatient().getMiddleName() : ""
         );
 
-        Encounter originalRegimenEncounter = RegimenMappingUtils.getFirstEncounterForProgram(patient, "ARV");
-        Encounter currentRegimenEncounter = RegimenMappingUtils.getLastEncounterForProgram(patient, "ARV");
-        SimpleObject regimenDetails = RegimenMappingUtils.buildRegimenChangeObject(currentRegimenEncounter.getObs(), currentRegimenEncounter);
-        String regimenName = (String) regimenDetails.get("regimenShortDisplay");
-        String regimenLine = (String) regimenDetails.get("regimenLine");
-        String nascopCode = "";
-        if (StringUtils.isNotBlank(regimenName )) {
-            nascopCode = RegimenMappingUtils.getDrugNascopCodeByDrugNameAndRegimenLine(regimenName, regimenLine);
-        }
 
-        if (StringUtils.isBlank(nascopCode) && StringUtils.isNotBlank(regimenLine)) {
-            nascopCode = RegimenMappingUtils.getNonStandardCodeFromRegimenLine(regimenLine);
-        }
 
         table.addCell(new Paragraph(WordUtils.capitalizeFully(fullName))).setFontSize(10);
-        table.addCell(new Paragraph(patient.getPatientIdentifier(Utils.getUniquePatientNumberIdentifierType()).getIdentifier())).setFontSize(10);
+        table.addCell(new Paragraph(patient.getPatientIdentifier(Utils.getHeiNumberIdentifierType()).getIdentifier())).setFontSize(10);
         table.addCell(new Paragraph(Utils.getSimpleDateFormat("dd/MM/yyyy").format(sample.getOrder().getPatient().getBirthdate()))).setFontSize(10);
         table.addCell(new Paragraph(sample.getOrder().getPatient().getGender())).setFontSize(10);
         if (patient.getGender().equals("F")) {
@@ -255,9 +243,9 @@ public class HeiLabManifestReport {
         table.addCell(new Paragraph(LabOrderDataExchange.getSampleTypeCode(sample.getSampleType()))).setFontSize(10);
         table.addCell(new Paragraph(sample.getSampleCollectionDate() != null ? Utils.getSimpleDateFormat("dd/MM/yyyy").format(sample.getSampleCollectionDate()) : "")).setFontSize(10);
         table.addCell(new Paragraph(sample.getSampleSeparationDate() != null ? Utils.getSimpleDateFormat("dd/MM/yyyy").format(sample.getSampleSeparationDate()) : "")).setFontSize(10);
-        table.addCell(new Paragraph(originalRegimenEncounter != null ? Utils.getSimpleDateFormat("dd/MM/yyyy").format(originalRegimenEncounter.getEncounterDatetime()) : "")).setFontSize(10);
-        table.addCell(new Paragraph(nascopCode)).setFontSize(10);
-        table.addCell(new Paragraph(currentRegimenEncounter != null ? Utils.getSimpleDateFormat("dd/MM/yyyy").format(currentRegimenEncounter.getEncounterDatetime()) : "")).setFontSize(10);
+        table.addCell(new Paragraph("")).setFontSize(10);
+        table.addCell(new Paragraph("")).setFontSize(10);
+        table.addCell(new Paragraph( "")).setFontSize(10);
         table.addCell(new Paragraph(sample.getOrder().getOrderReason() != null ? LabOrderDataExchange.getOrderReasonCode(sample.getOrder().getOrderReason().getUuid()) : "")).setFontSize(10);
 
     }
