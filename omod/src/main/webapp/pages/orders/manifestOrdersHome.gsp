@@ -80,12 +80,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                     <td>${kenyaui.formatDate(manifest.startDate)}</td>
                     <td>${kenyaui.formatDate(manifest.endDate)}</td>
                     <td>${manifest.status}</td>
-                    <% if (manifest.manifestType == 1) { %>
-                    <td> EID   </td>
-                    <% } %>
-                    <% if (manifest.manifestType == 2) { %>
-                    <td> Viral Load   </td>
-                    <% } %>
+                    <td>${manifestType}</td>
                     <td>${manifest.dispatchDate != null ? kenyaui.formatDate(manifest.dispatchDate) : ""}</td>
                 </tr>
 
@@ -123,7 +118,11 @@ tr:nth-child(even) {background-color: #f2f2f2;}
             <table class="simple-table" width="90%">
                 <tr>
                     <th class="nameColumn">Patient Name</th>
-                    <th class="cccNumberColumn">CCC Number</th>
+                    <% if (manifest.manifestType == 2) { %>
+                        <th class="cccNumberColumn">CCC Number</th>
+                    <% } else { %>
+                        <th class="cccNumberColumn">HEI Number</th>
+                    <% } %>
                     <th class="sampleTypeColumn">Sample type</th>
                     <th class="dateRequestColumn">Date requested</th>
                     <th class="sampleStatusColumn">Status</th>
@@ -162,7 +161,11 @@ tr:nth-child(even) {background-color: #f2f2f2;}
             <table class="simple-table" width="90%">
                 <tr>
                     <th class="nameColumn">Patient Name</th>
-                    <th class="cccNumberColumn">Unique Number</th>
+                    <% if (manifest.manifestType == 2) { %>
+                    <th class="cccNumberColumn">CCC Number</th>
+                    <% } else { %>
+                    <th class="cccNumberColumn">HEI Number</th>
+                    <% } %>
                     <th class="dateRequestColumn">Date requested</th>
                     <th class="actionColumn"></th>
                     <th></th>
@@ -184,7 +187,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                     <% eligibleEidOrders.each { o -> %>
                     <tr>
                         <td class="nameColumn">${o.patient.givenName} ${o.patient.familyName} </td>
-                        <td class="cccNumberColumn">${o.patient.getPatientIdentifier(cccNumberType)}</td>
+                        <td class="cccNumberColumn">${o.patient.getPatientIdentifier(heiNumberType)}</td>
                         <td class="dateRequestColumn">${kenyaui.formatDate(o.dateActivated)}</td>
                         <td class="actionColumn">
                             <button class="addOrderToManifest" style="background-color: cadetblue; color: white" value="od_${o.orderId}" data-target="#updateSampleDetails">Add to manifest</button>

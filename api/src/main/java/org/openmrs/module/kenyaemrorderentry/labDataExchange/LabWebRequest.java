@@ -71,6 +71,7 @@ public abstract class LabWebRequest {
         test.put("patient_name", fullName);
         test.put("sex", patient.getGender().equals("M") ? "1" : patient.getGender().equals("F") ? "2" : "3");
         test.put("datecollected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
+        test.put("sampletype", manifestType.toString());
         test.put("order_no", o.getOrderId().toString());
         test.put("patient_identifier", cccNumber != null ? cccNumber.getIdentifier() : "");
         test.put("lab", "");
