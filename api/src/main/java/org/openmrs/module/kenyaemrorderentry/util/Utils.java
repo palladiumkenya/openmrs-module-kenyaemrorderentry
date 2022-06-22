@@ -2,16 +2,28 @@ package org.openmrs.module.kenyaemrorderentry.util;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import org.apache.commons.lang3.StringUtils;
+import org.openmrs.Concept;
+import org.openmrs.Encounter;
+import org.openmrs.EncounterType;
 import org.openmrs.GlobalProperty;
 import org.openmrs.Location;
 import org.openmrs.LocationAttribute;
+import org.openmrs.Patient;
+import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
+import org.openmrs.Relationship;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.metadatadeploy.MetadataUtils;
+import org.openmrs.ui.framework.UiUtils;
 import org.openmrs.util.PrivilegeConstants;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
+import java.util.Dictionary;
+import java.util.List;
 
 public class Utils {
 
@@ -138,6 +150,154 @@ public class Utils {
                             String stripUnicode = new UnicodeUnescaper().translate(escapeName);
 
                             String cleanedName = StringEscapeUtils.unescapeJava(stripUnicode);*/
+    }
+
+    /**
+     * Finds the last encounter during the program enrollment with the given encounter type
+     * Picked for Kenyaemr.EmrUtils
+     * @param type the encounter type
+     *
+     * @return the encounter
+     */
+    public static Encounter lastEncounter(Patient patient, EncounterType type) {
+        List<Encounter> encounters = Context.getEncounterService().getEncounters(patient, null, null, null, null, Collections.singleton(type), null, null, null, false);
+        return encounters.size() > 0 ? encounters.get(encounters.size() - 1) : null;
+    }
+    /**
+     * Check mothers CCC number for an infant from the relationship defined
+     * Picked for Kenyaemr.EmrUtils
+     * @param patient
+     * @return list of mothers
+     */
+
+    public static String getMothersUniquePatientNumber(Patient patient) {
+
+        String cccNumber = "";
+
+        for (Relationship relationship : Context.getPersonService().getRelationshipsByPerson(patient)) {
+
+            if (relationship.getRelationshipType().getbIsToA().equals("Parent")) {
+                if (relationship.getPersonB().getGender().equals("F")) {
+                    if (!relationship.getPersonB().isDead()) {
+
+                        Integer personId = relationship.getPersonB().getPersonId();
+                        //Patient mother = Context.getPatientService().getPatient(personId);
+                        if(Context.getPatientService().getPatient(personId) != null) {
+                            Patient mother = Context.getPatientService().getPatient(personId);
+                            PatientIdentifierType pit = MetadataUtils.existing(PatientIdentifierType.class,Utils.getUniquePatientNumberIdentifierType().getUuid());
+                            PatientIdentifier cccObject = mother.getPatientIdentifier(pit);
+                            cccNumber = cccObject.getIdentifier();
+                        }
+                    }
+                }
+            }
+            if (relationship.getRelationshipType().getaIsToB().equals("Parent")) {
+                if (relationship.getPersonA().getGender().equals("F")) {
+                    if (!relationship.getPersonA().isDead()) {
+
+                        Integer personId = relationship.getPersonA().getPersonId();
+                        //Patient mother = Context.getPatientService().getPatient(personId);
+                        if(Context.getPatientService().getPatient(personId) != null){
+                            Patient mother = Context.getPatientService().getPatient(personId);
+                            PatientIdentifierType pit = MetadataUtils.existing(PatientIdentifierType.class, Utils.getUniquePatientNumberIdentifierType().getUuid());
+                            PatientIdentifier cccObject = mother.getPatientIdentifier(pit);
+                            cccNumber = cccObject.getIdentifier();
+
+                        }
+                    }
+                }
+            }
+        }
+        return cccNumber;
+    }
+
+    /**
+     * Check mothers  Age for an infant from the relationship defined
+     * @param patient
+     * @return list of mothers
+     */
+
+    public static Integer getMothersAge(Patient patient) {
+
+        Integer mothersAge = null;
+
+        for (Relationship relationship : Context.getPersonService().getRelationshipsByPerson(patient)) {
+
+            if (relationship.getRelationshipType().getbIsToA().equals("Parent")) {
+                if (relationship.getPersonB().getGender().equals("F")) {
+                    if (!relationship.getPersonB().isDead()) {
+
+                        Integer personId = relationship.getPersonB().getPersonId();
+                        if(Context.getPatientService().getPatient(personId) != null) {
+                            Patient mother = Context.getPatientService().getPatient(personId);
+                            mothersAge = mother.getAge();
+                        }
+                    }
+                }
+            }
+            if (relationship.getRelationshipType().getaIsToB().equals("Parent")) {
+                if (relationship.getPersonA().getGender().equals("F")) {
+                    if (!relationship.getPersonA().isDead()) {
+
+                        Integer personId = relationship.getPersonA().getPersonId();
+                        //Patient mother = Context.getPatientService().getPatient(personId);
+                        if(Context.getPatientService().getPatient(personId) != null){
+                            Patient mother = Context.getPatientService().getPatient(personId);
+                            mothersAge = mother.getAge();
+
+                        }
+                    }
+                }
+            }
+        }
+        return mothersAge;
+    }
+
+    /**
+     * Check mothers last viral load for an infant from the relationship defined
+     * @param patient
+     * @return list of mothers
+     */
+
+    public static String getMothersLastViralLoad(Patient patient) {
+
+        String mothersLastVl = "";
+        Concept latestVL = Context.getConceptService().getConcept(856);
+        Concept LDLQuestion = Context.getConceptService().getConcept(1305);
+        Concept LDLAnswer = Context.getConceptService().getConcept(1302);
+
+
+
+        for (Relationship relationship : Context.getPersonService().getRelationshipsByPerson(patient)) {
+
+            if (relationship.getRelationshipType().getbIsToA().equals("Parent")) {
+                if (relationship.getPersonB().getGender().equals("F")) {
+                    if (!relationship.getPersonB().isDead()) {
+
+                        Integer personId = relationship.getPersonB().getPersonId();
+                        if(Context.getPatientService().getPatient(personId) != null) {
+                            Patient mother = Context.getPatientService().getPatient(personId);
+                            mothersLastVl = "";
+                        }
+                    }
+                }
+            }
+            if (relationship.getRelationshipType().getaIsToB().equals("Parent")) {
+                if (relationship.getPersonA().getGender().equals("F")) {
+                    if (!relationship.getPersonA().isDead()) {
+
+                        Integer personId = relationship.getPersonA().getPersonId();
+                        //Patient mother = Context.getPatientService().getPatient(personId);
+                        if(Context.getPatientService().getPatient(personId) != null){
+                            Patient mother = Context.getPatientService().getPatient(personId);
+                            mothersLastVl = "";
+
+                        }
+                    }
+                }
+            }
+        }
+        return mothersLastVl;
     }
 }
 
