@@ -125,8 +125,11 @@ public class GeneralLabOrdersFragmentController {
 
             if (LabOrderDataExchange.isEidVlLabSystem()) {
                 postRequest = new EIDVLLabSystemWebRequest();
+                postRequest.setManifestType(manifest.getManifestType());
             } else {
                 postRequest = new LabwareSystemWebRequest();
+                postRequest.setManifestType(manifest.getManifestType());
+
             }
             ObjectNode payload = postRequest.completePostPayload(order, dateSampleCollected, dateSampleSeparated, sampleType, manifest.getIdentifier());
             // TODO: check if the payload is not null. Currently, an empty payload is generated if nascop code is null
