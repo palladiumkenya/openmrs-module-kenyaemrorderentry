@@ -8,6 +8,11 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.util.EntityUtils;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.openmrs.Concept;
 import org.openmrs.Encounter;
 import org.openmrs.EncounterType;
@@ -28,6 +33,7 @@ import org.openmrs.module.kenyaemrorderentry.util.Utils;
 import org.openmrs.ui.framework.SimpleObject;
 import org.openmrs.util.PrivilegeConstants;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.HashMap;
@@ -35,6 +41,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import static org.openmrs.module.metadatasharing.util.MetadataSharingGlobalPropertyListener.log;
 
 public class LabOrderDataExchange {
 
@@ -176,12 +184,12 @@ public class LabOrderDataExchange {
         //add to list only if code is found. This is a temp measure to avoid sending messages with null regimen codes
         if (StringUtils.isNotBlank(nascopCode)) {
 
-            test.put(isChaiLabSystem() ? "mflCode" : "mfl_code", Utils.getDefaultLocationMflCode(null));
+            test.put(isEidVlLabSystem() ? "mflCode" : "mfl_code", Utils.getDefaultLocationMflCode(null));
             test.put("patient_identifier", cccNumber != null ? cccNumber.getIdentifier() : "");
             test.put("dob", dob);
             test.put("patient_name", fullName);
             test.put("sex", patient.getGender().equals("M") ? "1" : patient.getGender().equals("F") ? "2" : "3");
-            test.put("sampletype", StringUtils.isNotBlank(sampleType) && isChaiLabSystem() ? LabOrderDataExchange.getSampleTypeCode(sampleType) : StringUtils.isNotBlank(sampleType) && !isChaiLabSystem() ? sampleType : "");
+            test.put("sampletype", StringUtils.isNotBlank(sampleType) && isEidVlLabSystem() ? LabOrderDataExchange.getSampleTypeCode(sampleType) : StringUtils.isNotBlank(sampleType) && !isEidVlLabSystem() ? sampleType : "");
             test.put("datecollected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
             test.put("order_no", o.getOrderId().toString());
             test.put("lab", "");
@@ -193,7 +201,7 @@ public class LabOrderDataExchange {
             test.put("initiation_date", originalRegimenEncounter != null ? Utils.getSimpleDateFormat("yyyy-MM-dd").format(originalRegimenEncounter.getEncounterDatetime()) : "");
             test.put("dateinitiatedonregimen", currentRegimenEncounter != null ? Utils.getSimpleDateFormat("yyyy-MM-dd").format(currentRegimenEncounter.getEncounterDatetime()) : "");
 
-            if (!isChaiLabSystem()) { // if labware
+            if (!isEidVlLabSystem()) { // if labware
 
                 if (patient.getGender().equals("F")) {
                     test.put("female_status", "none");
@@ -210,14 +218,42 @@ public class LabOrderDataExchange {
         return test;
     }
 
+    public static void updateAfterPost(HttpResponse response, CloseableHttpClient httpClient, LabManifestOrder manifestOrder) throws IOException, org.json.simple.parser.ParseException {
+        int statusCode = response.getStatusLine().getStatusCode();
 
-    public static boolean isChaiLabSystem() {
+        if (statusCode == 429) { // too many requests. just terminate
+            System.out.println("The push lab scheduler has been configured to run at very short intervals. Please change this to at least 30min");
+            //log.warn("The push scheduler has been configured to run at very short intervals. Please change this to at least 30min");
+            return;
+        }
+
+        if (statusCode != 201 && statusCode != 200 && statusCode != 422 && statusCode != 403) { // skip for status code 422: unprocessable entity, and status code 403 for forbidden response
+            JSONParser parser = new JSONParser();
+            JSONObject responseObj = (JSONObject) parser.parse(EntityUtils.toString(response.getEntity()));
+            JSONObject errorObj = (JSONObject) responseObj.get("error");
+            manifestOrder.setStatus("Error - " + statusCode + ". Msg" + errorObj.get("message"));
+            System.out.println("There was an error sending lab id = " + manifestOrder.getId());
+            log.warn("There was an error sending lab id = " + manifestOrder.getId());
+            // throw new RuntimeException("Failed with HTTP error code : " + statusCode + ". Error msg: " + errorObj.get("message"));
+        } else if (statusCode == 201 || statusCode == 200) {
+            manifestOrder.setStatus("Sent");
+            log.info("Successfully pushed a VL lab test id " + manifestOrder.getId());
+        } else if (statusCode == 403 || statusCode == 422) {
+            JSONParser parser = new JSONParser();
+            JSONObject responseObj = (JSONObject) parser.parse(EntityUtils.toString(response.getEntity()));
+            JSONObject errorObj = (JSONObject) responseObj.get("error");
+            System.out.println("Error while submitting manifest sample. " + "Error - " + statusCode + ". Msg" + errorObj.get("message"));
+            log.error("Error while submitting manifest sample. " + "Error - " + statusCode + ". Msg" + errorObj.get("message"));
+        }
+    }
+
+    public static boolean isEidVlLabSystem() {
         GlobalProperty gpLabSystemInUse = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LAB_SYSTEM_IN_USE);
         if (gpLabSystemInUse == null) {
             return false;
         }
         String labSystemName = gpLabSystemInUse.getPropertyValue();
-        return "CHAI".equalsIgnoreCase(labSystemName);
+        return "CHAI".toLowerCase().equalsIgnoreCase(labSystemName);
     }
 
 

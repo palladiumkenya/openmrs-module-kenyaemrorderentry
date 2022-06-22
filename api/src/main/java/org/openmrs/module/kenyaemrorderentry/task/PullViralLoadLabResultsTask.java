@@ -178,7 +178,7 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
 
                     // terminate if there are no pending results
                     if (ordersWithPendingResults.size() < 1) {
-                        System.out.println("The manifest : " + manifestToUpdateResults.getId() + " in queueu has no pending samples. It will be marked as incomplete");
+                        System.out.println("The manifest : " + manifestToUpdateResults.getId() + " in queue has no pending samples. It will be marked as incomplete");
 
                         manifestToUpdateResults.setStatus("Incomplete results");
                         manifestToUpdateResults.setDateChanged(new Date());
@@ -208,15 +208,17 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
 
                 CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
 
+                List<Integer> orderIds = new ArrayList<Integer>();
+                List<Integer> manifestOrderIds = new ArrayList<Integer>();
+                for (LabManifestOrder manifestOrder : ordersWithPendingResults) {
+                    orderIds.add(manifestOrder.getOrder().getOrderId());
+                    manifestOrderIds.add(manifestOrder.getId());
+                }
+
                 try {
 
                     // we want to create a comma separated list of order id
-                    List<Integer> orderIds = new ArrayList<Integer>();
-                    List<Integer> manifestOrderIds = new ArrayList<Integer>();
-                    for (LabManifestOrder manifestOrder : ordersWithPendingResults) {
-                        orderIds.add(manifestOrder.getOrder().getOrderId());
-                        manifestOrderIds.add(manifestOrder.getId());
-                    }
+
 
                     //Define a postRequest request
                     HttpPost postRequest = new HttpPost(serverUrl);
