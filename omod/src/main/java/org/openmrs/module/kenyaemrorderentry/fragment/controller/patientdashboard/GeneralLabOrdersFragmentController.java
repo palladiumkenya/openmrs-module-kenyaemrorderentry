@@ -113,6 +113,8 @@ public class GeneralLabOrdersFragmentController {
 
         if (manifest != null && order != null) {
             LabManifestOrder labOrder = new LabManifestOrder();
+
+
             labOrder.setLabManifest(manifest);
             labOrder.setOrder(order);
             labOrder.setSampleType(sampleType);
