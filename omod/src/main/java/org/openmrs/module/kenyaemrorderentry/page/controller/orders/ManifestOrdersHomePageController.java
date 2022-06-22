@@ -2,6 +2,8 @@ package org.openmrs.module.kenyaemrorderentry.page.controller.orders;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
+import org.openmrs.Order;
+import org.openmrs.OrderSet;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyacore.RegimenMappingUtils;
@@ -23,7 +25,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 @AppPage("kenyaemr.labmanifest")
 public class ManifestOrdersHomePageController {
@@ -33,11 +38,35 @@ public class ManifestOrdersHomePageController {
 
         List<LabManifestOrder> allOrdersForManifest = Context.getService(KenyaemrOrdersService.class).getLabManifestOrderByManifest(manifest);
         PatientIdentifierType pat = Utils.getUniquePatientNumberIdentifierType();
+        PatientIdentifierType hei = Utils.getHeiNumberIdentifierType();
         LabOrderDataExchange e = new LabOrderDataExchange();
-        model.put("manifest", manifest);
-        model.put("manifestOrders", allOrdersForManifest);
-        model.put("eligibleOrders", e.getActiveViralLoadOrdersNotInManifest(null,manifest.getStartDate(),manifest.getEndDate()));
-        model.put("cccNumberType", pat.getPatientIdentifierTypeId());
+        Integer orderType = null;
+        Set<Order> activeOrdersNotInManifest = new HashSet<Order>();
+        Set<Order> activeVlOrdersNotInManifest = new HashSet<Order>();
+        Set<Order> activeEidOrdersNotInManifest = new HashSet<Order>();
+        activeOrdersNotInManifest = e.getActiveOrdersNotInManifest(null, manifest.getStartDate(),manifest.getEndDate());
+
+       if(!activeOrdersNotInManifest.isEmpty()) {
+           for (Order o : activeOrdersNotInManifest) {
+               if (o.getPatient().getAge() >= 2) {   // this is a vl order
+                   activeVlOrdersNotInManifest = e.getActiveViralLoadOrdersNotInManifest(null, manifest.getStartDate(), manifest.getEndDate());
+                   orderType = LabManifest.VL_TYPE;
+               }
+               else if(o.getPatient().getAge() < 2){  // this is a eid order
+                   activeEidOrdersNotInManifest = e.getActiveEidOrdersNotInManifest(null, manifest.getStartDate(), manifest.getEndDate());
+                   orderType = LabManifest.EID_TYPE;
+               }
+           }
+
+           model.put("eligibleVlOrders", activeVlOrdersNotInManifest );
+           model.put("eligibleEidOrders", activeEidOrdersNotInManifest );
+           model.put("orderType", orderType);
+           model.put("manifest", manifest);
+           model.put("manifestOrders", allOrdersForManifest);
+           model.put("cccNumberType", pat.getPatientIdentifierTypeId());
+           model.put("heiNumberType", hei.getPatientIdentifierTypeId());
+        }
+
     }
 
 }

@@ -45,6 +45,12 @@
                     [object: command, property: "labPocPhoneNumber", label: "Lab person Phone number"]
             ]
     ]
+    def manifestTypeFields = [
+            [
+                    [object: command, property: "manifestType", label: "Manifest type", config: [style: "list", options: manifestTypeOptions]]
+
+            ]
+    ]
 
 %>
 <script type="text/javascript" src="/${ contextPath }/moduleResources/kenyaemr/scripts/KenyaAddressHierarchy.js"></script>
@@ -64,10 +70,25 @@
 
         <fieldset>
             <legend>Manifest date range</legend>
-
-            <% manifestCoverage.each { %>
-            ${ui.includeFragment("kenyaui", "widget/rowOfFields", [fields: it])}
-            <% } %>
+           <table>
+               <tr>
+                   <td>
+                        <% manifestCoverage.each { %>
+                        ${ui.includeFragment("kenyaui", "widget/rowOfFields", [fields: it])}
+                        <% } %>
+                   </td>
+               <td>
+                   <select name="manifestType" id="manifestType">
+                       <option></option>
+                       <% manifestTypeOptions.each { %>
+                       <option ${
+                               (command.manifestType == null) ? "" : it.value == command.manifestType ? "selected" : ""}
+                               value="${it.value}">${it.label}</option>
+                       <% } %>
+                   </select>
+               </td>
+               </tr>
+           </table>
         </fieldset>
         <fieldset>
             <legend>Dispatch Details</legend>

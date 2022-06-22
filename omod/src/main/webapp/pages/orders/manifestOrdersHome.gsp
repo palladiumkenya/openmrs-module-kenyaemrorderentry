@@ -73,12 +73,19 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                     <th>Start Date</th>
                     <th>End Date</th>
                     <th>Status</th>
+                    <th>Type</th>
                     <th>Dispatch Date</th>
                 </tr>
                 <tr>
                     <td>${kenyaui.formatDate(manifest.startDate)}</td>
                     <td>${kenyaui.formatDate(manifest.endDate)}</td>
                     <td>${manifest.status}</td>
+                    <% if (manifest.manifestType == 1) { %>
+                    <td> EID   </td>
+                    <% } %>
+                    <% if (manifest.manifestType == 2) { %>
+                    <td> Viral Load   </td>
+                    <% } %>
                     <td>${manifest.dispatchDate != null ? kenyaui.formatDate(manifest.dispatchDate) : ""}</td>
                 </tr>
 
@@ -155,21 +162,36 @@ tr:nth-child(even) {background-color: #f2f2f2;}
             <table class="simple-table" width="90%">
                 <tr>
                     <th class="nameColumn">Patient Name</th>
-                    <th class="cccNumberColumn">CCC Number</th>
+                    <th class="cccNumberColumn">Unique Number</th>
                     <th class="dateRequestColumn">Date requested</th>
                     <th class="actionColumn"></th>
                     <th></th>
                 </tr>
-                <% eligibleOrders.each { o -> %>
-                <tr>
-                    <td class="nameColumn">${o.patient.givenName} ${o.patient.familyName} </td>
-                    <td class="cccNumberColumn">${o.patient.getPatientIdentifier(cccNumberType)}</td>
-                    <td class="dateRequestColumn">${kenyaui.formatDate(o.dateActivated)}</td>
-                    <td class="actionColumn">
-                        <button class="addOrderToManifest" style="background-color: cadetblue; color: white" value="od_${o.orderId}" data-target="#updateSampleDetails">Add to manifest</button>
-                    </td>
-                    <td><span id="alert_${o.orderId}"></span></td>
-                </tr>
+                <% if (manifest.manifestType == 2) { %>
+                        <% eligibleVlOrders.each { o -> %>
+                    <tr>
+                        <td class="nameColumn">${o.patient.givenName} ${o.patient.familyName} </td>
+                        <td class="cccNumberColumn">${o.patient.getPatientIdentifier(cccNumberType)}</td>
+                        <td class="dateRequestColumn">${kenyaui.formatDate(o.dateActivated)}</td>
+                        <td class="actionColumn">
+                            <button class="addOrderToManifest" style="background-color: cadetblue; color: white" value="od_${o.orderId}" data-target="#updateSampleDetails">Add to manifest</button>
+                        </td>
+                        <td><span id="alert_${o.orderId}"></span></td>
+                    </tr>
+                      <% } %>
+                <% } %>
+                <% if (manifest.manifestType == 1) { %>
+                    <% eligibleEidOrders.each { o -> %>
+                    <tr>
+                        <td class="nameColumn">${o.patient.givenName} ${o.patient.familyName} </td>
+                        <td class="cccNumberColumn">${o.patient.getPatientIdentifier(cccNumberType)}</td>
+                        <td class="dateRequestColumn">${kenyaui.formatDate(o.dateActivated)}</td>
+                        <td class="actionColumn">
+                            <button class="addOrderToManifest" style="background-color: cadetblue; color: white" value="od_${o.orderId}" data-target="#updateSampleDetails">Add to manifest</button>
+                        </td>
+                        <td><span id="alert_${o.orderId}"></span></td>
+                    </tr>
+                    <% } %>
                 <% } %>
 
             </table>
@@ -196,8 +218,10 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                             <td>
                                 <select id="sampleType">
                                     <option>select ...</option>
-                                    <option value="Frozen plasma">Frozen plasma</option>
-                                    <option value="Whole Blood">Whole Blood</option>
+                                    <% if(manifest.manifestType == 2) { %>
+                                        <option value="Frozen plasma">Frozen plasma</option>
+                                        <option value="Whole Blood">Whole Blood</option>
+                                    <% } %>
                                     <option value="DBS">DBS</option>
                                 </select>
                             </td>
