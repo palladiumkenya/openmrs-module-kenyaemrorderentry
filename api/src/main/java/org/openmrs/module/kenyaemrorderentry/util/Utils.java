@@ -222,9 +222,10 @@ public class Utils {
      * @return list of mothers
      */
 
-    public static Integer getMothersAge(Patient patient) {
+    public static SimpleObject getMothersAge(Patient patient) {
 
         Integer mothersAge = null;
+        SimpleObject object = null;
 
         for (Relationship relationship : Context.getPersonService().getRelationshipsByPerson(patient)) {
 
@@ -255,7 +256,8 @@ public class Utils {
                 }
             }
         }
-        return mothersAge;
+        object = SimpleObject.create("mothersAge",mothersAge);
+        return object;
     }
 
    /**
