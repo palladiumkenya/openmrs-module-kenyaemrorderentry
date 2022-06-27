@@ -2,18 +2,22 @@ package org.openmrs.module.kenyaemrorderentry.util;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
+import org.joda.time.Days;
 import org.openmrs.Concept;
 import org.openmrs.Encounter;
 import org.openmrs.EncounterType;
 import org.openmrs.GlobalProperty;
 import org.openmrs.Location;
 import org.openmrs.LocationAttribute;
+import org.openmrs.Obs;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.Relationship;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.metadatadeploy.MetadataUtils;
+import org.openmrs.ui.framework.SimpleObject;
 import org.openmrs.ui.framework.UiUtils;
 import org.openmrs.util.PrivilegeConstants;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,6 +26,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Dictionary;
 import java.util.List;
 
@@ -217,9 +222,10 @@ public class Utils {
      * @return list of mothers
      */
 
-    public static Integer getMothersAge(Patient patient) {
+    public static SimpleObject getHeiMothersAge(Patient patient) {
 
         Integer mothersAge = null;
+        SimpleObject object = null;
 
         for (Relationship relationship : Context.getPersonService().getRelationshipsByPerson(patient)) {
 
@@ -234,6 +240,7 @@ public class Utils {
                         }
                     }
                 }
+                break;
             }
             if (relationship.getRelationshipType().getaIsToB().equals("Parent")) {
                 if (relationship.getPersonA().getGender().equals("F")) {
@@ -250,23 +257,21 @@ public class Utils {
                 }
             }
         }
-        return mothersAge;
+        object = SimpleObject.create("mothersAge",mothersAge);
+        return object;
     }
 
-    /**
+   /**
      * Check mothers last viral load for an infant from the relationship defined
      * @param patient
      * @return list of mothers
      */
 
-    public static String getMothersLastViralLoad(Patient patient) {
+    public static SimpleObject getMothersLastViralLoad(Patient patient) {
 
-        String mothersLastVl = "";
-        Concept latestVL = Context.getConceptService().getConcept(856);
-        Concept LDLQuestion = Context.getConceptService().getConcept(1305);
-        Concept LDLAnswer = Context.getConceptService().getConcept(1302);
-
-
+        String latestVL = "856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+        String latestLDL = "1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+        SimpleObject object = null;
 
         for (Relationship relationship : Context.getPersonService().getRelationshipsByPerson(patient)) {
 
@@ -275,9 +280,32 @@ public class Utils {
                     if (!relationship.getPersonB().isDead()) {
 
                         Integer personId = relationship.getPersonB().getPersonId();
-                        if(Context.getPatientService().getPatient(personId) != null) {
+                        if (Context.getPatientService().getPatient(personId) != null) {
                             Patient mother = Context.getPatientService().getPatient(personId);
-                            mothersLastVl = "";
+                            Obs mothersNumericVLObs = getLatestObs(mother, latestVL);
+                            Obs mothersLDLObs = getLatestObs(mother, latestLDL);
+                            if (mothersNumericVLObs != null && mothersLDLObs == null) {
+                                object = SimpleObject.create("lastVl", mothersNumericVLObs.getValueNumeric(), "lastVlDate", mothersNumericVLObs.getObsDatetime());
+                            }
+                            if (mothersNumericVLObs == null && mothersLDLObs != null) {
+                                object = SimpleObject.create("lastVl", "LDL", "lastVlDate", mothersLDLObs.getObsDatetime());
+                            }
+                            if (mothersNumericVLObs != null && mothersLDLObs != null) {
+                                //find the latest of the 2
+                                Obs lastViralLoadPicked = null;
+                                if (mothersNumericVLObs.getObsDatetime().after(mothersLDLObs.getObsDatetime())) {
+                                    lastViralLoadPicked = mothersNumericVLObs;
+                                } else {
+                                    lastViralLoadPicked = mothersLDLObs;
+                                }
+
+                                if (lastViralLoadPicked.getConcept().getConceptId().equals(856)) {
+                                    object = SimpleObject.create("lastVl", lastViralLoadPicked.getValueNumeric(), "lastVlDate", mothersNumericVLObs.getObsDatetime());
+                                } else {
+                                    object = SimpleObject.create("lastVl", "LDL", "lastVlDate", mothersLDLObs.getObsDatetime());
+                                }
+
+                            }
                         }
                     }
                 }
@@ -290,14 +318,56 @@ public class Utils {
                         //Patient mother = Context.getPatientService().getPatient(personId);
                         if(Context.getPatientService().getPatient(personId) != null){
                             Patient mother = Context.getPatientService().getPatient(personId);
-                            mothersLastVl = "";
+                            Obs mothersNumericVLObs = getLatestObs(mother, latestVL);
+                            Obs mothersLDLObs = getLatestObs(mother, latestLDL);
+                            if(mothersNumericVLObs != null && mothersLDLObs == null){
+                                object = SimpleObject.create("lastVl", mothersNumericVLObs.getValueNumeric(), "lastVlDate", mothersNumericVLObs.getObsDatetime());
+                            }
+                            if(mothersNumericVLObs == null && mothersLDLObs != null) {
+                                object = SimpleObject.create("lastVl", "LDL", "lastVlDate", mothersLDLObs.getObsDatetime());
+                            }
+                            if(mothersNumericVLObs != null && mothersLDLObs != null) {
+                                //find the latest of the 2
+                                Obs lastViralLoadPicked = null;
+                                if (mothersNumericVLObs.getObsDatetime().after(mothersLDLObs.getObsDatetime())) {
+                                    lastViralLoadPicked = mothersNumericVLObs;
+                                } else {
+                                    lastViralLoadPicked = mothersLDLObs;
+                                }
+                                if(lastViralLoadPicked.getConcept().getConceptId().equals(856)) {
+                                    object = SimpleObject.create("lastVl", lastViralLoadPicked.getValueNumeric(), "lastVlDate", mothersNumericVLObs.getObsDatetime());
+                                }
+                                else {
+                                    object = SimpleObject.create("lastVl", "LDL", "lastVlDate", mothersLDLObs.getObsDatetime());
+                                }
+
+                            }
 
                         }
                     }
                 }
             }
         }
-        return mothersLastVl;
+        return object;
+    }
+    /**
+     * Check latest obs values for given obs
+     * @param patient
+     * @return latest obs
+     */
+    public static Obs getLatestObs(Patient patient, String conceptIdentifier) {
+        Concept concept = Context.getConceptService().getConceptByUuid(conceptIdentifier);
+        List<Obs> obs = Context.getObsService().getObservationsByPersonAndConcept(patient, concept);
+        if (obs.size() > 0) {
+            // these are in reverse chronological order
+            return obs.get(0);
+        }
+        return null;
+    }
+    public static int daysBetween(Date date1, Date date2) {
+        DateTime d1 = new DateTime(date1.getTime());
+        DateTime d2 = new DateTime(date2.getTime());
+        return Days.daysBetween(d1, d2).getDays();
     }
 }
 
