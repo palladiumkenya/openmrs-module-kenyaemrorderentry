@@ -151,7 +151,7 @@ public abstract class LabWebRequest {
     public static SimpleObject getHeiDetailsForEidPostObject(Patient patient,Order o) {
         SimpleObject object = null;
         String entryPointAnswer = "";
-        Integer entryPointQuestion = 1855;
+        Integer entryPointQuestion = 160540;
         String prophylaxisAnswer = "";
         Integer prophylaxisQuestion = 1282;
         String mothersRegimenAnswer = "";
