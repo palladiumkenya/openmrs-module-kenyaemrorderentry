@@ -222,7 +222,7 @@ public class Utils {
      * @return list of mothers
      */
 
-    public static SimpleObject getMothersAge(Patient patient) {
+    public static SimpleObject getHeiMothersAge(Patient patient) {
 
         Integer mothersAge = null;
         SimpleObject object = null;
@@ -240,6 +240,7 @@ public class Utils {
                         }
                     }
                 }
+                break;
             }
             if (relationship.getRelationshipType().getaIsToB().equals("Parent")) {
                 if (relationship.getPersonA().getGender().equals("F")) {
