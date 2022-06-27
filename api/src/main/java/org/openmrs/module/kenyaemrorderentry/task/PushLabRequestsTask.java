@@ -35,6 +35,7 @@ public class PushLabRequestsTask extends AbstractTask {
      * @see AbstractTask#execute()
      */
     public void execute() {
+        System.out.println("Push Lab Results: PUSH TASK Starting");
         Context.openSession();
 
         // check first if there is internet connectivity before pushing
@@ -43,7 +44,6 @@ public class PushLabRequestsTask extends AbstractTask {
             URLConnection connection = new URL(url).openConnection();
             connection.connect();
             try {
-
                 GlobalProperty gpServerUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LAB_SERVER_REQUEST_URL);
                 GlobalProperty gpApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LAB_SERVER_API_TOKEN);
 
@@ -51,7 +51,7 @@ public class PushLabRequestsTask extends AbstractTask {
                 String API_KEY = gpApiToken.getPropertyValue();
 
                 if (StringUtils.isBlank(serverUrl) || StringUtils.isBlank(API_KEY)) {
-                    System.out.println("Please set credentials for posting lab requests to the lab system");
+                    System.out.println("Lab Results POST: Please set credentials for posting lab requests to the lab system");
                     return;
                 }
 
@@ -68,24 +68,22 @@ public class PushLabRequestsTask extends AbstractTask {
                     manifestStatus = "Currently submitting";
                 }
 
-
                 if (toProcess == null) {
-                    System.out.println("There are no viral load request to push to the lab system");
+                    System.out.println("Lab Results POST: There are no viral load requests to push to the lab system");
                     return;
                 }
 
                 List<LabManifestOrder> ordersInManifest = kenyaemrOrdersService.getLabManifestOrdersToSend(toProcess);
                 ;
-
                 if (ordersInManifest.size() < 1) {
-                    System.out.println("Found no lab requests to post. Will mark the manifest as submitted");
+                    System.out.println("Lab Results POST: Found no lab requests to post. Will mark the manifest as complete");
                     if (toProcess != null) {
                         toProcess.setStatus("Submitted");
                         kenyaemrOrdersService.saveLabOrderManifest(toProcess);
                     }
                     return;
                 } else {
-                    System.out.println("No of labs to push: " + ordersInManifest.size());
+                    System.out.println("Lab Results POST: No of labs to push: " + ordersInManifest.size());
                 }
 
 
@@ -103,18 +101,19 @@ public class PushLabRequestsTask extends AbstractTask {
                 }
 
             } catch (Exception e) {
-                throw new IllegalArgumentException("Unable to execute task that pushes viral load lab manifest", e);
+                throw new IllegalArgumentException("Lab Results POST: Unable to execute task that pushes viral load lab manifest", e);
             } finally {
                 Context.closeSession();
-
             }
         } catch (IOException ioe) {
 
             try {
-                String text = "At " + new Date() + " there was an error reported connecting to the internet. Will not attempt pushing viral load manifest ";
+                String text = "Lab Results POST: At " + new Date() + " there was an error reported connecting to the internet. Will not attempt pushing viral load manifest ";
+                System.err.println(text);
                 log.warn(text);
             } catch (Exception e) {
-                log.error("Failed to check internet connectivity", e);
+                System.err.println("Lab Results POST: Failed to check internet connectivity" + e.getMessage());
+                log.error("Lab Results POST: Failed to check internet connectivity", e);
             }
         }
     }
