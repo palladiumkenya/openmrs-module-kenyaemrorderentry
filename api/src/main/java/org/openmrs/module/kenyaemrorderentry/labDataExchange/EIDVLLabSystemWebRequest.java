@@ -40,6 +40,7 @@ public class EIDVLLabSystemWebRequest extends LabWebRequest {
     private static final Logger log = LoggerFactory.getLogger(PushLabRequestsTask.class);
 
     public EIDVLLabSystemWebRequest() {
+        setManifestType(LabManifest.EID_TYPE);
     }
 
     @Override
