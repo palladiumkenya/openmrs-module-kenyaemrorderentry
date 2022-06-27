@@ -331,8 +331,8 @@ public class LabwareSystemWebRequest extends LabWebRequest {
                 kenyaemrOrdersService.saveLabManifestOrder(o);
             }
 
-            System.out.println("Successfully executed the task that pulls lab requests");
-            log.info("Successfully executed the task that pulls lab requests");
+            System.out.println("Lab Results Get: Successfully executed the task that pulls lab requests");
+            log.info("Lab Results Get: Successfully executed the task that pulls lab requests");
 
             System.out.println("Lab Results Get: Successfully Done");
         } catch (Exception e) {

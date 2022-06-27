@@ -74,21 +74,16 @@ public class PushLabRequestsTask extends AbstractTask {
                 }
 
                 List<LabManifestOrder> ordersInManifest = kenyaemrOrdersService.getLabManifestOrdersToSend(toProcess);
-                
+                ;
                 if (ordersInManifest.size() < 1) {
-                    System.out.println("Lab Results POST: Found no lab requests to post.");
-                    // System.out.println("Lab Results POST: Found no lab requests to post. Will mark the manifest as complete");
-                    // if (toProcess != null) {
-                    //     toProcess.setStatus("Completed");
-                    //     kenyaemrOrdersService.saveLabOrderManifest(toProcess);
-                    // }
-                    return;
-                } else {
-                    System.out.println("Lab Results POST: Number of lab requests to push: " + ordersInManifest.size());
+                    System.out.println("Lab Results POST: Found no lab requests to post. Will mark the manifest as complete");
                     if (toProcess != null) {
                         toProcess.setStatus("Sending");
                         kenyaemrOrdersService.saveLabOrderManifest(toProcess);
                     }
+                    return;
+                } else {
+                    System.out.println("Lab Results POST: No of labs to push: " + ordersInManifest.size());
                 }
 
                 boolean checkIfSent = true;
