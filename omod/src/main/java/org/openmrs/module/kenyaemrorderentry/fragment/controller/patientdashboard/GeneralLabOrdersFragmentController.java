@@ -132,6 +132,7 @@ public class GeneralLabOrdersFragmentController {
 
             }
             ObjectNode payload = postRequest.completePostPayload(order, dateSampleCollected, dateSampleSeparated, sampleType, manifest.getIdentifier());
+            //ObjectNode payload = postRequest.completePostPayload(order, dateSampleCollected, dateSampleSeparated, sampleType, String.valueOf(manifest.getId()));
             // TODO: check if the payload is not null. Currently, an empty payload is generated if nascop code is null
             if (!payload.isEmpty()) {
                 labOrder.setPayload(payload.toString());

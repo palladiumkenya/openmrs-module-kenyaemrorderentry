@@ -51,6 +51,7 @@ public class LabwareSystemWebRequest extends LabWebRequest {
     private static final Logger log = LoggerFactory.getLogger(PushLabRequestsTask.class);
 
     public LabwareSystemWebRequest() {
+        setManifestType(LabManifest.VL_TYPE);
     }
 
     @Override
@@ -62,7 +63,7 @@ public class LabwareSystemWebRequest extends LabWebRequest {
         String API_KEY = gpApiToken.getPropertyValue();
 
         if (StringUtils.isBlank(serverUrl) || StringUtils.isBlank(API_KEY)) {
-            System.out.println("Please set credentials for posting lab requests to the lab system");
+            System.out.println("Lab Results POST: Please set credentials for posting lab requests to the lab system");
             return false;
         }
         return true;
@@ -70,8 +71,10 @@ public class LabwareSystemWebRequest extends LabWebRequest {
 
     public void postSamples(LabManifestOrder manifestOrder, String manifestStatus) throws IOException {
 
-        if (!checkRequirements())
+        if (!checkRequirements()) {
+            System.out.println("Lab Results POST: Failed to satisfy requirements");
             return;
+        }
 
         LabManifest toProcess = manifestOrder.getLabManifest();
         KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
@@ -93,6 +96,7 @@ public class LabwareSystemWebRequest extends LabWebRequest {
         try {
 
             //Define a postRequest request
+            System.out.println("Lab Results POST: Server URL: " + serverUrl);
             HttpPost postRequest = new HttpPost(serverUrl);
 
             //Set the API media type in http content-type header
@@ -101,6 +105,7 @@ public class LabwareSystemWebRequest extends LabWebRequest {
 
             //Set the request post body
             String payload = manifestOrder.getPayload();
+            System.out.println("Lab Results POST: Server Payload: " + payload);
             StringEntity userEntity = new StringEntity(payload);
             postRequest.setEntity(userEntity);
 
@@ -110,28 +115,31 @@ public class LabwareSystemWebRequest extends LabWebRequest {
             int statusCode = response.getStatusLine().getStatusCode();
 
             if (statusCode == 429) { // too many requests. just terminate
-                System.out.println("The push lab scheduler has been configured to run at very short intervals. Please change this to at least 30min");
-                log.warn("The push scheduler has been configured to run at very short intervals. Please change this to at least 30min");
+                System.out.println("Lab Results POST: The push lab scheduler has been configured to run at very short intervals. Please change this to at least 30min");
+                log.warn("Lab Results POST: The push scheduler has been configured to run at very short intervals. Please change this to at least 30min");
                 return;
             }
 
             if (statusCode != 201 && statusCode != 200 && statusCode != 422 && statusCode != 403) { // skip for status code 422: unprocessable entity, and status code 403 for forbidden response
                 JSONParser parser = new JSONParser();
                 JSONObject responseObj = (JSONObject) parser.parse(EntityUtils.toString(response.getEntity()));
-                JSONObject errorObj = (JSONObject) responseObj.get("errors");
-                manifestOrder.setStatus("Error - " + statusCode + ". Msg" + errorObj.get("message"));
-                System.out.println("There was an error sending lab id = " + manifestOrder.getId());
-                log.warn("There was an error sending lab id = " + manifestOrder.getId());
+//                JSONObject errorObj = (JSONObject) responseObj.get("errors");
+//                manifestOrder.setStatus("Error - " + statusCode + ". Msg" + errorObj.get("message"));
+                System.out.println("Lab Results POST: There was an error sending lab id = " + manifestOrder.getId() + " Status: " + statusCode);
+                log.warn("Lab Results POST: There was an error sending lab id = " + manifestOrder.getId() + " Status: " + statusCode);
                 // throw new RuntimeException("Failed with HTTP error code : " + statusCode + ". Error msg: " + errorObj.get("message"));
             } else if (statusCode == 201 || statusCode == 200) {
                 manifestOrder.setStatus("Sent");
-                log.info("Successfully pushed a VL lab test id " + manifestOrder.getId());
+                System.out.println("Lab Results POST: Successfully pushed a VL lab test id " + manifestOrder.getId());
+                log.info("Lab Results POST: Successfully pushed a VL lab test id " + manifestOrder.getId());
             } else if (statusCode == 403 || statusCode == 422) {
                 JSONParser parser = new JSONParser();
                 JSONObject responseObj = (JSONObject) parser.parse(EntityUtils.toString(response.getEntity()));
-                JSONObject errorObj = (JSONObject) responseObj.get("errors");
-                System.out.println("Error while submitting manifest sample. " + "Error - " + statusCode + ". Msg" + errorObj.get("message"));
-                log.error("Error while submitting manifest sample. " + "Error - " + statusCode + ". Msg" + errorObj.get("message"));
+//                JSONObject errorObj = (JSONObject) responseObj.get("errors");
+//                System.out.println("Lab Results POST: Error while submitting manifest sample. " + "Error - " + statusCode + ". Msg" + errorObj.get("message"));
+//                log.error("Lab Results POST: Error while submitting manifest sample. " + "Error - " + statusCode + ". Msg" + errorObj.get("message"));
+                System.out.println("Lab Results POST: There was an error sending lab id = " + manifestOrder.getId() + " Status: " + statusCode);
+                log.warn("Lab Results POST: There was an error sending lab id = " + manifestOrder.getId() + " Status: " + statusCode);
             }
 
             kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
@@ -141,9 +149,11 @@ public class LabwareSystemWebRequest extends LabWebRequest {
                 kenyaemrOrdersService.saveLabOrderManifest(toProcess);
             }
             Context.flushSession();
+
+            System.out.println("Lab Results POST: Push Successfull");
         } catch (Exception e) {
-            System.out.println("Could not push requests to the lab! " + e.getCause());
-            log.error("Could not push requests to the lab! " + e.getCause());
+            System.err.println("Lab Results POST: Could not push requests to the lab! " + e.getMessage());
+            log.error("Lab Results POST: Could not push requests to the lab! " + e.getMessage());
             e.printStackTrace();
         } finally {
             httpClient.close();
@@ -311,8 +321,8 @@ public class LabwareSystemWebRequest extends LabWebRequest {
                 kenyaemrOrdersService.saveLabManifestOrder(o);
             }
 
-            System.out.println("Successfully executed the task that pulls lab requests");
-            log.info("Successfully executed the task that pulls lab requests");
+            System.out.println("Lab Results Get: Successfully executed the task that pulls lab requests");
+            log.info("Lab Results Get: Successfully executed the task that pulls lab requests");
 
             System.out.println("Lab Results Get: Successfully Done");
         } catch (Exception e) {
@@ -325,6 +335,7 @@ public class LabwareSystemWebRequest extends LabWebRequest {
 
     @Override
     public ObjectNode completePostPayload(Order o, Date dateSampleCollected, Date dateSampleSeparated, String sampleType, String manifestID) {
+        setManifestType(LabManifest.VL_TYPE);
         ObjectNode node = baselinePostRequestPayload(o, dateSampleCollected, dateSampleSeparated, sampleType, manifestID);
         node.put("mfl_code", Utils.getDefaultLocationMflCode(null));
         if (o.getPatient().getGender().equals("F")) {
@@ -335,6 +346,10 @@ public class LabwareSystemWebRequest extends LabWebRequest {
         node.put("recency_id", "");
         node.put("emr_shipment", StringUtils.isNotBlank(manifestID) ? manifestID : "");
         node.put("date_separated", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleSeparated));
+        // node.put("justification", "");
+        // node.put("prophylaxis", "");
+        // node.put("dateinitiatedonregimen", "");
+        // node.put("initiation_date", "");
         return node;
 
     }

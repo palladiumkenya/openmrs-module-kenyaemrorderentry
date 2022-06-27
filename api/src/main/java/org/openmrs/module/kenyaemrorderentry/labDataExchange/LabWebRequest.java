@@ -11,6 +11,7 @@ import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyacore.RegimenMappingUtils;
+import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 import org.openmrs.module.kenyaemrorderentry.util.Utils;
 import org.openmrs.ui.framework.SimpleObject;
@@ -80,8 +81,9 @@ public abstract class LabWebRequest {
         test.put("patient_identifier", cccNumber != null ? cccNumber.getIdentifier() : "");
         test.put("lab", "");
 
-
-        if (manifestType == 1) { // we are using 1 for EID and 2 for VL
+        System.out.println("Lab Results POST: Manifest Type is: " + manifestType);
+        if (manifestType == LabManifest.EID_TYPE) { // we are using 1 for EID and 2 for VL
+            System.out.println("Lab Results POST: populating payload for EID Type");
             PatientIdentifier heiNumber = patient.getPatientIdentifier(Utils.getHeiNumberIdentifierType());
             SimpleObject heiDetailsObject = getHeiDetailsForEidPostObject(o.getPatient(),o);
             SimpleObject heiMothersAgeObject = getHeiMothersAge(o.getPatient());
@@ -96,7 +98,11 @@ public abstract class LabWebRequest {
             test.put("hei_identifier", heiNumber != null ? heiNumber.getIdentifier() : "");
             test.put("age_of_mother", heiMothersAgeObject.get("mothersAge").toString() != null ? heiMothersAgeObject.get("mothersAge").toString() : "" );
             test.put("ccc_number_of_mother", Utils.getMothersUniquePatientNumber(patient));
-        } else if (manifestType == 2) {
+            test.put("pmtct_regimen_of_mother", heiDetailsObject.get("mothersRegimenAnswer").toString());
+            test.put("mother_vl_result", ""); // within the last 6 months
+
+        } else if (manifestType == LabManifest.VL_TYPE) {
+            System.out.println("Lab Results POST: populating payload for VL Type");
             Encounter originalRegimenEncounter = RegimenMappingUtils.getFirstEncounterForProgram(patient, "ARV");
             Encounter currentRegimenEncounter = RegimenMappingUtils.getLastEncounterForProgram(patient, "ARV");
             if (currentRegimenEncounter == null) {

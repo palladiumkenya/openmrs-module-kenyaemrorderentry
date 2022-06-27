@@ -23,6 +23,7 @@ import org.openmrs.GlobalProperty;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange;
+import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabwareSystemWebRequest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 import org.openmrs.module.kenyaemrorderentry.util.Utils;
@@ -50,6 +51,7 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
      * @see AbstractTask#execute()
      */
     public void execute() {
+        System.out.println("Get Lab Results: PULL TASK Starting");
         Context.openSession();
 
         try {
@@ -73,8 +75,9 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
                 String labTatForVlResults = gpLabTatForVlResults.getPropertyValue();
                 LabManifest manifestToUpdateResults = null;
 
-                if (StringUtils.isBlank(serverUrl) || StringUtils.isBlank(API_KEY) || StringUtils.isBlank(updatesEndpoint)) {
-                    System.out.println("Please set credentials for pulling lab requests from the lab system");
+                //if (StringUtils.isBlank(serverUrl) || StringUtils.isBlank(API_KEY) || StringUtils.isBlank(updatesEndpoint)) {
+                if (StringUtils.isBlank(serverUrl) || StringUtils.isBlank(API_KEY)) {
+                    System.out.println("Lab Results Get: Please set credentials for pulling lab requests from the lab system");
                     return;
                 }
 
@@ -215,143 +218,23 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
                     manifestOrderIds.add(manifestOrder.getId());
                 }
 
-                try {
+                // Pull Lab Results
+                LabwareSystemWebRequest lswr = new LabwareSystemWebRequest();
+                lswr.pullResult(orderIds, manifestOrderIds);
 
-                    // we want to create a comma separated list of order id
-
-
-                    //Define a postRequest request
-                    HttpPost postRequest = new HttpPost(serverUrl);
-
-                    //Set the API media type in http content-type header
-                    postRequest.addHeader("content-type", "application/json");
-                    postRequest.addHeader("apikey", API_KEY);
-
-                    ObjectNode request = Utils.getJsonNodeFactory().objectNode();
-                    request.put("test", "2");
-                    request.put("facility_code", Utils.getDefaultLocationMflCode(Utils.getDefaultLocation()));
-                    request.put("order_numbers", StringUtils.join(orderIds, ","));
-
-                    //Set the request post body
-                    StringEntity userEntity = new StringEntity(request.toString());
-                    postRequest.setEntity(userEntity);
-
-                    //Send the request; It will immediately return the response in HttpResponse object if any
-                    HttpResponse response = httpClient.execute(postRequest);
-
-
-                    //verify the valid error code first
-                    int statusCode = response.getStatusLine().getStatusCode();
-
-                    if (statusCode == 429) { // too many requests. just terminate
-                        System.out.println("The pull lab result scheduler has been configured to run at very short intervals. Please change this to at least 30min");
-                        log.warn("The pull lab result scheduler has been configured to run at very short intervals. Please change this to at least 30min");
-                        return;
-                    }
-                    if (statusCode != 200) {
-                        throw new RuntimeException("Failed with HTTP error code : " + statusCode);
-                    }
-
-                    String responseStringRaw = EntityUtils.toString(response.getEntity());
-                    String responseStringEscape = StringEscapeUtils.escapeJava(responseStringRaw);
-                    String strippedUnicodeChars = new UnicodeUnescaper().translate(responseStringEscape);
-
-                    String finalChars = StringEscapeUtils.unescapeJava(strippedUnicodeChars);
-                    String removeBackslash = finalChars.replace("\\", "");
-
-
-                    Gson gson = new GsonBuilder().serializeNulls().create();
-                    JsonElement rootNode = gson.fromJson(finalChars, JsonElement.class);
-
-                    JsonArray resultArray = null;
-                    if(rootNode.isJsonObject()){
-                        JsonObject jsonObject = rootNode.getAsJsonObject();
-                        JsonElement vlResultArray = jsonObject.get("data");
-                        if(vlResultArray.isJsonArray()){
-                            resultArray = vlResultArray.getAsJsonArray();
-                        }
-                    }
-
-                    JsonArray cleanedArray = new JsonArray();
-                    if (resultArray != null && !resultArray.isEmpty()) {
-                        for (int i =0; i < resultArray.size(); i++) {
-                            JsonObject result = resultArray.get(i).getAsJsonObject();
-                            result.addProperty("full_names", "Replaced Name"); // this is a short workaround to handle data coming from eid/vl system and were pushed from kenyaemr with unicode literals
-                            cleanedArray.add(result);
-
-                        }
-                    }
-
-
-                    if (resultArray != null && !resultArray.isEmpty()) {
-                        String json = gson.toJson(cleanedArray);
-                        ProcessViralLoadResults.processPayload(json);// the only way that works for now is posting this through REST
-
-                    // update manifest details appropriately for the next execution
-
-                        if (manifestToUpdateResults != null) {
-                            List<LabManifestOrder> pendingResultsForNextIteration = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifestToUpdateResults, "Sent");
-                            List<LabManifestOrder> incompleteResults = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifestToUpdateResults, incompleteStatuses);
-
-                            if (pendingResultsForNextIteration.size() < 1 && incompleteResults.size() < 1) {
-                                manifestToUpdateResults.setStatus("Complete results");
-                                manifestToUpdateResults.setDateChanged(new Date());
-                                kenyaemrOrdersService.saveLabOrderManifest(manifestToUpdateResults);
-
-                                gpLastProcessedManifest.setPropertyValue(""); // set value to null so that the execution gets to the next manifest
-                                Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifest);
-                            } else if (pendingResultsForNextIteration.size() < 1 && incompleteResults.size() > 0) {
-                                manifestToUpdateResults.setStatus("Incomplete results");
-                                manifestToUpdateResults.setDateChanged(new Date());
-                                kenyaemrOrdersService.saveLabOrderManifest(manifestToUpdateResults);
-
-                                gpLastProcessedManifest.setPropertyValue(""); // set value to null so that the execution gets to the next manifest
-                                Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifest);
-                            }
-
-                            // update manifest global property
-                            if (pendingResultsForNextIteration.size() > 0) {
-                                gpLastProcessedManifest.setPropertyValue(manifestToUpdateResults.getId().toString());
-                                gpLastProcessedManifestUpdatetime.setPropertyValue(Utils.getSimpleDateFormat(LabOrderDataExchange.MANIFEST_LAST_UPDATE_PATTERN).format(new Date()));
-                                Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifest);
-                                Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifestUpdatetime);
-                            }
-                        }
-
-                    }
-
-                    // check and mark status for all orders that may have not been found in the lab system. It is still not clear how this happens since the records are marked as sent in the manifest
-
-                    Integer[] intArray = new Integer[manifestOrderIds.size()];
-                    intArray = manifestOrderIds.toArray(intArray);
-
-                    List<LabManifestOrder> ordersNotInLabSystem = kenyaemrOrdersService.getLabManifestOrderByNotFoundInLabSystem(intArray);
-
-                    for (LabManifestOrder o : ordersNotInLabSystem) {
-                        o.setStatus("Record not found");
-                        o.setDateChanged(new Date());
-                        kenyaemrOrdersService.saveLabManifestOrder(o);
-                    }
-
-                    System.out.println("Successfully executed the task that pulls lab requests");
-                    log.info("Successfully executed the task that pulls lab requests");
-
-                } finally {
-                    httpClient.close();
-                }
             } catch (Exception e) {
-                throw new IllegalArgumentException("Unable to execute task that pulls lab requests", e);
+                throw new IllegalArgumentException("Lab Results Get: Unable to execute task that pulls lab requests", e);
             } finally {
                 Context.closeSession();
             }
         } catch (IOException ioe) {
 
             try {
-                String text = "At " + new Date() + " there was an error reported connecting to the internet. The system did not attempt checking for viral load results ";
+                String text = "Lab Results Get: At " + new Date() + " there was an error reported connecting to the internet. The system did not attempt checking for viral load results ";
                 log.warn(text);
             }
             catch (Exception e) {
-                log.error("Failed to check internet connectivity", e);
+                log.error("Lab Results Get: Failed to check internet connectivity", e);
             }
         }
     }
