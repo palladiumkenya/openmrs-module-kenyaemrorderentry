@@ -44,16 +44,16 @@ public class PushLabRequestsTask extends AbstractTask {
             URLConnection connection = new URL(url).openConnection();
             connection.connect();
             try {
-                // GlobalProperty gpServerUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LAB_SERVER_REQUEST_URL);
-                // GlobalProperty gpApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LAB_SERVER_API_TOKEN);
+                GlobalProperty gpServerUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LAB_SERVER_REQUEST_URL);
+                GlobalProperty gpApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LAB_SERVER_API_TOKEN);
 
-                // String serverUrl = gpServerUrl.getPropertyValue();
-                // String API_KEY = gpApiToken.getPropertyValue();
+                String serverUrl = gpServerUrl.getPropertyValue();
+                String API_KEY = gpApiToken.getPropertyValue();
 
-                // if (StringUtils.isBlank(serverUrl) || StringUtils.isBlank(API_KEY)) {
-                //     System.out.println("Lab Results POST: Please set credentials for posting lab requests to the lab system");
-                //     return;
-                // }
+                if (StringUtils.isBlank(serverUrl) || StringUtils.isBlank(API_KEY)) {
+                    System.out.println("Lab Results POST: Please set credentials for posting lab requests to the lab system");
+                    return;
+                }
 
                 // Get a manifest ready to be sent
                 LabManifest toProcess = null;
@@ -74,24 +74,19 @@ public class PushLabRequestsTask extends AbstractTask {
                 }
 
                 List<LabManifestOrder> ordersInManifest = kenyaemrOrdersService.getLabManifestOrdersToSend(toProcess);
-                
+                ;
                 if (ordersInManifest.size() < 1) {
-                    System.out.println("Lab Results POST: Found no lab requests to post.");
-                    // System.out.println("Lab Results POST: Found no lab requests to post. Will mark the manifest as complete");
-                    // if (toProcess != null) {
-                    //     toProcess.setStatus("Completed");
-                    //     kenyaemrOrdersService.saveLabOrderManifest(toProcess);
-                    // }
-                    return;
-                } else {
-                    System.out.println("Lab Results POST: Number of lab requests to push: " + ordersInManifest.size());
+                    System.out.println("Lab Results POST: Found no lab requests to post. Will mark the manifest as complete");
                     if (toProcess != null) {
-                        toProcess.setStatus("Sending");
+                        toProcess.setStatus("Completed");
                         kenyaemrOrdersService.saveLabOrderManifest(toProcess);
                     }
+                    return;
+                } else {
+                    System.out.println("Lab Results POST: No of labs to push: " + ordersInManifest.size());
                 }
 
-                boolean checkIfSent = true;
+
                 for (LabManifestOrder manifestOrder : ordersInManifest) {
 
                     LabWebRequest postRequest;
@@ -101,18 +96,8 @@ public class PushLabRequestsTask extends AbstractTask {
                     } else {
                         postRequest = new LabwareSystemWebRequest();
                     }
-                    if(!postRequest.postSamples(manifestOrder, manifestStatus)) {
-                        checkIfSent = false;
-                    }
-                }
+                    postRequest.postSamples(manifestOrder, manifestStatus);
 
-                if(checkIfSent) {
-                    System.out.println("Lab Results POST: All orders were sent. Marking manifest as submitted");
-                    if (toProcess != null) {
-                        toProcess.setStatus("Submitted");
-                        toProcess.setDispatchDate(new Date()); // set dispatch date to today
-                        kenyaemrOrdersService.saveLabOrderManifest(toProcess);
-                    }
                 }
 
             } catch (Exception e) {
