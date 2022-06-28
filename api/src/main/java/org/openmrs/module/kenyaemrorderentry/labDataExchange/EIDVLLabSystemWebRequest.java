@@ -122,10 +122,10 @@ public class EIDVLLabSystemWebRequest extends LabWebRequest {
             }
 
             if (statusCode != 201 && statusCode != 200 && statusCode != 422 && statusCode != 403) { // skip for status code 422: unprocessable entity, and status code 403 for forbidden response
-                JSONParser parser = new JSONParser();
-                JSONObject responseObj = (JSONObject) parser.parse(EntityUtils.toString(response.getEntity()));
-                JSONObject errorObj = (JSONObject) responseObj.get("error");
-                manifestOrder.setStatus("Error - " + statusCode + ". Msg" + errorObj.get("message"));
+                // JSONParser parser = new JSONParser();
+                // JSONObject responseObj = (JSONObject) parser.parse(EntityUtils.toString(response.getEntity()));
+                // JSONObject errorObj = (JSONObject) responseObj.get("error");
+                // manifestOrder.setStatus("Error - " + statusCode + ". Msg" + errorObj.get("message"));
                 System.out.println("EID Lab Results POST: There was an error sending lab id = " + manifestOrder.getId());
                 log.warn("EID Lab Results POST: There was an error sending lab id = " + manifestOrder.getId());
                 // throw new RuntimeException("Failed with HTTP error code : " + statusCode + ". Error msg: " + errorObj.get("message"));
@@ -134,11 +134,13 @@ public class EIDVLLabSystemWebRequest extends LabWebRequest {
                 System.out.println("EID Lab Results POST: Successfully pushed a EID lab test id " + manifestOrder.getId());
                 log.info("EID Lab Results POST: Successfully pushed a EID lab test id " + manifestOrder.getId());
             } else if (statusCode == 403 || statusCode == 422) {
-                JSONParser parser = new JSONParser();
-                JSONObject responseObj = (JSONObject) parser.parse(EntityUtils.toString(response.getEntity()));
-                JSONObject errorObj = (JSONObject) responseObj.get("error");
-                System.out.println("EID Lab Results POST: Error while submitting manifest sample. " + "Error - " + statusCode + ". Msg" + errorObj.get("message"));
-                log.error("EID Lab Results POST: Error while submitting manifest sample. " + "Error - " + statusCode + ". Msg" + errorObj.get("message"));
+                // JSONParser parser = new JSONParser();
+                // JSONObject responseObj = (JSONObject) parser.parse(EntityUtils.toString(response.getEntity()));
+                // JSONObject errorObj = (JSONObject) responseObj.get("error");
+                // System.out.println("EID Lab Results POST: Error while submitting manifest sample. " + "Error - " + statusCode + ". Msg" + errorObj.get("message"));
+                // log.error("EID Lab Results POST: Error while submitting manifest sample. " + "Error - " + statusCode + ". Msg" + errorObj.get("message"));
+                System.out.println("EID Lab Results POST: Error while submitting manifest sample. " + "Error - " + statusCode);
+                log.error("EID Lab Results POST: Error while submitting manifest sample. " + "Error - " + statusCode);
             }
 
             kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
