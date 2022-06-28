@@ -22,7 +22,7 @@ import java.io.IOException;
 public class KenyaemrOrderRestController extends BaseRestController {
     protected final Log log = LogFactory.getLog(getClass());
 
-    @RequestMapping(method = RequestMethod.POST, value = "/labresults") // end point for processing individual lab results
+    @RequestMapping(method = RequestMethod.POST, value = "/labresults") // end point for processing individual lab results e,g http://localhost:8080/kenyaemr/ws/rest/v1/kemrorder/labresults
     @ResponseBody
     public Object processIncomingViralLoadResults(HttpServletRequest request) {
         String requestBody = null;
