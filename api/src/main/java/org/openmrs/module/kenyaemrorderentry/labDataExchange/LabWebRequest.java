@@ -73,7 +73,7 @@ public abstract class LabWebRequest {
         }
 
         test.put("dob", dob);
-        test.put("patient_name", fullName);
+        //test.put("patient_name", fullName);
         test.put("sex", patient.getGender().equals("M") ? "1" : patient.getGender().equals("F") ? "2" : "3");
         //test.put("datecollected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
         //test.put("sampletype", manifestType.toString());
@@ -92,6 +92,7 @@ public abstract class LabWebRequest {
             //API differences
             test.put("sample_type", sampleType);
             test.put("date_collected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
+            test.put("pat_name", fullName);
 
             if(heiDetailsObject !=null) {
                 test.put("infant_prophylaxis", heiDetailsObject.get("prophylaxisAnswer").toString());
@@ -104,6 +105,8 @@ public abstract class LabWebRequest {
             test.put("hei_id", heiNumber != null ? heiNumber.getIdentifier() : "");
             test.put("mother_age", heiMothersAgeObject.get("mothersAge") != null ? heiMothersAgeObject.get("mothersAge").toString() : "" );
             test.put("mother_ccc", Utils.getMothersUniquePatientNumber(patient));
+            
+            test.put("ccc_no", cccNumber != null ? cccNumber.getIdentifier() : "");
         } else if (manifestType == LabManifest.VL_TYPE) {
 
             System.out.println("Lab Results POST: populating payload for VL Type");
@@ -116,6 +119,7 @@ public abstract class LabWebRequest {
             //API differences
             test.put("sampletype", sampleType);
             test.put("datecollected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
+            test.put("patient_name", fullName);
 
             SimpleObject regimenDetails = RegimenMappingUtils.buildRegimenChangeObject(currentRegimenEncounter.getObs(), currentRegimenEncounter);
             String regimenName = (String) regimenDetails.get("regimenShortDisplay");
