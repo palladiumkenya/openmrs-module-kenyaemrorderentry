@@ -149,6 +149,7 @@ public class EIDVLLabSystemWebRequest extends LabWebRequest {
             }
             Context.flushSession();
 
+            System.out.println("EID Lab Results POST: Push Successfull");
             return(true);
         } catch (Exception e) {
             System.out.println("EID Lab Results POST: Could not push requests to the lab! " + e.getMessage());

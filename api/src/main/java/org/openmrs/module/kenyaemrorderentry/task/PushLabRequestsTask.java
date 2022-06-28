@@ -96,7 +96,8 @@ public class PushLabRequestsTask extends AbstractTask {
 
                     LabWebRequest postRequest;
 
-                    if (LabOrderDataExchange.isEidVlLabSystem()) {
+                    //if (LabOrderDataExchange.isEidVlLabSystem()) { // Cannot work in a multiuser system
+                    if(toProcess.getManifestType() == LabManifest.EID_TYPE) {
                         postRequest = new EIDVLLabSystemWebRequest();
                     } else {
                         postRequest = new LabwareSystemWebRequest();
