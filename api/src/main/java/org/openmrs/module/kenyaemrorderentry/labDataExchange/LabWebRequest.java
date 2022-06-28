@@ -11,7 +11,6 @@ import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyacore.RegimenMappingUtils;
-import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 import org.openmrs.module.kenyaemrorderentry.util.Utils;
 import org.openmrs.ui.framework.SimpleObject;
@@ -39,9 +38,9 @@ public abstract class LabWebRequest {
     }
     public abstract boolean checkRequirements();
 
-    public abstract boolean postSamples(LabManifestOrder manifestOrder, String manifestStatus) throws IOException;
+    public abstract void postSamples(LabManifestOrder manifestOrder, String manifestStatus) throws IOException;
 
-    public abstract void pullResult(List<Integer> orderIds, List<Integer> manifestOrderIds, LabManifest manifestToUpdateResults) throws IOException;
+    public abstract void pullResult(List<Integer> orderIds, List<Integer> manifestOrderIds) throws IOException;
 
     /**
      * Generate cross cutting object for post request
@@ -81,28 +80,23 @@ public abstract class LabWebRequest {
         test.put("patient_identifier", cccNumber != null ? cccNumber.getIdentifier() : "");
         test.put("lab", "");
 
-        System.out.println("Lab Results POST: Manifest Type is: " + manifestType);
-        if (manifestType == LabManifest.EID_TYPE) { // we are using 1 for EID and 2 for VL
-            System.out.println("Lab Results POST: populating payload for EID Type");
+
+        if (manifestType == 1) { // we are using 1 for EID and 2 for VL
             PatientIdentifier heiNumber = patient.getPatientIdentifier(Utils.getHeiNumberIdentifierType());
             SimpleObject heiDetailsObject = getHeiDetailsForEidPostObject(o.getPatient(),o);
             SimpleObject heiMothersAgeObject = getHeiMothersAge(o.getPatient());
             if(heiDetailsObject !=null) {
-                test.put("prophylaxis", heiDetailsObject.get("prophylaxisAnswer").toString());
-                test.put("pcr_sample_code", heiDetailsObject.get("pcrSampleCodeAnswer").toString());
+                test.put("infant_prophylaxis", heiDetailsObject.get("prophylaxisAnswer").toString());
+                test.put("pcr_code", heiDetailsObject.get("pcrSampleCodeAnswer").toString());
                 test.put("entry_point", heiDetailsObject.get("entryPointAnswer").toString());
-                test.put("infant_feeding_code", heiDetailsObject.get("feedingMethodAnswer").toString());
-                test.put("pmtct_regimen_of_mother", heiDetailsObject.get("mothersRegimenAnswer").toString());
-                test.put("mother_vl_result", heiDetailsObject.get("validMothersVL").toString()); // vl within last 6 months
+                test.put("infant_feeding", heiDetailsObject.get("feedingMethodAnswer").toString());
+                test.put("mother_pmtct", heiDetailsObject.get("mothersRegimenAnswer").toString());
+                test.put("mother_vl_res", heiDetailsObject.get("validMothersVL").toString()); // vl within last 6 months
             }
-            test.put("hei_identifier", heiNumber != null ? heiNumber.getIdentifier() : "");
-            test.put("age_of_mother", heiMothersAgeObject.get("mothersAge").toString() != null ? heiMothersAgeObject.get("mothersAge").toString() : "" );
-            test.put("ccc_number_of_mother", Utils.getMothersUniquePatientNumber(patient));
-            test.put("pmtct_regimen_of_mother", heiDetailsObject.get("mothersRegimenAnswer").toString());
-            test.put("mother_vl_result", ""); // within the last 6 months
-
-        } else if (manifestType == LabManifest.VL_TYPE) {
-            System.out.println("Lab Results POST: populating payload for VL Type");
+            test.put("hei_id", heiNumber != null ? heiNumber.getIdentifier() : "");
+            test.put("mother_age", heiMothersAgeObject.get("mothersAge").toString() != null ? heiMothersAgeObject.get("mothersAge").toString() : "" );
+            test.put("mother_ccc", Utils.getMothersUniquePatientNumber(patient));
+        } else if (manifestType == 2) {
             Encounter originalRegimenEncounter = RegimenMappingUtils.getFirstEncounterForProgram(patient, "ARV");
             Encounter currentRegimenEncounter = RegimenMappingUtils.getLastEncounterForProgram(patient, "ARV");
             if (currentRegimenEncounter == null) {
@@ -161,7 +155,6 @@ public abstract class LabWebRequest {
         String prophylaxisAnswer = "";
         Integer prophylaxisQuestion = 1282;
         String mothersRegimenAnswer = "";
-        Integer mothersRegimenQuestion = 1088;
         String pcrSampleCodeAnswer = "";
         String feedingMethodAnswer = "";
         Integer feedingMethodQuestion = 1151;
@@ -210,32 +203,12 @@ public abstract class LabWebRequest {
                         prophylaxisAnswer = "4";      //Other
                     }
                 }
-                //pmtct_regimen_of_mother
-                if (obs.getConcept().getConceptId().equals(mothersRegimenQuestion)) {
-                    Integer heiMotherRegimenObsAnswer = obs.getValueCoded().getConceptId();
-                    if (heiMotherRegimenObsAnswer.equals(1652)) {
-                        mothersRegimenAnswer = "PM3";    //PM3= AZT+3TC+NVP
-                    } else if (heiMotherRegimenObsAnswer.equals(160124)) {
-                        mothersRegimenAnswer = "PM4";      //AZT+ 3TC+ EFV
-                    } else if (heiMotherRegimenObsAnswer.equals(162561)) {
-                        mothersRegimenAnswer = "PM5";      //AZT+3TC+ LPV/r
-                    } else if (heiMotherRegimenObsAnswer.equals(162565)) {
-                        mothersRegimenAnswer = "PM6";     //TDC+3TC+NVP
-                    } else if (heiMotherRegimenObsAnswer.equals(164505)) {
-                        mothersRegimenAnswer = "PM9";     //TDF+3TC+EFV
-                    } else if (heiMotherRegimenObsAnswer.equals(164511)) {
-                        mothersRegimenAnswer = "PM10";     //AZT+3TC+ATV/r
-                    } else if (heiMotherRegimenObsAnswer.equals(164512)) {
-                        mothersRegimenAnswer = "PM11";     //TDF+3TC+ATV/r
-                    } else if (heiMotherRegimenObsAnswer.equals(164512)) {
-                        mothersRegimenAnswer = "PM11";     //TDF+3TC+ATV/r
-                    }
-                }
+
             }
         }
 
         if (lastHeiCWCFollowupEncounter != null) {
-            for (Obs obs : lastHeiEnrollmentEncounter.getObs()) {
+            for (Obs obs : lastHeiCWCFollowupEncounter.getObs()) {
                 // Baby feeding method
                 if (obs.getConcept().getConceptId().equals(feedingMethodQuestion)) {
                     Integer heiBabyFeedingObsAnswer = obs.getValueCoded().getConceptId();
@@ -256,6 +229,30 @@ public abstract class LabWebRequest {
             Date lastVLResultDate = (Date) vlObject.get("lastVlDate");
             if (Utils.daysBetween(lastVLResultDate, new Date()) <= 183) {
                 validMothersVL = vlObject.get("lastVl").toString();
+            }
+        }
+
+        //pmtct_regimen_of_mother
+        SimpleObject mothersRegimenObject = Utils.getHeiMothersCurrentRegimen(o.getPatient());
+        String currentMothersRegimen = "";
+        if(mothersRegimenObject !=null){
+            currentMothersRegimen = mothersRegimenObject.get("mothersCurrentRegimen").toString();
+            if (currentMothersRegimen.equals("AZT/3TC/NVP")) {
+                mothersRegimenAnswer = "PM3";    //PM3= AZT+3TC+NVP
+            } else if (currentMothersRegimen.equals("AZT/3TC/EFV")) {
+                mothersRegimenAnswer = "PM4";      //AZT+ 3TC+ EFV
+            } else if (currentMothersRegimen.equals("AZT/3TC/LPV/r")) {
+                mothersRegimenAnswer = "PM5";      //AZT+3TC+ LPV/r
+            } else if (currentMothersRegimen.equals("TDF/3TC/NVP")) {
+                mothersRegimenAnswer = "PM6";     //TDC+3TC+NVP
+            } else if (currentMothersRegimen.equals("TDF/3TC/EFV")) {
+                mothersRegimenAnswer = "PM9";     //TDF+3TC+EFV
+            } else if (currentMothersRegimen.equals("AZT/3TC/ATV/r")) {
+                mothersRegimenAnswer = "PM10";     //AZT+3TC+ATV/r
+            } else if (currentMothersRegimen.equals("TDF/3TC/ATV/r")) {
+                mothersRegimenAnswer = "PM11";     //TDF+3TC+ATV/r
+            } else if (currentMothersRegimen.equals("TDF/3TC/ATV/r")) {
+                mothersRegimenAnswer = "PM11";     //TDF+3TC+ATV/r
             }
         }
 
