@@ -75,19 +75,24 @@ public abstract class LabWebRequest {
         test.put("dob", dob);
         test.put("patient_name", fullName);
         test.put("sex", patient.getGender().equals("M") ? "1" : patient.getGender().equals("F") ? "2" : "3");
-        test.put("datecollected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
-        test.put("sampletype", manifestType.toString());
+        //test.put("datecollected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
+        //test.put("sampletype", manifestType.toString());
         test.put("order_no", o.getOrderId().toString());
         test.put("patient_identifier", cccNumber != null ? cccNumber.getIdentifier() : "");
         test.put("lab", "");
 
         System.out.println("Lab Results POST: Manifest Type is: " + manifestType);
         if (manifestType == LabManifest.EID_TYPE) { // we are using 1 for EID and 2 for VL
-            
+
             System.out.println("Lab Results POST: populating payload for EID Type");
             PatientIdentifier heiNumber = patient.getPatientIdentifier(Utils.getHeiNumberIdentifierType());
             SimpleObject heiDetailsObject = getHeiDetailsForEidPostObject(o.getPatient(),o);
             SimpleObject heiMothersAgeObject = getHeiMothersAge(o.getPatient());
+
+            //API differences
+            test.put("sample_type", sampleType);
+            test.put("date_collected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
+
             if(heiDetailsObject !=null) {
                 test.put("infant_prophylaxis", heiDetailsObject.get("prophylaxisAnswer").toString());
                 test.put("pcr_code", heiDetailsObject.get("pcrSampleCodeAnswer").toString());
@@ -97,7 +102,7 @@ public abstract class LabWebRequest {
                 test.put("mother_vl_res", heiDetailsObject.get("validMothersVL").toString()); // vl within last 6 months
             }
             test.put("hei_id", heiNumber != null ? heiNumber.getIdentifier() : "");
-            test.put("mother_age", heiMothersAgeObject.get("mothersAge").toString() != null ? heiMothersAgeObject.get("mothersAge").toString() : "" );
+            test.put("mother_age", heiMothersAgeObject.get("mothersAge") != null ? heiMothersAgeObject.get("mothersAge").toString() : "" );
             test.put("mother_ccc", Utils.getMothersUniquePatientNumber(patient));
         } else if (manifestType == LabManifest.VL_TYPE) {
 
@@ -107,6 +112,10 @@ public abstract class LabWebRequest {
             if (currentRegimenEncounter == null) {
                 return test;
             }
+
+            //API differences
+            test.put("sampletype", sampleType);
+            test.put("datecollected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
 
             SimpleObject regimenDetails = RegimenMappingUtils.buildRegimenChangeObject(currentRegimenEncounter.getObs(), currentRegimenEncounter);
             String regimenName = (String) regimenDetails.get("regimenShortDisplay");
