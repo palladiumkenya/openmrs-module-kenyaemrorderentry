@@ -80,8 +80,8 @@ public abstract class LabWebRequest {
 
         if (manifestType == 1) { // we are using 1 for EID and 2 for VL
             PatientIdentifier heiNumber = patient.getPatientIdentifier(Utils.getHeiNumberIdentifierType());
-            SimpleObject heiDetailsObject = getHeiDetailsForEidPostObject(o.getPatient(),o);
-            SimpleObject heiMothersAgeObject = getHeiMothersAge(o.getPatient());
+            SimpleObject heiDetailsObject = getHeiDetailsForEidPostObject(patient,o);
+            SimpleObject heiMothersAgeObject = Utils.getHeiMothersAge(patient);
 
             //API differences
             test.put("sample_type", sampleType);
@@ -100,11 +100,9 @@ public abstract class LabWebRequest {
             test.put("sample_type", "DBS");
             test.put("hei_id", heiNumber != null ? heiNumber.getIdentifier() : "");
             test.put("mother_age", heiMothersAgeObject != null ? heiMothersAgeObject.get("mothersAge").toString() : "" );
-            test.put("mother_ccc", Utils.getMothersUniquePatientNumber(patient));
-            
-            test.put("ccc_no", cccNumber != null ? cccNumber.getIdentifier() : "");
-        } else if (manifestType == LabManifest.VL_TYPE) {
-            System.out.println("Lab Results POST: populating payload for VL Type");
+            test.put("mother_ccc", Utils.getMothersUniquePatientNumber(patient) !=null ? Utils.getMothersUniquePatientNumber(patient) : "");
+            test.put("ccc_no",  cccNumber != null ? cccNumber.getIdentifier() : "");
+        } else if (manifestType == 2) {
             Encounter originalRegimenEncounter = RegimenMappingUtils.getFirstEncounterForProgram(patient, "ARV");
             Encounter currentRegimenEncounter = RegimenMappingUtils.getLastEncounterForProgram(patient, "ARV");
             if (currentRegimenEncounter == null) {
