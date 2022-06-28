@@ -3,6 +3,8 @@ package org.openmrs.module.kenyaemrorderentry.fragment.controller.manifest;
 import org.openmrs.Concept;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
+import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange;
+import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabwareSystemWebRequest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaui.form.AbstractWebForm;
 import org.openmrs.ui.framework.SimpleObject;
@@ -35,6 +37,8 @@ public class ManifestFormFragmentController {
         model.addAttribute("countyList", getCountyList());
         model.addAttribute("returnUrl", returnUrl);
 
+        LabwareSystemWebRequest lswr = new LabwareSystemWebRequest();
+        lswr.testPull();
     }
 
     private List<String> manifestStatus() {

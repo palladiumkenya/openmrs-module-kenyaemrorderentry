@@ -123,7 +123,9 @@ public class GeneralLabOrdersFragmentController {
 
             LabWebRequest postRequest;
 
-            if (LabOrderDataExchange.isEidVlLabSystem()) {
+            System.out.println("LAB Order Create: Order sample type is set as: " + sampleType);
+            //if (LabOrderDataExchange.isEidVlLabSystem()) {
+            if(manifest.getManifestType() == LabManifest.EID_TYPE) {
                 postRequest = new EIDVLLabSystemWebRequest();
                 postRequest.setManifestType(manifest.getManifestType());
             } else {
@@ -132,6 +134,7 @@ public class GeneralLabOrdersFragmentController {
 
             }
             ObjectNode payload = postRequest.completePostPayload(order, dateSampleCollected, dateSampleSeparated, sampleType, manifest.getIdentifier());
+            //ObjectNode payload = postRequest.completePostPayload(order, dateSampleCollected, dateSampleSeparated, sampleType, String.valueOf(manifest.getId()));
             // TODO: check if the payload is not null. Currently, an empty payload is generated if nascop code is null
             if (!payload.isEmpty()) {
                 labOrder.setPayload(payload.toString());

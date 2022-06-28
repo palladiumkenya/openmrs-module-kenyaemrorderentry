@@ -46,9 +46,12 @@ import static org.openmrs.module.metadatasharing.util.MetadataSharingGlobalPrope
 
 public class LabOrderDataExchange {
 
-    public static final String GP_LAB_SERVER_REQUEST_URL = "chai.viral_load_server_url";
-    public static final String GP_LAB_SERVER_RESULT_URL = "chai.viral_load_server_result_url";
-    public static final String GP_LAB_SERVER_API_TOKEN = "chai.viral_load_server_api_token";
+    public static final String GP_VL_LAB_SERVER_REQUEST_URL = "chai.viral_load_server_url";
+    public static final String GP_VL_LAB_SERVER_RESULT_URL = "chai.viral_load_server_result_url";
+    public static final String GP_VL_LAB_SERVER_API_TOKEN = "chai.viral_load_server_api_token";
+    public static final String GP_EID_LAB_SERVER_REQUEST_URL = "eid.viral_load_server_url";
+    public static final String GP_EID_LAB_SERVER_RESULT_URL = "eid.viral_load_server_result_url";
+    public static final String GP_EID_LAB_SERVER_API_TOKEN = "eid.viral_load_server_api_token";
     public static final String GP_MANIFEST_LAST_PROCESSED = "kemrorder.last_processed_manifest";// used when fetching results from the server
     public static final String GP_RETRY_PERIOD_FOR_ORDERS_WITH_INCOMPLETE_RESULTS = "kemrorder.retry_period_for_incomplete_vl_result";
     public static final String GP_LAB_TAT_FOR_VL_RESULTS = "kemrorder.viral_load_result_tat_in_days";
@@ -504,8 +507,9 @@ public class LabOrderDataExchange {
      */
     public String processIncomingViralLoadLabResults(String resultPayload) {
 
-        JsonParser parser = new JsonParser();
-        JsonElement rootNode = parser.parse(resultPayload);
+        // JsonParser parser = new JsonParser();
+        // JsonElement rootNode = parser.parse(resultPayload);
+        JsonElement rootNode = JsonParser.parseString(resultPayload);
 
         JsonArray resultsObj = null;
         String statusMsg;
@@ -523,40 +527,61 @@ public class LabOrderDataExchange {
             e.printStackTrace();
         }
 
-
         if (resultsObj.size() > 0) {
             for (int i = 0; i < resultsObj.size(); i++) {
 
                 JsonObject o =  resultsObj.get(i).getAsJsonObject();
                 Integer specimenId = o.get("order_number").getAsInt();
-                String dateSampleReceived = !o.get("date_received").isJsonNull() ? o.get("date_received").getAsString() : "";
-                String dateSampleTested = !o.get("date_tested").isJsonNull() ? o.get("date_tested").getAsString() : "";
                 Date sampleReceivedDate = null;
                 Date sampleTestedDate = null;
+                String dateSampleReceived = "";
+                String dateSampleTested = "";
+                String specimenRejectedReason = "";
+
+                if (LabOrderDataExchange.isEidVlLabSystem()) {
+                    dateSampleReceived = !o.get("date_received").isJsonNull() ? o.get("date_received").getAsString() : "";
+                    dateSampleTested = !o.get("date_tested").isJsonNull() ? o.get("date_tested").getAsString() : "";
+                    specimenRejectedReason = o.has("rejected_reason") ? o.get("rejected_reason").getAsString() : "";
+                } else {
+                    JsonObject dateReceivedObject = o.get("date_received").getAsJsonObject();
+                    dateSampleReceived = dateReceivedObject.get("date").getAsString().trim();
+                    JsonObject dateTestedObject = o.get("date_tested").getAsJsonObject();
+                    dateSampleTested = dateTestedObject.get("date").getAsString().trim();
+                    specimenRejectedReason = "";
+                }
 
                 if (StringUtils.isNotBlank(dateSampleReceived)) {
                     try {
                         sampleReceivedDate = Utils.getSimpleDateFormat(LAB_SYSTEM_DATE_PATTERN).parse(dateSampleReceived);
+                        System.out.println("Lab Results Get Results: Got sample receive date: " + sampleReceivedDate);
                     } catch (ParseException e) {
-                        //e.printStackTrace();
+                        System.err.println("Lab Results Get Results: Unable to get sample receive date" + e.getMessage());
+                        e.printStackTrace();
                     }
                 }
 
                 if (StringUtils.isNotBlank(dateSampleTested)) {
                     try {
                         sampleTestedDate = Utils.getSimpleDateFormat(LAB_SYSTEM_DATE_PATTERN).parse(dateSampleTested);
+                        System.out.println("Lab Results Get Results: Got sample tested date: " + sampleTestedDate);
                     } catch (ParseException e) {
-                        //e.printStackTrace();
+                        System.err.println("Lab Results Get Results: Unable to get sample tested date" + e.getMessage());
+                        e.printStackTrace();
                     }
                 }
 
-                String specimenReceivedStatus = o.get("sample_status").getAsString();// Complete, Incomplete, Rejected
-                String specimenRejectedReason = o.has("rejected_reason") ? o.get("rejected_reason").getAsString() : "";
-                String results = !o.get("result").isJsonNull() ? o.get("result").getAsString() : null; //1 - negative, 2 - positive, 5 - inconclusive
+                String specimenReceivedStatus = o.get("sample_status").getAsString().trim();// Complete, Incomplete, Rejected
+                //String specimenRejectedReason = o.has("rejected_reason") ? o.get("rejected_reason").getAsString() : "";
+                //String results = !o.get("result").isJsonNull() ? o.get("result").getAsString() : null; //1 - negative, 2 - positive, 5 - inconclusive
+                //String labNumber = o.get("lab_no").getAsString().trim();
+                String results = o.get("result").getAsString().trim();
+                //updateOrder(specimenId, results, specimenReceivedStatus, sampleReceivedDate, sampleTestedDate, labNumber);
+                //updateOrder(specimenId, results, specimenReceivedStatus, sampleReceivedDate, sampleTestedDate);
                 updateOrder(specimenId, results, specimenReceivedStatus, specimenRejectedReason, sampleReceivedDate, sampleTestedDate);
                 // update manifest object to reflect received status
             }
         }
+        System.out.println("Lab Results Get Results: Viral load results pulled and updated successfully in the database");
         return "Viral load results pulled and updated successfully in the database";
     }
 
@@ -567,8 +592,8 @@ public class LabOrderDataExchange {
      * @param specimenStatus
      * @param rejectedReason
      */
-    private void updateOrder(Integer orderId, String result, String specimenStatus, String rejectedReason, Date dateSampleReceived, Date dateSampleTested) {
-
+    //private void updateOrder(Integer orderId, String result, String specimenStatus, Date dateSampleReceived, Date dateSampleTested, String labNumber) {
+    private void updateOrder(Integer orderId, String result, String specimenStatus, String specimenRejectedReason, Date dateSampleReceived, Date dateSampleTested) {
         Order od = orderService.getOrder(orderId);
         LabManifestOrder manifestOrder = kenyaemrOrdersService.getLabManifestOrderByOrderId(orderService.getOrder(orderId));
         Date orderDiscontinuationDate = null;
@@ -578,16 +603,16 @@ public class LabOrderDataExchange {
             orderDiscontinuationDate = aMomentBefore(new Date());
         }
 
+        System.out.println("Lab Results Get Results: Setting discontinuation date to: " + orderDiscontinuationDate);
+
         if (od != null && od.isActive()) {
-            if ((StringUtils.isNotBlank(specimenStatus) && specimenStatus.equals("Rejected")) || StringUtils.isNotBlank(rejectedReason) || (StringUtils.isNotBlank(result) && result.equals("Collect New Sample"))) {
+            if ((StringUtils.isNotBlank(specimenStatus) && specimenStatus.equals("Rejected")) || (StringUtils.isNotBlank(result) && result.equals("Collect New Sample"))) {
                 // Get all active VL orders and discontinue them
                 Map<String, Order> ordersToProcess = getOrdersToProcess(od, vlTestConceptQuantitative);
                 Order o1 = ordersToProcess.get("orderToRetain");
                 Order o2 = ordersToProcess.get("orderToVoid");
                 String discontinuationReason = "";
-                if (StringUtils.isNotBlank(rejectedReason)){
-                    discontinuationReason = rejectedReason;
-                } else if (result.equals("Collect New Sample")) {
+                if (result.equalsIgnoreCase("Collect New Sample")) {
                     discontinuationReason = "Collect New Sample";
                 } else {
                     discontinuationReason = "Rejected specimen";
@@ -595,6 +620,7 @@ public class LabOrderDataExchange {
                 try {
                     // discontinue one order, and void the other.
                     // Discontinuing both orders result in one of them remaining active
+                    System.out.println("Lab Results Get Results: Start order discontinue");
                     orderService.discontinueOrder(o1, discontinuationReason, orderDiscontinuationDate, o1.getOrderer(),
                             o1.getEncounter());
                     orderService.voidOrder(o2, discontinuationReason);
@@ -619,7 +645,9 @@ public class LabOrderDataExchange {
                 String aboveMillionResult = "> 10,000,000 cp/ml";
                 Obs o = new Obs();
 
-                if (result.equals(lDLResult)) {
+                conceptToRetain = vlTestConceptQualitative;
+                //conceptToRetain = vlTestConceptQuantitative;
+                if (result.equalsIgnoreCase(lDLResult)) {
                     conceptToRetain = vlTestConceptQualitative;
                     o.setValueCoded(LDLConcept);
                 } else if (result.equalsIgnoreCase(aboveMillionResult)) {
@@ -627,7 +655,9 @@ public class LabOrderDataExchange {
                     o.setValueNumeric(new Double(10000001));
                 } else {
                     conceptToRetain = vlTestConceptQuantitative;
-                    o.setValueNumeric(Double.valueOf(result));
+                    //o.setValueNumeric(Double.valueOf(result));
+                    //o.setValueCoded(conceptToRetain);
+                    o.setValueNumeric(new Double(1));
                 }
 
                 // In order to record results both qualitative (LDL) and quantitative,
@@ -642,7 +672,8 @@ public class LabOrderDataExchange {
                 o.setConcept(conceptToRetain);
                 o.setDateCreated(orderDiscontinuationDate);
                 o.setCreator(Context.getUserService().getUser(1));
-                o.setObsDatetime(orderToRetain.getDateActivated());
+                ////o.setObsDatetime(orderToRetain.getDateActivated());
+                o.setObsDatetime(new Date());
                 o.setPerson(od.getPatient());
                 o.setOrder(orderToRetain);
 
@@ -659,6 +690,7 @@ public class LabOrderDataExchange {
                     try {
 
                         encounterService.saveEncounter(enc);
+                        System.out.println("Lab Results Get Results: Start order discontinue");
                         orderService.discontinueOrder(orderToRetain, "Results received", orderDiscontinuationDate, orderToRetain.getOrderer(),
                                 orderToRetain.getEncounter());
                         orderService.voidOrder(orderToVoid, "Duplicate VL order");
@@ -689,6 +721,7 @@ public class LabOrderDataExchange {
                     try {
 
                         encounterService.saveEncounter(enc);
+                        System.out.println("Lab Results Get Results: Start order discontinue");
                         orderService.discontinueOrder(orderToRetain, "Results received", orderDiscontinuationDate, orderToRetain.getOrderer(),
                                 orderToRetain.getEncounter());
                         // this is really a hack to ensure that order date_stopped is filled, otherwise the order will remain active
@@ -735,7 +768,7 @@ public class LabOrderDataExchange {
                         try {
 
                             encounterService.saveEncounter(enc);
-                            encounterService.saveEncounter(enc);
+                            System.out.println("Lab Results Get Results: Start order discontinue");
                             orderService.discontinueOrder(savedOrder, "Results received", orderDiscontinuationDate, savedOrder.getOrderer(),
                                     savedOrder.getEncounter());
                             // this is really a hack to ensure that order date_stopped is filled, otherwise the order will remain active
