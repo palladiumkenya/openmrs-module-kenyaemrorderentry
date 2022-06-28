@@ -75,8 +75,8 @@ public abstract class LabWebRequest {
         test.put("dob", dob);
         test.put("patient_name", fullName);
         test.put("sex", patient.getGender().equals("M") ? "1" : patient.getGender().equals("F") ? "2" : "3");
-        test.put("datecollected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
-        test.put("sampletype", manifestType.toString());
+        //test.put("datecollected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
+        //test.put("sampletype", manifestType.toString());
         test.put("order_no", o.getOrderId().toString());
         test.put("patient_identifier", cccNumber != null ? cccNumber.getIdentifier() : "");
         test.put("lab", "");
@@ -87,6 +87,11 @@ public abstract class LabWebRequest {
             PatientIdentifier heiNumber = patient.getPatientIdentifier(Utils.getHeiNumberIdentifierType());
             SimpleObject heiDetailsObject = getHeiDetailsForEidPostObject(o.getPatient(),o);
             SimpleObject heiMothersAgeObject = getHeiMothersAge(o.getPatient());
+
+            //API differences
+            test.put("sample_type", sampleType);
+            test.put("date_collected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
+
             if(heiDetailsObject !=null) {
                 test.put("infant_prophylaxis", heiDetailsObject.get("prophylaxisAnswer").toString());
                 test.put("pcr_code", heiDetailsObject.get("pcrSampleCodeAnswer").toString());
@@ -108,6 +113,10 @@ public abstract class LabWebRequest {
             if (currentRegimenEncounter == null) {
                 return test;
             }
+
+            //API differences
+            test.put("sampletype", sampleType);
+            test.put("datecollected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
 
             SimpleObject regimenDetails = RegimenMappingUtils.buildRegimenChangeObject(currentRegimenEncounter.getObs(), currentRegimenEncounter);
             String regimenName = (String) regimenDetails.get("regimenShortDisplay");

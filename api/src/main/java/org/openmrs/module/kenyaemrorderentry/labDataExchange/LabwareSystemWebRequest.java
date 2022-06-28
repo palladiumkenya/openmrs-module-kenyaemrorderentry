@@ -368,7 +368,7 @@ public class LabwareSystemWebRequest extends LabWebRequest {
             node.put("female_status", "none");
         }
         node.put("lab", "7");
-        node.put("facility_email", "");
+        node.put("facility_email", "info@example.com");
         node.put("recency_id", "");
         node.put("emr_shipment", StringUtils.isNotBlank(manifestID) ? manifestID : "");
         node.put("date_separated", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleSeparated));
