@@ -285,8 +285,9 @@ public class LabwareSystemWebRequest extends LabWebRequest {
             //     ProcessViralLoadResults.processPayload(json);// the only way that works for now is posting this through REST
             if (responseArray != null && !responseArray.isEmpty()) {
                 // update orders
-                LabOrderDataExchange lode = new LabOrderDataExchange();
-                lode.processIncomingViralLoadLabResults(jsonString);
+                // LabOrderDataExchange lode = new LabOrderDataExchange();
+                // lode.processIncomingViralLoadLabResults(jsonString);
+                ProcessViralLoadResults.processPayload(jsonString);
                 // update manifest details appropriately for the next execution
                 String [] incompleteStatuses = new String []{"Incomplete"};
 

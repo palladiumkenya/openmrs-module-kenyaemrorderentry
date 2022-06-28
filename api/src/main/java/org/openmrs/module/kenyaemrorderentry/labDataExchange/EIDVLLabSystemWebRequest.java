@@ -183,77 +183,118 @@ public class EIDVLLabSystemWebRequest extends LabWebRequest {
         CloseableHttpClient httpClient = HttpClientBuilder.create().build();
 
         try {
-            manifestToUpdateResults = kenyaemrOrdersService.getLabManifestOrderById(manifestOrderIds.get(0)).getLabManifest();
 
-            //Define a postRequest request
-            HttpPost postRequest = new HttpPost(serverUrl);
+            // //Define a postRequest request
+            // HttpPost postRequest = new HttpPost(serverUrl);
 
-            //Set the API media type in http content-type header
-            postRequest.addHeader("content-type", "application/json");
-            postRequest.addHeader("apikey", API_KEY);
+            // //Set the API media type in http content-type header
+            // postRequest.addHeader("content-type", "application/json");
+            // postRequest.addHeader("apikey", API_KEY);
 
-            ObjectNode request = Utils.getJsonNodeFactory().objectNode();
-            request.put("test", manifestToUpdateResults.getManifestType().toString());
-            request.put("facility_code", Utils.getDefaultLocationMflCode(Utils.getDefaultLocation()));
-            request.put("order_numbers", StringUtils.join(orderIds, ","));
+            // ObjectNode request = Utils.getJsonNodeFactory().objectNode();
+            // request.put("test", manifestToUpdateResults.getManifestType().toString());
+            // request.put("facility_code", Utils.getDefaultLocationMflCode(Utils.getDefaultLocation()));
+            // request.put("order_numbers", StringUtils.join(orderIds, ","));
 
-            //Set the request post body
-            StringEntity userEntity = new StringEntity(request.toString());
-            postRequest.setEntity(userEntity);
+            // //Set the request post body
+            // StringEntity userEntity = new StringEntity(request.toString());
+            // postRequest.setEntity(userEntity);
 
-            //Send the request; It will immediately return the response in HttpResponse object if any
-            HttpResponse response = httpClient.execute(postRequest);
+            // //Send the request; It will immediately return the response in HttpResponse object if any
+            // HttpResponse response = httpClient.execute(postRequest);
 
 
-            //verify the valid error code first
-            int statusCode = response.getStatusLine().getStatusCode();
+            // //verify the valid error code first
+            // int statusCode = response.getStatusLine().getStatusCode();
 
-            if (statusCode == 429) { // too many requests. just terminate
-                System.out.println("The pull lab result scheduler has been configured to run at very short intervals. Please change this to at least 30min");
-                log.warn("The pull lab result scheduler has been configured to run at very short intervals. Please change this to at least 30min");
-                return;
-            }
+            // if (statusCode == 429) { // too many requests. just terminate
+            //     System.out.println("The pull lab result scheduler has been configured to run at very short intervals. Please change this to at least 30min");
+            //     log.warn("The pull lab result scheduler has been configured to run at very short intervals. Please change this to at least 30min");
+            //     return;
+            // }
+            // if (statusCode != 200) {
+            //     throw new RuntimeException("Failed with HTTP error code : " + statusCode);
+            // }
+
+            // String responseStringRaw = EntityUtils.toString(response.getEntity());
+            // String responseStringEscape = StringEscapeUtils.escapeJava(responseStringRaw);
+            // String strippedUnicodeChars = new UnicodeUnescaper().translate(responseStringEscape);
+
+            // String finalChars = StringEscapeUtils.unescapeJava(strippedUnicodeChars);
+
+            // Gson gson = new GsonBuilder().serializeNulls().create();
+            // JsonElement rootNode = gson.fromJson(finalChars, JsonElement.class);
+
+            // JsonArray resultArray = null;
+            // if(rootNode.isJsonObject()){
+            //     JsonObject jsonObject = rootNode.getAsJsonObject();
+            //     JsonElement vlResultArray = jsonObject.get("data");
+            //     if(vlResultArray.isJsonArray()){
+            //         resultArray = vlResultArray.getAsJsonArray();
+            //     }
+            // }
+
+            // JsonArray cleanedArray = new JsonArray();
+            // if (resultArray != null && !resultArray.isEmpty()) {
+            //     for (int i =0; i < resultArray.size(); i++) {
+            //         JsonObject result = resultArray.get(i).getAsJsonObject();
+            //         result.addProperty("full_names", "Replaced Name"); // this is a short workaround to handle data coming from eid/vl system and were pushed from kenyaemr with unicode literals
+            //         cleanedArray.add(result);
+
+            //     }
+            // }
+
+            String facilityCode = Utils.getDefaultLocationMflCode(Utils.getDefaultLocation());
+            //String facilityCode = "17747";
+            String orderNumbers = StringUtils.join(orderIds, ",");
+            URIBuilder builder = new URIBuilder(serverUrl);
+            builder.addParameter("mfl_code", facilityCode);
+            builder.addParameter("order_no", orderNumbers);
+            URI uri = builder.build();
+            System.out.println("Get Lab Results URL: " + uri);
+
+            HttpGet httpget = new HttpGet(uri);
+            httpget.addHeader("content-type", "application/x-www-form-urlencoded");
+            httpget.addHeader("Authorization", "Bearer " +API_KEY);
+            httpget.addHeader("Accept", "application/json");
+
+            CloseableHttpResponse response = httpClient.execute(httpget);
+
+            final int statusCode = response.getStatusLine().getStatusCode();
             if (statusCode != 200) {
                 throw new RuntimeException("Get Lab Results Failed with HTTP error code : " + statusCode);
             } else {
                 System.out.println("Get Lab Results: REST Call Success");
             }
 
-            String responseStringRaw = EntityUtils.toString(response.getEntity());
-            String responseStringEscape = StringEscapeUtils.escapeJava(responseStringRaw);
-            String strippedUnicodeChars = new UnicodeUnescaper().translate(responseStringEscape);
+//            //Testing
+           String jsonString = null;
+           HttpEntity entity = response.getEntity();
+           if (entity != null) {
+               BufferedReader rd = new BufferedReader(new InputStreamReader(entity.getContent()));
 
-            String finalChars = StringEscapeUtils.unescapeJava(strippedUnicodeChars);
+               try {
+                   jsonString = rd.lines().collect(Collectors.joining()).toString();
+                   System.out.println("Lab Results Get: Request JSON -> " + jsonString);
+               } finally {
+                   rd.close();
+               }
+           }
 
-            Gson gson = new GsonBuilder().serializeNulls().create();
-            JsonElement rootNode = gson.fromJson(finalChars, JsonElement.class);
-
-            JsonArray resultArray = null;
-            if(rootNode.isJsonObject()){
-                JsonObject jsonObject = rootNode.getAsJsonObject();
-                JsonElement vlResultArray = jsonObject.get("data");
-                if(vlResultArray.isJsonArray()){
-                    resultArray = vlResultArray.getAsJsonArray();
-                }
-            }
-
-            JsonArray cleanedArray = new JsonArray();
-            if (resultArray != null && !resultArray.isEmpty()) {
-                for (int i =0; i < resultArray.size(); i++) {
-                    JsonObject result = resultArray.get(i).getAsJsonObject();
-                    result.addProperty("full_names", "Replaced Name"); // this is a short workaround to handle data coming from eid/vl system and were pushed from kenyaemr with unicode literals
-                    cleanedArray.add(result);
-
-                }
-            }
+            JSONParser parser = new JSONParser();
+            // JSONObject responseObj = (JSONObject) parser.parse(jsonString);
+            ////JSONObject errorObj = (JSONObject) responseObj.get("error");
+            JSONArray responseArray = (JSONArray) parser.parse(jsonString);
 
 
-            if (resultArray != null && !resultArray.isEmpty()) {
-                String json = gson.toJson(cleanedArray);
-                //ProcessViralLoadResults.processPayload(json);// the only way that works for now is posting this through REST
+            // if (resultArray != null && !resultArray.isEmpty()) {
+            if (responseArray != null && !responseArray.isEmpty()) {
+                // String json = gson.toJson(cleanedArray);
+                // ProcessViralLoadResults.processPayload(json);// the only way that works for now is posting this through REST
                 // update orders
-                LabOrderDataExchange lode = new LabOrderDataExchange();
-                lode.processIncomingViralLoadLabResults(json);
+                // LabOrderDataExchange lode = new LabOrderDataExchange();
+                // lode.processIncomingViralLoadLabResults(json);
+                ProcessViralLoadResults.processPayload(jsonString);
 
                 // update manifest details appropriately for the next execution
                 String [] incompleteStatuses = new String []{"Incomplete"};
