@@ -359,7 +359,8 @@ public class EIDVLLabSystemWebRequest extends LabWebRequest {
     @Override
     public ObjectNode completePostPayload(Order o, Date dateSampleCollected, Date dateSampleSeparated, String sampleType, String manifestID) {
         ObjectNode node = baselinePostRequestPayload(o, dateSampleCollected, dateSampleSeparated, sampleType, manifestID);
-        node.put("mflCode", Utils.getDefaultLocationMflCode(null));
+        node.put("mfl_code", Utils.getDefaultLocationMflCode(null));
+        node.put("facility_email", "info@example.com");
         return node;
     }
 
