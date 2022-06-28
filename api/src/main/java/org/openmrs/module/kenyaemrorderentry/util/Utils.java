@@ -206,7 +206,9 @@ public class Utils {
                             Patient mother = Context.getPatientService().getPatient(personId);
                             PatientIdentifierType pit = MetadataUtils.existing(PatientIdentifierType.class,Utils.getUniquePatientNumberIdentifierType().getUuid());
                             PatientIdentifier cccObject = mother.getPatientIdentifier(pit);
-                            cccNumber = cccObject.getIdentifier();
+                            if(cccObject != null) {
+                                cccNumber = cccObject.getIdentifier();
+                            }
                         }
                     }
                 }
@@ -221,7 +223,9 @@ public class Utils {
                             Patient mother = Context.getPatientService().getPatient(personId);
                             PatientIdentifierType pit = MetadataUtils.existing(PatientIdentifierType.class, Utils.getUniquePatientNumberIdentifierType().getUuid());
                             PatientIdentifier cccObject = mother.getPatientIdentifier(pit);
-                            cccNumber = cccObject.getIdentifier();
+                            if(cccObject != null) {
+                                cccNumber = cccObject.getIdentifier();
+                            }
 
                         }
                     }
@@ -251,7 +255,9 @@ public class Utils {
                         Integer personId = relationship.getPersonB().getPersonId();
                         if(Context.getPatientService().getPatient(personId) != null) {
                             Patient mother = Context.getPatientService().getPatient(personId);
-                            mothersAge = mother.getAge();
+                            if(mother != null) {
+                                mothersAge = mother.getAge();
+                            }
                         }
                     }
                 }
@@ -265,7 +271,9 @@ public class Utils {
                         //Patient mother = Context.getPatientService().getPatient(personId);
                         if(Context.getPatientService().getPatient(personId) != null){
                             Patient mother = Context.getPatientService().getPatient(personId);
-                            mothersAge = mother.getAge();
+                            if(mother != null) {
+                                mothersAge = mother.getAge();
+                            }
 
                         }
                     }
@@ -388,8 +396,10 @@ public class Utils {
                             Patient mother = Context.getPatientService().getPatient(personId);
                             //On ART -- find if mother has active ART
                             Encounter currentRegimenEncounter = RegimenMappingUtils.getLastEncounterForProgram(mother, "ARV");
-                            SimpleObject regimenDetails = RegimenMappingUtils.buildRegimenChangeObject(currentRegimenEncounter.getObs(), currentRegimenEncounter);
-                            mothersCurrentRegimen = (String) regimenDetails.get("regimenShortDisplay");
+                            if(currentRegimenEncounter != null) {
+                                SimpleObject regimenDetails = RegimenMappingUtils.buildRegimenChangeObject(currentRegimenEncounter.getObs(), currentRegimenEncounter);
+                                mothersCurrentRegimen = (String) regimenDetails.get("regimenShortDisplay");
+                            }
                         }
                     }
                 }
@@ -403,9 +413,10 @@ public class Utils {
                             Patient mother = Context.getPatientService().getPatient(personId);
                             //On ART -- find if mother has active ART
                             Encounter currentRegimenEncounter = RegimenMappingUtils.getLastEncounterForProgram(mother, "ARV");
-                            SimpleObject regimenDetails = RegimenMappingUtils.buildRegimenChangeObject(currentRegimenEncounter.getObs(), currentRegimenEncounter);
-                            mothersCurrentRegimen = (String) regimenDetails.get("regimenShortDisplay");
-
+                            if(currentRegimenEncounter != null) {
+                                SimpleObject regimenDetails = RegimenMappingUtils.buildRegimenChangeObject(currentRegimenEncounter.getObs(), currentRegimenEncounter);
+                                mothersCurrentRegimen = (String) regimenDetails.get("regimenShortDisplay");
+                            }
                         }
                     }
                 }
