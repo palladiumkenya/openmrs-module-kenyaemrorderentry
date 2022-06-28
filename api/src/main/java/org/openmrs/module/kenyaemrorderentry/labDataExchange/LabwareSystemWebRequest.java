@@ -59,8 +59,8 @@ public class LabwareSystemWebRequest extends LabWebRequest {
 
     @Override
     public boolean checkRequirements() {
-        GlobalProperty gpServerUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LAB_SERVER_REQUEST_URL);
-        GlobalProperty gpApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LAB_SERVER_API_TOKEN);
+        GlobalProperty gpServerUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_VL_LAB_SERVER_REQUEST_URL);
+        GlobalProperty gpApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_VL_LAB_SERVER_API_TOKEN);
 
         String serverUrl = gpServerUrl.getPropertyValue();
         String API_KEY = gpApiToken.getPropertyValue();
@@ -82,8 +82,8 @@ public class LabwareSystemWebRequest extends LabWebRequest {
         LabManifest toProcess = manifestOrder.getLabManifest();
         KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
 
-        GlobalProperty gpServerUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LAB_SERVER_REQUEST_URL);
-        GlobalProperty gpApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LAB_SERVER_API_TOKEN);
+        GlobalProperty gpServerUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_VL_LAB_SERVER_REQUEST_URL);
+        GlobalProperty gpApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_VL_LAB_SERVER_API_TOKEN);
 
         String serverUrl = gpServerUrl.getPropertyValue();
         String API_KEY = gpApiToken.getPropertyValue();
@@ -186,8 +186,8 @@ public class LabwareSystemWebRequest extends LabWebRequest {
 
         KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
 
-        GlobalProperty gpServerUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LAB_SERVER_RESULT_URL);
-        GlobalProperty gpApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LAB_SERVER_API_TOKEN);
+        GlobalProperty gpServerUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_VL_LAB_SERVER_RESULT_URL);
+        GlobalProperty gpApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_VL_LAB_SERVER_API_TOKEN);
         GlobalProperty gpLastProcessedManifest = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_MANIFEST_LAST_PROCESSED);
         GlobalProperty gpLastProcessedManifestUpdatetime = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_MANIFEST_LAST_UPDATETIME);
 
@@ -285,8 +285,9 @@ public class LabwareSystemWebRequest extends LabWebRequest {
             //     ProcessViralLoadResults.processPayload(json);// the only way that works for now is posting this through REST
             if (responseArray != null && !responseArray.isEmpty()) {
                 // update orders
-                LabOrderDataExchange lode = new LabOrderDataExchange();
-                lode.processIncomingViralLoadLabResults(jsonString);
+                // LabOrderDataExchange lode = new LabOrderDataExchange();
+                // lode.processIncomingViralLoadLabResults(jsonString);
+                ProcessViralLoadResults.processPayload(jsonString);
                 // update manifest details appropriately for the next execution
                 String [] incompleteStatuses = new String []{"Incomplete"};
 
