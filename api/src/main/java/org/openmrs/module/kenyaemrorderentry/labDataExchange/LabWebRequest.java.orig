@@ -71,24 +71,20 @@ public abstract class LabWebRequest {
         if (patient.getFamilyName() != null) {
             fullName += " " + patient.getFamilyName();
         }
-
         test.put("dob", dob);
         //test.put("patient_name", fullName);
         test.put("sex", patient.getGender().equals("M") ? "1" : patient.getGender().equals("F") ? "2" : "3");
-<<<<<<< HEAD
-        //test.put("datecollected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
-        //test.put("sampletype", manifestType.toString());
-=======
-
-
->>>>>>> Cleaned up mothers regimen code, and handled null values for eid
         test.put("order_no", o.getOrderId().toString());
         test.put("patient_identifier", cccNumber != null ? cccNumber.getIdentifier() : "");
         test.put("lab", "");
 
+<<<<<<< HEAD
         System.out.println("Lab Results POST: Manifest Type is: " + manifestType);
         if (manifestType == LabManifest.EID_TYPE) { // we are using 1 for EID and 2 for VL
             System.out.println("Lab Results POST: populating payload for EID Type");
+=======
+        if (manifestType == 1) { // we are using 1 for EID and 2 for VL
+>>>>>>> Updated manifestHome for EID to show HEI Number
             PatientIdentifier heiNumber = patient.getPatientIdentifier(Utils.getHeiNumberIdentifierType());
             SimpleObject heiDetailsObject = getHeiDetailsForEidPostObject(o.getPatient(),o);
             SimpleObject heiMothersAgeObject = getHeiMothersAge(o.getPatient());
@@ -107,19 +103,20 @@ public abstract class LabWebRequest {
                 test.put("mother_vl_res", heiDetailsObject.get("validMothersVL") != null ? heiDetailsObject.get("validMothersVL").toString() : ""); // vl within last 6 months
             }
             test.put("date_collected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
-            test.put("sample_type", manifestType.toString());
+            test.put("sample_type", "DBS");
             test.put("hei_id", heiNumber != null ? heiNumber.getIdentifier() : "");
-<<<<<<< HEAD
-            test.put("mother_age", heiMothersAgeObject.get("mothersAge") != null ? heiMothersAgeObject.get("mothersAge").toString() : "" );
-=======
             test.put("mother_age", heiMothersAgeObject != null ? heiMothersAgeObject.get("mothersAge").toString() : "" );
->>>>>>> Cleaned up mothers regimen code, and handled null values for eid
             test.put("mother_ccc", Utils.getMothersUniquePatientNumber(patient));
+<<<<<<< HEAD
             
             test.put("ccc_no", cccNumber != null ? cccNumber.getIdentifier() : "");
         } else if (manifestType == LabManifest.VL_TYPE) {
 
             System.out.println("Lab Results POST: populating payload for VL Type");
+=======
+            test.put("ccc_no",  cccNumber != null ? cccNumber.getIdentifier() : "");
+        } else if (manifestType == 2) {
+>>>>>>> Updated manifestHome for EID to show HEI Number
             Encounter originalRegimenEncounter = RegimenMappingUtils.getFirstEncounterForProgram(patient, "ARV");
             Encounter currentRegimenEncounter = RegimenMappingUtils.getLastEncounterForProgram(patient, "ARV");
             if (currentRegimenEncounter == null) {
