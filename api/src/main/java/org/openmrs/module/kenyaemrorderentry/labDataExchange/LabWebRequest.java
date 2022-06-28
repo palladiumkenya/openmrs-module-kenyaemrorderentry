@@ -83,7 +83,6 @@ public abstract class LabWebRequest {
 
         System.out.println("Lab Results POST: Manifest Type is: " + manifestType);
         if (manifestType == LabManifest.EID_TYPE) { // we are using 1 for EID and 2 for VL
-
             System.out.println("Lab Results POST: populating payload for EID Type");
             PatientIdentifier heiNumber = patient.getPatientIdentifier(Utils.getHeiNumberIdentifierType());
             SimpleObject heiDetailsObject = getHeiDetailsForEidPostObject(o.getPatient(),o);
