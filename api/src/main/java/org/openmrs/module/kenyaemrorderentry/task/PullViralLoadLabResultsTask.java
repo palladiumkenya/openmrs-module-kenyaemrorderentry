@@ -61,27 +61,27 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
             connection.connect();
             try {
 
-                GlobalProperty gpServerUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LAB_SERVER_RESULT_URL);
-                GlobalProperty gpApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LAB_SERVER_API_TOKEN);
-                GlobalProperty gpVLUpdateEndpoint = Context.getAdministrationService().getGlobalPropertyObject("local.viral_load_result_end_point");
+                // GlobalProperty gpServerUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LAB_SERVER_RESULT_URL);
+                // GlobalProperty gpApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LAB_SERVER_API_TOKEN);
+                // GlobalProperty gpVLUpdateEndpoint = Context.getAdministrationService().getGlobalPropertyObject("local.viral_load_result_end_point");
                 GlobalProperty gpLastProcessedManifest = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_MANIFEST_LAST_PROCESSED);
                 GlobalProperty gpRetryPeriodForIncompleteResults = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_RETRY_PERIOD_FOR_ORDERS_WITH_INCOMPLETE_RESULTS);
                 GlobalProperty gpLabTatForVlResults = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LAB_TAT_FOR_VL_RESULTS);
                 GlobalProperty gpLastProcessedManifestUpdatetime = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_MANIFEST_LAST_UPDATETIME);
 
-                String serverUrl = gpServerUrl.getPropertyValue();
-                String API_KEY = gpApiToken.getPropertyValue();
-                String updatesEndpoint = gpVLUpdateEndpoint.getPropertyValue();
+                // String serverUrl = gpServerUrl.getPropertyValue();
+                // String API_KEY = gpApiToken.getPropertyValue();
+                // String updatesEndpoint = gpVLUpdateEndpoint.getPropertyValue();
                 String lastProcessedManifest = gpLastProcessedManifest.getPropertyValue();
                 String retryPeriodForIncompleteResults = gpRetryPeriodForIncompleteResults.getPropertyValue();
                 String labTatForVlResults = gpLabTatForVlResults.getPropertyValue();
                 LabManifest manifestToUpdateResults = null;
 
                 //if (StringUtils.isBlank(serverUrl) || StringUtils.isBlank(API_KEY) || StringUtils.isBlank(updatesEndpoint)) {
-                if (StringUtils.isBlank(serverUrl) || StringUtils.isBlank(API_KEY)) {
-                    System.out.println("Lab Results Get: Please set credentials for pulling lab requests from the lab system");
-                    return;
-                }
+                // if (StringUtils.isBlank(serverUrl) || StringUtils.isBlank(API_KEY)) {
+                //     System.out.println("Lab Results Get: Please set credentials for pulling lab requests from the lab system");
+                //     return;
+                // }
 
 
                 //Collect New Sample, Missing Sample ( Physical Sample Missing) result is a complete result.

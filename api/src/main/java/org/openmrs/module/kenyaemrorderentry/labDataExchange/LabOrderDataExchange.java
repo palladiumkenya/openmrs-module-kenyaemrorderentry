@@ -48,10 +48,12 @@ import static org.openmrs.module.metadatasharing.util.MetadataSharingGlobalPrope
 
 public class LabOrderDataExchange {
 
-    //private Log log = LogFactory.getLog(getClass());
-    public static final String GP_LAB_SERVER_REQUEST_URL = "chai.viral_load_server_url";
-    public static final String GP_LAB_SERVER_RESULT_URL = "chai.viral_load_server_result_url";
-    public static final String GP_LAB_SERVER_API_TOKEN = "chai.viral_load_server_api_token";
+    public static final String GP_VL_LAB_SERVER_REQUEST_URL = "chai.viral_load_server_url";
+    public static final String GP_VL_LAB_SERVER_RESULT_URL = "chai.viral_load_server_result_url";
+    public static final String GP_VL_LAB_SERVER_API_TOKEN = "chai.viral_load_server_api_token";
+    public static final String GP_EID_LAB_SERVER_REQUEST_URL = "eid.viral_load_server_url";
+    public static final String GP_EID_LAB_SERVER_RESULT_URL = "eid.viral_load_server_result_url";
+    public static final String GP_EID_LAB_SERVER_API_TOKEN = "eid.viral_load_server_api_token";
     public static final String GP_MANIFEST_LAST_PROCESSED = "kemrorder.last_processed_manifest";// used when fetching results from the server
     public static final String GP_RETRY_PERIOD_FOR_ORDERS_WITH_INCOMPLETE_RESULTS = "kemrorder.retry_period_for_incomplete_vl_result";
     public static final String GP_LAB_TAT_FOR_VL_RESULTS = "kemrorder.viral_load_result_tat_in_days";
@@ -531,14 +533,23 @@ public class LabOrderDataExchange {
             for (int i = 0; i < resultsObj.size(); i++) {
                 JsonObject o =  resultsObj.get(i).getAsJsonObject();
                 Integer specimenId = o.get("order_number").getAsInt();
-                //String dateSampleReceived = !o.get("date_received").isJsonNull() ? o.get("date_received").getAsString() : "";
-                JsonObject dateReceivedObject = o.get("date_received").getAsJsonObject();
-                String dateSampleReceived = dateReceivedObject.get("date").getAsString().trim();
-                //String dateSampleTested = !o.get("date_tested").isJsonNull() ? o.get("date_tested").getAsString() : "";
-                JsonObject dateTestedObject = o.get("date_tested").getAsJsonObject();
-                String dateSampleTested = dateTestedObject.get("date").getAsString().trim();
                 Date sampleReceivedDate = null;
                 Date sampleTestedDate = null;
+                String dateSampleReceived = "";
+                String dateSampleTested = "";
+                String specimenRejectedReason = "";
+
+                if (LabOrderDataExchange.isEidVlLabSystem()) {
+                    dateSampleReceived = !o.get("date_received").isJsonNull() ? o.get("date_received").getAsString() : "";
+                    dateSampleTested = !o.get("date_tested").isJsonNull() ? o.get("date_tested").getAsString() : "";
+                    specimenRejectedReason = o.has("rejected_reason") ? o.get("rejected_reason").getAsString() : "";
+                } else {
+                    JsonObject dateReceivedObject = o.get("date_received").getAsJsonObject();
+                    dateSampleReceived = dateReceivedObject.get("date").getAsString().trim();
+                    JsonObject dateTestedObject = o.get("date_tested").getAsJsonObject();
+                    dateSampleTested = dateTestedObject.get("date").getAsString().trim();
+                    specimenRejectedReason = "";
+                }
 
                 if (StringUtils.isNotBlank(dateSampleReceived)) {
                     try {
@@ -563,9 +574,11 @@ public class LabOrderDataExchange {
                 String specimenReceivedStatus = o.get("sample_status").getAsString().trim();// Complete, Incomplete, Rejected
                 //String specimenRejectedReason = o.has("rejected_reason") ? o.get("rejected_reason").getAsString() : "";
                 //String results = !o.get("result").isJsonNull() ? o.get("result").getAsString() : null; //1 - negative, 2 - positive, 5 - inconclusive
-                String labNumber = o.get("lab_no").getAsString().trim();
+                //String labNumber = o.get("lab_no").getAsString().trim();
                 String results = o.get("result").getAsString().trim();
-                updateOrder(specimenId, results, specimenReceivedStatus, sampleReceivedDate, sampleTestedDate, labNumber);
+                //updateOrder(specimenId, results, specimenReceivedStatus, sampleReceivedDate, sampleTestedDate, labNumber);
+                //updateOrder(specimenId, results, specimenReceivedStatus, sampleReceivedDate, sampleTestedDate);
+                updateOrder(specimenId, results, specimenReceivedStatus, specimenRejectedReason, sampleReceivedDate, sampleTestedDate);
                 // update manifest object to reflect received status
             }
         }
@@ -580,8 +593,8 @@ public class LabOrderDataExchange {
      * @param specimenStatus
      * @param rejectedReason
      */
-    private void updateOrder(Integer orderId, String result, String specimenStatus, Date dateSampleReceived, Date dateSampleTested, String labNumber) {
-
+    //private void updateOrder(Integer orderId, String result, String specimenStatus, Date dateSampleReceived, Date dateSampleTested, String labNumber) {
+    private void updateOrder(Integer orderId, String result, String specimenStatus, String specimenRejectedReason, Date dateSampleReceived, Date dateSampleTested) {
         Order od = orderService.getOrder(orderId);
         LabManifestOrder manifestOrder = kenyaemrOrdersService.getLabManifestOrderByOrderId(orderService.getOrder(orderId));
         Date orderDiscontinuationDate = null;
