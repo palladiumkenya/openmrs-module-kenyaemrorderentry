@@ -244,7 +244,7 @@ public class Utils {
     public static SimpleObject getHeiMothersAge(Patient patient) {
 
         Integer mothersAge = null;
-        SimpleObject object = null;
+        SimpleObject mothersAgeObject = null;
 
         for (Relationship relationship : Context.getPersonService().getRelationshipsByPerson(patient)) {
 
@@ -280,8 +280,8 @@ public class Utils {
                 }
             }
         }
-        object = SimpleObject.create("mothersAge",mothersAge);
-        return object;
+        mothersAgeObject = SimpleObject.create("mothersAge",mothersAge);
+        return mothersAgeObject;
     }
 
    /**
