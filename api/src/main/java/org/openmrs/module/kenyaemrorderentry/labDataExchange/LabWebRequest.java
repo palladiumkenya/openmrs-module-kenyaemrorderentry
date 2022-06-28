@@ -74,8 +74,8 @@ public abstract class LabWebRequest {
         test.put("dob", dob);
         test.put("patient_name", fullName);
         test.put("sex", patient.getGender().equals("M") ? "1" : patient.getGender().equals("F") ? "2" : "3");
-        test.put("datecollected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
-        test.put("sampletype", manifestType.toString());
+
+
         test.put("order_no", o.getOrderId().toString());
         test.put("patient_identifier", cccNumber != null ? cccNumber.getIdentifier() : "");
         test.put("lab", "");
@@ -86,15 +86,17 @@ public abstract class LabWebRequest {
             SimpleObject heiDetailsObject = getHeiDetailsForEidPostObject(o.getPatient(),o);
             SimpleObject heiMothersAgeObject = getHeiMothersAge(o.getPatient());
             if(heiDetailsObject !=null) {
-                test.put("infant_prophylaxis", heiDetailsObject.get("prophylaxisAnswer").toString());
-                test.put("pcr_code", heiDetailsObject.get("pcrSampleCodeAnswer").toString());
-                test.put("entry_point", heiDetailsObject.get("entryPointAnswer").toString());
-                test.put("infant_feeding", heiDetailsObject.get("feedingMethodAnswer").toString());
-                test.put("mother_pmtct", heiDetailsObject.get("mothersRegimenAnswer").toString());
-                test.put("mother_vl_res", heiDetailsObject.get("validMothersVL").toString()); // vl within last 6 months
+                test.put("infant_prophylaxis", heiDetailsObject.get("prophylaxisAnswer") != null ? heiDetailsObject.get("prophylaxisAnswer").toString() : "");
+                test.put("pcr_code", heiDetailsObject.get("pcrSampleCodeAnswer") != null ? heiDetailsObject.get("pcrSampleCodeAnswer").toString() : "");
+                test.put("entry_point", heiDetailsObject.get("entryPointAnswer") != null ? heiDetailsObject.get("entryPointAnswer").toString() : "");
+                test.put("infant_feeding", heiDetailsObject.get("feedingMethodAnswer") != null ? heiDetailsObject.get("feedingMethodAnswer").toString() : "");
+                test.put("mother_pmtct", heiDetailsObject.get("mothersRegimenAnswer") != null ? heiDetailsObject.get("mothersRegimenAnswer").toString() : "");
+                test.put("mother_vl_res", heiDetailsObject.get("validMothersVL") != null ? heiDetailsObject.get("validMothersVL").toString() : ""); // vl within last 6 months
             }
+            test.put("date_collected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
+            test.put("sample_type", manifestType.toString());
             test.put("hei_id", heiNumber != null ? heiNumber.getIdentifier() : "");
-            test.put("mother_age", heiMothersAgeObject.get("mothersAge").toString() != null ? heiMothersAgeObject.get("mothersAge").toString() : "" );
+            test.put("mother_age", heiMothersAgeObject != null ? heiMothersAgeObject.get("mothersAge").toString() : "" );
             test.put("mother_ccc", Utils.getMothersUniquePatientNumber(patient));
         } else if (manifestType == 2) {
             Encounter originalRegimenEncounter = RegimenMappingUtils.getFirstEncounterForProgram(patient, "ARV");
@@ -116,7 +118,8 @@ public abstract class LabWebRequest {
             }
 
             test.put("justification", o.getOrderReason() != null ? getOrderReasonCode(o.getOrderReason().getUuid()) : "");
-
+            test.put("datecollected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
+            test.put("sampletype", manifestType.toString());
             //add to list only if code is found. This is a temp measure to avoid sending messages with null regimen codes
             if (StringUtils.isNotBlank(nascopCode)) {
 
