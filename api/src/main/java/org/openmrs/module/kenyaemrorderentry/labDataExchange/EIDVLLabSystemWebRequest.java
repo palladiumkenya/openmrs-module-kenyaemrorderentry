@@ -254,20 +254,20 @@ public class EIDVLLabSystemWebRequest extends LabWebRequest {
             builder.addParameter("mfl_code", facilityCode);
             builder.addParameter("order_no", orderNumbers);
             URI uri = builder.build();
-            System.out.println("Get Lab Results URL: " + uri);
+            System.out.println("Get EID Lab Results URL: " + uri);
 
             HttpGet httpget = new HttpGet(uri);
             httpget.addHeader("content-type", "application/x-www-form-urlencoded");
-            httpget.addHeader("Authorization", "Bearer " +API_KEY);
+            httpget.addHeader("Authorization", "Bearer " + API_KEY);
             httpget.addHeader("Accept", "application/json");
 
             CloseableHttpResponse response = httpClient.execute(httpget);
 
             final int statusCode = response.getStatusLine().getStatusCode();
             if (statusCode != 200) {
-                throw new RuntimeException("Get Lab Results Failed with HTTP error code : " + statusCode);
+                throw new RuntimeException("Get EID Lab Results Failed with HTTP error code : " + statusCode);
             } else {
-                System.out.println("Get Lab Results: REST Call Success");
+                System.out.println("Get EID Lab Results: REST Call Success");
             }
 
 //            //Testing
@@ -278,7 +278,7 @@ public class EIDVLLabSystemWebRequest extends LabWebRequest {
 
                try {
                    jsonString = rd.lines().collect(Collectors.joining()).toString();
-                   System.out.println("Lab Results Get: Request JSON -> " + jsonString);
+                   System.out.println("EID Lab Results Get: Request JSON -> " + jsonString);
                } finally {
                    rd.close();
                }
@@ -345,8 +345,8 @@ public class EIDVLLabSystemWebRequest extends LabWebRequest {
                 kenyaemrOrdersService.saveLabManifestOrder(o);
             }
 
-            System.out.println("Successfully executed the task that pulls lab requests");
-            log.info("Successfully executed the task that pulls lab requests");
+            System.out.println("Get EID Lab Results: Successfully executed the task that pulls lab requests");
+            log.info("Get EID Lab Results: Successfully executed the task that pulls lab requests");
 
         } catch (Exception e) {
             System.err.println("Get EID Lab Results Error: " + e.getMessage());
