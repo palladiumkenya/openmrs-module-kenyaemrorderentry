@@ -44,16 +44,16 @@ public class PushLabRequestsTask extends AbstractTask {
             URLConnection connection = new URL(url).openConnection();
             connection.connect();
             try {
-                GlobalProperty gpServerUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LAB_SERVER_REQUEST_URL);
-                GlobalProperty gpApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LAB_SERVER_API_TOKEN);
+                // GlobalProperty gpServerUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LAB_SERVER_REQUEST_URL);
+                // GlobalProperty gpApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LAB_SERVER_API_TOKEN);
 
-                String serverUrl = gpServerUrl.getPropertyValue();
-                String API_KEY = gpApiToken.getPropertyValue();
+                // String serverUrl = gpServerUrl.getPropertyValue();
+                // String API_KEY = gpApiToken.getPropertyValue();
 
-                if (StringUtils.isBlank(serverUrl) || StringUtils.isBlank(API_KEY)) {
-                    System.out.println("Lab Results POST: Please set credentials for posting lab requests to the lab system");
-                    return;
-                }
+                // if (StringUtils.isBlank(serverUrl) || StringUtils.isBlank(API_KEY)) {
+                //     System.out.println("Lab Results POST: Please set credentials for posting lab requests to the lab system");
+                //     return;
+                // }
 
                 // Get a manifest ready to be sent
                 LabManifest toProcess = null;
