@@ -75,8 +75,13 @@ public abstract class LabWebRequest {
         test.put("dob", dob);
         //test.put("patient_name", fullName);
         test.put("sex", patient.getGender().equals("M") ? "1" : patient.getGender().equals("F") ? "2" : "3");
+<<<<<<< HEAD
+        //test.put("datecollected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
+        //test.put("sampletype", manifestType.toString());
+=======
 
 
+>>>>>>> Cleaned up mothers regimen code, and handled null values for eid
         test.put("order_no", o.getOrderId().toString());
         test.put("patient_identifier", cccNumber != null ? cccNumber.getIdentifier() : "");
         test.put("lab", "");
@@ -104,11 +109,16 @@ public abstract class LabWebRequest {
             test.put("date_collected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
             test.put("sample_type", manifestType.toString());
             test.put("hei_id", heiNumber != null ? heiNumber.getIdentifier() : "");
+<<<<<<< HEAD
+            test.put("mother_age", heiMothersAgeObject.get("mothersAge") != null ? heiMothersAgeObject.get("mothersAge").toString() : "" );
+=======
             test.put("mother_age", heiMothersAgeObject != null ? heiMothersAgeObject.get("mothersAge").toString() : "" );
+>>>>>>> Cleaned up mothers regimen code, and handled null values for eid
             test.put("mother_ccc", Utils.getMothersUniquePatientNumber(patient));
             
             test.put("ccc_no", cccNumber != null ? cccNumber.getIdentifier() : "");
         } else if (manifestType == LabManifest.VL_TYPE) {
+
             System.out.println("Lab Results POST: populating payload for VL Type");
             Encounter originalRegimenEncounter = RegimenMappingUtils.getFirstEncounterForProgram(patient, "ARV");
             Encounter currentRegimenEncounter = RegimenMappingUtils.getLastEncounterForProgram(patient, "ARV");
