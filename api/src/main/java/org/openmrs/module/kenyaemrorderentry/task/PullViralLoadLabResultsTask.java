@@ -225,7 +225,8 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
                 // Pull Lab Results
                 LabWebRequest pullRequest;
 
-                if (LabOrderDataExchange.isEidVlLabSystem()) {
+                //if (LabOrderDataExchange.isEidVlLabSystem()) {
+                if(manifestToUpdateResults.getManifestType() == LabManifest.EID_TYPE) {
                     pullRequest = new EIDVLLabSystemWebRequest();
                 } else {
                     pullRequest = new LabwareSystemWebRequest();
