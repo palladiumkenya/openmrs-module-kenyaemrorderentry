@@ -39,9 +39,9 @@ public abstract class LabWebRequest {
     }
     public abstract boolean checkRequirements();
 
-    public abstract void postSamples(LabManifestOrder manifestOrder, String manifestStatus) throws IOException;
+    public abstract boolean postSamples(LabManifestOrder manifestOrder, String manifestStatus) throws IOException;
 
-    public abstract void pullResult(List<Integer> orderIds, List<Integer> manifestOrderIds) throws IOException;
+    public abstract void pullResult(List<Integer> orderIds, List<Integer> manifestOrderIds, LabManifest manifestToUpdateResults) throws IOException;
 
     /**
      * Generate cross cutting object for post request
