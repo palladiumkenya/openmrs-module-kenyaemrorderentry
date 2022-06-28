@@ -74,19 +74,24 @@ public class PushLabRequestsTask extends AbstractTask {
                 }
 
                 List<LabManifestOrder> ordersInManifest = kenyaemrOrdersService.getLabManifestOrdersToSend(toProcess);
-                ;
+                
                 if (ordersInManifest.size() < 1) {
-                    System.out.println("Lab Results POST: Found no lab requests to post. Will mark the manifest as complete");
-                    if (toProcess != null) {
-                        toProcess.setStatus("Submitted");
-                        kenyaemrOrdersService.saveLabOrderManifest(toProcess);
-                    }
+                    System.out.println("Lab Results POST: Found no lab requests to post.");
+                    // System.out.println("Lab Results POST: Found no lab requests to post. Will mark the manifest as complete");
+                    // if (toProcess != null) {
+                    //     toProcess.setStatus("Completed");
+                    //     kenyaemrOrdersService.saveLabOrderManifest(toProcess);
+                    // }
                     return;
                 } else {
-                    System.out.println("Lab Results POST: No of labs to push: " + ordersInManifest.size());
+                    System.out.println("Lab Results POST: Number of lab requests to push: " + ordersInManifest.size());
+                    if (toProcess != null) {
+                        toProcess.setStatus("Sending");
+                        kenyaemrOrdersService.saveLabOrderManifest(toProcess);
+                    }
                 }
 
-
+                boolean checkIfSent = true;
                 for (LabManifestOrder manifestOrder : ordersInManifest) {
 
                     LabWebRequest postRequest;
@@ -96,8 +101,18 @@ public class PushLabRequestsTask extends AbstractTask {
                     } else {
                         postRequest = new LabwareSystemWebRequest();
                     }
-                    postRequest.postSamples(manifestOrder, manifestStatus);
+                    if(!postRequest.postSamples(manifestOrder, manifestStatus)) {
+                        checkIfSent = false;
+                    }
+                }
 
+                if(checkIfSent) {
+                    System.out.println("Lab Results POST: All orders were sent. Marking manifest as submitted");
+                    if (toProcess != null) {
+                        toProcess.setStatus("Submitted");
+                        toProcess.setDispatchDate(new Date()); // set dispatch date to today
+                        kenyaemrOrdersService.saveLabOrderManifest(toProcess);
+                    }
                 }
 
             } catch (Exception e) {

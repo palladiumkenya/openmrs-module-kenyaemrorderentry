@@ -58,10 +58,10 @@ public class EIDVLLabSystemWebRequest extends LabWebRequest {
         return true;
     }
 
-    public void postSamples(LabManifestOrder manifestOrder, String manifestStatus) throws IOException {
+    public boolean postSamples(LabManifestOrder manifestOrder, String manifestStatus) throws IOException {
 
         if (!checkRequirements())
-            return;
+            return(false);
 
         LabManifest toProcess = manifestOrder.getLabManifest();
         KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
@@ -103,7 +103,7 @@ public class EIDVLLabSystemWebRequest extends LabWebRequest {
             if (statusCode == 429) { // too many requests. just terminate
                 System.out.println("The push lab scheduler has been configured to run at very short intervals. Please change this to at least 30min");
                 log.warn("The push scheduler has been configured to run at very short intervals. Please change this to at least 30min");
-                return;
+                return(false);
             }
 
             if (statusCode != 201 && statusCode != 200 && statusCode != 422 && statusCode != 403) { // skip for status code 422: unprocessable entity, and status code 403 for forbidden response
@@ -132,6 +132,8 @@ public class EIDVLLabSystemWebRequest extends LabWebRequest {
                 kenyaemrOrdersService.saveLabOrderManifest(toProcess);
             }
             Context.flushSession();
+
+            return(true);
         } catch (Exception e) {
             System.out.println("Could not push requests to the lab! " + e.getCause());
             log.error("Could not push requests to the lab! " + e.getCause());
@@ -139,9 +141,10 @@ public class EIDVLLabSystemWebRequest extends LabWebRequest {
         } finally {
             httpClient.close();
         }
+        return(false);
     }
 
-    public void pullResult(List<Integer> orderIds, List<Integer> manifestOrderIds) throws IOException {
+    public void pullResult(List<Integer> orderIds, List<Integer> manifestOrderIds, LabManifest manifestToUpdateResults) throws IOException {
 
         KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
 
@@ -152,7 +155,7 @@ public class EIDVLLabSystemWebRequest extends LabWebRequest {
 
         String serverUrl = gpServerUrl.getPropertyValue();
         String API_KEY = gpApiToken.getPropertyValue();
-        LabManifest manifestToUpdateResults = null;
+        //LabManifest manifestToUpdateResults = null;
 
         SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
                 SSLContexts.createDefault(),
@@ -163,7 +166,7 @@ public class EIDVLLabSystemWebRequest extends LabWebRequest {
         CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
 
         try {
-
+            manifestToUpdateResults = kenyaemrOrdersService.getLabManifestOrderById(manifestOrderIds.get(0)).getLabManifest();
 
             //Define a postRequest request
             HttpPost postRequest = new HttpPost(serverUrl);
@@ -173,7 +176,7 @@ public class EIDVLLabSystemWebRequest extends LabWebRequest {
             postRequest.addHeader("apikey", API_KEY);
 
             ObjectNode request = Utils.getJsonNodeFactory().objectNode();
-            request.put("test", "2");
+            request.put("test", manifestToUpdateResults.getManifestType().toString());
             request.put("facility_code", Utils.getDefaultLocationMflCode(Utils.getDefaultLocation()));
             request.put("order_numbers", StringUtils.join(orderIds, ","));
 
@@ -228,7 +231,10 @@ public class EIDVLLabSystemWebRequest extends LabWebRequest {
 
             if (resultArray != null && !resultArray.isEmpty()) {
                 String json = gson.toJson(cleanedArray);
-                ProcessViralLoadResults.processPayload(json);// the only way that works for now is posting this through REST
+                //ProcessViralLoadResults.processPayload(json);// the only way that works for now is posting this through REST
+                // update orders
+                LabOrderDataExchange lode = new LabOrderDataExchange();
+                lode.processIncomingViralLoadLabResults(json);
 
                 // update manifest details appropriately for the next execution
                 String [] incompleteStatuses = new String []{"Incomplete"};
