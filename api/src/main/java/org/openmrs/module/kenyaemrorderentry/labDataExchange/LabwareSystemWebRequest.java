@@ -20,10 +20,12 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContexts;
 import org.apache.http.util.EntityUtils;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.openmrs.GlobalProperty;
 import org.openmrs.Order;
+import org.openmrs.api.OrderService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
@@ -42,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 //import java.util.stream.Collectors;
+import java.util.stream.Collectors;
 
 /**
  * An implementation for Labware
@@ -69,11 +72,11 @@ public class LabwareSystemWebRequest extends LabWebRequest {
         return true;
     }
 
-    public void postSamples(LabManifestOrder manifestOrder, String manifestStatus) throws IOException {
+    public boolean postSamples(LabManifestOrder manifestOrder, String manifestStatus) throws IOException {
 
         if (!checkRequirements()) {
             System.out.println("Lab Results POST: Failed to satisfy requirements");
-            return;
+            return(false);
         }
 
         LabManifest toProcess = manifestOrder.getLabManifest();
@@ -85,13 +88,14 @@ public class LabwareSystemWebRequest extends LabWebRequest {
         String serverUrl = gpServerUrl.getPropertyValue();
         String API_KEY = gpApiToken.getPropertyValue();
 
-        SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
-                SSLContexts.createDefault(),
-                new String[]{"TLSv1.2"},
-                null,
-                SSLConnectionSocketFactory.getDefaultHostnameVerifier());
+        // SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
+        //         SSLContexts.createDefault(),
+        //         new String[]{"TLSv1.2"},
+        //         null,
+        //         SSLConnectionSocketFactory.getDefaultHostnameVerifier());
 
-        CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
+        // CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
+        CloseableHttpClient httpClient = HttpClientBuilder.create().build();
 
         try {
 
@@ -117,7 +121,7 @@ public class LabwareSystemWebRequest extends LabWebRequest {
             if (statusCode == 429) { // too many requests. just terminate
                 System.out.println("Lab Results POST: The push lab scheduler has been configured to run at very short intervals. Please change this to at least 30min");
                 log.warn("Lab Results POST: The push scheduler has been configured to run at very short intervals. Please change this to at least 30min");
-                return;
+                return(false);
             }
 
             if (statusCode != 201 && statusCode != 200 && statusCode != 422 && statusCode != 403) { // skip for status code 422: unprocessable entity, and status code 403 for forbidden response
@@ -151,6 +155,7 @@ public class LabwareSystemWebRequest extends LabWebRequest {
             Context.flushSession();
 
             System.out.println("Lab Results POST: Push Successfull");
+            return(true);
         } catch (Exception e) {
             System.err.println("Lab Results POST: Could not push requests to the lab! " + e.getMessage());
             log.error("Lab Results POST: Could not push requests to the lab! " + e.getMessage());
@@ -158,24 +163,26 @@ public class LabwareSystemWebRequest extends LabWebRequest {
         } finally {
             httpClient.close();
         }
+
+        return(false);
     }
 
     public void testPull() {
         System.out.println("Testing LAB Get Results");
-        List<Integer> myOrders = new ArrayList();
-        myOrders.add(1);
-        myOrders.add(19536);
-        myOrders.add(56577);
-        List<Integer> myManifests = new ArrayList();
-        try {
-            pullResult( myOrders,  myManifests);
-        } catch (Exception m) {
-            System.err.println("Lab Get Results Error: " + m.getMessage());
-            m.printStackTrace();
-        }
+        // List<Integer> myOrders = new ArrayList();
+        // myOrders.add(1);
+        // myOrders.add(19536);
+        // myOrders.add(56577);
+        // List<Integer> myManifests = new ArrayList();
+        // try {
+        //     pullResult( myOrders, myManifests, new LabManifest());
+        // } catch (Exception m) {
+        //     System.err.println("Lab Get Results Error: " + m.getMessage());
+        //     m.printStackTrace();
+        // }
     }
 
-    public void pullResult(List<Integer> orderIds, List<Integer> manifestOrderIds) throws IOException {
+    public void pullResult(List<Integer> orderIds, List<Integer> manifestOrderIds, LabManifest manifestToUpdateResults) throws IOException {
 
         KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
 
@@ -186,7 +193,7 @@ public class LabwareSystemWebRequest extends LabWebRequest {
 
         String serverUrl = gpServerUrl.getPropertyValue();
         String API_KEY = gpApiToken.getPropertyValue();
-        LabManifest manifestToUpdateResults = null;
+        //LabManifest manifestToUpdateResults = null;
 
 //Not using SSL
 //        SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
@@ -219,65 +226,80 @@ public class LabwareSystemWebRequest extends LabWebRequest {
             if (statusCode != 200) {
                 throw new RuntimeException("Get Lab Results Failed with HTTP error code : " + statusCode);
             } else {
-                System.out.println("Get Lab Results: Success");
+                System.out.println("Get Lab Results: REST Call Success");
             }
 
 //            //Testing
-//            String jsonString = null;
-//            HttpEntity entity = response.getEntity();
-//            if (entity != null) {
-//                BufferedReader rd = new BufferedReader(new InputStreamReader(entity.getContent()));
-//
-//                try {
-//                    jsonString = rd.lines().collect(Collectors.joining()).toString();
-//                    System.out.println("Lab Results Get Request JSON -> " + jsonString);
-//                } finally {
-//                    rd.close();
-//                }
-//            }
+           String jsonString = null;
+           HttpEntity entity = response.getEntity();
+           if (entity != null) {
+               BufferedReader rd = new BufferedReader(new InputStreamReader(entity.getContent()));
 
-            //JSONParser parser = new JSONParser();
-            //JSONObject responseObj = (JSONObject) parser.parse(jsonString);
+               try {
+                   jsonString = rd.lines().collect(Collectors.joining()).toString();
+                   System.out.println("Lab Results Get: Request JSON -> " + jsonString);
+               } finally {
+                   rd.close();
+               }
+           }
+
+            JSONParser parser = new JSONParser();
+            // JSONObject responseObj = (JSONObject) parser.parse(jsonString);
             ////JSONObject errorObj = (JSONObject) responseObj.get("error");
+            JSONArray responseArray = (JSONArray) parser.parse(jsonString);
 
-            String responseStringRaw = EntityUtils.toString(response.getEntity());
-            String responseStringEscape = StringEscapeUtils.escapeJava(responseStringRaw);
-            String strippedUnicodeChars = new UnicodeUnescaper().translate(responseStringEscape);
+            // String responseStringRaw = EntityUtils.toString(response.getEntity());
+            // String responseStringEscape = StringEscapeUtils.escapeJava(responseStringRaw);
+            // String strippedUnicodeChars = new UnicodeUnescaper().translate(responseStringEscape);
 
-            String finalChars = StringEscapeUtils.unescapeJava(strippedUnicodeChars);
-            String removeBackslash = finalChars.replace("\\", "");
-
-
-            Gson gson = new GsonBuilder().serializeNulls().create();
-            JsonElement rootNode = gson.fromJson(finalChars, JsonElement.class);
-
-            JsonArray resultArray = null;
-            if(rootNode.isJsonObject()){
-                JsonObject jsonObject = rootNode.getAsJsonObject();
-                JsonElement vlResultArray = jsonObject.get("data");
-                if(vlResultArray.isJsonArray()){
-                    resultArray = vlResultArray.getAsJsonArray();
-                }
-            }
-
-            JsonArray cleanedArray = new JsonArray();
-            if (resultArray != null && !resultArray.isEmpty()) {
-                for (int i =0; i < resultArray.size(); i++) {
-                    JsonObject result = resultArray.get(i).getAsJsonObject();
-                    result.addProperty("full_names", "Replaced Name"); // this is a short workaround to handle data coming from eid/vl system and were pushed from kenyaemr with unicode literals
-                    cleanedArray.add(result);
-
-                }
-            }
+            // String finalChars = StringEscapeUtils.unescapeJava(strippedUnicodeChars);
+            // String removeBackslash = finalChars.replace("\\", "");
 
 
-            if (resultArray != null && !resultArray.isEmpty()) {
-                String json = gson.toJson(cleanedArray);
-                ProcessViralLoadResults.processPayload(json);// the only way that works for now is posting this through REST
+            // Gson gson = new GsonBuilder().serializeNulls().create();
+            // JsonElement rootNode = gson.fromJson(finalChars, JsonElement.class);
 
+            // JsonArray resultArray = null;
+            // if(rootNode.isJsonObject()){
+            //     JsonObject jsonObject = rootNode.getAsJsonObject();
+            //     JsonElement vlResultArray = jsonObject.get("data");
+            //     if(vlResultArray.isJsonArray()){
+            //         resultArray = vlResultArray.getAsJsonArray();
+            //     }
+            // }
+
+            // JsonArray cleanedArray = new JsonArray();
+            // if (resultArray != null && !resultArray.isEmpty()) {
+            //     for (int i =0; i < resultArray.size(); i++) {
+            //         JsonObject result = resultArray.get(i).getAsJsonObject();
+            //         result.addProperty("full_names", "Replaced Name"); // this is a short workaround to handle data coming from eid/vl system and were pushed from kenyaemr with unicode literals
+            //         cleanedArray.add(result);
+
+            //     }
+            // }
+
+
+            // if (resultArray != null && !resultArray.isEmpty()) {
+            //     System.out.println("Get Lab Results: Error: Got null/empty json results");
+            //     String json = gson.toJson(cleanedArray);
+            //     ProcessViralLoadResults.processPayload(json);// the only way that works for now is posting this through REST
+            if (responseArray != null && !responseArray.isEmpty()) {
+                // update orders
+                LabOrderDataExchange lode = new LabOrderDataExchange();
+                lode.processIncomingViralLoadLabResults(jsonString);
                 // update manifest details appropriately for the next execution
                 String [] incompleteStatuses = new String []{"Incomplete"};
+
+                //update manifests
+                // manifestToUpdateResults = kenyaemrOrdersService.getLabManifestOrderById(manifestOrderIds.get(0)).getLabManifest();
+                // kenyaemrOrdersService.getLabManifestOrderByOrderId(orderIds.get(0));
+                // OrderService.getOrder(7);
+
+                //OrderService orderService = Context.getOrderService();
+                //manifestToUpdateResults = kenyaemrOrdersService.getLabManifestOrderByOrderId(orderService.getOrder(orderIds.get(0))).getLabManifest();
+
                 if (manifestToUpdateResults != null) {
+                    System.out.println("Lab Results Get: Updating manifest with status");
                     List<LabManifestOrder> pendingResultsForNextIteration = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifestToUpdateResults, "Sent");
                     List<LabManifestOrder> incompleteResults = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifestToUpdateResults, incompleteStatuses);
 
@@ -288,6 +310,7 @@ public class LabwareSystemWebRequest extends LabWebRequest {
 
                         gpLastProcessedManifest.setPropertyValue(""); // set value to null so that the execution gets to the next manifest
                         Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifest);
+                        System.out.println("Lab Results Get: Updating manifest with status: Complete Results");
                     } else if (pendingResultsForNextIteration.size() < 1 && incompleteResults.size() > 0) {
                         manifestToUpdateResults.setStatus("Incomplete results");
                         manifestToUpdateResults.setDateChanged(new Date());
@@ -295,10 +318,12 @@ public class LabwareSystemWebRequest extends LabWebRequest {
 
                         gpLastProcessedManifest.setPropertyValue(""); // set value to null so that the execution gets to the next manifest
                         Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifest);
+                        System.out.println("Lab Results Get: Updating manifest with status: Incomplete Results");
                     }
 
                     // update manifest global property
                     if (pendingResultsForNextIteration.size() > 0) {
+                        System.out.println("Lab Results Get: Updating manifest global property");
                         gpLastProcessedManifest.setPropertyValue(manifestToUpdateResults.getId().toString());
                         gpLastProcessedManifestUpdatetime.setPropertyValue(Utils.getSimpleDateFormat(LabOrderDataExchange.MANIFEST_LAST_UPDATE_PATTERN).format(new Date()));
                         Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifest);
