@@ -85,8 +85,8 @@ public class LabwareSystemWebRequest extends LabWebRequest {
         GlobalProperty gpServerUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_VL_LAB_SERVER_REQUEST_URL);
         GlobalProperty gpApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_VL_LAB_SERVER_API_TOKEN);
 
-        String serverUrl = gpServerUrl.getPropertyValue();
-        String API_KEY = gpApiToken.getPropertyValue();
+        String serverUrl = gpServerUrl.getPropertyValue().trim();
+        String API_KEY = gpApiToken.getPropertyValue().trim();
 
         // SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
         //         SSLContexts.createDefault(),
@@ -191,8 +191,8 @@ public class LabwareSystemWebRequest extends LabWebRequest {
         GlobalProperty gpLastProcessedManifest = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_MANIFEST_LAST_PROCESSED);
         GlobalProperty gpLastProcessedManifestUpdatetime = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_MANIFEST_LAST_UPDATETIME);
 
-        String serverUrl = gpServerUrl.getPropertyValue();
-        String API_KEY = gpApiToken.getPropertyValue();
+        String serverUrl = gpServerUrl.getPropertyValue().trim();
+        String API_KEY = gpApiToken.getPropertyValue().trim();
         //LabManifest manifestToUpdateResults = null;
 
 //Not using SSL
