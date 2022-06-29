@@ -133,8 +133,11 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                 <% manifestOrders.each { o -> %>
                 <tr>
                 <td class="nameColumn"><a href="${ ui.pageLink("kenyaemr", "chart/chartViewPatient", [ patientId: o.order.patient.id ]) }">${o.order.patient.givenName} ${o.order.patient.familyName} ${o.order.patient.middleName ?: ""}</a></td>
-                    <td class="cccNumberColumn">${o.order.patient.getPatientIdentifier(cccNumberType)}</td>
-
+                <% if (manifest.manifestType == 2) { %>
+                     <td class="cccNumberColumn">${o.order.patient.getPatientIdentifier(cccNumberType)}</td>
+                <% } else { %>
+                <td class="cccNumberColumn">${o.order.patient.getPatientIdentifier(heiNumberType)}</td>
+                <% } %>
                     <td class="sampleTypeColumn">${o.sampleType}</td>
                     <td class="dateRequestColumn">${kenyaui.formatDate(o.order.dateActivated)}</td>
                     <td class="sampleStatusColumn">${o.status}</td>
