@@ -55,16 +55,25 @@ public class ManifestOrdersHomePageController {
 
         //Temporary fix to remove special chars from lab results
         List<LabManifestOrder> ordersForManifest = new ArrayList<LabManifestOrder>();
-        for(LabManifestOrder m : allOrdersForManifest)
-        {
-            m.setResult(m.getResult().replaceAll("[^a-zA-Z0-9]"," ").trim());
-            ordersForManifest.add(m);
+        for(LabManifestOrder m : allOrdersForManifest) {
+            if(m != null) {
+                try {
+                    String result = m.getResult();
+                    if(result != null) {
+                        result = result.replaceAll("[^a-zA-Z0-9]"," ");
+                        result = result.trim();
+                        m.setResult(result);
+                    }
+                } catch(Exception ex) {}
+                ordersForManifest.add(m);
+            }
         }
 
         model.put("eligibleVlOrders", activeVlOrdersNotInManifest );
         model.put("eligibleEidOrders", activeEidOrdersNotInManifest );
         model.put("manifestType", manifestType);
         model.put("manifest", manifest);
+        //model.put("manifestOrders", allOrdersForManifest);
         model.put("manifestOrders", ordersForManifest);
         model.put("cccNumberType", pat.getPatientIdentifierTypeId());
         model.put("heiNumberType", hei.getPatientIdentifierTypeId());
