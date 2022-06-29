@@ -28,6 +28,7 @@ import org.openmrs.api.OrderService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyacore.RegimenMappingUtils;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
+import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 import org.openmrs.module.kenyaemrorderentry.util.Utils;
 import org.openmrs.ui.framework.SimpleObject;
@@ -516,14 +517,13 @@ public class LabOrderDataExchange {
         try {
             if(rootNode.isJsonArray()){
                 resultsObj = rootNode.getAsJsonArray();
-
             } else {
-                System.out.println("The payload could not be understood. An array is expected!:::: ");
-
-                statusMsg = "The payload could not be understood. An array is expected!";
+                System.out.println("Lab Results Get Results: The payload could not be understood. An array is expected!:::: ");
+                statusMsg = "Lab Results Get Results: The payload could not be understood. An array is expected!";
                 return statusMsg;
             }
         } catch (Exception e) {
+            System.err.println("Lab Results Get Results: An error occured: " + e.getMessage());
             e.printStackTrace();
         }
 
@@ -531,24 +531,30 @@ public class LabOrderDataExchange {
             for (int i = 0; i < resultsObj.size(); i++) {
 
                 JsonObject o =  resultsObj.get(i).getAsJsonObject();
-                Integer specimenId = o.get("order_number").getAsInt();
+                Integer orderId = o.get("order_number").getAsInt();
                 Date sampleReceivedDate = null;
                 Date sampleTestedDate = null;
                 String dateSampleReceived = "";
                 String dateSampleTested = "";
                 String specimenRejectedReason = "";
 
-                if (LabOrderDataExchange.isEidVlLabSystem()) {
-                    dateSampleReceived = !o.get("date_received").isJsonNull() ? o.get("date_received").getAsString() : "";
-                    dateSampleTested = !o.get("date_tested").isJsonNull() ? o.get("date_tested").getAsString() : "";
-                    specimenRejectedReason = o.has("rejected_reason") ? o.get("rejected_reason").getAsString() : "";
-                } else {
-                    JsonObject dateReceivedObject = o.get("date_received").getAsJsonObject();
-                    dateSampleReceived = dateReceivedObject.get("date").getAsString().trim();
-                    JsonObject dateTestedObject = o.get("date_tested").getAsJsonObject();
-                    dateSampleTested = dateTestedObject.get("date").getAsString().trim();
-                    specimenRejectedReason = "";
-                }
+                // if (LabOrderDataExchange.isEidVlLabSystem()) {
+                //     dateSampleReceived = !o.get("date_received").isJsonNull() ? o.get("date_received").getAsString() : "";
+                //     dateSampleTested = !o.get("date_tested").isJsonNull() ? o.get("date_tested").getAsString() : "";
+                //     specimenRejectedReason = o.has("rejected_reason") ? o.get("rejected_reason").getAsString() : "";
+                // } else {
+                //     JsonObject dateReceivedObject = o.get("date_received").getAsJsonObject();
+                //     dateSampleReceived = dateReceivedObject.get("date").getAsString().trim();
+                //     JsonObject dateTestedObject = o.get("date_tested").getAsJsonObject();
+                //     dateSampleTested = dateTestedObject.get("date").getAsString().trim();
+                //     specimenRejectedReason = "";
+                // }
+
+                JsonObject dateReceivedObject = o.get("date_received").getAsJsonObject();
+                dateSampleReceived = dateReceivedObject.get("date").getAsString().trim();
+                JsonObject dateTestedObject = o.get("date_tested").getAsJsonObject();
+                dateSampleTested = dateTestedObject.get("date").getAsString().trim();
+                specimenRejectedReason = o.has("rejected_reason") ? o.get("rejected_reason").getAsString() : "";
 
                 if (StringUtils.isNotBlank(dateSampleReceived)) {
                     try {
@@ -577,7 +583,7 @@ public class LabOrderDataExchange {
                 String results = o.get("result").getAsString().trim();
                 //updateOrder(specimenId, results, specimenReceivedStatus, sampleReceivedDate, sampleTestedDate, labNumber);
                 //updateOrder(specimenId, results, specimenReceivedStatus, sampleReceivedDate, sampleTestedDate);
-                updateOrder(specimenId, results, specimenReceivedStatus, specimenRejectedReason, sampleReceivedDate, sampleTestedDate);
+                updateOrder(orderId, results, specimenReceivedStatus, specimenRejectedReason, sampleReceivedDate, sampleTestedDate);
                 // update manifest object to reflect received status
             }
         }
@@ -645,19 +651,46 @@ public class LabOrderDataExchange {
                 String aboveMillionResult = "> 10,000,000 cp/ml";
                 Obs o = new Obs();
 
-                conceptToRetain = vlTestConceptQualitative;
-                //conceptToRetain = vlTestConceptQuantitative;
-                if (result.equalsIgnoreCase(lDLResult)) {
-                    conceptToRetain = vlTestConceptQualitative;
-                    o.setValueCoded(LDLConcept);
-                } else if (result.equalsIgnoreCase(aboveMillionResult)) {
-                    conceptToRetain = vlTestConceptQuantitative;
-                    o.setValueNumeric(new Double(10000001));
-                } else {
-                    conceptToRetain = vlTestConceptQuantitative;
-                    //o.setValueNumeric(Double.valueOf(result));
-                    //o.setValueCoded(conceptToRetain);
-                    o.setValueNumeric(new Double(1));
+                int manifestType = manifestOrder.getLabManifest().getManifestType();
+                if(manifestType == LabManifest.EID_TYPE) {
+                    String eidNegative = "Negative";
+                    String eidPositive = "Positive";
+                    String eidIndeterminate = "Positive";
+                    String eidPoorSample = "Positive";
+                    Concept eidNegativeConcept = conceptService.getConcept(664);
+                    Concept eidPositiveConcept = conceptService.getConcept(703);
+                    Concept eidIndeterminateConcept = conceptService.getConcept(1138);
+                    Concept eidPoorSampleConcept = conceptService.getConcept(1304);
+
+                    if (result.equalsIgnoreCase(eidNegative)) {
+                        conceptToRetain = eidNegativeConcept;
+                        o.setValueCoded(eidNegativeConcept);
+                    } else if (result.equalsIgnoreCase(eidPositive)) {
+                        conceptToRetain = eidPositiveConcept;
+                        o.setValueCoded(eidPositiveConcept);
+                    }  else if (result.equalsIgnoreCase(eidIndeterminate)) {
+                        conceptToRetain = eidIndeterminateConcept;
+                        o.setValueCoded(eidIndeterminateConcept);
+                    } else if (result.equalsIgnoreCase(eidPoorSample)) {
+                        conceptToRetain = eidPoorSampleConcept;
+                        o.setValueCoded(eidPoorSampleConcept);
+                    }
+                } else if(manifestType == LabManifest.VL_TYPE) {
+                    if (result.equalsIgnoreCase(lDLResult)) {
+                        conceptToRetain = vlTestConceptQualitative;
+                        o.setValueCoded(LDLConcept);
+                    } else if (result.equalsIgnoreCase(aboveMillionResult)) {
+                        conceptToRetain = vlTestConceptQuantitative;
+                        o.setValueNumeric(new Double(10000001));
+                    } else if (checkNumeric(result)) {
+                        conceptToRetain = vlTestConceptQuantitative;
+                        o.setValueNumeric(Double.valueOf(result));
+                    } else {
+                        //o.setValueNumeric(Double.valueOf(result));
+                        //o.setValueCoded(conceptToRetain);
+                        conceptToRetain = vlTestConceptQualitative;
+                        o.setValueCoded(conceptToRetain);
+                    }
                 }
 
                 // In order to record results both qualitative (LDL) and quantitative,
@@ -847,6 +880,21 @@ public class LabOrderDataExchange {
             }
         }
         return listToProcess;
+    }
+
+    /**
+     * Checks if a string is numeric
+     * @param feed the string
+     * @return true if numeric and false if not
+     */
+    private boolean checkNumeric(String feed) {
+        try {
+            Long l = Long.parseLong(feed);
+            return true;
+        } catch (NumberFormatException e) {
+            System.out.println("Input String cannot be parsed to Integer.");
+            return false;
+        }
     }
 
     /**
