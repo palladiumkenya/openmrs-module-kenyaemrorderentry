@@ -649,6 +649,7 @@ public class LabOrderDataExchange {
 
                 Concept conceptToRetain = null;
                 String lDLResult = "< LDL copies/ml";
+                String labwarelDLResult = "<LDL";
                 String aboveMillionResult = "> 10,000,000 cp/ml";
                 Obs o = new Obs();
 
@@ -677,7 +678,7 @@ public class LabOrderDataExchange {
                         o.setValueCoded(eidPoorSampleConcept);
                     }
                 } else if(manifestType == LabManifest.VL_TYPE) {
-                    if (result.equalsIgnoreCase(lDLResult)) {
+                    if (result.equalsIgnoreCase(lDLResult) || result.equalsIgnoreCase(labwarelDLResult)) {
                         conceptToRetain = vlTestConceptQualitative;
                         o.setValueCoded(LDLConcept);
                     } else if (result.equalsIgnoreCase(aboveMillionResult)) {
@@ -686,11 +687,6 @@ public class LabOrderDataExchange {
                     } else if (checkNumeric(result)) {
                         conceptToRetain = vlTestConceptQuantitative;
                         o.setValueNumeric(Double.valueOf(result));
-                    } else {
-                        //o.setValueNumeric(Double.valueOf(result));
-                        //o.setValueCoded(conceptToRetain);
-                        conceptToRetain = vlTestConceptQualitative;
-                        o.setValueCoded(conceptToRetain);
                     }
                 }
 
@@ -701,6 +697,7 @@ public class LabOrderDataExchange {
                 Order orderToRetain = ordersToProcess.get("orderToRetain");
                 Order orderToVoid = ordersToProcess.get("orderToVoid");
 
+                System.out.println("Lab Results Get Results: retain: " + orderToRetain + " and void: " + orderToVoid);
 
                 // logic that picks the right concept id for the result obs
                 o.setConcept(conceptToRetain);
@@ -718,91 +715,18 @@ public class LabOrderDataExchange {
                 enc.setCreator(Context.getUserService().getUser(1));
 
                 enc.addObs(o);
-                if (orderToRetain != null && orderToRetain.isActive() && orderToVoid != null) {
 
-                    try {
-
-                        encounterService.saveEncounter(enc);
-                        System.out.println("Lab Results Get Results: Start order discontinue");
-                        orderService.discontinueOrder(orderToRetain, "Results received", orderDiscontinuationDate, orderToRetain.getOrderer(),
-                                orderToRetain.getEncounter());
-                        orderService.voidOrder(orderToVoid, "Duplicate VL order");
-                        // this is really a hack to ensure that order date_stopped is filled, otherwise the order will remain active
-                        // the issue here is that even though disc order is created, the original order is not stopped
-                        // an alternative is to discontinue this order via REST which works well
-
-                        manifestOrder.setStatus("Complete");
-                        manifestOrder.setResult(result);
-                        manifestOrder.setResultDate(orderDiscontinuationDate);
-                        if (dateSampleReceived != null) {
-                            manifestOrder.setSampleReceivedDate(dateSampleReceived);
-                        }
-
-                        if (dateSampleTested != null) {
-                            manifestOrder.setSampleTestedDate(dateSampleTested);
-                        }
-                        kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
-                    } catch (Exception e) {
-                        System.out.println("An error was encountered while updating orders for viral load");
-                        e.printStackTrace();
-                    }
-
-                } else if ((orderToRetain != null && orderToRetain.isActive()) && (orderToVoid == null || !orderToVoid.isActive())) {
-                    // this use case has been observed in facility dbs.
-                    // until a lasting solution is found, this block will handle the use case
-                    try {
-
-                        encounterService.saveEncounter(enc);
-                        System.out.println("Lab Results Get Results: Start order discontinue");
-                        orderService.discontinueOrder(orderToRetain, "Results received", orderDiscontinuationDate, orderToRetain.getOrderer(),
-                                orderToRetain.getEncounter());
-                        // this is really a hack to ensure that order date_stopped is filled, otherwise the order will remain active
-                        // the issue here is that even though disc order is created, the original order is not stopped
-                        // an alternative is to discontinue this order via REST which works well
-
-                        manifestOrder.setStatus("Complete");
-                        manifestOrder.setResult(result);
-                        manifestOrder.setResultDate(orderDiscontinuationDate);
-                        if (dateSampleReceived != null) {
-                            manifestOrder.setSampleReceivedDate(dateSampleReceived);
-                        }
-
-                        if (dateSampleTested != null) {
-                            manifestOrder.setSampleTestedDate(dateSampleTested);
-                        }
-                        kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
-                    } catch (Exception e) {
-                        System.out.println("An error was encountered while updating orders for viral load");
-                        e.printStackTrace();
-                    }
-
-                } else {
-                    // we should create a new order and discontinue it
-
-                    if ((orderToRetain == null || !orderToRetain.isActive()) && (orderToVoid != null && orderToVoid.isActive())) {
-                        TestOrder order = new TestOrder();
-                        order.setAction(Order.Action.NEW);
-                        order.setCareSetting(orderToVoid.getCareSetting());
-                        order.setConcept(orderToVoid.getConcept().equals(vlTestConceptQualitative) ? vlTestConceptQuantitative : vlTestConceptQualitative);
-                        order.setPatient(orderToVoid.getPatient());
-                        order.setOrderType(orderToVoid.getOrderType());
-                        order.setOrderer(orderToVoid.getOrderer());
-                        order.setInstructions(orderToVoid.getInstructions());
-                        order.setUrgency(orderToVoid.getUrgency());
-                        order.setCommentToFulfiller(orderToVoid.getCommentToFulfiller());
-                        order.setOrderReason(orderToVoid.getOrderReason());
-                        order.setOrderReasonNonCoded(orderToVoid.getOrderReasonNonCoded());
-                        order.setDateActivated(orderToVoid.getDateActivated());
-                        order.setCreator(orderToVoid.getCreator());
-                        order.setEncounter(orderToVoid.getEncounter());
-                        Order savedOrder = orderService.saveOrder(order, null);
+                if(manifestType == LabManifest.VL_TYPE) {
+                    // For a VL type order
+                    if (orderToRetain != null && orderToRetain.isActive() && orderToVoid != null) {
 
                         try {
 
                             encounterService.saveEncounter(enc);
                             System.out.println("Lab Results Get Results: Start order discontinue");
-                            orderService.discontinueOrder(savedOrder, "Results received", orderDiscontinuationDate, savedOrder.getOrderer(),
-                                    savedOrder.getEncounter());
+                            orderService.discontinueOrder(orderToRetain, "Results received", orderDiscontinuationDate, orderToRetain.getOrderer(),
+                                    orderToRetain.getEncounter());
+                            orderService.voidOrder(orderToVoid, "Duplicate VL order");
                             // this is really a hack to ensure that order date_stopped is filled, otherwise the order will remain active
                             // the issue here is that even though disc order is created, the original order is not stopped
                             // an alternative is to discontinue this order via REST which works well
@@ -819,22 +743,121 @@ public class LabOrderDataExchange {
                             }
                             kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
                         } catch (Exception e) {
-                            System.out.println("An error was encountered while updating orders for viral load");
+                            System.out.println("Lab Results Get Results: An error was encountered while updating orders for viral load");
                             e.printStackTrace();
                         }
-                    }  else {
-                        /**
-                         * the result could not be updated in the system
-                         * TODO: establish why one order for VL is missing. When a VL request is made, two orders (856 and 1305) are created
-                         * sometimes one order just misses and the code cannot find the one to update
-                         * We will mark these with errors for a user to manually update in the system.
-                         * An alternative is to create a similar order and update results
-                         */
 
-                        manifestOrder.setStatus("Requires manual update in the lab module");
+
+                    } else if ((orderToRetain != null && orderToRetain.isActive()) && (orderToVoid == null || !orderToVoid.isActive())) {
+                        // this use case has been observed in facility dbs.
+                        // until a lasting solution is found, this block will handle the use case
+                        try {
+
+                            encounterService.saveEncounter(enc);
+                            System.out.println("Lab Results Get Results: Start order discontinue");
+                            orderService.discontinueOrder(orderToRetain, "Results received", orderDiscontinuationDate, orderToRetain.getOrderer(),
+                                    orderToRetain.getEncounter());
+                            // this is really a hack to ensure that order date_stopped is filled, otherwise the order will remain active
+                            // the issue here is that even though disc order is created, the original order is not stopped
+                            // an alternative is to discontinue this order via REST which works well
+
+                            manifestOrder.setStatus("Complete");
+                            manifestOrder.setResult(result);
+                            manifestOrder.setResultDate(orderDiscontinuationDate);
+                            if (dateSampleReceived != null) {
+                                manifestOrder.setSampleReceivedDate(dateSampleReceived);
+                            }
+
+                            if (dateSampleTested != null) {
+                                manifestOrder.setSampleTestedDate(dateSampleTested);
+                            }
+                            kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
+                        } catch (Exception e) {
+                            System.out.println("Lab Results Get Results: An error was encountered while updating orders for viral load");
+                            e.printStackTrace();
+                        }
+
+                    } else {
+                        // we should create a new order and discontinue it
+
+                        if ((orderToRetain == null || !orderToRetain.isActive()) && (orderToVoid != null && orderToVoid.isActive())) {
+                            TestOrder order = new TestOrder();
+                            order.setAction(Order.Action.NEW);
+                            order.setCareSetting(orderToVoid.getCareSetting());
+                            order.setConcept(orderToVoid.getConcept().equals(vlTestConceptQualitative) ? vlTestConceptQuantitative : vlTestConceptQualitative);
+                            order.setPatient(orderToVoid.getPatient());
+                            order.setOrderType(orderToVoid.getOrderType());
+                            order.setOrderer(orderToVoid.getOrderer());
+                            order.setInstructions(orderToVoid.getInstructions());
+                            order.setUrgency(orderToVoid.getUrgency());
+                            order.setCommentToFulfiller(orderToVoid.getCommentToFulfiller());
+                            order.setOrderReason(orderToVoid.getOrderReason());
+                            order.setOrderReasonNonCoded(orderToVoid.getOrderReasonNonCoded());
+                            order.setDateActivated(orderToVoid.getDateActivated());
+                            order.setCreator(orderToVoid.getCreator());
+                            order.setEncounter(orderToVoid.getEncounter());
+                            Order savedOrder = orderService.saveOrder(order, null);
+
+                            try {
+
+                                encounterService.saveEncounter(enc);
+                                System.out.println("Lab Results Get Results: Start order discontinue");
+                                orderService.discontinueOrder(savedOrder, "Results received", orderDiscontinuationDate, savedOrder.getOrderer(),
+                                        savedOrder.getEncounter());
+                                // this is really a hack to ensure that order date_stopped is filled, otherwise the order will remain active
+                                // the issue here is that even though disc order is created, the original order is not stopped
+                                // an alternative is to discontinue this order via REST which works well
+
+                                manifestOrder.setStatus("Complete");
+                                manifestOrder.setResult(result);
+                                manifestOrder.setResultDate(orderDiscontinuationDate);
+                                if (dateSampleReceived != null) {
+                                    manifestOrder.setSampleReceivedDate(dateSampleReceived);
+                                }
+
+                                if (dateSampleTested != null) {
+                                    manifestOrder.setSampleTestedDate(dateSampleTested);
+                                }
+                                kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
+                            } catch (Exception e) {
+                                System.out.println("Lab Results Get Results: An error was encountered while updating orders for viral load");
+                                e.printStackTrace();
+                            }
+                        }  else {
+                            /**
+                             * the result could not be updated in the system
+                             * TODO: establish why one order for VL is missing. When a VL request is made, two orders (856 and 1305) are created
+                             * sometimes one order just misses and the code cannot find the one to update
+                             * We will mark these with errors for a user to manually update in the system.
+                             * An alternative is to create a similar order and update results
+                             */
+                            System.out.println("Lab Results Get Results: Unable to discontinue the order. Manual action is required");
+                            manifestOrder.setStatus("Requires manual update in the lab module");
+                            manifestOrder.setResult(result);
+                            manifestOrder.setResultDate(orderDiscontinuationDate);
+
+                            if (dateSampleReceived != null) {
+                                manifestOrder.setSampleReceivedDate(dateSampleReceived);
+                            }
+
+                            if (dateSampleTested != null) {
+                                manifestOrder.setSampleTestedDate(dateSampleTested);
+                            }
+
+                            kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
+                        }
+                    }
+                } else if(manifestType == LabManifest.EID_TYPE) {
+                    // For a EID type order
+                    try {
+                        encounterService.saveEncounter(enc);
+                        System.out.println("Lab Results Get Results: Start EID order discontinue");
+                        Order eidOrder = manifestOrder.getOrder();
+                        orderService.discontinueOrder(eidOrder, "Results received", orderDiscontinuationDate, eidOrder.getOrderer(), eidOrder.getEncounter());
+
+                        manifestOrder.setStatus("Complete");
                         manifestOrder.setResult(result);
                         manifestOrder.setResultDate(orderDiscontinuationDate);
-
                         if (dateSampleReceived != null) {
                             manifestOrder.setSampleReceivedDate(dateSampleReceived);
                         }
@@ -842,11 +865,11 @@ public class LabOrderDataExchange {
                         if (dateSampleTested != null) {
                             manifestOrder.setSampleTestedDate(dateSampleTested);
                         }
-
                         kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
+                    } catch (Exception e) {
+                        System.out.println("Lab Results Get Results: An error was encountered while updating orders for EID");
+                        e.printStackTrace();
                     }
-
-
                 }
             } else if (StringUtils.isNotBlank(specimenStatus) && specimenStatus.equalsIgnoreCase("Incomplete")) {
                 // indicate the incomplete status
