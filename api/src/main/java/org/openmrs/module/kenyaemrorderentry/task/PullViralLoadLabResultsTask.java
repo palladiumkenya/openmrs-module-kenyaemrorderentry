@@ -91,24 +91,24 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
                 /**
                  * we can do some cleanup i.e close all manifests with results
                  */
-                List<LabManifest> allManifests = kenyaemrOrdersService.getLabOrderManifest("Incomplete results");
-                for (LabManifest manifest : allManifests) {
+                // List<LabManifest> allManifests = kenyaemrOrdersService.getLabOrderManifest("Incomplete results");
+                // for (LabManifest manifest : allManifests) {
 
-                    List<LabManifestOrder> manifestOrdersWithIncompleteResults = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifest, incompleteStatuses);
+                //     List<LabManifestOrder> manifestOrdersWithIncompleteResults = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifest, incompleteStatuses);
 
-                    if (manifestOrdersWithIncompleteResults.size() < 1) {
-                        manifest.setStatus("Complete results");
-                        manifest.setDateChanged(new Date());
-                        kenyaemrOrdersService.saveLabOrderManifest(manifest);
-                        if(StringUtils.isNotBlank(lastProcessedManifest) && Integer.valueOf(lastProcessedManifest).equals(manifest.getId())) {
-                            lastProcessedManifest = "";
-                            gpLastProcessedManifest.setPropertyValue(""); // set value to null so that the execution gets to the next manifest
-                            Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifest);
-                        }
-                        System.out.println("Lab Results Get: Manifest with ID " + manifest.getId() + " has no pending orders. It has been marked as complete");
+                //     if (manifestOrdersWithIncompleteResults.size() < 1) {
+                //         manifest.setStatus("Complete results");
+                //         manifest.setDateChanged(new Date());
+                //         kenyaemrOrdersService.saveLabOrderManifest(manifest);
+                //         if(StringUtils.isNotBlank(lastProcessedManifest) && Integer.valueOf(lastProcessedManifest).equals(manifest.getId())) {
+                //             lastProcessedManifest = "";
+                //             gpLastProcessedManifest.setPropertyValue(""); // set value to null so that the execution gets to the next manifest
+                //             Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifest);
+                //         }
+                //         System.out.println("Lab Results Get: Manifest with ID " + manifest.getId() + " has no pending orders. It has been marked as complete");
 
-                    }
-                }
+                //     }
+                // }
 
 
                 /**

@@ -119,43 +119,48 @@ public class LabwareSystemWebRequest extends LabWebRequest {
             int statusCode = response.getStatusLine().getStatusCode();
 
             if (statusCode == 429) { // too many requests. just terminate
-                System.out.println("Lab Results POST: The push lab scheduler has been configured to run at very short intervals. Please change this to at least 30min");
-                log.warn("Lab Results POST: The push scheduler has been configured to run at very short intervals. Please change this to at least 30min");
+                System.out.println("Lab Results POST: 429 The push lab scheduler has been configured to run at very short intervals. Please change this to at least 30min");
+                log.warn("Lab Results POST: 429 The push scheduler has been configured to run at very short intervals. Please change this to at least 30min");
                 return(false);
             }
 
             if (statusCode != 201 && statusCode != 200 && statusCode != 422 && statusCode != 403) { // skip for status code 422: unprocessable entity, and status code 403 for forbidden response
-                JSONParser parser = new JSONParser();
-                JSONObject responseObj = (JSONObject) parser.parse(EntityUtils.toString(response.getEntity()));
-//                JSONObject errorObj = (JSONObject) responseObj.get("errors");
-//                manifestOrder.setStatus("Error - " + statusCode + ". Msg" + errorObj.get("message"));
+                // JSONParser parser = new JSONParser();
+                // JSONObject responseObj = (JSONObject) parser.parse(EntityUtils.toString(response.getEntity()));
+                // JSONObject errorObj = (JSONObject) responseObj.get("errors");
+                // manifestOrder.setStatus("Error - " + statusCode + ". Msg" + errorObj.get("message"));
+                manifestOrder.setStatus("Pending");
+                kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
                 System.out.println("Lab Results POST: There was an error sending lab id = " + manifestOrder.getId() + " Status: " + statusCode);
                 log.warn("Lab Results POST: There was an error sending lab id = " + manifestOrder.getId() + " Status: " + statusCode);
                 // throw new RuntimeException("Failed with HTTP error code : " + statusCode + ". Error msg: " + errorObj.get("message"));
+                return(false);
+            } else if (statusCode == 403 || statusCode == 422) {
+                // JSONParser parser = new JSONParser();
+                // JSONObject responseObj = (JSONObject) parser.parse(EntityUtils.toString(response.getEntity()));
+                // JSONObject errorObj = (JSONObject) responseObj.get("errors");
+                // System.out.println("Lab Results POST: Error while submitting manifest sample. " + "Error - " + statusCode + ". Msg" + errorObj.get("message"));
+                // log.error("Lab Results POST: Error while submitting manifest sample. " + "Error - " + statusCode + ". Msg" + errorObj.get("message"));
+                manifestOrder.setStatus("Pending");
+                kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
+                System.out.println("Lab Results POST: There was an error sending lab id = " + manifestOrder.getId() + " Status: " + statusCode);
+                log.warn("Lab Results POST: There was an error sending lab id = " + manifestOrder.getId() + " Status: " + statusCode);
+                return(false);
             } else if (statusCode == 201 || statusCode == 200) {
                 manifestOrder.setStatus("Sent");
                 System.out.println("Lab Results POST: Successfully pushed a VL lab test id " + manifestOrder.getId());
                 log.info("Lab Results POST: Successfully pushed a VL lab test id " + manifestOrder.getId());
-            } else if (statusCode == 403 || statusCode == 422) {
-                JSONParser parser = new JSONParser();
-                JSONObject responseObj = (JSONObject) parser.parse(EntityUtils.toString(response.getEntity()));
-//                JSONObject errorObj = (JSONObject) responseObj.get("errors");
-//                System.out.println("Lab Results POST: Error while submitting manifest sample. " + "Error - " + statusCode + ". Msg" + errorObj.get("message"));
-//                log.error("Lab Results POST: Error while submitting manifest sample. " + "Error - " + statusCode + ". Msg" + errorObj.get("message"));
-                System.out.println("Lab Results POST: There was an error sending lab id = " + manifestOrder.getId() + " Status: " + statusCode);
-                log.warn("Lab Results POST: There was an error sending lab id = " + manifestOrder.getId() + " Status: " + statusCode);
+                kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
+
+                if (toProcess != null && manifestStatus.equals("Ready to send")) {
+                    toProcess.setStatus("Sending");
+                    kenyaemrOrdersService.saveLabOrderManifest(toProcess);
+                }
+                Context.flushSession();
+
+                System.out.println("Lab Results POST: Push Successfull");
+                return(true);
             }
-
-            kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
-
-            if (toProcess != null && manifestStatus.equals("Ready to send")) {
-                toProcess.setStatus("Sending");
-                kenyaemrOrdersService.saveLabOrderManifest(toProcess);
-            }
-            Context.flushSession();
-
-            System.out.println("Lab Results POST: Push Successfull");
-            return(true);
         } catch (Exception e) {
             System.err.println("Lab Results POST: Could not push requests to the lab! " + e.getMessage());
             log.error("Lab Results POST: Could not push requests to the lab! " + e.getMessage());
@@ -289,7 +294,7 @@ public class LabwareSystemWebRequest extends LabWebRequest {
                 // lode.processIncomingViralLoadLabResults(jsonString);
                 ProcessViralLoadResults.processPayload(jsonString);
                 // update manifest details appropriately for the next execution
-                String [] incompleteStatuses = new String []{"Incomplete"};
+                String [] incompleteStatuses = new String []{"Incomplete", "Pending", "Sending"};
 
                 //update manifests
                 // manifestToUpdateResults = kenyaemrOrdersService.getLabManifestOrderById(manifestOrderIds.get(0)).getLabManifest();
@@ -303,6 +308,8 @@ public class LabwareSystemWebRequest extends LabWebRequest {
                     System.out.println("Lab Results Get: Updating manifest with status");
                     List<LabManifestOrder> pendingResultsForNextIteration = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifestToUpdateResults, "Sent");
                     List<LabManifestOrder> incompleteResults = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifestToUpdateResults, incompleteStatuses);
+
+                    System.out.println("Size of pending results: " + pendingResultsForNextIteration.size() + " Size of incomplete results: " + incompleteResults.size());
 
                     if (pendingResultsForNextIteration.size() < 1 && incompleteResults.size() < 1) {
                         manifestToUpdateResults.setStatus("Complete results");
