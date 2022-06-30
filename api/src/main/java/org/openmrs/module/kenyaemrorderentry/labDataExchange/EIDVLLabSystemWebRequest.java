@@ -96,6 +96,7 @@ public class EIDVLLabSystemWebRequest extends LabWebRequest {
         try {
 
             //Define a postRequest request
+            System.out.println("EID Lab Results POST: Server URL: " + serverUrl);
             HttpPost postRequest = new HttpPost(serverUrl);
 
             //Set the API media type in http content-type header
@@ -116,8 +117,8 @@ public class EIDVLLabSystemWebRequest extends LabWebRequest {
             int statusCode = response.getStatusLine().getStatusCode();
 
             if (statusCode == 429) { // too many requests. just terminate
-                System.out.println("EID Lab Results POST: The push lab scheduler has been configured to run at very short intervals. Please change this to at least 30min");
-                log.warn("EID Lab Results POST: The push scheduler has been configured to run at very short intervals. Please change this to at least 30min");
+                System.out.println("EID Lab Results POST: 429 The push lab scheduler has been configured to run at very short intervals. Please change this to at least 30min");
+                log.warn("EID Lab Results POST: 429 The push scheduler has been configured to run at very short intervals. Please change this to at least 30min");
                 return(false);
             }
 
@@ -126,33 +127,39 @@ public class EIDVLLabSystemWebRequest extends LabWebRequest {
                 // JSONObject responseObj = (JSONObject) parser.parse(EntityUtils.toString(response.getEntity()));
                 // JSONObject errorObj = (JSONObject) responseObj.get("error");
                 // manifestOrder.setStatus("Error - " + statusCode + ". Msg" + errorObj.get("message"));
-                System.out.println("EID Lab Results POST: There was an error sending lab id = " + manifestOrder.getId());
-                log.warn("EID Lab Results POST: There was an error sending lab id = " + manifestOrder.getId());
+                manifestOrder.setStatus("Pending");
+                kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
+                System.out.println("EID Lab Results POST: There was an error sending lab id = " + manifestOrder.getId() + " Status: " + statusCode);
+                log.warn("EID Lab Results POST: There was an error sending lab id = " + manifestOrder.getId() + " Status: " + statusCode);
                 // throw new RuntimeException("Failed with HTTP error code : " + statusCode + ". Error msg: " + errorObj.get("message"));
-            } else if (statusCode == 201 || statusCode == 200) {
-                manifestOrder.setStatus("Sent");
-                System.out.println("EID Lab Results POST: Successfully pushed a EID lab test id " + manifestOrder.getId());
-                log.info("EID Lab Results POST: Successfully pushed a EID lab test id " + manifestOrder.getId());
+                return(false);
             } else if (statusCode == 403 || statusCode == 422) {
                 // JSONParser parser = new JSONParser();
                 // JSONObject responseObj = (JSONObject) parser.parse(EntityUtils.toString(response.getEntity()));
                 // JSONObject errorObj = (JSONObject) responseObj.get("error");
                 // System.out.println("EID Lab Results POST: Error while submitting manifest sample. " + "Error - " + statusCode + ". Msg" + errorObj.get("message"));
                 // log.error("EID Lab Results POST: Error while submitting manifest sample. " + "Error - " + statusCode + ". Msg" + errorObj.get("message"));
+                manifestOrder.setStatus("Pending");
+                kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
                 System.out.println("EID Lab Results POST: Error while submitting manifest sample. " + "Error - " + statusCode);
                 log.error("EID Lab Results POST: Error while submitting manifest sample. " + "Error - " + statusCode);
+                return(false);
+            } else if (statusCode == 201 || statusCode == 200) {
+                manifestOrder.setStatus("Sent");
+                System.out.println("EID Lab Results POST: Successfully pushed a EID lab test id " + manifestOrder.getId());
+                log.info("EID Lab Results POST: Successfully pushed a EID lab test id " + manifestOrder.getId());
+
+                kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
+
+                if (toProcess != null && manifestStatus.equals("Ready to send")) {
+                    toProcess.setStatus("Sending");
+                    kenyaemrOrdersService.saveLabOrderManifest(toProcess);
+                }
+                Context.flushSession();
+
+                System.out.println("EID Lab Results POST: Push Successfull");
+                return(true);
             }
-
-            kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
-
-            if (toProcess != null && manifestStatus.equals("Ready to send")) {
-                toProcess.setStatus("Sending");
-                kenyaemrOrdersService.saveLabOrderManifest(toProcess);
-            }
-            Context.flushSession();
-
-            System.out.println("EID Lab Results POST: Push Successfull");
-            return(true);
         } catch (Exception e) {
             System.out.println("EID Lab Results POST: Could not push requests to the lab! " + e.getMessage());
             log.error("EID Lab Results POST: Could not push requests to the lab! " + e.getMessage());
@@ -300,10 +307,12 @@ public class EIDVLLabSystemWebRequest extends LabWebRequest {
                 ProcessViralLoadResults.processPayload(jsonString);
 
                 // update manifest details appropriately for the next execution
-                String [] incompleteStatuses = new String []{"Incomplete"};
+                String [] incompleteStatuses = new String []{"Incomplete", "Pending", "Sending"};
                 if (manifestToUpdateResults != null) {
                     List<LabManifestOrder> pendingResultsForNextIteration = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifestToUpdateResults, "Sent");
                     List<LabManifestOrder> incompleteResults = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifestToUpdateResults, incompleteStatuses);
+
+                    System.out.println("Size of pending results: " + pendingResultsForNextIteration.size() + " Size of incomplete results: " + incompleteResults.size());
 
                     if (pendingResultsForNextIteration.size() < 1 && incompleteResults.size() < 1) {
                         manifestToUpdateResults.setStatus("Complete results");
@@ -312,6 +321,7 @@ public class EIDVLLabSystemWebRequest extends LabWebRequest {
 
                         gpLastProcessedManifest.setPropertyValue(""); // set value to null so that the execution gets to the next manifest
                         Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifest);
+                        System.out.println("Lab Results Get: Updating manifest with status: Complete Results");
                     } else if (pendingResultsForNextIteration.size() < 1 && incompleteResults.size() > 0) {
                         manifestToUpdateResults.setStatus("Incomplete results");
                         manifestToUpdateResults.setDateChanged(new Date());
@@ -319,6 +329,7 @@ public class EIDVLLabSystemWebRequest extends LabWebRequest {
 
                         gpLastProcessedManifest.setPropertyValue(""); // set value to null so that the execution gets to the next manifest
                         Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifest);
+                        System.out.println("Lab Results Get: Updating manifest with status: InComplete Results");
                     }
 
                     // update manifest global property
