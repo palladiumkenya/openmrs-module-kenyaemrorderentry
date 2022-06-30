@@ -1,6 +1,8 @@
 package org.openmrs.module.kenyaemrorderentry.fragment.controller.manifest;
 
+import org.apache.commons.lang.StringUtils;
 import org.openmrs.Concept;
+import org.openmrs.Location;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange;
@@ -20,9 +22,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
+import java.util.Set;
 
 public class ManifestFormFragmentController {
     public void controller(@FragmentParam(value = "manifestId", required = false) LabManifest labManifest,
@@ -34,7 +38,18 @@ public class ManifestFormFragmentController {
         model.addAttribute("manifestTypeOptions", manifestTypeOptions());
         model.addAttribute("command", newEditManifestForm(exists));
         model.addAttribute("manifestStatusOptions", manifestStatus());
-        model.addAttribute("countyList", getCountyList());
+             // create list of counties
+        List<String> countyList = new ArrayList<String>();
+        List<Location> locationList = Context.getLocationService().getAllLocations();
+        for(Location loc: locationList) {
+            String locationCounty = loc.getCountyDistrict();
+            if(!StringUtils.isEmpty(locationCounty) && !StringUtils.isBlank(locationCounty)) {
+                countyList.add(locationCounty);
+            }
+        }
+        Set<String> uniqueCountyList = new HashSet<String>(countyList);
+        model.addAttribute("countyList", uniqueCountyList);
+
         model.addAttribute("returnUrl", returnUrl);
 
         LabwareSystemWebRequest lswr = new LabwareSystemWebRequest();
@@ -62,61 +77,6 @@ public class ManifestFormFragmentController {
         options.put(LabManifest.EID_TYPE, "EID");
         return options;
     }
-
-    private List<String> getCountyList() {
-
-        return Arrays.asList(
-                new String("Kwale"),
-                new String("Bungoma"),
-                new String("Kisumu"),
-                new String("Meru"),
-                new String("Mandera"),
-                new String("Kirinyaga"),
-                new String("Lamu"),
-                new String("Uasin Gishu"),
-                new String("Kisii"),
-                new String("Nakuru"),
-                new String("Kitui"),
-                new String("Baringo"),
-                new String("Migori"),
-                new String("Vihiga"),
-                new String("Taita Taveta"),
-                new String("Tana River"),
-                new String("Kakamega"),
-                new String("Siaya"),
-                new String("Marsabit"),
-                new String("Laikipia"),
-                new String("Kilifi"),
-                new String("Isiolo"),
-                new String("Nyeri"),
-                new String("Nairobi"),
-                new String("Narok"),
-                new String("Kajiado"),
-                new String("Nyamira"),
-                new String("Elgeyo Marakwet"),
-                new String("Embu"),
-                new String("Turkana"),
-                new String("Samburu"),
-                new String("Muranga"),
-                new String("Nandi"),
-                new String("Tharaka Nithi"),
-                new String("Kericho"),
-                new String("Trans Nzoia"),
-                new String("Bomet"),
-                new String("Machakos"),
-                new String("West Pokot"),
-                new String("Garissa"),
-                new String("Mombasa"),
-                new String("Wajir"),
-                new String("Homa Bay"),
-                new String("Makueni"),
-                new String("Nyandarua"),
-                new String("Kiambu"),
-                new String("Busia")
-        );
-
-    }
-
 
 
     public SimpleObject saveManifest(@MethodParam("newEditManifestForm") @BindParams EditManifestForm

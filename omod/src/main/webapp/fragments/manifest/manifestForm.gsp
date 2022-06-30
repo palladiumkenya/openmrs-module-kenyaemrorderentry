@@ -126,7 +126,9 @@
                     </select>
                 </td>
                 <td style="width: 260px">
-                    <input type="text" id="subCounty" name="subCounty" value="${command.subCounty ?: ''}" size="30"></input>
+                        <select id="subCounty" name="subCounty" value="${command.subCounty ?: ''}">
+                        <option></option>
+                    </select>
                 </td>
             </tr>
         </table>
@@ -180,6 +182,9 @@
     //On ready
     jQuery(function () {
         //defaults
+        jQuery('#county').change(updateSubcounty);
+        updateSubcountyOnEdit();
+
         jQuery('#new-edit-manifest-form .cancel-button').click(function () {
             ui.navigate('${ config.returnUrl }');
         });
@@ -195,5 +200,29 @@
 
     }); // end of jQuery initialization bloc
 
+    function updateSubcounty() {
+
+        jQuery('#subCounty').empty();
+        var selectedCounty = jQuery('#county').val();
+        var scKey;
+        jQuery('#subCounty').append(jQuery("<option></option>").attr("value", "").text(""));
+        for (scKey in kenyaAddressHierarchy[selectedCounty]) {
+            jQuery('#subCounty').append(jQuery("<option></option>").attr("value", scKey).text(scKey));
+
+        }
+    }
+
+    function updateSubcountyOnEdit() {
+
+        jQuery('#subCounty').empty();
+        var selectedCounty = jQuery('#county').val();
+        var scKey;
+        jQuery('#subCounty').append(jQuery("<option></option>").attr("value", "").text(""));
+        for (scKey in kenyaAddressHierarchy[selectedCounty]) {
+
+            jQuery('#subCounty').append(jQuery("<option></option>").attr("value", scKey).text(scKey));
+        }
+        jQuery('#subCounty').val('${command.subCounty}');
+    }
 
 </script>
