@@ -15,6 +15,7 @@ import org.openmrs.ui.framework.annotation.SpringBean;
 import org.openmrs.ui.framework.page.PageModel;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -52,11 +53,28 @@ public class ManifestOrdersHomePageController {
            }
         }
 
+        //Temporary fix to remove special chars from lab results
+        List<LabManifestOrder> ordersForManifest = new ArrayList<LabManifestOrder>();
+        for(LabManifestOrder m : allOrdersForManifest) {
+            if(m != null) {
+                try {
+                    String result = m.getResult();
+                    if(result != null) {
+                        result = result.replaceAll("[^a-zA-Z0-9]"," ");
+                        result = result.trim();
+                        m.setResult(result);
+                    }
+                } catch(Exception ex) {}
+                ordersForManifest.add(m);
+            }
+        }
+
         model.put("eligibleVlOrders", activeVlOrdersNotInManifest );
         model.put("eligibleEidOrders", activeEidOrdersNotInManifest );
         model.put("manifestType", manifestType);
         model.put("manifest", manifest);
-        model.put("manifestOrders", allOrdersForManifest);
+        //model.put("manifestOrders", allOrdersForManifest);
+        model.put("manifestOrders", ordersForManifest);
         model.put("cccNumberType", pat.getPatientIdentifierTypeId());
         model.put("heiNumberType", hei.getPatientIdentifierTypeId());
 
