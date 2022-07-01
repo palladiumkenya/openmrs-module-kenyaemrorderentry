@@ -14,6 +14,7 @@ public interface KenyaemrOrdersDAO {
     List<LabManifest> getLabOrderManifest();
     LabManifest getLabOrderManifestById(Integer id);
     LabManifest getLabOrderManifestByManifestType(Integer manifestType);
+    LabManifest getLastLabOrderManifest();
     List<LabManifest> getLabOrderManifestBetweenDates(Date startDate, Date endDate);
     void voidLabOrderManifest(Integer id);
 

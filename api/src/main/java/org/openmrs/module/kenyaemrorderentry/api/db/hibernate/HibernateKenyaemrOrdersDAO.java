@@ -64,6 +64,14 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
     }
 
     @Override
+    public LabManifest getLastLabOrderManifest() throws DataException {
+        Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifest.class);
+        criteria.setMaxResults(1);
+        criteria.addOrder(org.hibernate.criterion.Order.desc("id"));
+        return (LabManifest) criteria.uniqueResult();
+    }
+
+    @Override
     public List<LabManifest> getLabOrderManifestBetweenDates(Date startDate, Date endDate) throws DataException{
         Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifest.class);
         criteria.add(Restrictions.ge("startDate",startDate));
