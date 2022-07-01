@@ -51,6 +51,12 @@ public class KenyaemrOrdersServiceImpl extends BaseOpenmrsService implements Ken
 
     @Override
     @Transactional(readOnly = true)
+    public LabManifest getLastLabOrderManifest() {
+        return dao.getLastLabOrderManifest();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public LabManifest getLabOrderManifestByStatus(String status) {
         return dao.getLabOrderManifestByStatus(status);
     }
