@@ -126,10 +126,11 @@
                     </select>
                 </td>
                 <td style="width: 260px">
-                        <select id="subCounty" name="subCounty" value="${command.subCounty ?: ''}">
-                        <option></option>
+                    <select id="subCounty" name="subCounty" value="${command.subCounty ?: ''}">
+                        <option>${command.subCounty ?: lastSubCounty}</option>
                     </select>
                 </td>
+
             </tr>
         </table>
         <% facilityContactFields.each { %>
@@ -183,7 +184,6 @@
     jQuery(function () {
         //defaults
         jQuery('#county').change(updateSubcounty);
-        updateSubcountyOnEdit();
 
         jQuery('#new-edit-manifest-form .cancel-button').click(function () {
             ui.navigate('${ config.returnUrl }');
@@ -197,6 +197,32 @@
                 }
             }
         });
+        //Prepopulations
+        // For new entries
+        if('${command.county}' == 'null' && '${lastCounty}' != ""){
+            jQuery('select[name=county]').val('${lastCounty}');
+        }
+        if('${command.subCounty}' == 'null' && '${lastSubCounty}' != ""){
+            jQuery('select[name=subCounty]').val('${lastSubCounty}');
+        }
+        if('${command.facilityEmail}' == 'null' && '${lastFacilityEmail}' != ""){
+            jQuery("input[name='facilityEmail']").val('${lastFacilityEmail}');
+        }
+        if('${command.facilityPhoneContact}' == 'null' && '${lastFacilityPhoneContact}' != ""){
+            jQuery("input[name='facilityPhoneContact']").val('${lastFacilityPhoneContact}');
+        }
+        if('${command.clinicianName}' == 'null' && '${lastFacilityClinicianName}' != ""){
+            jQuery("input[name='clinicianName']").val('${lastFacilityClinicianName}');
+        }
+        if('${command.clinicianPhoneContact}' == 'null' && '${lastFacilityClinicianPhone}' != ""){
+            jQuery("input[name='clinicianPhoneContact']").val('${lastFacilityClinicianPhone}');
+        }
+        if('${command.labPocPhoneNumber}' == 'null' &&  '${lastFacilityLabPhone}' != ""){
+            jQuery("input[name='labPocPhoneNumber']").val('${lastFacilityLabPhone}');
+        }
+
+        //updateSubcountyOnEdit();
+
 
     }); // end of jQuery initialization bloc
 
