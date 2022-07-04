@@ -1,21 +1,16 @@
 package org.openmrs.module.kenyaemrorderentry.fragment.controller.patientdashboard;
 
+import java.util.List;
+
 import org.apache.commons.beanutils.PropertyUtils;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.openmrs.*;
+import org.openmrs.Order;
+import org.openmrs.OrderType;
+import org.openmrs.Patient;
 import org.openmrs.api.OrderService;
-import org.openmrs.api.OrderSetService;
 import org.openmrs.api.PatientService;
-import org.openmrs.ui.framework.UiUtils;
 import org.openmrs.ui.framework.annotation.SpringBean;
 import org.openmrs.ui.framework.fragment.FragmentConfiguration;
 import org.openmrs.ui.framework.fragment.FragmentModel;
-
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 
 public class ActiveDrugOrdersFragmentController {
 
