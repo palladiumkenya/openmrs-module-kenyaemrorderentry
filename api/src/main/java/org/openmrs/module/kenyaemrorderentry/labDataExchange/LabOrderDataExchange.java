@@ -49,12 +49,18 @@ import static org.openmrs.module.metadatasharing.util.MetadataSharingGlobalPrope
 
 public class LabOrderDataExchange {
 
-    public static final String GP_VL_LAB_SERVER_REQUEST_URL = "chai.viral_load_server_url";
-    public static final String GP_VL_LAB_SERVER_RESULT_URL = "chai.viral_load_server_result_url";
-    public static final String GP_VL_LAB_SERVER_API_TOKEN = "chai.viral_load_server_api_token";
-    public static final String GP_EID_LAB_SERVER_REQUEST_URL = "eid.viral_load_server_url";
-    public static final String GP_EID_LAB_SERVER_RESULT_URL = "eid.viral_load_server_result_url";
-    public static final String GP_EID_LAB_SERVER_API_TOKEN = "eid.viral_load_server_api_token";
+    public static final String GP_CHAI_VL_LAB_SERVER_REQUEST_URL = "chai_vl_server_url";
+    public static final String GP_CHAI_VL_LAB_SERVER_RESULT_URL = "chai_vl_server_result_url";
+    public static final String GP_CHAI_VL_LAB_SERVER_API_TOKEN = "chai_vl_server_api_token";
+    public static final String GP_CHAI_EID_LAB_SERVER_REQUEST_URL = "chai_eid_server_url";
+    public static final String GP_CHAI_EID_LAB_SERVER_RESULT_URL = "chai_eid_server_result_url";
+    public static final String GP_CHAI_EID_LAB_SERVER_API_TOKEN = "chai_eid_server_api_token";
+    public static final String GP_LABWARE_VL_LAB_SERVER_REQUEST_URL = "labware_vl_server_url";
+    public static final String GP_LABWARE_VL_LAB_SERVER_RESULT_URL = "labware_vl_result_url";
+    public static final String GP_LABWARE_VL_LAB_SERVER_API_TOKEN = "labware_vl_server_api_token";
+    public static final String GP_LABWARE_EID_LAB_SERVER_REQUEST_URL = "labware_eid_server_url";
+    public static final String GP_LABWARE_EID_LAB_SERVER_RESULT_URL = "labware_eid_result_url";
+    public static final String GP_LABWARE_EID_LAB_SERVER_API_TOKEN = "labware_eid_server_api_token";
     public static final String GP_MANIFEST_LAST_PROCESSED = "kemrorder.last_processed_manifest";// used when fetching results from the server
     public static final String GP_RETRY_PERIOD_FOR_ORDERS_WITH_INCOMPLETE_RESULTS = "kemrorder.retry_period_for_incomplete_vl_result";
     public static final String GP_LAB_TAT_FOR_VL_RESULTS = "kemrorder.viral_load_result_tat_in_days";
@@ -62,6 +68,11 @@ public class LabOrderDataExchange {
     public static final String MANIFEST_LAST_UPDATE_PATTERN = "yyyy-MM-dd HH:mm:ss";
     public static final String LAB_SYSTEM_DATE_PATTERN = "yyyy-MM-dd";
     public static final String GP_LAB_SYSTEM_IN_USE = "kemrorder.labsystem_identifier";
+
+    // System Types e.g CHAI, LABWARE etc
+
+    public static final int CHAI_SYSTEM = 1;
+    public static final int LABWARE_SYSTEM = 2;
 
     ConceptService conceptService = Context.getConceptService();
     EncounterService encounterService = Context.getEncounterService();
@@ -190,12 +201,12 @@ public class LabOrderDataExchange {
         //add to list only if code is found. This is a temp measure to avoid sending messages with null regimen codes
         if (StringUtils.isNotBlank(nascopCode)) {
 
-            test.put(isEidVlLabSystem() ? "mflCode" : "mfl_code", Utils.getDefaultLocationMflCode(null));
+            test.put(getSystemType() == CHAI_SYSTEM ? "mflCode" : "mfl_code", Utils.getDefaultLocationMflCode(null));
             test.put("patient_identifier", cccNumber != null ? cccNumber.getIdentifier() : "");
             test.put("dob", dob);
             test.put("patient_name", fullName);
             test.put("sex", patient.getGender().equals("M") ? "1" : patient.getGender().equals("F") ? "2" : "3");
-            test.put("sampletype", StringUtils.isNotBlank(sampleType) && isEidVlLabSystem() ? LabOrderDataExchange.getSampleTypeCode(sampleType) : StringUtils.isNotBlank(sampleType) && !isEidVlLabSystem() ? sampleType : "");
+            test.put("sampletype", StringUtils.isNotBlank(sampleType) && getSystemType() == CHAI_SYSTEM ? LabOrderDataExchange.getSampleTypeCode(sampleType) : StringUtils.isNotBlank(sampleType) && getSystemType() == LABWARE_SYSTEM ? sampleType : "");
             test.put("datecollected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
             test.put("order_no", o.getOrderId().toString());
             test.put("lab", "");
@@ -207,7 +218,7 @@ public class LabOrderDataExchange {
             test.put("initiation_date", originalRegimenEncounter != null ? Utils.getSimpleDateFormat("yyyy-MM-dd").format(originalRegimenEncounter.getEncounterDatetime()) : "");
             test.put("dateinitiatedonregimen", currentRegimenEncounter != null ? Utils.getSimpleDateFormat("yyyy-MM-dd").format(currentRegimenEncounter.getEncounterDatetime()) : "");
 
-            if (!isEidVlLabSystem()) { // if labware
+            if (getSystemType() == LABWARE_SYSTEM) { // if labware
 
                 if (patient.getGender().equals("F")) {
                     test.put("female_status", "none");
@@ -253,13 +264,36 @@ public class LabOrderDataExchange {
         }
     }
 
-    public static boolean isEidVlLabSystem() {
+    // public static boolean isEidVlLabSystem() {
+    //     GlobalProperty gpLabSystemInUse = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LAB_SYSTEM_IN_USE);
+    //     if (gpLabSystemInUse == null) {
+    //         return false;
+    //     }
+    //     String labSystemName = gpLabSystemInUse.getPropertyValue();
+    //     return "CHAI".toLowerCase().equalsIgnoreCase(labSystemName);
+    // }
+
+    /**
+     * Give the kind of lab system configured i.e CHAI or LABWARE
+     * 
+     * @return int system type LABWARE_SYSTEM or CHAI_SYSTEM
+     */
+    public static int getSystemType() {
+        String systemType = "";
         GlobalProperty gpLabSystemInUse = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LAB_SYSTEM_IN_USE);
         if (gpLabSystemInUse == null) {
-            return false;
+            return LABWARE_SYSTEM; // If the global is not set
+        } else {
+            systemType = gpLabSystemInUse.getPropertyValue().trim();
         }
-        String labSystemName = gpLabSystemInUse.getPropertyValue();
-        return "CHAI".toLowerCase().equalsIgnoreCase(labSystemName);
+
+        if(systemType.equalsIgnoreCase("CHAI")) {
+            return CHAI_SYSTEM;
+        } else if(systemType.equalsIgnoreCase("LABWARE")) {
+            return LABWARE_SYSTEM;
+        } else {
+            return LABWARE_SYSTEM; // The default if empty string or another string
+        }
     }
 
 

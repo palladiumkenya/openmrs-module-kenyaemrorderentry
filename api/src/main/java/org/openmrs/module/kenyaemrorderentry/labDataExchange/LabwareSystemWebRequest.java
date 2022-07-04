@@ -1,31 +1,29 @@
 package org.openmrs.module.kenyaemrorderentry.labDataExchange;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.gson.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URI;
+import java.util.Date;
+import java.util.List;
+//import java.util.stream.Collectors;
+import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.text.StringEscapeUtils;
-import org.apache.commons.text.translate.UnicodeUnescaper;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.ssl.SSLContexts;
-import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.openmrs.GlobalProperty;
 import org.openmrs.Order;
-import org.openmrs.api.OrderService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
@@ -36,15 +34,7 @@ import org.openmrs.module.kenyaemrorderentry.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-//import java.util.stream.Collectors;
-import java.util.stream.Collectors;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
  * An implementation for Labware
@@ -54,19 +44,31 @@ public class LabwareSystemWebRequest extends LabWebRequest {
     private static final Logger log = LoggerFactory.getLogger(PushLabRequestsTask.class);
 
     public LabwareSystemWebRequest() {
-        setManifestType(LabManifest.VL_TYPE);
+        //
     }
 
     @Override
     public boolean checkRequirements() {
-        GlobalProperty gpServerUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_VL_LAB_SERVER_REQUEST_URL);
-        GlobalProperty gpApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_VL_LAB_SERVER_API_TOKEN);
+        // EID settings
+        GlobalProperty gpEIDServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LABWARE_EID_LAB_SERVER_REQUEST_URL);
+        GlobalProperty gpEIDServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LABWARE_EID_LAB_SERVER_RESULT_URL);
+        GlobalProperty gpEIDApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LABWARE_EID_LAB_SERVER_API_TOKEN);
 
-        String serverUrl = gpServerUrl.getPropertyValue();
-        String API_KEY = gpApiToken.getPropertyValue();
+        // VL Settings
+        GlobalProperty gpVLServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LABWARE_VL_LAB_SERVER_REQUEST_URL);
+        GlobalProperty gpVLServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LABWARE_VL_LAB_SERVER_RESULT_URL);
+        GlobalProperty gpVLApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LABWARE_VL_LAB_SERVER_API_TOKEN);
 
-        if (StringUtils.isBlank(serverUrl) || StringUtils.isBlank(API_KEY)) {
-            System.out.println("Lab Results POST: Please set credentials for posting lab requests to the lab system");
+        String EIDServerPushUrl = gpEIDServerPushUrl.getPropertyValue();
+        String EIDServerPullUrl = gpEIDServerPullUrl.getPropertyValue();
+        String EIDApiToken = gpEIDApiToken.getPropertyValue();
+
+        String VLServerPushUrl = gpVLServerPushUrl.getPropertyValue();
+        String VLServerPullUrl = gpVLServerPullUrl.getPropertyValue();
+        String VLApiToken = gpVLApiToken.getPropertyValue();
+
+        if (StringUtils.isBlank(EIDServerPushUrl) || StringUtils.isBlank(EIDServerPullUrl) || StringUtils.isBlank(EIDApiToken) || StringUtils.isBlank(VLServerPushUrl) || StringUtils.isBlank(VLServerPullUrl) || StringUtils.isBlank(VLApiToken)) {
+            System.out.println("Labware Lab Results: Please set credentials for posting lab requests to the labware system");
             return false;
         }
         return true;
@@ -75,18 +77,27 @@ public class LabwareSystemWebRequest extends LabWebRequest {
     public boolean postSamples(LabManifestOrder manifestOrder, String manifestStatus) throws IOException {
 
         if (!checkRequirements()) {
-            System.out.println("Lab Results POST: Failed to satisfy requirements");
+            System.out.println("Labware Lab Results POST: Failed to satisfy requirements");
             return(false);
         }
 
         LabManifest toProcess = manifestOrder.getLabManifest();
         KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
 
-        GlobalProperty gpServerUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_VL_LAB_SERVER_REQUEST_URL);
-        GlobalProperty gpApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_VL_LAB_SERVER_API_TOKEN);
+        String serverUrl = "";
+        String API_KEY = "";
 
-        String serverUrl = gpServerUrl.getPropertyValue().trim();
-        String API_KEY = gpApiToken.getPropertyValue().trim();
+        if(toProcess.getManifestType() == LabManifest.EID_TYPE) {
+            GlobalProperty gpEIDServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LABWARE_EID_LAB_SERVER_REQUEST_URL);
+            GlobalProperty gpEIDApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LABWARE_EID_LAB_SERVER_API_TOKEN);
+            serverUrl = gpEIDServerPushUrl.getPropertyValue().trim();
+            API_KEY = gpEIDApiToken.getPropertyValue().trim();
+        } else if(toProcess.getManifestType() == LabManifest.VL_TYPE) {
+            GlobalProperty gpVLServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LABWARE_VL_LAB_SERVER_REQUEST_URL);
+            GlobalProperty gpVLApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LABWARE_VL_LAB_SERVER_API_TOKEN);
+            serverUrl = gpVLServerPushUrl.getPropertyValue().trim();
+            API_KEY = gpVLApiToken.getPropertyValue().trim();
+        }
 
         // SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
         //         SSLContexts.createDefault(),
@@ -191,14 +202,27 @@ public class LabwareSystemWebRequest extends LabWebRequest {
 
         KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
 
-        GlobalProperty gpServerUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_VL_LAB_SERVER_RESULT_URL);
-        GlobalProperty gpApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_VL_LAB_SERVER_API_TOKEN);
+        String serverUrl = "";
+        String API_KEY = "";
+
+        if(manifestToUpdateResults.getManifestType() == LabManifest.EID_TYPE) {
+            GlobalProperty gpEIDServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LABWARE_EID_LAB_SERVER_RESULT_URL);
+            GlobalProperty gpEIDApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LABWARE_EID_LAB_SERVER_API_TOKEN);
+            serverUrl = gpEIDServerPullUrl.getPropertyValue().trim();
+            API_KEY = gpEIDApiToken.getPropertyValue().trim();
+        } else if(manifestToUpdateResults.getManifestType() == LabManifest.VL_TYPE) {
+            GlobalProperty gpVLServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LABWARE_VL_LAB_SERVER_RESULT_URL);
+            GlobalProperty gpVLApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LABWARE_VL_LAB_SERVER_API_TOKEN);
+            serverUrl = gpVLServerPullUrl.getPropertyValue().trim();
+            API_KEY = gpVLApiToken.getPropertyValue().trim();
+        }
+
         GlobalProperty gpLastProcessedManifest = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_MANIFEST_LAST_PROCESSED);
         GlobalProperty gpLastProcessedManifestUpdatetime = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_MANIFEST_LAST_UPDATETIME);
 
-        String serverUrl = gpServerUrl.getPropertyValue().trim();
-        String API_KEY = gpApiToken.getPropertyValue().trim();
-        //LabManifest manifestToUpdateResults = null;
+        // String serverUrl = gpServerUrl.getPropertyValue().trim();
+        // String API_KEY = gpApiToken.getPropertyValue().trim();
+        // LabManifest manifestToUpdateResults = null;
 
 //Not using SSL
 //        SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
@@ -379,12 +403,7 @@ public class LabwareSystemWebRequest extends LabWebRequest {
         node.put("recency_id", "");
         node.put("emr_shipment", StringUtils.isNotBlank(manifestID) ? manifestID : "");
         node.put("date_separated", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleSeparated));
-        // node.put("justification", "");
-        // node.put("prophylaxis", "");
-        // node.put("dateinitiatedonregimen", "");
-        // node.put("initiation_date", "");
         return node;
-
     }
 
 }
