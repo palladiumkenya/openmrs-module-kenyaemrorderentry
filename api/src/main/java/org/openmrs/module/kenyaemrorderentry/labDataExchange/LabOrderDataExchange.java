@@ -56,10 +56,10 @@ public class LabOrderDataExchange {
     public static final String GP_CHAI_EID_LAB_SERVER_RESULT_URL = "chai_eid_server_result_url";
     public static final String GP_CHAI_EID_LAB_SERVER_API_TOKEN = "chai_eid_server_api_token";
     public static final String GP_LABWARE_VL_LAB_SERVER_REQUEST_URL = "labware_vl_server_url";
-    public static final String GP_LABWARE_VL_LAB_SERVER_RESULT_URL = "labware_vl_result_url";
+    public static final String GP_LABWARE_VL_LAB_SERVER_RESULT_URL = "labware_vl_server_result_url";
     public static final String GP_LABWARE_VL_LAB_SERVER_API_TOKEN = "labware_vl_server_api_token";
     public static final String GP_LABWARE_EID_LAB_SERVER_REQUEST_URL = "labware_eid_server_url";
-    public static final String GP_LABWARE_EID_LAB_SERVER_RESULT_URL = "labware_eid_result_url";
+    public static final String GP_LABWARE_EID_LAB_SERVER_RESULT_URL = "labware_eid_server_result_url";
     public static final String GP_LABWARE_EID_LAB_SERVER_API_TOKEN = "labware_eid_server_api_token";
     public static final String GP_MANIFEST_LAST_PROCESSED = "kemrorder.last_processed_manifest";// used when fetching results from the server
     public static final String GP_RETRY_PERIOD_FOR_ORDERS_WITH_INCOMPLETE_RESULTS = "kemrorder.retry_period_for_incomplete_vl_result";
@@ -263,15 +263,6 @@ public class LabOrderDataExchange {
             log.error("Error while submitting manifest sample. " + "Error - " + statusCode + ". Msg" + errorObj.get("message"));
         }
     }
-
-    // public static boolean isEidVlLabSystem() {
-    //     GlobalProperty gpLabSystemInUse = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LAB_SYSTEM_IN_USE);
-    //     if (gpLabSystemInUse == null) {
-    //         return false;
-    //     }
-    //     String labSystemName = gpLabSystemInUse.getPropertyValue();
-    //     return "CHAI".toLowerCase().equalsIgnoreCase(labSystemName);
-    // }
 
     /**
      * Give the kind of lab system configured i.e CHAI or LABWARE
@@ -539,13 +530,11 @@ public class LabOrderDataExchange {
     /**
      * processes results from lab     *
      *
-     * @param resultPayload this should be an array
+     * @param resultPayload this should be a JSON array
      * @return
      */
     public String processIncomingViralLoadLabResults(String resultPayload) {
 
-        // JsonParser parser = new JsonParser();
-        // JsonElement rootNode = parser.parse(resultPayload);
         JsonElement rootNode = JsonParser.parseString(resultPayload);
 
         JsonArray resultsObj = null;
@@ -573,18 +562,6 @@ public class LabOrderDataExchange {
                 String dateSampleTested = "";
                 String specimenRejectedReason = "";
 
-                // if (LabOrderDataExchange.isEidVlLabSystem()) {
-                //     dateSampleReceived = !o.get("date_received").isJsonNull() ? o.get("date_received").getAsString() : "";
-                //     dateSampleTested = !o.get("date_tested").isJsonNull() ? o.get("date_tested").getAsString() : "";
-                //     specimenRejectedReason = o.has("rejected_reason") ? o.get("rejected_reason").getAsString() : "";
-                // } else {
-                //     JsonObject dateReceivedObject = o.get("date_received").getAsJsonObject();
-                //     dateSampleReceived = dateReceivedObject.get("date").getAsString().trim();
-                //     JsonObject dateTestedObject = o.get("date_tested").getAsJsonObject();
-                //     dateSampleTested = dateTestedObject.get("date").getAsString().trim();
-                //     specimenRejectedReason = "";
-                // }
-
                 JsonObject dateReceivedObject = o.get("date_received").getAsJsonObject();
                 dateSampleReceived = dateReceivedObject.get("date").getAsString().trim();
                 JsonObject dateTestedObject = o.get("date_tested").getAsJsonObject();
@@ -611,15 +588,10 @@ public class LabOrderDataExchange {
                     }
                 }
 
-                String specimenReceivedStatus = o.get("sample_status").getAsString().trim();// Complete, Incomplete, Rejected
-                //String specimenRejectedReason = o.has("rejected_reason") ? o.get("rejected_reason").getAsString() : "";
-                //String results = !o.get("result").isJsonNull() ? o.get("result").getAsString() : null; //1 - negative, 2 - positive, 5 - inconclusive
-                //String labNumber = o.get("lab_no").getAsString().trim();
-                String results = o.get("result").getAsString().trim();
-                //updateOrder(specimenId, results, specimenReceivedStatus, sampleReceivedDate, sampleTestedDate, labNumber);
-                //updateOrder(specimenId, results, specimenReceivedStatus, sampleReceivedDate, sampleTestedDate);
-                updateOrder(orderId, results, specimenReceivedStatus, specimenRejectedReason, sampleReceivedDate, sampleTestedDate);
+                String specimenReceivedStatus = o.has("sample_status") ? o.get("sample_status").getAsString().trim() : "";
+                String results = o.has("result") ? o.get("result").getAsString().trim() : "";
                 // update manifest object to reflect received status
+                updateOrder(orderId, results, specimenReceivedStatus, specimenRejectedReason, sampleReceivedDate, sampleTestedDate);
             }
         }
         System.out.println("Lab Results Get Results: Viral load results pulled and updated successfully in the database");
@@ -633,7 +605,6 @@ public class LabOrderDataExchange {
      * @param specimenStatus
      * @param rejectedReason
      */
-    //private void updateOrder(Integer orderId, String result, String specimenStatus, Date dateSampleReceived, Date dateSampleTested, String labNumber) {
     private void updateOrder(Integer orderId, String result, String specimenStatus, String specimenRejectedReason, Date dateSampleReceived, Date dateSampleTested) {
         Order od = orderService.getOrder(orderId);
         LabManifestOrder manifestOrder = kenyaemrOrdersService.getLabManifestOrderByOrderId(orderService.getOrder(orderId));
@@ -710,9 +681,12 @@ public class LabOrderDataExchange {
                     } else if (result.equalsIgnoreCase(eidPoorSample)) {
                         conceptToRetain = eidPoorSampleConcept;
                         o.setValueCoded(eidPoorSampleConcept);
+                    } else { // if all fails
+                        conceptToRetain = eidIndeterminateConcept;
+                        o.setValueCoded(eidIndeterminateConcept);
                     }
                 } else if(manifestType == LabManifest.VL_TYPE) {
-                    if (result.equalsIgnoreCase(lDLResult) || result.equalsIgnoreCase(labwarelDLResult)) {
+                    if (result.equalsIgnoreCase(lDLResult) || result.equalsIgnoreCase(labwarelDLResult) || result.contains("LDL")) {
                         conceptToRetain = vlTestConceptQualitative;
                         o.setValueCoded(LDLConcept);
                     } else if (result.equalsIgnoreCase(aboveMillionResult)) {
@@ -721,6 +695,9 @@ public class LabOrderDataExchange {
                     } else if (checkNumeric(result)) {
                         conceptToRetain = vlTestConceptQuantitative;
                         o.setValueNumeric(Double.valueOf(result));
+                    } else { // if all fails
+                        conceptToRetain = vlTestConceptQualitative;
+                        o.setValueCoded(LDLConcept);
                     }
                 }
 

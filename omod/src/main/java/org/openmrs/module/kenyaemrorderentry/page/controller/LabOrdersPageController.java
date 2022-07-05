@@ -51,9 +51,6 @@ public class LabOrdersPageController {
                     @SpringBean("conceptService") ConceptService conceptService,
                     @SpringBean("obsService") ObsService obsService) {
 
-        LabwareSystemWebRequest lswr = new LabwareSystemWebRequest();
-        lswr.testPull();
-
         OrderEntryUIUtils.setDrugOrderPageAttributes(pageContext, OrderEntryUIUtils.APP_LAB_ORDER);
 
         EncounterType labOrderEncounterType = encounterService.getEncounterTypeByUuid(OrderType.TEST_ORDER_TYPE_UUID);
