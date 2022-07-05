@@ -69,7 +69,7 @@
 
 	<globalProperty>
 		<property>chai_eid_server_url</property>
-		<defaultValue>http://localhost:8094/api/v1/chai/push</defaultValue>
+		<defaultValue>http://localhost:8094/api/v1/chai/eid/push</defaultValue>
 		<description>
 			The URL for pushing requests to the CHAI EID server
 		</description>
@@ -77,7 +77,7 @@
 
 	<globalProperty>
 		<property>chai_eid_server_result_url</property>
-		<defaultValue>http://localhost:8094/api/v1/chai/pull</defaultValue>
+		<defaultValue>http://localhost:8094/api/v1/chai/eid/pull</defaultValue>
 		<description>
 			The URL for fetching CHAI EID result
 		</description>
@@ -93,7 +93,7 @@
 
 	<globalProperty>
 		<property>chai_vl_server_url</property>
-		<defaultValue>http://localhost:8094/api/v1/chai/push</defaultValue>
+		<defaultValue>http://localhost:8094/api/v1/chai/vl/push</defaultValue>
 		<description>
 			The URL for pushing requests to the CHAI VL server
 		</description>
@@ -101,7 +101,7 @@
 
 	<globalProperty>
 		<property>chai_vl_server_result_url</property>
-		<defaultValue>http://localhost:8094/api/v1/chai/pull</defaultValue>
+		<defaultValue>http://localhost:8094/api/v1/chai/vl/pull</defaultValue>
 		<description>
 			The URL for fetching CHAI VL result
 		</description>
@@ -117,7 +117,7 @@
 
 	<globalProperty>
 		<property>labware_eid_server_url</property>
-		<defaultValue>http://localhost:8094/api/v1/labware/push</defaultValue>
+		<defaultValue>http://localhost:8094/api/v1/labware/eid/push</defaultValue>
 		<description>
 			The URL for pushing requests to the LABWARE EID server
 		</description>
@@ -125,7 +125,7 @@
 
 	<globalProperty>
 		<property>labware_eid_server_result_url</property>
-		<defaultValue>http://localhost:8094/api/v1/labware/pull</defaultValue>
+		<defaultValue>http://localhost:8094/api/v1/labware/eid/pull</defaultValue>
 		<description>
 			The URL for fetching LABWARE EID result
 		</description>
@@ -141,7 +141,7 @@
 
 	<globalProperty>
 		<property>labware_vl_server_url</property>
-		<defaultValue>http://localhost:8094/api/v1/labware/push</defaultValue>
+		<defaultValue>http://localhost:8094/api/v1/labware/vl/push</defaultValue>
 		<description>
 			The URL for pushing requests to the LABWARE VL server
 		</description>
@@ -149,7 +149,7 @@
 
 	<globalProperty>
 		<property>labware_vl_server_result_url</property>
-		<defaultValue>http://localhost:8094/api/v1/labware/pull</defaultValue>
+		<defaultValue>http://localhost:8094/api/v1/labware/vl/pull</defaultValue>
 		<description>
 			The URL for fetching LABWARE VL result
 		</description>
