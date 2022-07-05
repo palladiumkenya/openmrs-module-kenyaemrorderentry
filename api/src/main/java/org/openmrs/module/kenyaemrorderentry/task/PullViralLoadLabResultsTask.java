@@ -22,7 +22,7 @@ import org.apache.http.util.EntityUtils;
 import org.openmrs.GlobalProperty;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
-import org.openmrs.module.kenyaemrorderentry.labDataExchange.EIDVLLabSystemWebRequest;
+import org.openmrs.module.kenyaemrorderentry.labDataExchange.ChaiSystemWebRequest;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabWebRequest;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabwareSystemWebRequest;
@@ -227,7 +227,7 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
 
                 //if (LabOrderDataExchange.isEidVlLabSystem()) {
                 if(manifestToUpdateResults.getManifestType() == LabManifest.EID_TYPE) {
-                    pullRequest = new EIDVLLabSystemWebRequest();
+                    pullRequest = new ChaiSystemWebRequest();
                 } else {
                     pullRequest = new LabwareSystemWebRequest();
                 }

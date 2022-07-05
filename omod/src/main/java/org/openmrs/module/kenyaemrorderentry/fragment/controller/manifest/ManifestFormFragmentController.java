@@ -61,9 +61,6 @@ public class ManifestFormFragmentController {
         model.addAttribute("countyList", uniqueCountyList);
 
         model.addAttribute("returnUrl", returnUrl);
-
-        LabwareSystemWebRequest lswr = new LabwareSystemWebRequest();
-        lswr.testPull();
     }
 
     private List<String> manifestStatus() {

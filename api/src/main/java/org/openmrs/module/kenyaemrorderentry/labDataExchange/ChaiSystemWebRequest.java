@@ -16,9 +16,12 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.ssl.SSLContexts;
 import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.openmrs.GlobalProperty;
@@ -38,11 +41,11 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 /**
  * An implementation for EIDVLLabSystem - commonly referred to as CHAI system
  */
-public class EIDVLLabSystemWebRequest extends LabWebRequest {
+public class ChaiSystemWebRequest extends LabWebRequest {
 
     private static final Logger log = LoggerFactory.getLogger(PushLabRequestsTask.class);
 
-    public EIDVLLabSystemWebRequest() {
+    public ChaiSystemWebRequest() {
         //
     }
 
@@ -76,7 +79,7 @@ public class EIDVLLabSystemWebRequest extends LabWebRequest {
     public boolean postSamples(LabManifestOrder manifestOrder, String manifestStatus) throws IOException {
 
         if (!checkRequirements()) {
-            System.out.println("CHAI EID Lab Results POST: Failed to satisfy requirements");
+            System.out.println("CHAI Lab Results POST: Failed to satisfy requirements");
             return(false);
         }
 
@@ -98,19 +101,19 @@ public class EIDVLLabSystemWebRequest extends LabWebRequest {
             API_KEY = gpVLApiToken.getPropertyValue().trim();
         }
 
-        // SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
-        //         SSLContexts.createDefault(),
-        //         new String[]{"TLSv1.2"},
-        //         null,
-        //         SSLConnectionSocketFactory.getDefaultHostnameVerifier());
+        SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
+                SSLContexts.createDefault(),
+                new String[]{"TLSv1.2"},
+                null,
+                SSLConnectionSocketFactory.getDefaultHostnameVerifier());
 
-        // CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
-        CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+        CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
+        //CloseableHttpClient httpClient = HttpClientBuilder.create().build();
 
         try {
 
             //Define a postRequest request
-            System.out.println("EID Lab Results POST: Server URL: " + serverUrl);
+            System.out.println("CHAI Lab Results POST: Server URL: " + serverUrl);
             HttpPost postRequest = new HttpPost(serverUrl);
 
             //Set the API media type in http content-type header
@@ -119,7 +122,7 @@ public class EIDVLLabSystemWebRequest extends LabWebRequest {
             postRequest.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + API_KEY);
             //Set the request post body
             String payload = manifestOrder.getPayload();
-            System.out.println("EID Lab Results POST: Server Payload: " + payload);
+            System.out.println("CHAI Lab Results POST: Server Payload: " + payload);
             StringEntity userEntity = new StringEntity(payload);
             postRequest.setEntity(userEntity);
 
@@ -131,8 +134,8 @@ public class EIDVLLabSystemWebRequest extends LabWebRequest {
             int statusCode = response.getStatusLine().getStatusCode();
 
             if (statusCode == 429) { // too many requests. just terminate
-                System.out.println("EID Lab Results POST: 429 The push lab scheduler has been configured to run at very short intervals. Please change this to at least 30min");
-                log.warn("EID Lab Results POST: 429 The push scheduler has been configured to run at very short intervals. Please change this to at least 30min");
+                System.out.println("CHAI Lab Results POST: 429 The push lab scheduler has been configured to run at very short intervals. Please change this to at least 30min");
+                log.warn("CHAI Lab Results POST: 429 The push scheduler has been configured to run at very short intervals. Please change this to at least 30min");
                 return(false);
             }
 
@@ -143,25 +146,25 @@ public class EIDVLLabSystemWebRequest extends LabWebRequest {
                 // manifestOrder.setStatus("Error - " + statusCode + ". Msg" + errorObj.get("message"));
                 manifestOrder.setStatus("Pending");
                 kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
-                System.out.println("EID Lab Results POST: There was an error sending lab id = " + manifestOrder.getId() + " Status: " + statusCode);
-                log.warn("EID Lab Results POST: There was an error sending lab id = " + manifestOrder.getId() + " Status: " + statusCode);
+                System.out.println("CHAI Lab Results POST: There was an error sending lab id = " + manifestOrder.getId() + " Status: " + statusCode);
+                log.warn("CHAI Lab Results POST: There was an error sending lab id = " + manifestOrder.getId() + " Status: " + statusCode);
                 // throw new RuntimeException("Failed with HTTP error code : " + statusCode + ". Error msg: " + errorObj.get("message"));
                 return(false);
             } else if (statusCode == 403 || statusCode == 422) {
                 // JSONParser parser = new JSONParser();
                 // JSONObject responseObj = (JSONObject) parser.parse(EntityUtils.toString(response.getEntity()));
                 // JSONObject errorObj = (JSONObject) responseObj.get("error");
-                // System.out.println("EID Lab Results POST: Error while submitting manifest sample. " + "Error - " + statusCode + ". Msg" + errorObj.get("message"));
-                // log.error("EID Lab Results POST: Error while submitting manifest sample. " + "Error - " + statusCode + ". Msg" + errorObj.get("message"));
+                // System.out.println("CHAI Lab Results POST: Error while submitting manifest sample. " + "Error - " + statusCode + ". Msg" + errorObj.get("message"));
+                // log.error("CHAI Lab Results POST: Error while submitting manifest sample. " + "Error - " + statusCode + ". Msg" + errorObj.get("message"));
                 manifestOrder.setStatus("Pending");
                 kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
-                System.out.println("EID Lab Results POST: Error while submitting manifest sample. " + "Error - " + statusCode);
-                log.error("EID Lab Results POST: Error while submitting manifest sample. " + "Error - " + statusCode);
+                System.out.println("CHAI Lab Results POST: Error while submitting manifest sample. " + "Error - " + statusCode);
+                log.error("CHAI Lab Results POST: Error while submitting manifest sample. " + "Error - " + statusCode);
                 return(false);
             } else if (statusCode == 201 || statusCode == 200) {
                 manifestOrder.setStatus("Sent");
-                System.out.println("EID Lab Results POST: Successfully pushed a EID lab test id " + manifestOrder.getId());
-                log.info("EID Lab Results POST: Successfully pushed a EID lab test id " + manifestOrder.getId());
+                System.out.println("CHAI Lab Results POST: Successfully pushed a EID lab test id " + manifestOrder.getId());
+                log.info("CHAI Lab Results POST: Successfully pushed a EID lab test id " + manifestOrder.getId());
 
                 kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
 
@@ -171,12 +174,12 @@ public class EIDVLLabSystemWebRequest extends LabWebRequest {
                 }
                 Context.flushSession();
 
-                System.out.println("EID Lab Results POST: Push Successfull");
+                System.out.println("CHAI Lab Results POST: Push Successfull");
                 return(true);
             }
         } catch (Exception e) {
-            System.out.println("EID Lab Results POST: Could not push requests to the lab! " + e.getMessage());
-            log.error("EID Lab Results POST: Could not push requests to the lab! " + e.getMessage());
+            System.out.println("CHAI Lab Results POST: Could not push requests to the lab! " + e.getMessage());
+            log.error("CHAI Lab Results POST: Could not push requests to the lab! " + e.getMessage());
             e.printStackTrace();
         } finally {
             httpClient.close();
@@ -206,18 +209,14 @@ public class EIDVLLabSystemWebRequest extends LabWebRequest {
         GlobalProperty gpLastProcessedManifest = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_MANIFEST_LAST_PROCESSED);
         GlobalProperty gpLastProcessedManifestUpdatetime = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_MANIFEST_LAST_UPDATETIME);
 
-        // String serverUrl = gpServerUrl.getPropertyValue().trim();
-        // String API_KEY = gpApiToken.getPropertyValue().trim();
-        //LabManifest manifestToUpdateResults = null;
+        SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
+                SSLContexts.createDefault(),
+                new String[]{"TLSv1.2"},
+                null,
+                SSLConnectionSocketFactory.getDefaultHostnameVerifier());
 
-        // SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
-        //         SSLContexts.createDefault(),
-        //         new String[]{"TLSv1.2"},
-        //         null,
-        //         SSLConnectionSocketFactory.getDefaultHostnameVerifier());
-
-        // CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
-        CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+        CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
+        //CloseableHttpClient httpClient = HttpClientBuilder.create().build();
 
         try {
 
@@ -288,7 +287,7 @@ public class EIDVLLabSystemWebRequest extends LabWebRequest {
             builder.addParameter("mfl_code", facilityCode);
             builder.addParameter("order_no", orderNumbers);
             URI uri = builder.build();
-            System.out.println("Get EID Lab Results URL: " + uri);
+            System.out.println("Get CHAI Lab Results URL: " + uri);
 
             HttpGet httpget = new HttpGet(uri);
             httpget.addHeader("content-type", "application/x-www-form-urlencoded");
@@ -299,12 +298,11 @@ public class EIDVLLabSystemWebRequest extends LabWebRequest {
 
             final int statusCode = response.getStatusLine().getStatusCode();
             if (statusCode != 200) {
-                throw new RuntimeException("Get EID Lab Results Failed with HTTP error code : " + statusCode);
+                throw new RuntimeException("Get CHAI Lab Results Failed with HTTP error code : " + statusCode);
             } else {
-                System.out.println("Get EID Lab Results: REST Call Success");
+                System.out.println("Get CHAI Lab Results: REST Call Success");
             }
 
-//            //Testing
            String jsonString = null;
            HttpEntity entity = response.getEntity();
            if (entity != null) {
@@ -312,25 +310,17 @@ public class EIDVLLabSystemWebRequest extends LabWebRequest {
 
                try {
                    jsonString = rd.lines().collect(Collectors.joining()).toString();
-                   System.out.println("EID Lab Results Get: Request JSON -> " + jsonString);
+                   System.out.println("CHAI Lab Results Get: Request JSON -> " + jsonString);
                } finally {
                    rd.close();
                }
-           }
+            }
 
             JSONParser parser = new JSONParser();
-            // JSONObject responseObj = (JSONObject) parser.parse(jsonString);
-            ////JSONObject errorObj = (JSONObject) responseObj.get("error");
             JSONArray responseArray = (JSONArray) parser.parse(jsonString);
 
-
-            // if (resultArray != null && !resultArray.isEmpty()) {
             if (responseArray != null && !responseArray.isEmpty()) {
-                // String json = gson.toJson(cleanedArray);
-                // ProcessViralLoadResults.processPayload(json);// the only way that works for now is posting this through REST
-                // update orders
-                // LabOrderDataExchange lode = new LabOrderDataExchange();
-                // lode.processIncomingViralLoadLabResults(json);
+
                 ProcessViralLoadResults.processPayload(jsonString);
 
                 // update manifest details appropriately for the next execution
@@ -383,11 +373,11 @@ public class EIDVLLabSystemWebRequest extends LabWebRequest {
                 kenyaemrOrdersService.saveLabManifestOrder(o);
             }
 
-            System.out.println("Get EID Lab Results: Successfully executed the task that pulls lab requests");
-            log.info("Get EID Lab Results: Successfully executed the task that pulls lab requests");
+            System.out.println("Get CHAI Lab Results: Successfully executed the task that pulls lab requests");
+            log.info("Get CHAI Lab Results: Successfully executed the task that pulls lab requests");
 
         } catch (Exception e) {
-            System.err.println("Get EID Lab Results Error: " + e.getMessage());
+            System.err.println("Get CHAI Lab Results Error: " + e.getMessage());
             e.printStackTrace();
         } finally {
             httpClient.close();
