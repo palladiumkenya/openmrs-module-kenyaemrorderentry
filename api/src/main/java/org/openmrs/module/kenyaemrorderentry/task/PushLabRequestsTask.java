@@ -73,6 +73,9 @@ public class PushLabRequestsTask extends AbstractTask {
                     return;
                 }
 
+                Long ordersCount = kenyaemrOrdersService.countLabManifestOrdersToSend(toProcess);
+                System.out.println("Lab Request PUSH Task: TOTAL Number of manifest orders: " + ordersCount);
+                
                 List<LabManifestOrder> ordersInManifest = kenyaemrOrdersService.getLabManifestOrdersToSend(toProcess);
                 
                 if (ordersInManifest.size() < 1) {

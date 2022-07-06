@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -23,6 +25,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContexts;
 import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.openmrs.GlobalProperty;
 import org.openmrs.Order;
@@ -114,20 +117,54 @@ public class ChaiSystemWebRequest extends LabWebRequest {
 
             //Define a postRequest request
             System.out.println("CHAI Lab Results POST: Server URL: " + serverUrl);
-            HttpPost postRequest = new HttpPost(serverUrl);
+            URI uri = convertJSONTOURLEncoded(serverUrl, manifestOrder.getPayload());
+            // String facilityCode = Utils.getDefaultLocationMflCode(Utils.getDefaultLocation());
+            // URIBuilder builder = new URIBuilder(serverUrl);
 
-            //Set the API media type in http content-type header
-            postRequest.addHeader("content-type", "application/json");
-            //postRequest.addHeader("apikey", API_KEY);
-            postRequest.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + API_KEY);
-            //Set the request post body
-            String payload = manifestOrder.getPayload();
-            System.out.println("CHAI Lab Results POST: Server Payload: " + payload);
-            StringEntity userEntity = new StringEntity(payload);
-            postRequest.setEntity(userEntity);
+            // JSONParser parser = new JSONParser();
+            // JSONObject payloadObject = (JSONObject) parser.parse(manifestOrder.getPayload());
 
-            //Send the request; It will immediately return the response in HttpResponse object if any
-            HttpResponse response = httpClient.execute(postRequest);
+            // builder.addParameter("mflCode", facilityCode);
+            // builder.addParameter("patient_identifier", payloadObject.containsKey("patient_identifier") ? payloadObject.get("patient_identifier").toString() : "" );
+            // builder.addParameter("dob", payloadObject.containsKey("dob") ? payloadObject.get("dob").toString() : "" );
+            // builder.addParameter("datecollected", payloadObject.containsKey("datecollected") ? payloadObject.get("datecollected").toString() : "" );
+            // builder.addParameter("datereceived", payloadObject.containsKey("datecollected") ? payloadObject.get("datecollected").toString() : "" );
+            // builder.addParameter("sex", payloadObject.containsKey("sex") ? payloadObject.get("sex").toString() : "" );
+            // builder.addParameter("datetested", payloadObject.containsKey("patient") ? payloadObject.get("patient").toString() : "" );
+            // builder.addParameter("datedispatched", payloadObject.containsKey("patient") ? payloadObject.get("patient").toString() : "" );
+            // builder.addParameter("receivedstatus", payloadObject.containsKey("patient") ? payloadObject.get("patient").toString() : "" );
+            // builder.addParameter("result", payloadObject.containsKey("patient") ? payloadObject.get("patient").toString() : "" );
+            // builder.addParameter("specimenlabelID", payloadObject.containsKey("patient") ? payloadObject.get("patient").toString() : "" );
+            // builder.addParameter("lab", payloadObject.containsKey("lab") ? payloadObject.get("lab").toString() : "" );
+            // builder.addParameter("order_no", payloadObject.containsKey("order_no") ? payloadObject.get("order_no").toString() : "" );
+
+            // if(toProcess.getManifestType() == LabManifest.VL_TYPE) {
+            //     builder.addParameter("prophylaxis", payloadObject.containsKey("prophylaxis") ? payloadObject.get("prophylaxis").toString() : "");
+            //     builder.addParameter("regimenline", payloadObject.containsKey("regimenline") ? payloadObject.get("regimenline").toString() : "");
+            //     builder.addParameter("sampletype", payloadObject.containsKey("sampletype") ? payloadObject.get("sampletype").toString() : "");
+            //     builder.addParameter("justification", payloadObject.containsKey("justification") ? payloadObject.get("justification").toString() : "");
+            //     builder.addParameter("pmtct", payloadObject.containsKey("pmtct") ? payloadObject.get("pmtct").toString() : "");
+            // } else if(toProcess.getManifestType() == LabManifest.EID_TYPE) {
+            //     builder.addParameter("feeding", facilityCode);
+            //     builder.addParameter("pcrtype", facilityCode);
+            //     builder.addParameter("regimen", facilityCode);
+            //     builder.addParameter("entry_point", facilityCode);
+            //     builder.addParameter("mother_prophylaxis", facilityCode);
+            //     builder.addParameter("spots", facilityCode);
+            //     builder.addParameter("mother_last_result", facilityCode);
+            //     builder.addParameter("mother_age", facilityCode);
+            //     builder.addParameter("ccc_no", facilityCode);
+            // }
+
+            // URI uri = builder.build();
+            System.out.println("Get CHAI Lab Results URL: " + uri);
+
+            HttpPost postRequest = new HttpPost(uri);
+            postRequest.addHeader("content-type", "application/x-www-form-urlencoded");
+            postRequest.addHeader("Authorization", "Bearer " + API_KEY);
+            postRequest.addHeader("Accept", "application/json");
+
+            CloseableHttpResponse response = httpClient.execute(postRequest);
 
             //return response;
             //verify the valid error code first
@@ -140,10 +177,6 @@ public class ChaiSystemWebRequest extends LabWebRequest {
             }
 
             if (statusCode != 201 && statusCode != 200 && statusCode != 422 && statusCode != 403) { // skip for status code 422: unprocessable entity, and status code 403 for forbidden response
-                // JSONParser parser = new JSONParser();
-                // JSONObject responseObj = (JSONObject) parser.parse(EntityUtils.toString(response.getEntity()));
-                // JSONObject errorObj = (JSONObject) responseObj.get("error");
-                // manifestOrder.setStatus("Error - " + statusCode + ". Msg" + errorObj.get("message"));
                 manifestOrder.setStatus("Pending");
                 kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
                 System.out.println("CHAI Lab Results POST: There was an error sending lab id = " + manifestOrder.getId() + " Status: " + statusCode);
@@ -151,11 +184,6 @@ public class ChaiSystemWebRequest extends LabWebRequest {
                 // throw new RuntimeException("Failed with HTTP error code : " + statusCode + ". Error msg: " + errorObj.get("message"));
                 return(false);
             } else if (statusCode == 403 || statusCode == 422) {
-                // JSONParser parser = new JSONParser();
-                // JSONObject responseObj = (JSONObject) parser.parse(EntityUtils.toString(response.getEntity()));
-                // JSONObject errorObj = (JSONObject) responseObj.get("error");
-                // System.out.println("CHAI Lab Results POST: Error while submitting manifest sample. " + "Error - " + statusCode + ". Msg" + errorObj.get("message"));
-                // log.error("CHAI Lab Results POST: Error while submitting manifest sample. " + "Error - " + statusCode + ". Msg" + errorObj.get("message"));
                 manifestOrder.setStatus("Pending");
                 kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
                 System.out.println("CHAI Lab Results POST: Error while submitting manifest sample. " + "Error - " + statusCode);
@@ -195,13 +223,13 @@ public class ChaiSystemWebRequest extends LabWebRequest {
         String API_KEY = "";
 
         if(manifestToUpdateResults.getManifestType() == LabManifest.EID_TYPE) {
-            GlobalProperty gpEIDServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LABWARE_EID_LAB_SERVER_RESULT_URL);
-            GlobalProperty gpEIDApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LABWARE_EID_LAB_SERVER_API_TOKEN);
+            GlobalProperty gpEIDServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_CHAI_EID_LAB_SERVER_RESULT_URL);
+            GlobalProperty gpEIDApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_CHAI_EID_LAB_SERVER_API_TOKEN);
             serverUrl = gpEIDServerPullUrl.getPropertyValue().trim();
             API_KEY = gpEIDApiToken.getPropertyValue().trim();
         } else if(manifestToUpdateResults.getManifestType() == LabManifest.VL_TYPE) {
-            GlobalProperty gpVLServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LABWARE_VL_LAB_SERVER_RESULT_URL);
-            GlobalProperty gpVLApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LABWARE_VL_LAB_SERVER_API_TOKEN);
+            GlobalProperty gpVLServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_CHAI_VL_LAB_SERVER_RESULT_URL);
+            GlobalProperty gpVLApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_CHAI_VL_LAB_SERVER_API_TOKEN);
             serverUrl = gpVLServerPullUrl.getPropertyValue().trim();
             API_KEY = gpVLApiToken.getPropertyValue().trim();
         }
@@ -220,81 +248,21 @@ public class ChaiSystemWebRequest extends LabWebRequest {
 
         try {
 
-            // //Define a postRequest request
-            // HttpPost postRequest = new HttpPost(serverUrl);
-
-            // //Set the API media type in http content-type header
-            // postRequest.addHeader("content-type", "application/json");
-            // postRequest.addHeader("apikey", API_KEY);
-
-            // ObjectNode request = Utils.getJsonNodeFactory().objectNode();
-            // request.put("test", manifestToUpdateResults.getManifestType().toString());
-            // request.put("facility_code", Utils.getDefaultLocationMflCode(Utils.getDefaultLocation()));
-            // request.put("order_numbers", StringUtils.join(orderIds, ","));
-
-            // //Set the request post body
-            // StringEntity userEntity = new StringEntity(request.toString());
-            // postRequest.setEntity(userEntity);
-
-            // //Send the request; It will immediately return the response in HttpResponse object if any
-            // HttpResponse response = httpClient.execute(postRequest);
-
-
-            // //verify the valid error code first
-            // int statusCode = response.getStatusLine().getStatusCode();
-
-            // if (statusCode == 429) { // too many requests. just terminate
-            //     System.out.println("The pull lab result scheduler has been configured to run at very short intervals. Please change this to at least 30min");
-            //     log.warn("The pull lab result scheduler has been configured to run at very short intervals. Please change this to at least 30min");
-            //     return;
-            // }
-            // if (statusCode != 200) {
-            //     throw new RuntimeException("Failed with HTTP error code : " + statusCode);
-            // }
-
-            // String responseStringRaw = EntityUtils.toString(response.getEntity());
-            // String responseStringEscape = StringEscapeUtils.escapeJava(responseStringRaw);
-            // String strippedUnicodeChars = new UnicodeUnescaper().translate(responseStringEscape);
-
-            // String finalChars = StringEscapeUtils.unescapeJava(strippedUnicodeChars);
-
-            // Gson gson = new GsonBuilder().serializeNulls().create();
-            // JsonElement rootNode = gson.fromJson(finalChars, JsonElement.class);
-
-            // JsonArray resultArray = null;
-            // if(rootNode.isJsonObject()){
-            //     JsonObject jsonObject = rootNode.getAsJsonObject();
-            //     JsonElement vlResultArray = jsonObject.get("data");
-            //     if(vlResultArray.isJsonArray()){
-            //         resultArray = vlResultArray.getAsJsonArray();
-            //     }
-            // }
-
-            // JsonArray cleanedArray = new JsonArray();
-            // if (resultArray != null && !resultArray.isEmpty()) {
-            //     for (int i =0; i < resultArray.size(); i++) {
-            //         JsonObject result = resultArray.get(i).getAsJsonObject();
-            //         result.addProperty("full_names", "Replaced Name"); // this is a short workaround to handle data coming from eid/vl system and were pushed from kenyaemr with unicode literals
-            //         cleanedArray.add(result);
-
-            //     }
-            // }
-
             String facilityCode = Utils.getDefaultLocationMflCode(Utils.getDefaultLocation());
-            //String facilityCode = "17747";
             String orderNumbers = StringUtils.join(orderIds, ",");
             URIBuilder builder = new URIBuilder(serverUrl);
-            builder.addParameter("mfl_code", facilityCode);
-            builder.addParameter("order_no", orderNumbers);
+            builder.addParameter("test", manifestToUpdateResults.getManifestType().toString());
+            builder.addParameter("order_numbers", orderNumbers);
+            builder.addParameter("facility_code", facilityCode);
             URI uri = builder.build();
             System.out.println("Get CHAI Lab Results URL: " + uri);
 
-            HttpGet httpget = new HttpGet(uri);
-            httpget.addHeader("content-type", "application/x-www-form-urlencoded");
-            httpget.addHeader("Authorization", "Bearer " + API_KEY);
-            httpget.addHeader("Accept", "application/json");
+            HttpPost postRequest = new HttpPost(uri);
+            postRequest.addHeader("content-type", "application/x-www-form-urlencoded");
+            postRequest.addHeader("Authorization", "Bearer " + API_KEY);
+            postRequest.addHeader("Accept", "application/json");
 
-            CloseableHttpResponse response = httpClient.execute(httpget);
+            CloseableHttpResponse response = httpClient.execute(postRequest);
 
             final int statusCode = response.getStatusLine().getStatusCode();
             if (statusCode != 200) {
@@ -317,11 +285,13 @@ public class ChaiSystemWebRequest extends LabWebRequest {
             }
 
             JSONParser parser = new JSONParser();
-            JSONArray responseArray = (JSONArray) parser.parse(jsonString);
+            JSONObject responseObject = (JSONObject) parser.parse(jsonString);
+            JSONArray responseArray = (JSONArray)responseObject.get("data");
+            String dataString = responseArray.toString();
 
             if (responseArray != null && !responseArray.isEmpty()) {
 
-                ProcessViralLoadResults.processPayload(jsonString);
+                ProcessViralLoadResults.processPayload(dataString);
 
                 // update manifest details appropriately for the next execution
                 String [] incompleteStatuses = new String []{"Incomplete", "Pending", "Sending"};
@@ -382,6 +352,25 @@ public class ChaiSystemWebRequest extends LabWebRequest {
         } finally {
             httpClient.close();
         }
+    }
+
+    public URI convertJSONTOURLEncoded(String URL, String jsonPayload) {
+        URI uri = null;
+        try {
+            URIBuilder builder = new URIBuilder(URL);
+            JSONParser parser = new JSONParser();
+            JSONObject payloadObject = (JSONObject) parser.parse(jsonPayload);
+            Iterator iterator = payloadObject.keySet().iterator();
+            //Set<String> keys = payloadObject.keySet();
+            //for(String key : keys) {
+            while (iterator.hasNext()) {
+                String key = (String) iterator.next();
+                builder.addParameter(key, payloadObject.get(key).toString());
+            }
+            builder.addParameter("facility_code", "");
+            uri = builder.build();
+        } catch(Exception ex) {}
+        return(uri);
     }
 
     @Override

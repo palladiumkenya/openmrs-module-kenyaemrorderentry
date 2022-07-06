@@ -12,6 +12,7 @@ import org.hibernate.CacheMode;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.exception.DataException;
 import org.openmrs.Cohort;
@@ -210,14 +211,26 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
     }
 
     @Override
-    public List<LabManifestOrder> getLabManifestOrdersToSend(LabManifest labManifestOrder) {
+    public List<LabManifestOrder> getLabManifestOrdersToSend(LabManifest labManifest) {
         Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifestOrder.class);
-        criteria.add(Restrictions.eq("labManifest", labManifestOrder));
+        criteria.add(Restrictions.eq("labManifest", labManifest));
         criteria.add(Restrictions.eq("status", "Pending"));
         criteria.addOrder(org.hibernate.criterion.Order.asc("id"));
         criteria.add(Restrictions.eq("voided", false));
         criteria.setMaxResults(50);
         return criteria.list();
+    }
+
+    @Override
+    public Long countLabManifestOrdersToSend(LabManifest labManifest) {
+        Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifestOrder.class);
+        criteria.add(Restrictions.eq("labManifest", labManifest));
+        criteria.add(Restrictions.eq("status", "Pending"));
+        criteria.add(Restrictions.eq("voided", false));
+        criteria.setProjection(Projections.rowCount());
+        List rowCount = criteria.list();
+        Long count = (Long) rowCount.get(0);
+        return(count);
     }
 
     //Patient contact dimensions methods
@@ -312,6 +325,18 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
     }
 
     @Override
+    public Long countLabManifestOrderByStatusBeforeDate(String status, Date lastStatusCheckDate) {
+        Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifestOrder.class);
+        criteria.add(Restrictions.eq("status", status));
+        criteria.add(Restrictions.eq("voided", false));
+        criteria.add(Restrictions.or(Restrictions.isNull("lastStatusCheckDate"), Restrictions.le("lastStatusCheckDate", lastStatusCheckDate)));
+        criteria.setProjection(Projections.rowCount());
+        List rowCount = criteria.list();
+        Long count = (Long) rowCount.get(0);
+        return(count);
+    }
+
+    @Override
     public LabManifest getLabOrderManifestByStatus(String status, Date onOrBefore) {
         Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifest.class);
         criteria.add(Restrictions.eq("status", status));
@@ -355,6 +380,19 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
         criteria.setMaxResults(50);
 
         return criteria.list();
+    }
+
+    @Override
+    public Long countLabManifestOrderByManifestAndStatus(LabManifest labManifestOrder, Date updatedBefore, String... status) {
+        Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifestOrder.class);
+        criteria.add(Restrictions.le("lastStatusCheckDate", updatedBefore));
+        criteria.add(Restrictions.eq("labManifest", labManifestOrder));
+        criteria.add(Restrictions.in("status", status));
+        criteria.add(Restrictions.eq("voided", false));
+        criteria.setProjection(Projections.rowCount());
+        List rowCount = criteria.list();
+        Long count = (Long) rowCount.get(0);
+        return(count);
     }
 
 }
