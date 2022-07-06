@@ -562,10 +562,16 @@ public class LabOrderDataExchange {
                 String dateSampleTested = "";
                 String specimenRejectedReason = "";
 
-                JsonObject dateReceivedObject = o.get("date_received").getAsJsonObject();
-                dateSampleReceived = dateReceivedObject.get("date").getAsString().trim();
-                JsonObject dateTestedObject = o.get("date_tested").getAsJsonObject();
-                dateSampleTested = dateTestedObject.get("date").getAsString().trim();
+                if(getSystemType() == LABWARE_SYSTEM) {
+                    JsonObject dateReceivedObject = o.get("date_received").getAsJsonObject();
+                    dateSampleReceived = dateReceivedObject.get("date").getAsString().trim();
+                    JsonObject dateTestedObject = o.get("date_tested").getAsJsonObject();
+                    dateSampleTested = dateTestedObject.get("date").getAsString().trim();
+                } else if(getSystemType() == CHAI_SYSTEM) {
+                    dateSampleReceived = o.has("date_received") ? o.get("date_received").getAsString().trim() : "";
+                    dateSampleTested = o.has("date_tested") ? o.get("date_tested").getAsString().trim() : "";
+                }
+
                 specimenRejectedReason = o.has("rejected_reason") ? o.get("rejected_reason").getAsString() : "";
 
                 if (StringUtils.isNotBlank(dateSampleReceived)) {
@@ -589,9 +595,9 @@ public class LabOrderDataExchange {
                 }
 
                 String specimenReceivedStatus = o.has("sample_status") ? o.get("sample_status").getAsString().trim() : "";
-                String results = o.has("result") ? o.get("result").getAsString().trim() : "";
+                String result = o.has("result") ? o.get("result").getAsString().trim() : "";
                 // update manifest object to reflect received status
-                updateOrder(orderId, results, specimenReceivedStatus, specimenRejectedReason, sampleReceivedDate, sampleTestedDate);
+                updateOrder(orderId, result, specimenReceivedStatus, specimenRejectedReason, sampleReceivedDate, sampleTestedDate);
             }
         }
         System.out.println("Lab Results Get Results: Viral load results pulled and updated successfully in the database");

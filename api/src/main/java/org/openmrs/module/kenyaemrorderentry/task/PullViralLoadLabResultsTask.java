@@ -132,6 +132,9 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
                 Date effectiveDate =  calendar.getTime();
                 System.out.println("Lab Results Get: Preparing to pull VL results for tests dispatched on or before : " + effectiveDate);
                 List<LabManifestOrder> ordersWithPendingResults = new ArrayList<LabManifestOrder>();
+                
+                Long countPreviouslyCheckedOrders = kenyaemrOrdersService.countLabManifestOrderByStatusBeforeDate("Incomplete", effectiveDate );
+                System.out.println("Lab Pull Results Task: Total number of PreviouslyCheckedOrders: " + countPreviouslyCheckedOrders);
 
                 List<LabManifestOrder> previouslyCheckedOrders = kenyaemrOrdersService.getLabManifestOrderByStatusBeforeDate("Incomplete", effectiveDate );
 
@@ -223,12 +226,11 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
                 }
 
                 // Pull Lab Results
-                LabWebRequest pullRequest;
+                LabWebRequest pullRequest = new LabwareSystemWebRequest();;
 
-                //if (LabOrderDataExchange.isEidVlLabSystem()) {
-                if(manifestToUpdateResults.getManifestType() == LabManifest.EID_TYPE) {
+                if (LabOrderDataExchange.getSystemType() == LabOrderDataExchange.CHAI_SYSTEM) {
                     pullRequest = new ChaiSystemWebRequest();
-                } else {
+                } else if (LabOrderDataExchange.getSystemType() == LabOrderDataExchange.LABWARE_SYSTEM) {
                     pullRequest = new LabwareSystemWebRequest();
                 }
                 pullRequest.pullResult(orderIds, manifestOrderIds, manifestToUpdateResults);
