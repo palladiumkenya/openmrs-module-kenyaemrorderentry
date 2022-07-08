@@ -117,54 +117,19 @@ public class ChaiSystemWebRequest extends LabWebRequest {
 
             //Define a postRequest request
             System.out.println("CHAI Lab Results POST: Server URL: " + serverUrl);
-            URI uri = convertJSONTOURLEncoded(serverUrl, manifestOrder.getPayload());
-            // String facilityCode = Utils.getDefaultLocationMflCode(Utils.getDefaultLocation());
-            // URIBuilder builder = new URIBuilder(serverUrl);
+            HttpPost postRequest = new HttpPost(serverUrl);
 
-            // JSONParser parser = new JSONParser();
-            // JSONObject payloadObject = (JSONObject) parser.parse(manifestOrder.getPayload());
+            //Set the API media type in http content-type header
+            postRequest.addHeader("content-type", "application/json");
+            postRequest.setHeader("apikey", API_KEY);
 
-            // builder.addParameter("mflCode", facilityCode);
-            // builder.addParameter("patient_identifier", payloadObject.containsKey("patient_identifier") ? payloadObject.get("patient_identifier").toString() : "" );
-            // builder.addParameter("dob", payloadObject.containsKey("dob") ? payloadObject.get("dob").toString() : "" );
-            // builder.addParameter("datecollected", payloadObject.containsKey("datecollected") ? payloadObject.get("datecollected").toString() : "" );
-            // builder.addParameter("datereceived", payloadObject.containsKey("datecollected") ? payloadObject.get("datecollected").toString() : "" );
-            // builder.addParameter("sex", payloadObject.containsKey("sex") ? payloadObject.get("sex").toString() : "" );
-            // builder.addParameter("datetested", payloadObject.containsKey("patient") ? payloadObject.get("patient").toString() : "" );
-            // builder.addParameter("datedispatched", payloadObject.containsKey("patient") ? payloadObject.get("patient").toString() : "" );
-            // builder.addParameter("receivedstatus", payloadObject.containsKey("patient") ? payloadObject.get("patient").toString() : "" );
-            // builder.addParameter("result", payloadObject.containsKey("patient") ? payloadObject.get("patient").toString() : "" );
-            // builder.addParameter("specimenlabelID", payloadObject.containsKey("patient") ? payloadObject.get("patient").toString() : "" );
-            // builder.addParameter("lab", payloadObject.containsKey("lab") ? payloadObject.get("lab").toString() : "" );
-            // builder.addParameter("order_no", payloadObject.containsKey("order_no") ? payloadObject.get("order_no").toString() : "" );
+            //Set the request post body
+            String payload = manifestOrder.getPayload();
+            System.out.println("CHAI Lab POST: Server Payload: " + payload);
+            StringEntity userEntity = new StringEntity(payload);
+            postRequest.setEntity(userEntity);
 
-            // if(toProcess.getManifestType() == LabManifest.VL_TYPE) {
-            //     builder.addParameter("prophylaxis", payloadObject.containsKey("prophylaxis") ? payloadObject.get("prophylaxis").toString() : "");
-            //     builder.addParameter("regimenline", payloadObject.containsKey("regimenline") ? payloadObject.get("regimenline").toString() : "");
-            //     builder.addParameter("sampletype", payloadObject.containsKey("sampletype") ? payloadObject.get("sampletype").toString() : "");
-            //     builder.addParameter("justification", payloadObject.containsKey("justification") ? payloadObject.get("justification").toString() : "");
-            //     builder.addParameter("pmtct", payloadObject.containsKey("pmtct") ? payloadObject.get("pmtct").toString() : "");
-            // } else if(toProcess.getManifestType() == LabManifest.EID_TYPE) {
-            //     builder.addParameter("feeding", facilityCode);
-            //     builder.addParameter("pcrtype", facilityCode);
-            //     builder.addParameter("regimen", facilityCode);
-            //     builder.addParameter("entry_point", facilityCode);
-            //     builder.addParameter("mother_prophylaxis", facilityCode);
-            //     builder.addParameter("spots", facilityCode);
-            //     builder.addParameter("mother_last_result", facilityCode);
-            //     builder.addParameter("mother_age", facilityCode);
-            //     builder.addParameter("ccc_no", facilityCode);
-            // }
-
-            // URI uri = builder.build();
-            System.out.println("Get CHAI Lab Results URL: " + uri);
-
-            HttpPost postRequest = new HttpPost(uri);
-            postRequest.addHeader("content-type", "application/x-www-form-urlencoded");
-            postRequest.addHeader("Authorization", "Bearer " + API_KEY);
-            postRequest.addHeader("Accept", "application/json");
-
-            CloseableHttpResponse response = httpClient.execute(postRequest);
+            HttpResponse response = httpClient.execute(postRequest);
 
             //return response;
             //verify the valid error code first
@@ -260,6 +225,7 @@ public class ChaiSystemWebRequest extends LabWebRequest {
             HttpPost postRequest = new HttpPost(uri);
             postRequest.addHeader("content-type", "application/x-www-form-urlencoded");
             postRequest.addHeader("Authorization", "Bearer " + API_KEY);
+            postRequest.addHeader("apikey", API_KEY);
             postRequest.addHeader("Accept", "application/json");
 
             CloseableHttpResponse response = httpClient.execute(postRequest);
@@ -278,7 +244,7 @@ public class ChaiSystemWebRequest extends LabWebRequest {
 
                try {
                    jsonString = rd.lines().collect(Collectors.joining()).toString();
-                   System.out.println("CHAI Lab Results Get: Request JSON -> " + jsonString);
+                   System.out.println("CHAI Lab Results Get: JSON REPLY -> " + jsonString);
                } finally {
                    rd.close();
                }
@@ -377,6 +343,7 @@ public class ChaiSystemWebRequest extends LabWebRequest {
     public ObjectNode completePostPayload(Order o, Date dateSampleCollected, Date dateSampleSeparated, String sampleType, String manifestID) {
         ObjectNode node = baselinePostRequestPayload(o, dateSampleCollected, dateSampleSeparated, sampleType, manifestID);
         node.put("mfl_code", Utils.getDefaultLocationMflCode(null));
+        node.put("mflCode", Utils.getDefaultLocationMflCode(null));
         node.put("facility_email", "info@example.com");
         return node;
     }
