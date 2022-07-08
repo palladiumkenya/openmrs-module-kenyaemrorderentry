@@ -138,8 +138,9 @@ public class LabOrderDataExchange {
             test.put("sex", patient.getGender().equals("M") ? "1" : patient.getGender().equals("F") ? "2" : "3");
             test.put("sampletype", "1");
             test.put("datecollected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(o.getDateActivated()));
+            test.put("datereceived", Utils.getSimpleDateFormat("yyyy-MM-dd").format(o.getDateActivated()));
             test.put("order_no", o.getOrderId().toString());
-            test.put("lab", "");
+            test.put("lab", "7");
             test.put("justification", o.getOrderReason() != null ? getOrderReasonCode(o.getOrderReason().getUuid()) : "");
             //test.put("justification", "1");
             test.put("prophylaxis", nascopCode);
@@ -208,8 +209,9 @@ public class LabOrderDataExchange {
             test.put("sex", patient.getGender().equals("M") ? "1" : patient.getGender().equals("F") ? "2" : "3");
             test.put("sampletype", StringUtils.isNotBlank(sampleType) && getSystemType() == CHAI_SYSTEM ? LabOrderDataExchange.getSampleTypeCode(sampleType) : StringUtils.isNotBlank(sampleType) && getSystemType() == LABWARE_SYSTEM ? sampleType : "");
             test.put("datecollected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
+            test.put("datereceived", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
             test.put("order_no", o.getOrderId().toString());
-            test.put("lab", "");
+            test.put("lab", "7");
             test.put("justification", o.getOrderReason() != null ? getOrderReasonCode(o.getOrderReason().getUuid()) : "");
             test.put("prophylaxis", nascopCode);
             if (patient.getGender().equals("F")) {
@@ -568,11 +570,15 @@ public class LabOrderDataExchange {
                     JsonObject dateTestedObject = o.get("date_tested").getAsJsonObject();
                     dateSampleTested = dateTestedObject.get("date").getAsString().trim();
                 } else if(getSystemType() == CHAI_SYSTEM) {
-                    dateSampleReceived = o.has("date_received") ? o.get("date_received").getAsString().trim() : "";
-                    dateSampleTested = o.has("date_tested") ? o.get("date_tested").getAsString().trim() : "";
+                    try {
+                        dateSampleReceived = o.get("date_received").getAsString().trim();
+                    } catch(Exception ex) {}
+                    try {
+                        dateSampleTested = o.get("date_tested").getAsString().trim();
+                    } catch(Exception ex) {}
                 }
 
-                specimenRejectedReason = o.has("rejected_reason") ? o.get("rejected_reason").getAsString() : "";
+                specimenRejectedReason = (o.has("rejected_reason") && o.get("rejected_reason") != null && o.get("rejected_reason").getAsString() != null) ? o.get("rejected_reason").getAsString().trim() : "";
 
                 if (StringUtils.isNotBlank(dateSampleReceived)) {
                     try {
@@ -594,8 +600,8 @@ public class LabOrderDataExchange {
                     }
                 }
 
-                String specimenReceivedStatus = o.has("sample_status") ? o.get("sample_status").getAsString().trim() : "";
-                String result = o.has("result") ? o.get("result").getAsString().trim() : "";
+                String specimenReceivedStatus = (o.has("sample_status") && o.get("sample_status") != null && o.get("sample_status").getAsString() != null) ? o.get("sample_status").getAsString().trim() : "";
+                String result = (o.has("result") && o.get("result") != null && o.get("result").getAsString() != null) ? o.get("result").getAsString().trim() : "";
                 // update manifest object to reflect received status
                 updateOrder(orderId, result, specimenReceivedStatus, specimenRejectedReason, sampleReceivedDate, sampleTestedDate);
             }
