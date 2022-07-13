@@ -30,21 +30,21 @@ kemrorder.labsystem_identifier		LABWARE			LABWARE/CHAI
 
 LABWARE LAB SYSTEM
 Setting Name:						Sample:			
-chai_vl_server_url					http://41.89.93.242/api/vl_complete
-chai_vl_server_result_url			http://41.89.93.242/api/function
-chai_vl_server_api_token			123456
-chai_eid_server_url					http://41.89.93.242/api/eid_complete
-chai_eid_server_result_url			http://41.89.93.242/api/function
-chai_eid_server_api_token			123456
+chai_vl_server_url					<host>/api/vl_complete
+chai_vl_server_result_url			<host>/api/function
+chai_vl_server_api_token			xyz
+chai_eid_server_url					<host>/api/eid_complete
+chai_eid_server_result_url			<host>/api/function
+chai_eid_server_api_token			xyz
 
 CHAI LAB SYSTEM
 Setting Name:						Sample:			
-labware_vl_server_url				https://covid2.nphl.go.ke/api/emr-exchange
-labware_vl_server_result_url		https://covid2.nphl.go.ke/api/emr-exchange
-labware_vl_server_api_token			123456
-labware_eid_server_url				https://nhrl.nphl.go.ke/api/eid-exchange
-labware_eid_server_result_url		https://nhrl.nphl.go.ke/api/eid-exchange
-labware_eid_server_api_token		123456
+labware_vl_server_url				<host>/api/emr-exchange
+labware_vl_server_result_url		<host>/api/emr-exchange
+labware_vl_server_api_token			xyz
+labware_eid_server_url				<host>/api/eid-exchange
+labware_eid_server_result_url		<host>/api/eid-exchange
+labware_eid_server_api_token		xyz
 
 Accreditation
 -------------
