@@ -53,6 +53,7 @@ public abstract class LabWebRequest {
      * @return
      */
     public ObjectNode baselinePostRequestPayload(Order o, Date dateSampleCollected, Date dateSampleSeparated, String sampleType, String manifestID) {
+        System.out.println("The Manifest Type is: " + manifestType);
         Patient patient = o.getPatient();
         ObjectNode test = Utils.getJsonNodeFactory().objectNode();
 
@@ -76,33 +77,39 @@ public abstract class LabWebRequest {
         test.put("sex", patient.getGender().equals("M") ? "1" : patient.getGender().equals("F") ? "2" : "3");
         test.put("order_no", o.getOrderId().toString());
         test.put("patient_identifier", cccNumber != null ? cccNumber.getIdentifier() : "");
-        test.put("lab", "");
+        test.put("lab", "7");
 
-        if (manifestType == 1) { // we are using 1 for EID and 2 for VL
+        if (manifestType == LabManifest.EID_TYPE) { // we are using 1 for EID and 2 for VL
             PatientIdentifier heiNumber = patient.getPatientIdentifier(Utils.getHeiNumberIdentifierType());
             SimpleObject heiDetailsObject = getHeiDetailsForEidPostObject(patient,o);
             SimpleObject heiMothersAgeObject = Utils.getHeiMothersAge(patient);
 
             //API differences
             test.put("sample_type", sampleType);
-            test.put("date_collected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
+            test.put("date_received", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
+            test.put("datereceived", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
             test.put("pat_name", fullName);
+            test.put("patient_name", fullName);
 
             if(heiDetailsObject !=null) {
                 test.put("infant_prophylaxis", heiDetailsObject.get("prophylaxisAnswer") != null ? heiDetailsObject.get("prophylaxisAnswer").toString() : "");
                 test.put("pcr_code", heiDetailsObject.get("pcrSampleCodeAnswer") != null ? heiDetailsObject.get("pcrSampleCodeAnswer").toString() : "");
+                test.put("pcrtype", heiDetailsObject.get("pcrSampleCodeAnswer") != null ? heiDetailsObject.get("pcrSampleCodeAnswer").toString() : "");
                 test.put("entry_point", heiDetailsObject.get("entryPointAnswer") != null ? heiDetailsObject.get("entryPointAnswer").toString() : "");
                 test.put("infant_feeding", heiDetailsObject.get("feedingMethodAnswer") != null ? heiDetailsObject.get("feedingMethodAnswer").toString() : "");
                 test.put("mother_pmtct", heiDetailsObject.get("mothersRegimenAnswer") != null ? heiDetailsObject.get("mothersRegimenAnswer").toString() : "");
                 test.put("mother_vl_res", heiDetailsObject.get("validMothersVL") != null ? heiDetailsObject.get("validMothersVL").toString() : ""); // vl within last 6 months
             }
             test.put("date_collected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
+            test.put("datecollected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
+            test.put("regimen", "1");
+            test.put("feeding", "yes");
             test.put("sample_type", "DBS");
             test.put("hei_id", heiNumber != null ? heiNumber.getIdentifier() : "");
             test.put("mother_age", heiMothersAgeObject != null ? heiMothersAgeObject.get("mothersAge").toString() : "" );
             test.put("mother_ccc", Utils.getMothersUniquePatientNumber(patient) !=null ? Utils.getMothersUniquePatientNumber(patient) : "");
             test.put("ccc_no",  cccNumber != null ? cccNumber.getIdentifier() : "");
-        } else if (manifestType == 2) {
+        } else if (manifestType == LabManifest.VL_TYPE) {
             Encounter originalRegimenEncounter = RegimenMappingUtils.getFirstEncounterForProgram(patient, "ARV");
             Encounter currentRegimenEncounter = RegimenMappingUtils.getLastEncounterForProgram(patient, "ARV");
             if (currentRegimenEncounter == null) {
@@ -111,7 +118,7 @@ public abstract class LabWebRequest {
 
             //API differences
             test.put("sampletype", sampleType);
-            test.put("datecollected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
+            test.put("datereceived", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
             test.put("patient_name", fullName);
 
             SimpleObject regimenDetails = RegimenMappingUtils.buildRegimenChangeObject(currentRegimenEncounter.getObs(), currentRegimenEncounter);
@@ -126,6 +133,7 @@ public abstract class LabWebRequest {
                 nascopCode = RegimenMappingUtils.getNonStandardCodeFromRegimenLine(regimenLine);
             }
 
+            test.put("regimenline", regimenLine);
             test.put("justification", o.getOrderReason() != null ? getOrderReasonCode(o.getOrderReason().getUuid()) : "");
             test.put("datecollected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
             test.put("sampletype", manifestType.toString());

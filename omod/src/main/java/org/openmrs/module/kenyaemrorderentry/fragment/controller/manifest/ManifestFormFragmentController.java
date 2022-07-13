@@ -61,9 +61,6 @@ public class ManifestFormFragmentController {
         model.addAttribute("countyList", uniqueCountyList);
 
         model.addAttribute("returnUrl", returnUrl);
-
-        LabwareSystemWebRequest lswr = new LabwareSystemWebRequest();
-        lswr.testPull();
     }
 
     private List<String> manifestStatus() {
@@ -184,9 +181,9 @@ public class ManifestFormFragmentController {
             require(errors, "startDate");
             require(errors, "endDate");
             require(errors, "status");
-            if(manifestType == LabManifest.EID_TYPE) {
-                require(errors, "identifier");
-            }
+            //if(manifestType == LabManifest.EID_TYPE) {
+                require(errors, "identifier"); // We now require the identifier for all types of manifests
+            //}
 
             /*if (startDate != null) {
                 if (startDate.after(new Date())) {

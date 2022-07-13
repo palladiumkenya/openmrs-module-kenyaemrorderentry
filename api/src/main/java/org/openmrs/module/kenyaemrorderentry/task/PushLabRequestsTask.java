@@ -4,7 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.openmrs.GlobalProperty;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
-import org.openmrs.module.kenyaemrorderentry.labDataExchange.EIDVLLabSystemWebRequest;
+import org.openmrs.module.kenyaemrorderentry.labDataExchange.ChaiSystemWebRequest;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabWebRequest;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabwareSystemWebRequest;
@@ -73,6 +73,9 @@ public class PushLabRequestsTask extends AbstractTask {
                     return;
                 }
 
+                Long ordersCount = kenyaemrOrdersService.countLabManifestOrdersToSend(toProcess);
+                System.out.println("Lab Request PUSH Task: TOTAL Number of manifest orders: " + ordersCount);
+                
                 List<LabManifestOrder> ordersInManifest = kenyaemrOrdersService.getLabManifestOrdersToSend(toProcess);
                 
                 if (ordersInManifest.size() < 1) {
@@ -96,9 +99,8 @@ public class PushLabRequestsTask extends AbstractTask {
 
                     LabWebRequest postRequest;
 
-                    //if (LabOrderDataExchange.isEidVlLabSystem()) { // Cannot work in a multiuser system
-                    if(toProcess.getManifestType() == LabManifest.EID_TYPE) {
-                        postRequest = new EIDVLLabSystemWebRequest();
+                    if (LabOrderDataExchange.getSystemType() == LabOrderDataExchange.CHAI_SYSTEM) {
+                        postRequest = new ChaiSystemWebRequest();
                     } else {
                         postRequest = new LabwareSystemWebRequest();
                     }

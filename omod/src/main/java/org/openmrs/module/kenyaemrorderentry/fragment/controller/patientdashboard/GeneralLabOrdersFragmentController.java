@@ -18,7 +18,7 @@ import org.openmrs.api.ProviderService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appui.UiSessionContext;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
-import org.openmrs.module.kenyaemrorderentry.labDataExchange.EIDVLLabSystemWebRequest;
+import org.openmrs.module.kenyaemrorderentry.labDataExchange.ChaiSystemWebRequest;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabWebRequest;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabwareSystemWebRequest;
@@ -114,27 +114,27 @@ public class GeneralLabOrdersFragmentController {
         if (manifest != null && order != null) {
             LabManifestOrder labOrder = new LabManifestOrder();
 
-
             labOrder.setLabManifest(manifest);
             labOrder.setOrder(order);
             labOrder.setSampleType(sampleType);
             labOrder.setSampleCollectionDate(dateSampleCollected);
             labOrder.setSampleSeparationDate(dateSampleSeparated);
 
-            LabWebRequest postRequest;
+            LabWebRequest postRequest = new LabwareSystemWebRequest();
 
-            System.out.println("LAB Order Create: Order sample type is set as: " + sampleType);
-            //if (LabOrderDataExchange.isEidVlLabSystem()) {
-            if(manifest.getManifestType() == LabManifest.EID_TYPE) {
-                postRequest = new EIDVLLabSystemWebRequest();
-                postRequest.setManifestType(manifest.getManifestType());
-            } else {
+            if (LabOrderDataExchange.getSystemType() == LabOrderDataExchange.CHAI_SYSTEM) {
+                System.out.println("The System Type is CHAI");
+                postRequest = new ChaiSystemWebRequest();
+            } else if (LabOrderDataExchange.getSystemType() == LabOrderDataExchange.LABWARE_SYSTEM) {
+                System.out.println("The System Type is LABWARE");
                 postRequest = new LabwareSystemWebRequest();
-                postRequest.setManifestType(manifest.getManifestType());
-
+            } else {
+                System.out.println("The System Type has not been set: " + LabOrderDataExchange.getSystemType());
             }
+
+            postRequest.setManifestType(manifest.getManifestType());
             ObjectNode payload = postRequest.completePostPayload(order, dateSampleCollected, dateSampleSeparated, sampleType, manifest.getIdentifier());
-            //ObjectNode payload = postRequest.completePostPayload(order, dateSampleCollected, dateSampleSeparated, sampleType, String.valueOf(manifest.getId()));
+
             // TODO: check if the payload is not null. Currently, an empty payload is generated if nascop code is null
             if (!payload.isEmpty()) {
                 labOrder.setPayload(payload.toString());

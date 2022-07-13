@@ -5,8 +5,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
-//import java.util.stream.Collectors;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -24,6 +25,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContexts;
 import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.openmrs.GlobalProperty;
 import org.openmrs.Order;
@@ -40,27 +42,27 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
- * An implementation for Labware
+ * An implementation for EIDVLLabSystem - commonly referred to as CHAI system
  */
-public class LabwareSystemWebRequest extends LabWebRequest {
+public class ChaiSystemWebRequest extends LabWebRequest {
 
     private static final Logger log = LoggerFactory.getLogger(PushLabRequestsTask.class);
 
-    public LabwareSystemWebRequest() {
+    public ChaiSystemWebRequest() {
         //
     }
 
     @Override
     public boolean checkRequirements() {
         // EID settings
-        GlobalProperty gpEIDServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LABWARE_EID_LAB_SERVER_REQUEST_URL);
-        GlobalProperty gpEIDServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LABWARE_EID_LAB_SERVER_RESULT_URL);
-        GlobalProperty gpEIDApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LABWARE_EID_LAB_SERVER_API_TOKEN);
+        GlobalProperty gpEIDServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_CHAI_EID_LAB_SERVER_REQUEST_URL);
+        GlobalProperty gpEIDServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_CHAI_EID_LAB_SERVER_RESULT_URL);
+        GlobalProperty gpEIDApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_CHAI_EID_LAB_SERVER_API_TOKEN);
 
         // VL Settings
-        GlobalProperty gpVLServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LABWARE_VL_LAB_SERVER_REQUEST_URL);
-        GlobalProperty gpVLServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LABWARE_VL_LAB_SERVER_RESULT_URL);
-        GlobalProperty gpVLApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LABWARE_VL_LAB_SERVER_API_TOKEN);
+        GlobalProperty gpVLServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_CHAI_VL_LAB_SERVER_REQUEST_URL);
+        GlobalProperty gpVLServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_CHAI_VL_LAB_SERVER_RESULT_URL);
+        GlobalProperty gpVLApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_CHAI_VL_LAB_SERVER_API_TOKEN);
 
         String EIDServerPushUrl = gpEIDServerPushUrl.getPropertyValue();
         String EIDServerPullUrl = gpEIDServerPullUrl.getPropertyValue();
@@ -71,7 +73,7 @@ public class LabwareSystemWebRequest extends LabWebRequest {
         String VLApiToken = gpVLApiToken.getPropertyValue();
 
         if (StringUtils.isBlank(EIDServerPushUrl) || StringUtils.isBlank(EIDServerPullUrl) || StringUtils.isBlank(EIDApiToken) || StringUtils.isBlank(VLServerPushUrl) || StringUtils.isBlank(VLServerPullUrl) || StringUtils.isBlank(VLApiToken)) {
-            System.out.println("Labware Lab Results: Please set credentials for posting lab requests to the labware system");
+            System.out.println("CHAI Lab Results: Please set credentials for posting lab requests to the CHAI system");
             return false;
         }
         return true;
@@ -80,7 +82,7 @@ public class LabwareSystemWebRequest extends LabWebRequest {
     public boolean postSamples(LabManifestOrder manifestOrder, String manifestStatus) throws IOException {
 
         if (!checkRequirements()) {
-            System.out.println("Labware Lab Results POST: Failed to satisfy requirements");
+            System.out.println("CHAI Lab Results POST: Failed to satisfy requirements");
             return(false);
         }
 
@@ -91,13 +93,13 @@ public class LabwareSystemWebRequest extends LabWebRequest {
         String API_KEY = "";
 
         if(toProcess.getManifestType() == LabManifest.EID_TYPE) {
-            GlobalProperty gpEIDServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LABWARE_EID_LAB_SERVER_REQUEST_URL);
-            GlobalProperty gpEIDApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LABWARE_EID_LAB_SERVER_API_TOKEN);
+            GlobalProperty gpEIDServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_CHAI_EID_LAB_SERVER_REQUEST_URL);
+            GlobalProperty gpEIDApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_CHAI_EID_LAB_SERVER_API_TOKEN);
             serverUrl = gpEIDServerPushUrl.getPropertyValue().trim();
             API_KEY = gpEIDApiToken.getPropertyValue().trim();
         } else if(toProcess.getManifestType() == LabManifest.VL_TYPE) {
-            GlobalProperty gpVLServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LABWARE_VL_LAB_SERVER_REQUEST_URL);
-            GlobalProperty gpVLApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LABWARE_VL_LAB_SERVER_API_TOKEN);
+            GlobalProperty gpVLServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_CHAI_VL_LAB_SERVER_REQUEST_URL);
+            GlobalProperty gpVLApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_CHAI_VL_LAB_SERVER_API_TOKEN);
             serverUrl = gpVLServerPushUrl.getPropertyValue().trim();
             API_KEY = gpVLApiToken.getPropertyValue().trim();
         }
@@ -114,46 +116,49 @@ public class LabwareSystemWebRequest extends LabWebRequest {
         try {
 
             //Define a postRequest request
-            System.out.println("Labware Lab Results POST: Server URL: " + serverUrl);
+            System.out.println("CHAI Lab Results POST: Server URL: " + serverUrl);
             HttpPost postRequest = new HttpPost(serverUrl);
 
             //Set the API media type in http content-type header
             postRequest.addHeader("content-type", "application/json");
-            postRequest.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + API_KEY);
+            postRequest.setHeader("apikey", API_KEY);
 
             //Set the request post body
             String payload = manifestOrder.getPayload();
-            System.out.println("Labware Lab Results POST: Server Payload: " + payload);
+            System.out.println("CHAI Lab POST: Server Payload: " + payload);
             StringEntity userEntity = new StringEntity(payload);
             postRequest.setEntity(userEntity);
 
             HttpResponse response = httpClient.execute(postRequest);
 
+            //return response;
             //verify the valid error code first
             int statusCode = response.getStatusLine().getStatusCode();
 
             if (statusCode == 429) { // too many requests. just terminate
-                System.out.println("Labware Lab Results POST: 429 The push lab scheduler has been configured to run at very short intervals. Please change this to at least 30min");
-                log.warn("Labware Lab Results POST: 429 The push scheduler has been configured to run at very short intervals. Please change this to at least 30min");
+                System.out.println("CHAI Lab Results POST: 429 The push lab scheduler has been configured to run at very short intervals. Please change this to at least 30min");
+                log.warn("CHAI Lab Results POST: 429 The push scheduler has been configured to run at very short intervals. Please change this to at least 30min");
                 return(false);
             }
 
             if (statusCode != 201 && statusCode != 200 && statusCode != 422 && statusCode != 403) { // skip for status code 422: unprocessable entity, and status code 403 for forbidden response
                 manifestOrder.setStatus("Pending");
                 kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
-                System.out.println("Labware Lab Results POST: There was an error sending lab id = " + manifestOrder.getId() + " Status: " + statusCode);
-                log.warn("Labware Lab Results POST: There was an error sending lab id = " + manifestOrder.getId() + " Status: " + statusCode);
+                System.out.println("CHAI Lab Results POST: There was an error sending lab id = " + manifestOrder.getId() + " Status: " + statusCode);
+                log.warn("CHAI Lab Results POST: There was an error sending lab id = " + manifestOrder.getId() + " Status: " + statusCode);
+                // throw new RuntimeException("Failed with HTTP error code : " + statusCode + ". Error msg: " + errorObj.get("message"));
                 return(false);
             } else if (statusCode == 403 || statusCode == 422) {
                 manifestOrder.setStatus("Pending");
                 kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
-                System.out.println("Labware Lab Results POST: There was an error sending lab id = " + manifestOrder.getId() + " Status: " + statusCode);
-                log.warn("Labware Lab Results POST: There was an error sending lab id = " + manifestOrder.getId() + " Status: " + statusCode);
+                System.out.println("CHAI Lab Results POST: Error while submitting manifest sample. " + "Error - " + statusCode);
+                log.error("CHAI Lab Results POST: Error while submitting manifest sample. " + "Error - " + statusCode);
                 return(false);
             } else if (statusCode == 201 || statusCode == 200) {
                 manifestOrder.setStatus("Sent");
-                System.out.println("Labware Lab Results POST: Successfully pushed a VL lab test id " + manifestOrder.getId());
-                log.info("Labware Lab Results POST: Successfully pushed a VL lab test id " + manifestOrder.getId());
+                System.out.println("CHAI Lab Results POST: Successfully pushed a EID lab test id " + manifestOrder.getId());
+                log.info("CHAI Lab Results POST: Successfully pushed a EID lab test id " + manifestOrder.getId());
+
                 kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
 
                 if (toProcess != null && manifestStatus.equals("Ready to send")) {
@@ -162,17 +167,16 @@ public class LabwareSystemWebRequest extends LabWebRequest {
                 }
                 Context.flushSession();
 
-                System.out.println("Labware Lab Results POST: Push Successfull");
+                System.out.println("CHAI Lab Results POST: Push Successfull");
                 return(true);
             }
         } catch (Exception e) {
-            System.err.println("Labware Lab Results POST: Could not push requests to the lab! " + e.getMessage());
-            log.error("Labware Lab Results POST: Could not push requests to the lab! " + e.getMessage());
+            System.out.println("CHAI Lab Results POST: Could not push requests to the lab! " + e.getMessage());
+            log.error("CHAI Lab Results POST: Could not push requests to the lab! " + e.getMessage());
             e.printStackTrace();
         } finally {
             httpClient.close();
         }
-
         return(false);
     }
 
@@ -184,13 +188,13 @@ public class LabwareSystemWebRequest extends LabWebRequest {
         String API_KEY = "";
 
         if(manifestToUpdateResults.getManifestType() == LabManifest.EID_TYPE) {
-            GlobalProperty gpEIDServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LABWARE_EID_LAB_SERVER_RESULT_URL);
-            GlobalProperty gpEIDApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LABWARE_EID_LAB_SERVER_API_TOKEN);
+            GlobalProperty gpEIDServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_CHAI_EID_LAB_SERVER_RESULT_URL);
+            GlobalProperty gpEIDApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_CHAI_EID_LAB_SERVER_API_TOKEN);
             serverUrl = gpEIDServerPullUrl.getPropertyValue().trim();
             API_KEY = gpEIDApiToken.getPropertyValue().trim();
         } else if(manifestToUpdateResults.getManifestType() == LabManifest.VL_TYPE) {
-            GlobalProperty gpVLServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LABWARE_VL_LAB_SERVER_RESULT_URL);
-            GlobalProperty gpVLApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LABWARE_VL_LAB_SERVER_API_TOKEN);
+            GlobalProperty gpVLServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_CHAI_VL_LAB_SERVER_RESULT_URL);
+            GlobalProperty gpVLApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_CHAI_VL_LAB_SERVER_API_TOKEN);
             serverUrl = gpVLServerPullUrl.getPropertyValue().trim();
             API_KEY = gpVLApiToken.getPropertyValue().trim();
         }
@@ -198,8 +202,6 @@ public class LabwareSystemWebRequest extends LabWebRequest {
         GlobalProperty gpLastProcessedManifest = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_MANIFEST_LAST_PROCESSED);
         GlobalProperty gpLastProcessedManifestUpdatetime = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_MANIFEST_LAST_UPDATETIME);
 
-
-        //Using SSL
         SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
                 SSLContexts.createDefault(),
                 new String[]{"TLSv1.2"},
@@ -210,26 +212,29 @@ public class LabwareSystemWebRequest extends LabWebRequest {
         //CloseableHttpClient httpClient = HttpClientBuilder.create().build();
 
         try {
+
             String facilityCode = Utils.getDefaultLocationMflCode(Utils.getDefaultLocation());
             String orderNumbers = StringUtils.join(orderIds, ",");
             URIBuilder builder = new URIBuilder(serverUrl);
-            builder.addParameter("mfl_code", facilityCode);
-            builder.addParameter("order_no", orderNumbers);
+            builder.addParameter("test", manifestToUpdateResults.getManifestType().toString());
+            builder.addParameter("order_numbers", orderNumbers);
+            builder.addParameter("facility_code", facilityCode);
             URI uri = builder.build();
-            System.out.println("Get Labware Lab Results URL: " + uri);
+            System.out.println("Get CHAI Lab Results URL: " + uri);
 
-            HttpGet httpget = new HttpGet(uri);
-            httpget.addHeader("content-type", "application/x-www-form-urlencoded");
-            httpget.addHeader("Authorization", "Bearer " +API_KEY);
-            httpget.addHeader("Accept", "application/json");
+            HttpPost postRequest = new HttpPost(uri);
+            postRequest.addHeader("content-type", "application/x-www-form-urlencoded");
+            postRequest.addHeader("Authorization", "Bearer " + API_KEY);
+            postRequest.addHeader("apikey", API_KEY);
+            postRequest.addHeader("Accept", "application/json");
 
-            CloseableHttpResponse response = httpClient.execute(httpget);
+            CloseableHttpResponse response = httpClient.execute(postRequest);
 
             final int statusCode = response.getStatusLine().getStatusCode();
             if (statusCode != 200) {
-                throw new RuntimeException("Get Labware Lab Results Failed with HTTP error code : " + statusCode);
+                throw new RuntimeException("Get CHAI Lab Results Failed with HTTP error code : " + statusCode);
             } else {
-                System.out.println("Get Labware Lab Results: REST Call Success");
+                System.out.println("Get CHAI Lab Results: REST Call Success");
             }
 
            String jsonString = null;
@@ -239,24 +244,24 @@ public class LabwareSystemWebRequest extends LabWebRequest {
 
                try {
                    jsonString = rd.lines().collect(Collectors.joining()).toString();
-                   System.out.println("Labware Lab Results Get: Request JSON -> " + jsonString);
+                   System.out.println("CHAI Lab Results Get: JSON REPLY -> " + jsonString);
                } finally {
                    rd.close();
                }
-           }
+            }
 
             JSONParser parser = new JSONParser();
-            JSONArray responseArray = (JSONArray) parser.parse(jsonString);
+            JSONObject responseObject = (JSONObject) parser.parse(jsonString);
+            JSONArray responseArray = (JSONArray)responseObject.get("data");
+            String dataString = responseArray.toString();
 
             if (responseArray != null && !responseArray.isEmpty()) {
-                // update orders
-                ProcessViralLoadResults.processPayload(jsonString);
+
+                ProcessViralLoadResults.processPayload(dataString);
 
                 // update manifest details appropriately for the next execution
                 String [] incompleteStatuses = new String []{"Incomplete", "Pending", "Sending"};
-
                 if (manifestToUpdateResults != null) {
-                    System.out.println("Labware Lab Results Get: Updating manifest with status");
                     List<LabManifestOrder> pendingResultsForNextIteration = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifestToUpdateResults, "Sent");
                     List<LabManifestOrder> incompleteResults = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifestToUpdateResults, incompleteStatuses);
 
@@ -269,7 +274,7 @@ public class LabwareSystemWebRequest extends LabWebRequest {
 
                         gpLastProcessedManifest.setPropertyValue(""); // set value to null so that the execution gets to the next manifest
                         Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifest);
-                        System.out.println("Labware Lab Results Get: Updating manifest with status: Complete Results");
+                        System.out.println("Lab Results Get: Updating manifest with status: Complete Results");
                     } else if (pendingResultsForNextIteration.size() < 1 && incompleteResults.size() > 0) {
                         manifestToUpdateResults.setStatus("Incomplete results");
                         manifestToUpdateResults.setDateChanged(new Date());
@@ -277,12 +282,11 @@ public class LabwareSystemWebRequest extends LabWebRequest {
 
                         gpLastProcessedManifest.setPropertyValue(""); // set value to null so that the execution gets to the next manifest
                         Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifest);
-                        System.out.println("Labware Lab Results Get: Updating manifest with status: Incomplete Results");
+                        System.out.println("Lab Results Get: Updating manifest with status: InComplete Results");
                     }
 
                     // update manifest global property
                     if (pendingResultsForNextIteration.size() > 0) {
-                        System.out.println("Labware Lab Results Get: Updating manifest global property");
                         gpLastProcessedManifest.setPropertyValue(manifestToUpdateResults.getId().toString());
                         gpLastProcessedManifestUpdatetime.setPropertyValue(Utils.getSimpleDateFormat(LabOrderDataExchange.MANIFEST_LAST_UPDATE_PATTERN).format(new Date()));
                         Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifest);
@@ -305,31 +309,42 @@ public class LabwareSystemWebRequest extends LabWebRequest {
                 kenyaemrOrdersService.saveLabManifestOrder(o);
             }
 
-            System.out.println("Labware Lab Results Get: Successfully executed the task that pulls lab requests");
-            log.info("Labware Lab Results Get: Successfully executed the task that pulls lab requests");
+            System.out.println("Get CHAI Lab Results: Successfully executed the task that pulls lab requests");
+            log.info("Get CHAI Lab Results: Successfully executed the task that pulls lab requests");
 
-            System.out.println("Labware Lab Results Get: Successfully Done");
         } catch (Exception e) {
-            System.err.println("Get Labware Lab Results Error: " + e.getMessage());
+            System.err.println("Get CHAI Lab Results Error: " + e.getMessage());
             e.printStackTrace();
         } finally {
             httpClient.close();
         }
     }
 
+    public URI convertJSONTOURLEncoded(String URL, String jsonPayload) {
+        URI uri = null;
+        try {
+            URIBuilder builder = new URIBuilder(URL);
+            JSONParser parser = new JSONParser();
+            JSONObject payloadObject = (JSONObject) parser.parse(jsonPayload);
+            Iterator iterator = payloadObject.keySet().iterator();
+            //Set<String> keys = payloadObject.keySet();
+            //for(String key : keys) {
+            while (iterator.hasNext()) {
+                String key = (String) iterator.next();
+                builder.addParameter(key, payloadObject.get(key).toString());
+            }
+            builder.addParameter("facility_code", "");
+            uri = builder.build();
+        } catch(Exception ex) {}
+        return(uri);
+    }
+
     @Override
     public ObjectNode completePostPayload(Order o, Date dateSampleCollected, Date dateSampleSeparated, String sampleType, String manifestID) {
-        //setManifestType(LabManifest.VL_TYPE);
         ObjectNode node = baselinePostRequestPayload(o, dateSampleCollected, dateSampleSeparated, sampleType, manifestID);
         node.put("mfl_code", Utils.getDefaultLocationMflCode(null));
-        if (o.getPatient().getGender().equals("F")) {
-            node.put("female_status", "none");
-        }
-        node.put("lab", "7");
+        node.put("mflCode", Utils.getDefaultLocationMflCode(null));
         node.put("facility_email", "info@example.com");
-        node.put("recency_id", "");
-        node.put("emr_shipment", StringUtils.isNotBlank(manifestID) ? manifestID : "");
-        node.put("date_separated", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleSeparated));
         return node;
     }
 

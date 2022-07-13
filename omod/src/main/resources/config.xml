@@ -68,50 +68,98 @@
 	</globalProperty>
 
 	<globalProperty>
-		<property>chai.viral_load_server_url</property>
-		<defaultValue></defaultValue>
+		<property>chai_eid_server_url</property>
+		<defaultValue>http://localhost:8094/api/v1/chai/eid/push</defaultValue>
 		<description>
-			The POST URL for pushing requests to the viral load server
+			The URL for pushing requests to the CHAI EID server
 		</description>
 	</globalProperty>
 
 	<globalProperty>
-		<property>chai.viral_load_server_result_url</property>
-		<defaultValue></defaultValue>
+		<property>chai_eid_server_result_url</property>
+		<defaultValue>http://localhost:8094/api/v1/chai/eid/pull</defaultValue>
 		<description>
-			The POST URL for fetching viral load result
+			The URL for fetching CHAI EID result
 		</description>
 	</globalProperty>
 
 	<globalProperty>
-		<property>chai.viral_load_server_api_token</property>
-		<defaultValue></defaultValue>
+		<property>chai_eid_server_api_token</property>
+		<defaultValue>5de96c436f5956cebb97b63fa354bde1</defaultValue>
 		<description>
-			API token to authenticate communication to the CHAI lab system API
+			API token to authenticate communication to the CHAI EID lab system API
 		</description>
 	</globalProperty>
 
 	<globalProperty>
-		<property>eid.viral_load_server_url</property>
-		<defaultValue></defaultValue>
+		<property>chai_vl_server_url</property>
+		<defaultValue>http://localhost:8094/api/v1/chai/vl/push</defaultValue>
 		<description>
-			The POST URL for pushing requests to the EID viral load server
+			The URL for pushing requests to the CHAI VL server
 		</description>
 	</globalProperty>
 
 	<globalProperty>
-		<property>eid.viral_load_server_result_url</property>
-		<defaultValue></defaultValue>
+		<property>chai_vl_server_result_url</property>
+		<defaultValue>http://localhost:8094/api/v1/chai/vl/pull</defaultValue>
 		<description>
-			The POST URL for fetching EID viral load result
+			The URL for fetching CHAI VL result
 		</description>
 	</globalProperty>
 
 	<globalProperty>
-		<property>eid.viral_load_server_api_token</property>
-		<defaultValue></defaultValue>
+		<property>chai_vl_server_api_token</property>
+		<defaultValue>5de96c436f5956cebb97b63fa354bde1</defaultValue>
 		<description>
-			API token to authenticate communication to the EID lab system API
+			API token to authenticate communication to the CHAI VL lab system API
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>labware_eid_server_url</property>
+		<defaultValue>http://localhost:8094/api/v1/labware/eid/push</defaultValue>
+		<description>
+			The URL for pushing requests to the LABWARE EID server
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>labware_eid_server_result_url</property>
+		<defaultValue>http://localhost:8094/api/v1/labware/eid/pull</defaultValue>
+		<description>
+			The URL for fetching LABWARE EID result
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>labware_eid_server_api_token</property>
+		<defaultValue>5de96c436f5956cebb97b63fa354bde1</defaultValue>
+		<description>
+			API token to authenticate communication to the LABWARE EID lab system API
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>labware_vl_server_url</property>
+		<defaultValue>http://localhost:8094/api/v1/labware/vl/push</defaultValue>
+		<description>
+			The URL for pushing requests to the LABWARE VL server
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>labware_vl_server_result_url</property>
+		<defaultValue>http://localhost:8094/api/v1/labware/vl/pull</defaultValue>
+		<description>
+			The URL for fetching LABWARE VL result
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>labware_vl_server_api_token</property>
+		<defaultValue>5de96c436f5956cebb97b63fa354bde1</defaultValue>
+		<description>
+			API token to authenticate communication to the LABWARE VL lab system API
 		</description>
 	</globalProperty>
 
@@ -149,7 +197,7 @@
 
 	<globalProperty>
 		<property>kemrorder.labsystem_identifier</property>
-		<defaultValue></defaultValue>
+		<defaultValue>LABWARE</defaultValue>
 		<description>
 			The name of the lab system in use. Answers should be CHAI,LABWARE
 		</description>
