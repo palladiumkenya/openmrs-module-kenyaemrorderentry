@@ -53,6 +53,7 @@ public abstract class LabWebRequest {
      * @return
      */
     public ObjectNode baselinePostRequestPayload(Order o, Date dateSampleCollected, Date dateSampleSeparated, String sampleType, String manifestID) {
+        System.out.println("The Manifest Type is: " + manifestType);
         Patient patient = o.getPatient();
         ObjectNode test = Utils.getJsonNodeFactory().objectNode();
 
