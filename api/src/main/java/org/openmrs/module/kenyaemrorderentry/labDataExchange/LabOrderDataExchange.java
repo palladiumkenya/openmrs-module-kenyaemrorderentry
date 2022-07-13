@@ -564,10 +564,14 @@ public class LabOrderDataExchange {
                 String specimenRejectedReason = "";
 
                 if(getSystemType() == LABWARE_SYSTEM) {
-                    JsonObject dateReceivedObject = o.get("date_received").getAsJsonObject();
-                    dateSampleReceived = dateReceivedObject.get("date").getAsString().trim();
-                    JsonObject dateTestedObject = o.get("date_tested").getAsJsonObject();
-                    dateSampleTested = dateTestedObject.get("date").getAsString().trim();
+                    try {
+                        JsonObject dateReceivedObject = o.get("date_received").getAsJsonObject();
+                        dateSampleReceived = dateReceivedObject.get("date").getAsString().trim();
+                    } catch(Exception ex) {}
+                    try {
+                        JsonObject dateTestedObject = o.get("date_tested").getAsJsonObject();
+                        dateSampleTested = dateTestedObject.get("date").getAsString().trim();
+                    } catch(Exception ex) {}
                 } else if(getSystemType() == CHAI_SYSTEM) {
                     try {
                         dateSampleReceived = o.get("date_received").getAsString().trim();
