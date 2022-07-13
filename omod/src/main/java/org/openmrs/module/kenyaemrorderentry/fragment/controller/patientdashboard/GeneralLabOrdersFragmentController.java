@@ -114,7 +114,6 @@ public class GeneralLabOrdersFragmentController {
         if (manifest != null && order != null) {
             LabManifestOrder labOrder = new LabManifestOrder();
 
-
             labOrder.setLabManifest(manifest);
             labOrder.setOrder(order);
             labOrder.setSampleType(sampleType);
@@ -124,13 +123,16 @@ public class GeneralLabOrdersFragmentController {
             LabWebRequest postRequest = new LabwareSystemWebRequest();
 
             if (LabOrderDataExchange.getSystemType() == LabOrderDataExchange.CHAI_SYSTEM) {
+                System.out.println("The System Type is CHAI");
                 postRequest = new ChaiSystemWebRequest();
-                postRequest.setManifestType(manifest.getManifestType());
             } else if (LabOrderDataExchange.getSystemType() == LabOrderDataExchange.LABWARE_SYSTEM) {
+                System.out.println("The System Type is LABWARE");
                 postRequest = new LabwareSystemWebRequest();
-                postRequest.setManifestType(manifest.getManifestType());
+            } else {
+                System.out.println("The System Type has not been set: " + LabOrderDataExchange.getSystemType());
             }
 
+            postRequest.setManifestType(manifest.getManifestType());
             ObjectNode payload = postRequest.completePostPayload(order, dateSampleCollected, dateSampleSeparated, sampleType, manifest.getIdentifier());
 
             // TODO: check if the payload is not null. Currently, an empty payload is generated if nascop code is null
