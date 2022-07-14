@@ -67,20 +67,17 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
 
           }
 
-          $scope.customDurationUnits = OpenMRS.durationUnitsPayload.durationUnitsResponse;
-          $scope.showRegimenPanel = false;
+        $scope.customDurationUnits = "";
+        if( OpenMRS.durationUnitsPayload && OpenMRS.durationUnitsPayload !== undefined) {
+            $scope.customDurationUnits = OpenMRS.durationUnitsPayload.durationUnitsResponse;
+        }
+        $scope.showRegimenPanel = false;
 
         function loadExistingOrders() {
-            loadActiveDrugOrders();
-            loadPastDrugOrders();
-        }
-
-
-        function loadActiveDrugOrders() {
             $scope.activeDrugOrders = {loading: true};
             OrderService.getOrders({
                 t: 'drugorder',
-                v: 'custom:(uuid,concept)',
+                v: 'full',
                 patient: config.patient.uuid,
                 careSetting: $scope.careSetting.uuid
             }).then(function (results) {
@@ -98,7 +95,6 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                         return 1;
                     }
                 });
-                
                 $scope.patientRegimens = addRegimenStatus(programRegimens);
                 $scope.patientActiveDrugOrders = OpenMRS.activeOrdersPayload;
                 if($scope.patientActiveDrugOrders) {
@@ -117,10 +113,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                 }
 
             });
-            
-        }
 
-        function loadPastDrugOrders() {
             $scope.pastDrugOrders = {loading: true};
             OrderService.getOrders({
                 t: 'drugorder',
@@ -163,9 +156,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                     }
                 }
             });
-
         }
-
 
         function addRegimenStatus(completed) {
             var completedFields = [];
@@ -263,14 +254,18 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
         $scope.showStandardRegimenTab = true;
 
 
-        var config = OpenMRS.drugOrdersConfig;
+        var config = "";
+
+        if( OpenMRS.drugOrdersConfig && OpenMRS.drugOrdersConfig !== undefined) {
+            config = OpenMRS.drugOrdersConfig;
+        }
         $scope.init = function () {
-            $scope.routes = config.routes;
-            $scope.doseUnits = config.doseUnits;
-            $scope.durationUnits = config.durationUnits;
-            $scope.quantityUnits = config.quantityUnits;
-            $scope.frequencies = config.frequencies;
-            $scope.careSettings = config.careSettings;
+            $scope.routes = config.routes !== undefined ? config.routes : "";
+            $scope.doseUnits = config.doseUnits !== undefined ? config.doseUnits : "";
+            $scope.durationUnits = config.durationUnits !== undefined ? config.durationUnits : "";
+            $scope.quantityUnits = config.quantityUnits !== undefined ? config.quantityUnits : "";
+            $scope.frequencies = config.frequencies !== undefined ? config.frequencies : "";
+            $scope.careSettings = config && config.careSettings && config !== "" && config.careSettings !=="" && config.careSettings !== undefined ? config.careSettings : "";
             $scope.careSetting = config.intialCareSetting ?
                 _.findWhere(config.careSettings, {uuid: config.intialCareSetting}) :
                 config.careSettings[0];
@@ -556,7 +551,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
         }
 
         $scope.getCurrentRegimen = function (res) {
-            var isDrugComponentSizeEqual = pastDrugOrdersComponent($scope.pastDrugOrderGroups);
+            var isDrugComponentSizeEqual = pastDrugOrdersComponent($scope.pastDrugOrderGroups)
             if($scope.pastDrugOrderGroups && $scope.pastDrugOrderGroups[0] !== undefined && isDrugComponentSizeEqual) {
                 $scope.components = prefillDrugComponentsWithPastValues(res.orderSetComponents);
 
@@ -703,23 +698,19 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
                we cannot therefore rely on order group id in this case to distinguish between regimens ordered as a group and 
                those not ordered as a group.
             */
-              if (pastOrders && pastOrders[0] !== undefined && pastOrders[0] !== 'undefined' ) {
-                var regimenComponentSize = pastOrders[0]?.components.length;
-                var regimenName = pastOrders[0]?.name
-                var arrayOfDrugsFormingRegimen = regimenName.split('/');
-                /*If length of drug components is not the same as the number of drugs forming the regimen(Drugs forming the regimen is extracted from the regimen name).
-                 then do not pre-populate the prescription with the previous regimen details. Render the prescription a fresh.
+            for (var i = 0; i < pastOrders.length; ++i) {
+                var firstComponentSize = pastOrders[0]?.components.length;
+                /*If length of drug components is less than two it is taken to mean the drug has not been ordered as a group.
+                 Assumption here is that regimen should have more than one drug component. If we have more than one drug component,
+                 then pre-populate the prescription with the previous regimen details.
                 */
-                if (regimenComponentSize !== arrayOfDrugsFormingRegimen.length) {
+                if (firstComponentSize < 2) {
                     return false;
 
                 } else {
                     return true;
                 }
-            } else {
-                return false;
             }
-    
         }
 
         function formatDisplayOfPastSingleDrugInstructions(res) {
