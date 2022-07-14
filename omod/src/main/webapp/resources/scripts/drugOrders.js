@@ -700,12 +700,11 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
             */
             for (var i = 0; i < pastOrders.length; ++i) {
                 var firstComponentSize = pastOrders[0]?.components.length;
-                var secondComponentSize = pastOrders[1]?.components.length;
-                // If lengths of drug components are not equal and size is one, it means the drugs were not ordered has a group
-                if (firstComponentSize != secondComponentSize) {
-                    return false;
-
-                } else if(firstComponentSize == secondComponentSize && (firstComponentSize == 1 || secondComponentSize == 1)) {
+                /*If length of drug components is less than two it is taken to mean the drug has not been ordered as a group.
+                 Assumption here is that regimen should have more than one drug component. If we have more than one drug component,
+                 then pre-populate the prescription with the previous regimen details.
+                */
+                if (firstComponentSize < 2) {
                     return false;
 
                 } else {
