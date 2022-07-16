@@ -197,12 +197,27 @@
 
 	<globalProperty>
 		<property>kemrorder.labsystem_identifier</property>
-		<defaultValue>LABWARE</defaultValue>
+		<defaultValue></defaultValue>
 		<description>
-			The name of the lab system in use. Answers should be CHAI,LABWARE
+			The name of the lab system in use. Accepted options are CHAI,LABWARE. Please note these are case sensitive
 		</description>
 	</globalProperty>
 
+	<globalProperty>
+		<property>kemrorder.ssl_verification_enabled</property>
+		<defaultValue>true</defaultValue>
+		<description>
+			Defines whether SSL verification is enabled. Should be set to false to disable SSL verification
+		</description>
+	</globalProperty>
+
+	<!--<globalProperty>
+		<property>kemrorder.vl_server_last_execution_time</property>
+		<defaultValue></defaultValue>
+		<description>
+			Last execution for vl result pull request
+		</description>
+	</globalProperty>-->
 
 </module>
 

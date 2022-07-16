@@ -77,7 +77,7 @@ public abstract class LabWebRequest {
         test.put("sex", patient.getGender().equals("M") ? "1" : patient.getGender().equals("F") ? "2" : "3");
         test.put("order_no", o.getOrderId().toString());
         test.put("patient_identifier", cccNumber != null ? cccNumber.getIdentifier() : "");
-        test.put("lab", "7");
+        test.put("lab", "");
 
         if (manifestType == LabManifest.EID_TYPE) { // we are using 1 for EID and 2 for VL
             PatientIdentifier heiNumber = patient.getPatientIdentifier(Utils.getHeiNumberIdentifierType());
