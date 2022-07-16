@@ -35,6 +35,7 @@ public interface KenyaemrOrdersService extends OpenmrsService {
     List<LabManifestOrder> getLabManifestOrderByStatus(String status);
     List<LabManifestOrder> getLabManifestOrderByNotFoundInLabSystem(Integer... ordersList);
     List<LabManifestOrder> getLabManifestOrderByStatusBeforeDate(String status, Date lastStatusCheckDate);
+    LabManifest getFirstLabManifestByOrderStatusCheckedBeforeDate(String status, Date lastStatusCheckDate);
     Long countLabManifestOrderByStatusBeforeDate(String status, Date lastStatusCheckDate);
     List<LabManifestOrder> getLabManifestOrderByManifestAndStatus(LabManifest labManifestOrder, String status);
     List<LabManifestOrder> getLabManifestOrderByManifestAndStatus(LabManifest labManifestOrder, String ... status);

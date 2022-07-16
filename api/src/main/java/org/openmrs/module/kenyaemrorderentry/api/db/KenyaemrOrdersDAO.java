@@ -72,5 +72,9 @@ public interface KenyaemrOrdersDAO {
 
     Long countLabManifestOrderByManifestAndStatus(LabManifest labManifestOrder, Date updatedBefore, String... status);
 
+    LabManifestOrder getLabManifestOrderByOrderId(Order specimenId);
+
+    LabManifest getFirstLabManifestByOrderStatusCheckedBeforeDate(String status, Date lastStatusCheckDate);
+
     //End of Patient Contact dimensions methods
 }

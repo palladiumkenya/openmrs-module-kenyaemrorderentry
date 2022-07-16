@@ -111,7 +111,7 @@ public class GeneralLabOrdersFragmentController {
                                            @RequestParam(value = "dateSampleSeparated") Date dateSampleSeparated
                                            ) {
 
-        if (manifest != null && order != null) {
+        if (manifest != null && order != null && LabOrderDataExchange.getSystemType() != 0) { // check for the configured lab system so that appropriate payload structure is generated
             LabManifestOrder labOrder = new LabManifestOrder();
 
             labOrder.setLabManifest(manifest);
