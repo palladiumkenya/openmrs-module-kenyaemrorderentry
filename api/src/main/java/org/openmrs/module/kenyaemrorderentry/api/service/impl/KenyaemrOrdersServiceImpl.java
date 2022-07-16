@@ -116,7 +116,7 @@ public class KenyaemrOrdersServiceImpl extends BaseOpenmrsService implements Ken
     @Override
     @Transactional(readOnly = true)
     public LabManifestOrder getLabManifestOrderByOrderId(Order specimenId) {
-        return dao.getLabManifestOrderByManifest(specimenId);
+        return dao.getLabManifestOrderByOrderId(specimenId);
     }
 
     @Override
@@ -133,6 +133,11 @@ public class KenyaemrOrdersServiceImpl extends BaseOpenmrsService implements Ken
     @Override
     public List<LabManifestOrder> getLabManifestOrderByStatusBeforeDate(String status, Date lastStatusCheckDate) {
         return dao.getLabManifestOrderByStatusBeforeDate(status, lastStatusCheckDate);
+    }
+
+    @Override
+    public LabManifest getFirstLabManifestByOrderStatusCheckedBeforeDate(String status, Date lastStatusCheckDate) {
+        return dao.getFirstLabManifestByOrderStatusCheckedBeforeDate(status, lastStatusCheckDate);
     }
 
     @Override

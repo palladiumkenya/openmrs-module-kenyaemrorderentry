@@ -180,4 +180,15 @@ public class LabManifestOrder extends BaseOpenmrsData implements Serializable {
     public void setOrderType(Integer orderType) {
         this.orderType = orderType;
     }
+
+    @Override
+    public String toString() {
+        return "LabManifestOrder{" +
+                "id=" + id +
+                ", sampleType='" + sampleType + '\'' +
+                ", status='" + status + '\'' +
+                ", result='" + result + '\'' +
+                ", lastStatusCheckDate=" + lastStatusCheckDate +
+                '}';
+    }
 }
