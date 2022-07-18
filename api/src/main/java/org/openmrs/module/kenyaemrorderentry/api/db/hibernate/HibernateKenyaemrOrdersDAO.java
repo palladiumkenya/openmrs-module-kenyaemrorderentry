@@ -395,4 +395,30 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
         return(count);
     }
 
+    @Override
+    public LabManifestOrder getLabManifestOrderByOrderId(Order specimenId) {
+        Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifestOrder.class);
+        criteria.add(Restrictions.eq("order", specimenId));
+        if (criteria.list().size() > 0) {
+            return (LabManifestOrder) criteria.list().get(0);
+        }
+        return null;
+    }
+
+    @Override
+    public LabManifest getFirstLabManifestByOrderStatusCheckedBeforeDate(String status, Date lastStatusCheckDate) {
+        Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifestOrder.class);
+        criteria.add(Restrictions.eq("status", status));
+        criteria.add(Restrictions.eq("voided", false));
+        criteria.add(Restrictions.or(Restrictions.isNull("lastStatusCheckDate"), Restrictions.le("lastStatusCheckDate", lastStatusCheckDate)));
+        criteria.addOrder(org.hibernate.criterion.Order.asc("id"));
+        criteria.setMaxResults(1);
+
+        if (criteria.list().size() > 0) {
+            LabManifestOrder manifestOrder = (LabManifestOrder) criteria.list().get(0);
+            return manifestOrder.getLabManifest();
+        }
+        return null;
+    }
+
 }

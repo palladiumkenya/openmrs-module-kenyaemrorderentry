@@ -69,7 +69,7 @@
 
 	<globalProperty>
 		<property>chai_eid_server_url</property>
-		<defaultValue>http://localhost:8094/api/v1/chai/eid/push</defaultValue>
+		<defaultValue></defaultValue>
 		<description>
 			The URL for pushing requests to the CHAI EID server
 		</description>
@@ -77,7 +77,7 @@
 
 	<globalProperty>
 		<property>chai_eid_server_result_url</property>
-		<defaultValue>http://localhost:8094/api/v1/chai/eid/pull</defaultValue>
+		<defaultValue></defaultValue>
 		<description>
 			The URL for fetching CHAI EID result
 		</description>
@@ -85,7 +85,7 @@
 
 	<globalProperty>
 		<property>chai_eid_server_api_token</property>
-		<defaultValue>5de96c436f5956cebb97b63fa354bde1</defaultValue>
+		<defaultValue></defaultValue>
 		<description>
 			API token to authenticate communication to the CHAI EID lab system API
 		</description>
@@ -93,7 +93,7 @@
 
 	<globalProperty>
 		<property>chai_vl_server_url</property>
-		<defaultValue>http://localhost:8094/api/v1/chai/vl/push</defaultValue>
+		<defaultValue></defaultValue>
 		<description>
 			The URL for pushing requests to the CHAI VL server
 		</description>
@@ -101,7 +101,7 @@
 
 	<globalProperty>
 		<property>chai_vl_server_result_url</property>
-		<defaultValue>http://localhost:8094/api/v1/chai/vl/pull</defaultValue>
+		<defaultValue></defaultValue>
 		<description>
 			The URL for fetching CHAI VL result
 		</description>
@@ -109,7 +109,7 @@
 
 	<globalProperty>
 		<property>chai_vl_server_api_token</property>
-		<defaultValue>5de96c436f5956cebb97b63fa354bde1</defaultValue>
+		<defaultValue></defaultValue>
 		<description>
 			API token to authenticate communication to the CHAI VL lab system API
 		</description>
@@ -117,7 +117,7 @@
 
 	<globalProperty>
 		<property>labware_eid_server_url</property>
-		<defaultValue>http://localhost:8094/api/v1/labware/eid/push</defaultValue>
+		<defaultValue></defaultValue>
 		<description>
 			The URL for pushing requests to the LABWARE EID server
 		</description>
@@ -125,7 +125,7 @@
 
 	<globalProperty>
 		<property>labware_eid_server_result_url</property>
-		<defaultValue>http://localhost:8094/api/v1/labware/eid/pull</defaultValue>
+		<defaultValue></defaultValue>
 		<description>
 			The URL for fetching LABWARE EID result
 		</description>
@@ -133,7 +133,7 @@
 
 	<globalProperty>
 		<property>labware_eid_server_api_token</property>
-		<defaultValue>5de96c436f5956cebb97b63fa354bde1</defaultValue>
+		<defaultValue></defaultValue>
 		<description>
 			API token to authenticate communication to the LABWARE EID lab system API
 		</description>
@@ -141,7 +141,7 @@
 
 	<globalProperty>
 		<property>labware_vl_server_url</property>
-		<defaultValue>http://localhost:8094/api/v1/labware/vl/push</defaultValue>
+		<defaultValue></defaultValue>
 		<description>
 			The URL for pushing requests to the LABWARE VL server
 		</description>
@@ -149,7 +149,7 @@
 
 	<globalProperty>
 		<property>labware_vl_server_result_url</property>
-		<defaultValue>http://localhost:8094/api/v1/labware/vl/pull</defaultValue>
+		<defaultValue></defaultValue>
 		<description>
 			The URL for fetching LABWARE VL result
 		</description>
@@ -157,7 +157,7 @@
 
 	<globalProperty>
 		<property>labware_vl_server_api_token</property>
-		<defaultValue>5de96c436f5956cebb97b63fa354bde1</defaultValue>
+		<defaultValue></defaultValue>
 		<description>
 			API token to authenticate communication to the LABWARE VL lab system API
 		</description>
@@ -197,12 +197,35 @@
 
 	<globalProperty>
 		<property>kemrorder.labsystem_identifier</property>
-		<defaultValue>LABWARE</defaultValue>
+		<defaultValue></defaultValue>
 		<description>
-			The name of the lab system in use. Answers should be CHAI,LABWARE
+			The name of the lab system in use. Accepted options are CHAI,LABWARE. Please note these are case sensitive
 		</description>
 	</globalProperty>
 
+	<globalProperty>
+		<property>kemrorder.ssl_verification_enabled</property>
+		<defaultValue>true</defaultValue>
+		<description>
+			Defines whether SSL verification is enabled. Should be set to false to disable SSL verification
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>local.viral_load_result_end_point</property>
+		<defaultValue>http://localhost:8080/openmrs/ws/rest/v1/kemrorder/labresults</defaultValue>
+		<description>
+			Internal API endpoint for processing lab results from the lab. Please note this is a local endpoint
+		</description>
+	</globalProperty>
+
+	<!--<globalProperty>
+		<property>kemrorder.vl_server_last_execution_time</property>
+		<defaultValue></defaultValue>
+		<description>
+			Last execution for vl result pull request
+		</description>
+	</globalProperty>-->
 
 </module>
 

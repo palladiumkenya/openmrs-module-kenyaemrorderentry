@@ -1,49 +1,35 @@
 package org.openmrs.module.kenyaemrorderentry.util;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import org.apache.commons.lang3.StringUtils;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.node.ArrayNode;
-import org.codehaus.jackson.node.ObjectNode;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustStrategy;
+import org.apache.http.conn.ssl.X509HostnameVerifier;
+import org.apache.http.ssl.SSLContextBuilder;
+import org.apache.http.ssl.SSLContexts;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
-import org.openmrs.Concept;
-import org.openmrs.Encounter;
-import org.openmrs.EncounterType;
-import org.openmrs.Form;
-import org.openmrs.GlobalProperty;
-import org.openmrs.Location;
-import org.openmrs.LocationAttribute;
-import org.openmrs.Obs;
-import org.openmrs.Patient;
-import org.openmrs.PatientIdentifier;
-import org.openmrs.PatientIdentifierType;
-import org.openmrs.Relationship;
-import org.openmrs.api.EncounterService;
-import org.openmrs.api.FormService;
+import org.openmrs.*;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.kenyacore.CoreConstants;
 import org.openmrs.module.kenyacore.RegimenMappingUtils;
 import org.openmrs.module.metadatadeploy.MetadataUtils;
 import org.openmrs.ui.framework.SimpleObject;
-import org.openmrs.ui.framework.UiUtils;
 import org.openmrs.util.PrivilegeConstants;
-import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLException;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocket;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Dictionary;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.NavigableMap;
-import java.util.Set;
-import java.util.TreeMap;
 
 public class Utils {
 
@@ -54,14 +40,17 @@ public class Utils {
 
     /**
      * Gets the PatientIdentifierType for a patient UPN
+     *
      * @return
      */
     public static PatientIdentifierType getUniquePatientNumberIdentifierType() {
         return Context.getPatientService().getPatientIdentifierTypeByUuid(UNIQUE_PATIENT_NUMBER);
 
     }
+
     /**
      * Gets the PatientIdentifierType for a patient HEI Number
+     *
      * @return
      */
     public static PatientIdentifierType getHeiNumberIdentifierType() {
@@ -71,6 +60,7 @@ public class Utils {
 
     /**
      * gets default location from global property
+     *
      * @return
      */
     public static Location getDefaultLocation() {
@@ -80,8 +70,7 @@ public class Utils {
             String GP_DEFAULT_LOCATION = "kenyaemr.defaultLocation";
             GlobalProperty gp = Context.getAdministrationService().getGlobalPropertyObject(GP_DEFAULT_LOCATION);
             return gp != null ? ((Location) gp.getValue()) : null;
-        }
-        finally {
+        } finally {
             Context.removeProxyPrivilege(PrivilegeConstants.GET_LOCATIONS);
             Context.removeProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
         }
@@ -91,13 +80,14 @@ public class Utils {
     /**
      * Borrowed from KenyaEMR
      * Returns the MFL code for a location
+     *
      * @param location
      * @return
      */
     public static String getDefaultLocationMflCode(Location location) {
         String MASTER_FACILITY_CODE = "8a845a89-6aa5-4111-81d3-0af31c45c002";
 
-        if(location == null) {
+        if (location == null) {
             location = getDefaultLocation();
         }
         try {
@@ -122,6 +112,7 @@ public class Utils {
 
     /**
      * Creates a node factory
+     *
      * @return
      */
     public static JsonNodeFactory getJsonNodeFactory() {
@@ -132,6 +123,7 @@ public class Utils {
 
     /**
      * Extracts the request body and return it as string
+     *
      * @param reader
      * @return
      */
@@ -155,7 +147,7 @@ public class Utils {
     /**
      * Used to strip off unicode literals from string
      */
-    public static void stripUnicodeLiterals () {
+    public static void stripUnicodeLiterals() {
         //String fullName = result.get("full_names").getAsString();
 
                             /*for (int j = 0; j < fullName.length(); j++) {
@@ -175,17 +167,19 @@ public class Utils {
     /**
      * Finds the last encounter during the program enrollment with the given encounter type
      * Picked for Kenyaemr.EmrUtils
-     * @param type the encounter type
      *
+     * @param type the encounter type
      * @return the encounter
      */
     public static Encounter lastEncounter(Patient patient, EncounterType type) {
         List<Encounter> encounters = Context.getEncounterService().getEncounters(patient, null, null, null, null, Collections.singleton(type), null, null, null, false);
         return encounters.size() > 0 ? encounters.get(encounters.size() - 1) : null;
     }
+
     /**
      * Check mothers CCC number for an infant from the relationship defined
      * Picked for Kenyaemr.EmrUtils
+     *
      * @param patient
      * @return list of mothers
      */
@@ -202,11 +196,11 @@ public class Utils {
 
                         Integer personId = relationship.getPersonB().getPersonId();
                         //Patient mother = Context.getPatientService().getPatient(personId);
-                        if(Context.getPatientService().getPatient(personId) != null) {
+                        if (Context.getPatientService().getPatient(personId) != null) {
                             Patient mother = Context.getPatientService().getPatient(personId);
-                            PatientIdentifierType pit = MetadataUtils.existing(PatientIdentifierType.class,Utils.getUniquePatientNumberIdentifierType().getUuid());
+                            PatientIdentifierType pit = MetadataUtils.existing(PatientIdentifierType.class, Utils.getUniquePatientNumberIdentifierType().getUuid());
                             PatientIdentifier cccObject = mother.getPatientIdentifier(pit);
-                            if(cccObject != null) {
+                            if (cccObject != null) {
                                 cccNumber = cccObject.getIdentifier();
                             }
                         }
@@ -219,11 +213,11 @@ public class Utils {
 
                         Integer personId = relationship.getPersonA().getPersonId();
                         //Patient mother = Context.getPatientService().getPatient(personId);
-                        if(Context.getPatientService().getPatient(personId) != null){
+                        if (Context.getPatientService().getPatient(personId) != null) {
                             Patient mother = Context.getPatientService().getPatient(personId);
                             PatientIdentifierType pit = MetadataUtils.existing(PatientIdentifierType.class, Utils.getUniquePatientNumberIdentifierType().getUuid());
                             PatientIdentifier cccObject = mother.getPatientIdentifier(pit);
-                            if(cccObject != null) {
+                            if (cccObject != null) {
                                 cccNumber = cccObject.getIdentifier();
                             }
 
@@ -237,6 +231,7 @@ public class Utils {
 
     /**
      * Check mothers  Age for an infant from the relationship defined
+     *
      * @param patient
      * @return list of mothers
      */
@@ -253,9 +248,9 @@ public class Utils {
                     if (!relationship.getPersonB().isDead()) {
 
                         Integer personId = relationship.getPersonB().getPersonId();
-                        if(Context.getPatientService().getPatient(personId) != null) {
+                        if (Context.getPatientService().getPatient(personId) != null) {
                             Patient mother = Context.getPatientService().getPatient(personId);
-                            if(mother != null) {
+                            if (mother != null) {
                                 mothersAge = mother.getAge();
                             }
                         }
@@ -269,9 +264,9 @@ public class Utils {
 
                         Integer personId = relationship.getPersonA().getPersonId();
                         //Patient mother = Context.getPatientService().getPatient(personId);
-                        if(Context.getPatientService().getPatient(personId) != null){
+                        if (Context.getPatientService().getPatient(personId) != null) {
                             Patient mother = Context.getPatientService().getPatient(personId);
-                            if(mother != null) {
+                            if (mother != null) {
                                 mothersAge = mother.getAge();
                             }
 
@@ -280,12 +275,13 @@ public class Utils {
                 }
             }
         }
-        mothersAgeObject = SimpleObject.create("mothersAge",mothersAge);
+        mothersAgeObject = SimpleObject.create("mothersAge", mothersAge);
         return mothersAgeObject;
     }
 
-   /**
+    /**
      * Check mothers last viral load for an infant from the relationship defined
+     *
      * @param patient
      * @return list of mothers
      */
@@ -340,17 +336,17 @@ public class Utils {
 
                         Integer personId = relationship.getPersonA().getPersonId();
                         //Patient mother = Context.getPatientService().getPatient(personId);
-                        if(Context.getPatientService().getPatient(personId) != null){
+                        if (Context.getPatientService().getPatient(personId) != null) {
                             Patient mother = Context.getPatientService().getPatient(personId);
                             Obs mothersNumericVLObs = getLatestObs(mother, latestVL);
                             Obs mothersLDLObs = getLatestObs(mother, latestLDL);
-                            if(mothersNumericVLObs != null && mothersLDLObs == null){
+                            if (mothersNumericVLObs != null && mothersLDLObs == null) {
                                 object = SimpleObject.create("lastVl", mothersNumericVLObs.getValueNumeric(), "lastVlDate", mothersNumericVLObs.getObsDatetime());
                             }
-                            if(mothersNumericVLObs == null && mothersLDLObs != null) {
+                            if (mothersNumericVLObs == null && mothersLDLObs != null) {
                                 object = SimpleObject.create("lastVl", "LDL", "lastVlDate", mothersLDLObs.getObsDatetime());
                             }
-                            if(mothersNumericVLObs != null && mothersLDLObs != null) {
+                            if (mothersNumericVLObs != null && mothersLDLObs != null) {
                                 //find the latest of the 2
                                 Obs lastViralLoadPicked = null;
                                 if (mothersNumericVLObs.getObsDatetime().after(mothersLDLObs.getObsDatetime())) {
@@ -358,10 +354,9 @@ public class Utils {
                                 } else {
                                     lastViralLoadPicked = mothersLDLObs;
                                 }
-                                if(lastViralLoadPicked.getConcept().getConceptId().equals(856)) {
+                                if (lastViralLoadPicked.getConcept().getConceptId().equals(856)) {
                                     object = SimpleObject.create("lastVl", lastViralLoadPicked.getValueNumeric(), "lastVlDate", mothersNumericVLObs.getObsDatetime());
-                                }
-                                else {
+                                } else {
                                     object = SimpleObject.create("lastVl", "LDL", "lastVlDate", mothersLDLObs.getObsDatetime());
                                 }
 
@@ -377,6 +372,7 @@ public class Utils {
 
     /**
      * Check mothers  current age for an HEI from the relationship defined
+     *
      * @param patient
      * @return current mothers regimen
      */
@@ -392,11 +388,11 @@ public class Utils {
                 if (relationship.getPersonB().getGender().equals("F")) {
                     if (!relationship.getPersonB().isDead()) {
                         Integer personId = relationship.getPersonB().getPersonId();
-                        if(Context.getPatientService().getPatient(personId) != null) {
+                        if (Context.getPatientService().getPatient(personId) != null) {
                             Patient mother = Context.getPatientService().getPatient(personId);
                             //On ART -- find if mother has active ART
                             Encounter currentRegimenEncounter = RegimenMappingUtils.getLastEncounterForProgram(mother, "ARV");
-                            if(currentRegimenEncounter != null) {
+                            if (currentRegimenEncounter != null) {
                                 SimpleObject regimenDetails = RegimenMappingUtils.buildRegimenChangeObject(currentRegimenEncounter.getObs(), currentRegimenEncounter);
                                 mothersCurrentRegimen = (String) regimenDetails.get("regimenShortDisplay");
                             }
@@ -409,11 +405,11 @@ public class Utils {
                 if (relationship.getPersonA().getGender().equals("F")) {
                     if (!relationship.getPersonA().isDead()) {
                         Integer personId = relationship.getPersonA().getPersonId();
-                        if(Context.getPatientService().getPatient(personId) != null){
+                        if (Context.getPatientService().getPatient(personId) != null) {
                             Patient mother = Context.getPatientService().getPatient(personId);
                             //On ART -- find if mother has active ART
                             Encounter currentRegimenEncounter = RegimenMappingUtils.getLastEncounterForProgram(mother, "ARV");
-                            if(currentRegimenEncounter != null) {
+                            if (currentRegimenEncounter != null) {
                                 SimpleObject regimenDetails = RegimenMappingUtils.buildRegimenChangeObject(currentRegimenEncounter.getObs(), currentRegimenEncounter);
                                 mothersCurrentRegimen = (String) regimenDetails.get("regimenShortDisplay");
                             }
@@ -422,12 +418,13 @@ public class Utils {
                 }
             }
         }
-        object = SimpleObject.create("mothersCurrentRegimen",mothersCurrentRegimen);
+        object = SimpleObject.create("mothersCurrentRegimen", mothersCurrentRegimen);
         return object;
     }
 
     /**
      * Check latest obs values for given obs
+     *
      * @param patient
      * @return latest obs
      */
@@ -447,7 +444,72 @@ public class Utils {
         return Days.daysBetween(d1, d2).getDays();
     }
 
+    /**
+     * Builds an SSL context for disabling/bypassing SSL verification
+     *
+     * @return
+     */
+    public static SSLConnectionSocketFactory sslConnectionSocketFactoryWithDisabledSSLVerification() {
+        SSLContextBuilder builder = SSLContexts.custom();
+        try {
+            builder.loadTrustMaterial(null, new TrustStrategy() {
+                @Override
+                public boolean isTrusted(X509Certificate[] chain, String authType)
+                        throws CertificateException {
+                    return true;
+                }
+            });
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        } catch (KeyStoreException e) {
+            throw new RuntimeException(e);
+        }
+        SSLContext sslContext = null;
+        try {
+            sslContext = builder.build();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        } catch (KeyManagementException e) {
+            throw new RuntimeException(e);
+        }
+        SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
+                sslContext, new X509HostnameVerifier() {
+            @Override
+            public void verify(String host, SSLSocket ssl)
+                    throws IOException {
+            }
 
+            @Override
+            public void verify(String host, X509Certificate cert)
+                    throws SSLException {
+            }
+
+            @Override
+            public void verify(String host, String[] cns,
+                               String[] subjectAlts) throws SSLException {
+            }
+
+            @Override
+            public boolean verify(String s, SSLSession sslSession) {
+                return true;
+            }
+        });
+        return sslsf;
+    }
+
+    /**
+     * Default SSL context
+     *
+     * @return
+     */
+    public static SSLConnectionSocketFactory sslConnectionSocketFactoryDefault() {
+        SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
+                SSLContexts.createDefault(),
+                new String[]{"TLSv1.2"},
+                null,
+                SSLConnectionSocketFactory.getDefaultHostnameVerifier());
+        return sslsf;
+    }
 }
 
 

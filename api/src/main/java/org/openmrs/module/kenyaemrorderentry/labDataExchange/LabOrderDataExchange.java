@@ -7,6 +7,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -36,12 +37,7 @@ import org.openmrs.util.PrivilegeConstants;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.openmrs.module.metadatasharing.util.MetadataSharingGlobalPropertyListener.log;
 
@@ -69,8 +65,11 @@ public class LabOrderDataExchange {
 
     // System Types e.g CHAI, LABWARE etc
 
+    public static final int NO_SYSTEM_CONFIGURED = 0;
     public static final int CHAI_SYSTEM = 1;
     public static final int LABWARE_SYSTEM = 2;
+    public static final Integer DEFAULT_APHL_LAB_CODE = 7;
+    public static final String GP_SSL_VERIFICATION_ENABLED = "kemrorder.ssl_verification_enabled";
 
     ConceptService conceptService = Context.getConceptService();
     EncounterService encounterService = Context.getEncounterService();
@@ -117,7 +116,7 @@ public class LabOrderDataExchange {
         String regimenName = (String) regimenDetails.get("regimenShortDisplay");
         String regimenLine = (String) regimenDetails.get("regimenLine");
         String nascopCode = "";
-        if (StringUtils.isNotBlank(regimenName )) {
+        if (StringUtils.isNotBlank(regimenName)) {
             nascopCode = RegimenMappingUtils.getDrugNascopCodeByDrugNameAndRegimenLine(regimenName, regimenLine);
         }
 
@@ -138,7 +137,7 @@ public class LabOrderDataExchange {
             test.put("datecollected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(o.getDateActivated()));
             test.put("datereceived", Utils.getSimpleDateFormat("yyyy-MM-dd").format(o.getDateActivated()));
             test.put("order_no", o.getOrderId().toString());
-            test.put("lab", "7");
+            test.put("lab", "");
             test.put("justification", o.getOrderReason() != null ? getOrderReasonCode(o.getOrderReason().getUuid()) : "");
             //test.put("justification", "1");
             test.put("prophylaxis", nascopCode);
@@ -157,7 +156,7 @@ public class LabOrderDataExchange {
      *
      * @param o
      * @param dateSampleCollected
-     *@param sampleType @return
+     * @param sampleType          @return
      */
     public ObjectNode generatePayloadForLabOrder(Order o, Date dateSampleCollected, Date dateSampleSeparated, String sampleType, String manifestID) {
         Patient patient = o.getPatient();
@@ -189,7 +188,7 @@ public class LabOrderDataExchange {
         String regimenName = (String) regimenDetails.get("regimenShortDisplay");
         String regimenLine = (String) regimenDetails.get("regimenLine");
         String nascopCode = "";
-        if (StringUtils.isNotBlank(regimenName )) {
+        if (StringUtils.isNotBlank(regimenName)) {
             nascopCode = RegimenMappingUtils.getDrugNascopCodeByDrugNameAndRegimenLine(regimenName, regimenLine);
         }
 
@@ -209,7 +208,7 @@ public class LabOrderDataExchange {
             test.put("datecollected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
             test.put("datereceived", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
             test.put("order_no", o.getOrderId().toString());
-            test.put("lab", "7");
+            test.put("lab", "");
             test.put("justification", o.getOrderReason() != null ? getOrderReasonCode(o.getOrderReason().getUuid()) : "");
             test.put("prophylaxis", nascopCode);
             if (patient.getGender().equals("F")) {
@@ -224,7 +223,7 @@ public class LabOrderDataExchange {
                     test.put("female_status", "none");
                 }
 
-                test.put("lab", "7");
+                test.put("lab", DEFAULT_APHL_LAB_CODE.toString());
                 test.put("facility_email", "");
                 test.put("recency_id", "");
                 test.put("emr_shipment", StringUtils.isNotBlank(manifestID) ? manifestID : "");
@@ -266,24 +265,28 @@ public class LabOrderDataExchange {
 
     /**
      * Give the kind of lab system configured i.e CHAI or LABWARE
-     * 
+     *
      * @return int system type LABWARE_SYSTEM or CHAI_SYSTEM
      */
     public static int getSystemType() {
         String systemType = "";
         GlobalProperty gpLabSystemInUse = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LAB_SYSTEM_IN_USE);
         if (gpLabSystemInUse == null) {
-            return LABWARE_SYSTEM; // If the global is not set
+            return NO_SYSTEM_CONFIGURED; // return 0 if not set
         } else {
-            systemType = gpLabSystemInUse.getPropertyValue().trim();
+            systemType = gpLabSystemInUse.getPropertyValue();
         }
 
-        if(systemType.equalsIgnoreCase("CHAI")) {
+        if (StringUtils.isBlank(systemType)) {
+            return NO_SYSTEM_CONFIGURED;
+        }
+
+        if (systemType.equalsIgnoreCase("CHAI")) {
             return CHAI_SYSTEM;
-        } else if(systemType.equalsIgnoreCase("LABWARE")) {
+        } else if (systemType.equalsIgnoreCase("LABWARE")) {
             return LABWARE_SYSTEM;
         } else {
-            return LABWARE_SYSTEM; // The default if empty string or another string
+            return NO_SYSTEM_CONFIGURED; // The default if empty string or another string
         }
     }
 
@@ -291,6 +294,7 @@ public class LabOrderDataExchange {
     /**
      * TODO: Get correct mappings for the different regions
      * Returns mapping for testing labs
+     *
      * @param lab
      * @return
      */
@@ -336,6 +340,7 @@ public class LabOrderDataExchange {
     /**
      * TODO: add correct mappings for the different specimen types
      * Returns mapping for specimen types
+     *
      * @param type
      * @return
      */
@@ -358,14 +363,15 @@ public class LabOrderDataExchange {
 
     /**
      * Converter for concept to lab system code
-     *1= Routine VL
-     2=confirmation of
-     treatment failure (repeat VL)
-     3= Clinical failure
-     4= Single drug
-     substitution
-     5=Baseline VL (for infants diagnosed through EID)
-     6=Confirmation of persistent low level Viremia (PLLV)
+     * 1= Routine VL
+     * 2=confirmation of
+     * treatment failure (repeat VL)
+     * 3= Clinical failure
+     * 4= Single drug
+     * substitution
+     * 5=Baseline VL (for infants diagnosed through EID)
+     * 6=Confirmation of persistent low level Viremia (PLLV)
+     *
      * @param conceptUuid
      * @return
      */
@@ -419,6 +425,7 @@ public class LabOrderDataExchange {
 
     /**
      * Returns active orders which have not been added to any manifest
+     *
      * @param manifestId
      * @param startDate
      * @param endDate
@@ -456,6 +463,7 @@ public class LabOrderDataExchange {
 
     /**
      * Returns active vl orders which have not been added to any manifest
+     *
      * @param manifestId
      * @param startDate
      * @param endDate
@@ -493,6 +501,7 @@ public class LabOrderDataExchange {
 
     /**
      * Returns active Eid orders which have not been added to any manifest
+     *
      * @param manifestId
      * @param startDate
      * @param endDate
@@ -527,6 +536,8 @@ public class LabOrderDataExchange {
         Context.removeProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
         return activeLabs;
     }
+
+
     /**
      * processes results from lab     *
      *
@@ -540,7 +551,7 @@ public class LabOrderDataExchange {
         JsonArray resultsObj = null;
         String statusMsg;
         try {
-            if(rootNode.isJsonArray()){
+            if (rootNode.isJsonArray()) {
                 resultsObj = rootNode.getAsJsonArray();
             } else {
                 System.out.println("Lab Results Get Results: The payload could not be understood. An array is expected!:::: ");
@@ -555,7 +566,7 @@ public class LabOrderDataExchange {
         if (resultsObj.size() > 0) {
             for (int i = 0; i < resultsObj.size(); i++) {
 
-                JsonObject o =  resultsObj.get(i).getAsJsonObject();
+                JsonObject o = resultsObj.get(i).getAsJsonObject();
                 Integer orderId = o.get("order_number").getAsInt();
                 Date sampleReceivedDate = null;
                 Date sampleTestedDate = null;
@@ -563,22 +574,26 @@ public class LabOrderDataExchange {
                 String dateSampleTested = "";
                 String specimenRejectedReason = "";
 
-                if(getSystemType() == LABWARE_SYSTEM) {
+                if (getSystemType() == LABWARE_SYSTEM) {
                     try {
                         JsonObject dateReceivedObject = o.get("date_received").getAsJsonObject();
                         dateSampleReceived = dateReceivedObject.get("date").getAsString().trim();
-                    } catch(Exception ex) {}
+                    } catch (Exception ex) {
+                    }
                     try {
                         JsonObject dateTestedObject = o.get("date_tested").getAsJsonObject();
                         dateSampleTested = dateTestedObject.get("date").getAsString().trim();
-                    } catch(Exception ex) {}
-                } else if(getSystemType() == CHAI_SYSTEM) {
+                    } catch (Exception ex) {
+                    }
+                } else if (getSystemType() == CHAI_SYSTEM) {
                     try {
                         dateSampleReceived = o.get("date_received").getAsString().trim();
-                    } catch(Exception ex) {}
+                    } catch (Exception ex) {
+                    }
                     try {
                         dateSampleTested = o.get("date_tested").getAsString().trim();
-                    } catch(Exception ex) {}
+                    } catch (Exception ex) {
+                    }
                 }
 
                 specimenRejectedReason = (o.has("rejected_reason") && o.get("rejected_reason") != null && o.get("rejected_reason").getAsString() != null) ? o.get("rejected_reason").getAsString().trim() : "";
@@ -586,7 +601,6 @@ public class LabOrderDataExchange {
                 if (StringUtils.isNotBlank(dateSampleReceived)) {
                     try {
                         sampleReceivedDate = Utils.getSimpleDateFormat(LAB_SYSTEM_DATE_PATTERN).parse(dateSampleReceived);
-                        System.out.println("Lab Results Get Results: Got sample receive date: " + sampleReceivedDate);
                     } catch (ParseException e) {
                         System.err.println("Lab Results Get Results: Unable to get sample receive date" + e.getMessage());
                         e.printStackTrace();
@@ -596,7 +610,6 @@ public class LabOrderDataExchange {
                 if (StringUtils.isNotBlank(dateSampleTested)) {
                     try {
                         sampleTestedDate = Utils.getSimpleDateFormat(LAB_SYSTEM_DATE_PATTERN).parse(dateSampleTested);
-                        System.out.println("Lab Results Get Results: Got sample tested date: " + sampleTestedDate);
                     } catch (ParseException e) {
                         System.err.println("Lab Results Get Results: Unable to get sample tested date" + e.getMessage());
                         e.printStackTrace();
@@ -604,7 +617,8 @@ public class LabOrderDataExchange {
                 }
 
                 String specimenReceivedStatus = (o.has("sample_status") && o.get("sample_status") != null && o.get("sample_status").getAsString() != null) ? o.get("sample_status").getAsString().trim() : "";
-                String result = (o.has("result") && o.get("result") != null && o.get("result").getAsString() != null) ? o.get("result").getAsString().trim() : "";
+                String result = !o.isJsonNull() && !o.get("result").isJsonNull() ? o.get("result").getAsString() : "";
+
                 // update manifest object to reflect received status
                 updateOrder(orderId, result, specimenReceivedStatus, specimenRejectedReason, sampleReceivedDate, sampleTestedDate);
             }
@@ -615,14 +629,18 @@ public class LabOrderDataExchange {
 
     /**
      * Updates an active order and sets results if provided
+     *
      * @param orderId
      * @param result
      * @param specimenStatus
-     * @param rejectedReason
+     * @param specimenRejectedReason
      */
     private void updateOrder(Integer orderId, String result, String specimenStatus, String specimenRejectedReason, Date dateSampleReceived, Date dateSampleTested) {
         Order od = orderService.getOrder(orderId);
-        LabManifestOrder manifestOrder = kenyaemrOrdersService.getLabManifestOrderByOrderId(orderService.getOrder(orderId));
+        LabManifestOrder manifestOrder = kenyaemrOrdersService.getLabManifestOrderByOrderId(od);
+
+        System.out.println("Order ID: " + od.getOrderId() + ", manifest order: " + manifestOrder.getId() + ", manifest id: " + manifestOrder.getLabManifest().getId() + ", isActive: " + od.isActive());
+
         Date orderDiscontinuationDate = null;
         if (dateSampleTested != null) {
             orderDiscontinuationDate = dateSampleTested;
@@ -630,29 +648,43 @@ public class LabOrderDataExchange {
             orderDiscontinuationDate = aMomentBefore(new Date());
         }
 
-        System.out.println("Lab Results Get Results: Setting discontinuation date to: " + orderDiscontinuationDate);
+        int manifestType = manifestOrder.getLabManifest().getManifestType();
 
         if (od != null && od.isActive()) {
             if ((StringUtils.isNotBlank(specimenStatus) && specimenStatus.equals("Rejected")) || (StringUtils.isNotBlank(result) && result.equals("Collect New Sample"))) {
-                // Get all active VL orders and discontinue them
-                Map<String, Order> ordersToProcess = getOrdersToProcess(od, vlTestConceptQuantitative);
-                Order o1 = ordersToProcess.get("orderToRetain");
-                Order o2 = ordersToProcess.get("orderToVoid");
+
                 String discontinuationReason = "";
-                if (result.equalsIgnoreCase("Collect New Sample")) {
+                if (StringUtils.isNotBlank(specimenRejectedReason)) {
+                    discontinuationReason = specimenRejectedReason;
+                } else if (result.equalsIgnoreCase("Collect New Sample")) {
                     discontinuationReason = "Collect New Sample";
                 } else {
                     discontinuationReason = "Rejected specimen";
                 }
-                try {
-                    // discontinue one order, and void the other.
-                    // Discontinuing both orders result in one of them remaining active
-                    System.out.println("Lab Results Get Results: Start order discontinue");
-                    orderService.discontinueOrder(o1, discontinuationReason, orderDiscontinuationDate, o1.getOrderer(),
-                            o1.getEncounter());
-                    orderService.voidOrder(o2, discontinuationReason);
-                } catch (Exception e) {
-                    e.printStackTrace();
+
+                if (manifestType == LabManifest.EID_TYPE) {
+                    try {
+                        orderService.discontinueOrder(od, discontinuationReason, orderDiscontinuationDate, od.getOrderer(),
+                                od.getEncounter());
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                } else if (manifestType == LabManifest.VL_TYPE) {
+                    // Get all active VL orders and discontinue them
+                    Map<String, Order> ordersToProcess = getOrdersToProcess(od, vlTestConceptQuantitative);
+                    Order o1 = ordersToProcess.get("orderToRetain");
+                    Order o2 = ordersToProcess.get("orderToVoid");
+
+                    try {
+                        // discontinue one order, and void the other.
+                        // Discontinuing both orders result in one of them remaining active
+                        orderService.discontinueOrder(o1, discontinuationReason, orderDiscontinuationDate, o1.getOrderer(),
+                                o1.getEncounter());
+                        orderService.voidOrder(o2, discontinuationReason);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
                 }
                 manifestOrder.setStatus(discontinuationReason);
                 manifestOrder.setResult(result);
@@ -667,89 +699,97 @@ public class LabOrderDataExchange {
                 kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
             } else if (StringUtils.isNotBlank(specimenStatus) && specimenStatus.equalsIgnoreCase("Complete") && StringUtils.isNotBlank(result)) {
 
-                Concept conceptToRetain = null;
-                String lDLResult = "< LDL copies/ml";
-                String labwarelDLResult = "<LDL";
-                String aboveMillionResult = "> 10,000,000 cp/ml";
-                Obs o = new Obs();
-
-                int manifestType = manifestOrder.getLabManifest().getManifestType();
-                if(manifestType == LabManifest.EID_TYPE) {
-                    String eidNegative = "Negative";
-                    String eidPositive = "Positive";
-                    String eidIndeterminate = "Positive";
-                    String eidPoorSample = "Positive";
-                    Concept eidNegativeConcept = conceptService.getConcept(664);
-                    Concept eidPositiveConcept = conceptService.getConcept(703);
-                    Concept eidIndeterminateConcept = conceptService.getConcept(1138);
-                    Concept eidPoorSampleConcept = conceptService.getConcept(1304);
-
-                    if (result.equalsIgnoreCase(eidNegative)) {
-                        conceptToRetain = eidNegativeConcept;
-                        o.setValueCoded(eidNegativeConcept);
-                    } else if (result.equalsIgnoreCase(eidPositive)) {
-                        conceptToRetain = eidPositiveConcept;
-                        o.setValueCoded(eidPositiveConcept);
-                    }  else if (result.equalsIgnoreCase(eidIndeterminate)) {
-                        conceptToRetain = eidIndeterminateConcept;
-                        o.setValueCoded(eidIndeterminateConcept);
-                    } else if (result.equalsIgnoreCase(eidPoorSample)) {
-                        conceptToRetain = eidPoorSampleConcept;
-                        o.setValueCoded(eidPoorSampleConcept);
-                    } else { // if all fails
-                        conceptToRetain = eidIndeterminateConcept;
-                        o.setValueCoded(eidIndeterminateConcept);
-                    }
-                } else if(manifestType == LabManifest.VL_TYPE) {
-                    if (result.equalsIgnoreCase(lDLResult) || result.equalsIgnoreCase(labwarelDLResult) || result.contains("LDL")) {
-                        conceptToRetain = vlTestConceptQualitative;
-                        o.setValueCoded(LDLConcept);
-                    } else if (result.equalsIgnoreCase(aboveMillionResult)) {
-                        conceptToRetain = vlTestConceptQuantitative;
-                        o.setValueNumeric(new Double(10000001));
-                    } else if (checkNumeric(result)) {
-                        conceptToRetain = vlTestConceptQuantitative;
-                        o.setValueNumeric(Double.valueOf(result));
-                    } else { // if all fails
-                        conceptToRetain = vlTestConceptQualitative;
-                        o.setValueCoded(LDLConcept);
-                    }
-                }
-
-                // In order to record results both qualitative (LDL) and quantitative,
-                // every vl request saves two orders: one with 856(quantitative) for numeric values and another with 1305(quantitative) for LDL value
-                // When recording result, it is therefore prudent to set result for one order and void the other one
-                Map<String, Order> ordersToProcess = getOrdersToProcess(od, conceptToRetain);
-                Order orderToRetain = ordersToProcess.get("orderToRetain");
-                Order orderToVoid = ordersToProcess.get("orderToVoid");
-
-                System.out.println("Lab Results Get Results: retain: " + orderToRetain + " and void: " + orderToVoid);
-
-                // logic that picks the right concept id for the result obs
-                o.setConcept(conceptToRetain);
-                o.setDateCreated(orderDiscontinuationDate);
-                o.setCreator(Context.getUserService().getUser(1));
-                ////o.setObsDatetime(orderToRetain.getDateActivated());
-                o.setObsDatetime(new Date());
-                o.setPerson(od.getPatient());
-                o.setOrder(orderToRetain);
-
                 Encounter enc = new Encounter();
                 enc.setEncounterType(labEncounterType);
                 enc.setEncounterDatetime(orderDiscontinuationDate);
                 enc.setPatient(od.getPatient());
                 enc.setCreator(Context.getUserService().getUser(1));
 
-                enc.addObs(o);
+                if (manifestType == LabManifest.EID_TYPE) {
+                    Obs o = new Obs();
+                    String eidNegative = "Negative";
+                    String eidPositive = "Positive";
 
-                if(manifestType == LabManifest.VL_TYPE) {
+                    Concept eidNegativeConcept = conceptService.getConcept(664);
+                    Concept eidPositiveConcept = conceptService.getConcept(703);
+                    /*Concept eidIndeterminateConcept = conceptService.getConcept(1138);
+                    Concept eidPoorSampleConcept = conceptService.getConcept(1304);*/
+
+                    if (result.equalsIgnoreCase(eidNegative)) {
+                        o.setValueCoded(eidNegativeConcept);
+                    } else if (result.equalsIgnoreCase(eidPositive)) {
+                        o.setValueCoded(eidPositiveConcept);
+                    }
+
+                    o.setDateCreated(orderDiscontinuationDate);
+                    o.setCreator(Context.getUserService().getUser(1));
+                    o.setObsDatetime(od.getDateActivated());
+                    o.setPerson(od.getPatient());
+                    o.setOrder(od);
+
+                    try {
+                        enc.addObs(o);
+                        encounterService.saveEncounter(enc);
+
+                        orderService.discontinueOrder(od, "Results received", orderDiscontinuationDate, od.getOrderer(), od.getEncounter());
+
+                        manifestOrder.setStatus("Complete");
+                        manifestOrder.setResult(result);
+                        manifestOrder.setResultDate(orderDiscontinuationDate);
+                        if (dateSampleReceived != null) {
+                            manifestOrder.setSampleReceivedDate(dateSampleReceived);
+                        }
+
+                        if (dateSampleTested != null) {
+                            manifestOrder.setSampleTestedDate(dateSampleTested);
+                        }
+                        kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
+                    } catch (Exception e) {
+                        System.out.println("Lab Results Get Results: An error was encountered while updating orders for EID");
+                        e.printStackTrace();
+                    }
+                } else if (manifestType == LabManifest.VL_TYPE) {
+                    Concept conceptToRetain = null;
+                    String lDLResult = "< LDL copies/ml";
+                    String labwarelDLResult = "<LDL";
+                    String aboveMillionResult = "> 10,000,000 cp/ml";
+                    Obs o = new Obs();
+
+                    if (result.equalsIgnoreCase(lDLResult) || result.equalsIgnoreCase(labwarelDLResult) || result.contains("LDL")) {
+                        conceptToRetain = vlTestConceptQualitative;
+                        o.setValueCoded(LDLConcept);
+                    } else if (result.equalsIgnoreCase(aboveMillionResult)) {
+                        conceptToRetain = vlTestConceptQuantitative;
+                        o.setValueNumeric(new Double(10000001));
+                    } else {
+                        conceptToRetain = vlTestConceptQuantitative;
+                        Double vlVal = NumberUtils.toDouble(result);
+                        o.setValueNumeric(vlVal);
+                    }
+
+                    // In order to record results both qualitative (LDL) and quantitative,
+                    // every vl request saves two orders: one with 856(quantitative) for numeric values and another with 1305(quantitative) for LDL value
+                    // When recording result, it is therefore prudent to set result for one order and void the other one
+                    Map<String, Order> ordersToProcess = getOrdersToProcess(od, conceptToRetain);
+                    Order orderToRetain = ordersToProcess.get("orderToRetain");
+                    Order orderToVoid = ordersToProcess.get("orderToVoid");
+
+                    // logic that picks the right concept id for the result obs
+                    o.setConcept(conceptToRetain);
+                    o.setDateCreated(new Date());
+                    o.setCreator(Context.getUserService().getUser(1));
+                    o.setObsDatetime(orderToRetain.getDateActivated());
+                    o.setPerson(od.getPatient());
+                    o.setOrder(orderToRetain);
+
+                    enc.addObs(o);
+
                     // For a VL type order
                     if (orderToRetain != null && orderToRetain.isActive() && orderToVoid != null) {
 
                         try {
 
                             encounterService.saveEncounter(enc);
-                            System.out.println("Lab Results Get Results: Start order discontinue");
                             orderService.discontinueOrder(orderToRetain, "Results received", orderDiscontinuationDate, orderToRetain.getOrderer(),
                                     orderToRetain.getEncounter());
                             orderService.voidOrder(orderToVoid, "Duplicate VL order");
@@ -772,15 +812,12 @@ public class LabOrderDataExchange {
                             System.out.println("Lab Results Get Results: An error was encountered while updating orders for viral load");
                             e.printStackTrace();
                         }
-
-
                     } else if ((orderToRetain != null && orderToRetain.isActive()) && (orderToVoid == null || !orderToVoid.isActive())) {
                         // this use case has been observed in facility dbs.
                         // until a lasting solution is found, this block will handle the use case
                         try {
 
                             encounterService.saveEncounter(enc);
-                            System.out.println("Lab Results Get Results: Start order discontinue");
                             orderService.discontinueOrder(orderToRetain, "Results received", orderDiscontinuationDate, orderToRetain.getOrderer(),
                                     orderToRetain.getEncounter());
                             // this is really a hack to ensure that order date_stopped is filled, otherwise the order will remain active
@@ -827,7 +864,6 @@ public class LabOrderDataExchange {
                             try {
 
                                 encounterService.saveEncounter(enc);
-                                System.out.println("Lab Results Get Results: Start order discontinue");
                                 orderService.discontinueOrder(savedOrder, "Results received", orderDiscontinuationDate, savedOrder.getOrderer(),
                                         savedOrder.getEncounter());
                                 // this is really a hack to ensure that order date_stopped is filled, otherwise the order will remain active
@@ -849,7 +885,7 @@ public class LabOrderDataExchange {
                                 System.out.println("Lab Results Get Results: An error was encountered while updating orders for viral load");
                                 e.printStackTrace();
                             }
-                        }  else {
+                        } else {
                             /**
                              * the result could not be updated in the system
                              * TODO: establish why one order for VL is missing. When a VL request is made, two orders (856 and 1305) are created
@@ -873,44 +909,27 @@ public class LabOrderDataExchange {
                             kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
                         }
                     }
-                } else if(manifestType == LabManifest.EID_TYPE) {
-                    // For a EID type order
-                    try {
-                        encounterService.saveEncounter(enc);
-                        System.out.println("Lab Results Get Results: Start EID order discontinue");
-                        Order eidOrder = manifestOrder.getOrder();
-                        orderService.discontinueOrder(eidOrder, "Results received", orderDiscontinuationDate, eidOrder.getOrderer(), eidOrder.getEncounter());
-
-                        manifestOrder.setStatus("Complete");
-                        manifestOrder.setResult(result);
-                        manifestOrder.setResultDate(orderDiscontinuationDate);
-                        if (dateSampleReceived != null) {
-                            manifestOrder.setSampleReceivedDate(dateSampleReceived);
-                        }
-
-                        if (dateSampleTested != null) {
-                            manifestOrder.setSampleTestedDate(dateSampleTested);
-                        }
-                        kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
-                    } catch (Exception e) {
-                        System.out.println("Lab Results Get Results: An error was encountered while updating orders for EID");
-                        e.printStackTrace();
-                    }
                 }
-            } else if (StringUtils.isNotBlank(specimenStatus) && specimenStatus.equalsIgnoreCase("Incomplete")) {
 
+            } else if (StringUtils.isNotBlank(specimenStatus) && specimenStatus.equalsIgnoreCase("Incomplete")) {
                 // indicate the incomplete status
                 manifestOrder.setStatus("Incomplete");
                 manifestOrder.setResult("");
                 manifestOrder.setLastStatusCheckDate(new Date());
                 kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
             }
+        } else /*if (!od.isActive() || od.getVoided())*/ {
+            manifestOrder.setStatus("Inactive");
+            manifestOrder.setResult(result);
+            manifestOrder.setResultDate(new Date());
+            kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
         }
 
     }
 
     /**
      * Returns an object indicating the order to retain and that to void
+     *
      * @param referenceOrder
      * @param conceptToRetain
      * @return
@@ -933,6 +952,7 @@ public class LabOrderDataExchange {
 
     /**
      * Checks if a string is numeric
+     *
      * @param feed the string
      * @return true if numeric and false if not
      */
