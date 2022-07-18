@@ -7,6 +7,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -616,7 +617,8 @@ public class LabOrderDataExchange {
                 }
 
                 String specimenReceivedStatus = (o.has("sample_status") && o.get("sample_status") != null && o.get("sample_status").getAsString() != null) ? o.get("sample_status").getAsString().trim() : "";
-                String result = (!o.isJsonNull() && o.has("result") && o.get("result") != null && StringUtils.isNotBlank(o.get("result").toString())) ? o.get("result").toString().trim() : "";
+                String result = !o.isJsonNull() && !o.get("result").isJsonNull() ? o.get("result").getAsString() : "";
+
                 // update manifest object to reflect received status
                 updateOrder(orderId, result, specimenReceivedStatus, specimenRejectedReason, sampleReceivedDate, sampleTestedDate);
             }
@@ -759,12 +761,10 @@ public class LabOrderDataExchange {
                     } else if (result.equalsIgnoreCase(aboveMillionResult)) {
                         conceptToRetain = vlTestConceptQuantitative;
                         o.setValueNumeric(new Double(10000001));
-                    } else if (checkNumeric(result)) {
+                    } else {
                         conceptToRetain = vlTestConceptQuantitative;
-                        o.setValueNumeric(Double.valueOf(result));
-                    } else { // if all fails
-                        conceptToRetain = vlTestConceptQualitative;
-                        o.setValueCoded(LDLConcept);
+                        Double vlVal = NumberUtils.toDouble(result);
+                        o.setValueNumeric(vlVal);
                     }
 
                     // In order to record results both qualitative (LDL) and quantitative,
@@ -776,7 +776,7 @@ public class LabOrderDataExchange {
 
                     // logic that picks the right concept id for the result obs
                     o.setConcept(conceptToRetain);
-                    o.setDateCreated(orderDiscontinuationDate);
+                    o.setDateCreated(new Date());
                     o.setCreator(Context.getUserService().getUser(1));
                     o.setObsDatetime(orderToRetain.getDateActivated());
                     o.setPerson(od.getPatient());
@@ -912,7 +912,6 @@ public class LabOrderDataExchange {
                 }
 
             } else if (StringUtils.isNotBlank(specimenStatus) && specimenStatus.equalsIgnoreCase("Incomplete")) {
-                System.out.println("Updating incomplete status for manifest order");
                 // indicate the incomplete status
                 manifestOrder.setStatus("Incomplete");
                 manifestOrder.setResult("");
