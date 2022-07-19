@@ -320,7 +320,7 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
                                 </div>
                             </div>
                             <div class="card-body">
-                                <span ng-show="patientRegimens.length==0">Patient is not on any regimen</span>
+                                <span ng-show="patientRegimens.length === 0">Patient is not on any regimen</span>
 
                                 <div ng-show="showRegimenPanel">
                                     ${ui.includeFragment("kenyaemrorderentry", "patientdashboard/regimenDispensation", ["patient": patient])}
@@ -347,7 +347,7 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
                                         </div>
                                         <div class="card-body">
 
-                                        <span ng-show="patientActiveDrugOrders.order_groups.length==0">None</span>
+                                        <span ng-show="patientActiveDrugOrders.order_groups.length === 0">None</span>
 
                                         <div class="table-responsive">
                                             <table ng-show="patientActiveDrugOrders.order_groups.length > 0"
@@ -387,7 +387,7 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
 
 
                                             <span ng-show="activeDrugOrders.loading">${ui.message("uicommons.loading.placeholder")}</span>
-                                            <span ng-show="activeDrugOrders.length == 0">None</span>
+                                            <span ng-show="activeDrugOrders.length === 0">None</span>
 
                                             <div class="table-responsive">
                                                 <table ng-show="activeDrugOrders.length > 0"
