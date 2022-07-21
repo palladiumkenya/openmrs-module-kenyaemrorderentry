@@ -181,24 +181,15 @@
 
     //On ready
     jQuery(function () {
-        //functions
-        //Generates a unique manifest ID
-        function generateManifestID() {
-            //get value of manifest type
-            let manifestType = jq("#manifestType").val();
-            let status = jq("#status").val();
-            if(checkVarIfEmptyOrNull(manifestType)) {
-                console.log("Manifest Type is Selected");
-                if(checkVarIfEmptyOrNull(status)) {
-                    console.log("Status is Selected");
-                    jq('#btnCreateManifest').attr('disabled', false);
-                }
-            } else {
-                console.log("Manifest Type and status is NOT Selected");
-                jq('#btnCreateManifest').attr('disabled', true);
-            }
+        
+        //Enable save button if it is an edit
+        //if("${command.original}" !== 'null') {
+        if("${isAnEdit}" == 'true') {
+            console.log("This is an edit");
+            jq('#btnCreateManifest').attr('disabled', false);
         }
 
+        //functions
         //checks if a value is empty or null - true if no, false if yes
         function checkVarIfEmptyOrNull(msg) {
             return((msg && (msg = msg.trim())) ? true : false);
@@ -213,6 +204,20 @@
                 jq('#btnCreateManifest').attr('disabled', false);
             } else {
                 console.log("Status and Type is NOT Selected");
+                jq('#btnCreateManifest').attr('disabled', true);
+            }
+        });
+
+        //must select manifest type
+        jQuery('#manifestType').change(function () {
+            //get value of manifest type
+            let manifestType = jq("#manifestType").val();
+            let status = jq("#status").val();
+            if(checkVarIfEmptyOrNull(manifestType) && checkVarIfEmptyOrNull(status)) {
+                console.log("Manifest Type and Status is Selected");
+                jq('#btnCreateManifest').attr('disabled', false);
+            } else {
+                console.log("Manifest Type and status is NOT Selected");
                 jq('#btnCreateManifest').attr('disabled', true);
             }
         });
@@ -234,16 +239,6 @@
             }
         });
         //Prepopulations
-
-        //manifest ID auto gen assist
-        jQuery('#manifestType').change(generateManifestID);
-
-        //Enable save button if it is an edit
-        //if("${command.original}" !== 'null') {
-        if("${isAnEdit}" == 'true') {
-            console.log("This is an edit");
-            jq('#btnCreateManifest').attr('disabled', false);
-        }
 
         // For new entries
         if('${command.county}' == 'null' && '${lastCounty}' != ""){
