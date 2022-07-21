@@ -239,7 +239,9 @@
         jQuery('#manifestType').change(generateManifestID);
 
         //Enable save button if it is an edit
-        if('${command.original}' != 'null') {
+        //if("${command.original}" !== 'null') {
+        if("${isAnEdit}" == 'true') {
+            console.log("This is an edit");
             jq('#btnCreateManifest').attr('disabled', false);
         }
 
