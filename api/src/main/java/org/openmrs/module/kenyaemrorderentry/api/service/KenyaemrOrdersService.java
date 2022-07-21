@@ -13,6 +13,7 @@ import java.util.List;
 
 public interface KenyaemrOrdersService extends OpenmrsService {
     LabManifest saveLabOrderManifest(LabManifest labManifest);
+    Long getLastManifestID();
     List<LabManifest> getLabOrderManifest();
     List<LabManifest> getLabOrderManifest(String status);
     LabManifest getLabOrderManifestById(Integer id);
