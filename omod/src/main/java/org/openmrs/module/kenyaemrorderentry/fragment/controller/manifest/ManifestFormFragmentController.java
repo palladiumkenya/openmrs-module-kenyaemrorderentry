@@ -1,12 +1,19 @@
 package org.openmrs.module.kenyaemrorderentry.fragment.controller.manifest;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.commons.lang.StringUtils;
-import org.openmrs.Concept;
 import org.openmrs.Location;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange;
-import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabwareSystemWebRequest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaui.form.AbstractWebForm;
 import org.openmrs.ui.framework.SimpleObject;
@@ -18,21 +25,12 @@ import org.openmrs.ui.framework.page.PageModel;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.PriorityQueue;
-import java.util.Set;
-
 public class ManifestFormFragmentController {
     public void controller(@FragmentParam(value = "manifestId", required = false) LabManifest labManifest,
                            @RequestParam(value = "returnUrl") String returnUrl,
                            PageModel model) {
         KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
+        LabOrderDataExchange labOrderDataExchange = new LabOrderDataExchange();
         LabManifest exists = labManifest != null ? labManifest : null;
         model.addAttribute("labManifest", labManifest);
         model.addAttribute("manifestTypeOptions", manifestTypeOptions());
@@ -110,12 +108,12 @@ public class ManifestFormFragmentController {
         private LabManifest original;
         private String identifier;
         private Date startDate;
-        private  Date endDate;
+        private Date endDate;
         private String courier;
         private String courierOfficer;
         private String status;
         private Integer manifestType;
-        private  Date dispatchDate;
+        private Date dispatchDate;
         private String county;
         private String subCounty;
         private String facilityEmail;
@@ -155,7 +153,18 @@ public class ManifestFormFragmentController {
             else{
                 toSave = new LabManifest();
             }
-            toSave.setIdentifier(identifier);
+            //Check if it is labware system and if so generate a manifest ID
+            //Avoid doing this if it is an edit
+            LabOrderDataExchange labOrderDataExchange = new LabOrderDataExchange();
+            if(LabOrderDataExchange.getSystemType() == LabOrderDataExchange.LABWARE_SYSTEM) {
+                String mType = "E";
+                if(manifestType == LabManifest.EID_TYPE) {
+                    mType = "E";
+                } else if(manifestType == LabManifest.VL_TYPE) {
+                    mType = "V";
+                }
+                toSave.setIdentifier(labOrderDataExchange.generateUniqueManifestID(mType));
+            }
             toSave.setStartDate(startDate);
             toSave.setEndDate(endDate);
             toSave.setDispatchDate(dispatchDate);
@@ -181,46 +190,11 @@ public class ManifestFormFragmentController {
             require(errors, "startDate");
             require(errors, "endDate");
             require(errors, "status");
-            //if(manifestType == LabManifest.EID_TYPE) {
-                require(errors, "identifier"); // We now require the identifier for all types of manifests
-            //}
-
-            /*if (startDate != null) {
-                if (startDate.after(new Date())) {
-                    errors.rejectValue("startDate", "Cannot be in the future");
-                } else {
-                    Calendar calendar = Calendar.getInstance();
-                    calendar.setTime(new Date());
-                    calendar.add(Calendar.YEAR, -120);
-                    if (startDate.before(calendar.getTime())) {
-                        errors.rejectValue("startDate", " Invalid date");
-                    }
-                }
-            }
-            if (endDate != null) {
-                if (endDate.after(new Date())) {
-                    errors.rejectValue("endDate", "Cannot be in the future");
-                } else {
-                    Calendar calendar = Calendar.getInstance();
-                    calendar.setTime(new Date());
-                    calendar.add(Calendar.YEAR, -120);
-                    if (endDate.before(calendar.getTime())) {
-                        errors.rejectValue("endDate", " Invalid date");
-                    }
-                }
-            }*/
+            require(errors, "manifestType");
         }
 
         public LabManifest getOriginal() {
             return original;
-        }
-
-        public String getIdentifier() {
-            return identifier;
-        }
-
-        public void setIdentifier(String identifier) {
-            this.identifier = identifier;
         }
 
         public void setOriginal(LabManifest original) {
