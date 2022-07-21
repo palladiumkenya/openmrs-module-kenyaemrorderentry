@@ -57,7 +57,7 @@ public class ManifestFormFragmentController {
         }
         Set<String> uniqueCountyList = new HashSet<String>(countyList);
         model.addAttribute("countyList", uniqueCountyList);
-
+        model.addAttribute("isAnEdit", exists == null ? false : true);
         model.addAttribute("returnUrl", returnUrl);
     }
 
@@ -146,24 +146,31 @@ public class ManifestFormFragmentController {
         }
         public LabManifest save(){
             LabManifest toSave;
-            if (original !=null){
-
+            if (original != null){
+                //This is an edit
                 toSave = original;
             }
             else{
+                //This is a save
                 toSave = new LabManifest();
             }
             //Check if it is labware system and if so generate a manifest ID
             //Avoid doing this if it is an edit
-            LabOrderDataExchange labOrderDataExchange = new LabOrderDataExchange();
-            if(LabOrderDataExchange.getSystemType() == LabOrderDataExchange.LABWARE_SYSTEM) {
-                String mType = "E";
-                if(manifestType == LabManifest.EID_TYPE) {
-                    mType = "E";
-                } else if(manifestType == LabManifest.VL_TYPE) {
-                    mType = "V";
+            if(original == null) {
+                //This is a save
+                LabOrderDataExchange labOrderDataExchange = new LabOrderDataExchange();
+                if(LabOrderDataExchange.getSystemType() == LabOrderDataExchange.LABWARE_SYSTEM) {
+                    String mType = "E";
+                    if(manifestType == LabManifest.EID_TYPE) {
+                        mType = "E";
+                    } else if(manifestType == LabManifest.VL_TYPE) {
+                        mType = "V";
+                    }
+                    toSave.setIdentifier(labOrderDataExchange.generateUniqueManifestID(mType));
                 }
-                toSave.setIdentifier(labOrderDataExchange.generateUniqueManifestID(mType));
+            } else {
+                //This is an edit
+                toSave.setIdentifier(identifier);
             }
             toSave.setStartDate(startDate);
             toSave.setEndDate(endDate);
@@ -199,6 +206,14 @@ public class ManifestFormFragmentController {
 
         public void setOriginal(LabManifest original) {
             this.original = original;
+        }
+
+        public String getIdentifier() {
+            return identifier;
+        }
+
+        public void setIdentifier(String identifier) {
+            this.identifier = identifier;
         }
 
         public Date getStartDate() {
