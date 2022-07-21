@@ -146,18 +146,12 @@ public class ManifestFormFragmentController {
         }
         public LabManifest save(){
             LabManifest toSave;
-            if (original != null){
-                //This is an edit
-                toSave = original;
-            }
-            else{
-                //This is a save
-                toSave = new LabManifest();
-            }
+
             //Check if it is labware system and if so generate a manifest ID
             //Avoid doing this if it is an edit
             if(original == null) {
                 //This is a save
+                toSave = new LabManifest();
                 LabOrderDataExchange labOrderDataExchange = new LabOrderDataExchange();
                 if(LabOrderDataExchange.getSystemType() == LabOrderDataExchange.LABWARE_SYSTEM) {
                     String mType = "E";
@@ -170,8 +164,10 @@ public class ManifestFormFragmentController {
                 }
             } else {
                 //This is an edit
+                toSave = original;
                 toSave.setIdentifier(identifier);
             }
+            
             toSave.setStartDate(startDate);
             toSave.setEndDate(endDate);
             toSave.setDispatchDate(dispatchDate);
