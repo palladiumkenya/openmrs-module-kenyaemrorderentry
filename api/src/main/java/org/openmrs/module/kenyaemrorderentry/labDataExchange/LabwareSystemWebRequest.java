@@ -318,11 +318,10 @@ public class LabwareSystemWebRequest extends LabWebRequest {
     }
 
     @Override
-    public ObjectNode completePostPayload(Order o, Date dateSampleCollected, Date dateSampleSeparated, String sampleType, String manifestID) {
-        //setManifestType(LabManifest.VL_TYPE);
-        ObjectNode node = baselinePostRequestPayload(o, dateSampleCollected, dateSampleSeparated, sampleType, manifestID);
-        node.put("mfl_code", Utils.getDefaultLocationMflCode(null));
-        if (o.getPatient().getGender().equals("F")) {
+    public ObjectNode completePostPayload(Order order, Date dateSampleCollected, Date dateSampleSeparated, String sampleType, String manifestID) {
+        ObjectNode node = baselinePostRequestPayload(order, dateSampleCollected, dateSampleSeparated, sampleType, manifestID);
+        node.put("mfl_code", Utils.getDefaultLocationMflCode(Utils.getDefaultLocation()));
+        if (order.getPatient().getGender().equals("F")) {
             node.put("female_status", "none");
         }
         node.put("lab", "7");
