@@ -101,9 +101,9 @@
                     <td id="dispatchDate" name="dispatchDate" style="width: 270px">
                         ${ui.includeFragment("kenyaui", "widget/field", [object: command, property: "dispatchDate"])}
                     </td>
-                    <td style="width: 270px"><input type="text" id="identifier" name="identifier"></td>
-                    <td style="width: 270px"><input type="text" id="courier" name="courier"></td>
-                    <td style="width: 270px"><input type="text" id="courierOfficer" name="courierOfficer"></td>
+                    <td style="width: 270px"><input type="text" id="identifier" name="identifier" value="${command.identifier ?: ''}"></td>
+                    <td style="width: 270px"><input type="text" id="courier" name="courier" value="${command.courier ?: ''}"></td>
+                    <td style="width: 270px"><input type="text" id="courierOfficer" name="courierOfficer" value="${command.courierOfficer ?: ''}"></td>
                 </tr>
             </table>
         </fieldset>
