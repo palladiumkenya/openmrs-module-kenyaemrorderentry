@@ -33,6 +33,7 @@ public class ManifestFormFragmentController {
                            @RequestParam(value = "returnUrl") String returnUrl,
                            PageModel model) {
         KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
+        LabOrderDataExchange labOrderDataExchange = new LabOrderDataExchange();
         LabManifest exists = labManifest != null ? labManifest : null;
         model.addAttribute("labManifest", labManifest);
         model.addAttribute("manifestTypeOptions", manifestTypeOptions());
@@ -61,6 +62,19 @@ public class ManifestFormFragmentController {
         model.addAttribute("countyList", uniqueCountyList);
 
         model.addAttribute("returnUrl", returnUrl);
+    }
+
+    /**
+     * Generate a new manifest ID
+     * 
+     * @param mType - The manifest type V for VL and E for EID
+     * @return String - The new manifest ID
+     */
+    public String generateNewManifestID(@RequestParam("mType") String mType) {
+        System.out.println("Got the manifest Type as: " + mType);
+        LabOrderDataExchange labOrderDataExchange = new LabOrderDataExchange();
+        String ret = labOrderDataExchange.generateUniqueManifestID(mType);
+        return(ret);
     }
 
     private List<String> manifestStatus() {
@@ -181,6 +195,7 @@ public class ManifestFormFragmentController {
             require(errors, "startDate");
             require(errors, "endDate");
             require(errors, "status");
+            require(errors, "manifestType");
             //if(manifestType == LabManifest.EID_TYPE) {
                 require(errors, "identifier"); // We now require the identifier for all types of manifests
             //}

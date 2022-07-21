@@ -12,6 +12,8 @@ import java.util.List;
 public interface KenyaemrOrdersDAO {
     LabManifest saveLabOrderManifest(LabManifest labManifest);
 
+    Long getLastManifestID();
+
     List<LabManifest> getLabOrderManifest();
 
     LabManifest getLabOrderManifestById(Integer id);
