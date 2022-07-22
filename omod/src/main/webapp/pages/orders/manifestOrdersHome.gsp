@@ -164,14 +164,6 @@ tr:nth-child(even) {background-color: #f2f2f2;}
         <fieldset>
             <legend>Active requests</legend>
 
-            <table>
-                <tr>
-                    <td class="actionColumn">
-                        <button class="addAllOrders" style="background-color: cadetblue; color: white" data-target="#addAllOrders">Add All Orders</button>
-                    </td>
-                </tr>
-            </table>
-
             <table class="simple-table" width="90%">
                 <tr>
                     <th class="nameColumn">Patient Name</th>
