@@ -76,7 +76,7 @@
                 </tr>
                 <tr>
                     <td>
-                        <select name="manifestType" id="manifestType">
+                        <select name="manifestType" id="manifestType" ${command.original ? "disabled" : ""}>
                             <option></option>
                             <% manifestTypeOptions.each { %>
                             <option ${
@@ -187,6 +187,7 @@
         if("${isAnEdit}" == 'true') {
             console.log("This is an edit");
             jq('#btnCreateManifest').attr('disabled', false);
+            jq('#manifestType').attr('disabled', true);
         }
 
         //functions
