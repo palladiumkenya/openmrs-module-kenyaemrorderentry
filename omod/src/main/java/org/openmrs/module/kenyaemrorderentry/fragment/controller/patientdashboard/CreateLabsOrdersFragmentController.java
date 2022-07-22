@@ -176,7 +176,6 @@ public class CreateLabsOrdersFragmentController {
                     labTestObj.put("name", conceptService.getConcept(labTest.getConceptId()).getName(LOCALE).getName());
                     labTestArray.add(labTestObj);
 
-
                 }
                 panelObj.put("name", panelName);
                 panelObj.put("tests", labTestArray);
