@@ -114,7 +114,8 @@ tr:nth-child(even) {background-color: #f2f2f2;}
         <br/>
         <br/>
         <fieldset>
-            <legend>Samples in the manifest (Total: ${manifestOrders.size()})</legend>
+            <legend>Samples in the manifest</legend>
+
             <table class="simple-table" width="90%">
                 <tr>
                     <th class="nameColumn">Patient Name</th>
@@ -162,6 +163,15 @@ tr:nth-child(even) {background-color: #f2f2f2;}
         <% if (manifest.status == "Draft") { %>
         <fieldset>
             <legend>Active requests</legend>
+
+            <table>
+                <tr>
+                    <td class="actionColumn">
+                        <button class="addAllOrders" style="background-color: cadetblue; color: white" data-target="#addAllOrders">Add All Orders</button>
+                    </td>
+                </tr>
+            </table>
+
             <table class="simple-table" width="90%">
                 <tr>
                     <th class="nameColumn">Patient Name</th>
@@ -176,16 +186,16 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                 </tr>
                 <% if (manifest.manifestType == 2) { %>
                         <% eligibleVlOrders.each { o -> %>
-                    <tr>
-                        <td class="nameColumn">${o.patient.givenName} ${o.patient.familyName} </td>
-                        <td class="cccNumberColumn">${o.patient.getPatientIdentifier(cccNumberType)}</td>
-                        <td class="dateRequestColumn">${kenyaui.formatDate(o.dateActivated)}</td>
-                        <td class="actionColumn">
-                            <button class="addOrderToManifest" style="background-color: cadetblue; color: white" value="od_${o.orderId}" data-target="#updateSampleDetails">Add to manifest</button>
-                        </td>
-                        <td><span id="alert_${o.orderId}"></span></td>
-                    </tr>
-                      <% } %>
+                            <tr>
+                                <td class="nameColumn">${o.patient.givenName} ${o.patient.familyName} </td>
+                                <td class="cccNumberColumn">${o.patient.getPatientIdentifier(cccNumberType)}</td>
+                                <td class="dateRequestColumn">${kenyaui.formatDate(o.dateActivated)}</td>
+                                <td class="actionColumn">
+                                    <button class="addOrderToManifest" style="background-color: cadetblue; color: white" value="od_${o.orderId}" data-target="#updateSampleDetails">Add to manifest</button>
+                                </td>
+                                <td><span id="alert_${o.orderId}"></span></td>
+                            </tr>
+                        <% } %>
                 <% } %>
                 <% if (manifest.manifestType == 1) { %>
                     <% eligibleEidOrders.each { o -> %>
@@ -283,6 +293,57 @@ tr:nth-child(even) {background-color: #f2f2f2;}
     //On ready
     jq = jQuery;
     jq(function () {
+        //Global Vars
+        var manifestID = ${ manifest.id };
+        var manifestType = ${ manifest.manifestType };
+        var eligibleOrdersToInsert = [];
+        if(manifestType == 1) {
+            eligibleOrdersToInsert = ${ EIDOrders };
+        } else if(manifestType == 2) {
+            eligibleOrdersToInsert = ${ VLOrders };
+        }
+
+        //Bulk add all orders
+        function addAllOrders() {
+            console.log("Add all orders activated");
+            var dCollected = "2022-07-22";
+            var dSeparated = "2022-07-22";
+            var dToday = new Date();
+            var sampleType = "";
+            if(manifestType == 2) {
+                sampleType = "Whole Blood";
+            } else if(manifestType == 1) {
+                sampleType = "DBS";
+            }
+            //loop through the orders
+            for (var i = 0; i < eligibleOrdersToInsert.length; i++) {
+                var oID = eligibleOrdersToInsert[i].orderId;
+                console.log("Inserting order: " + oID);
+                // Push order to manifest
+                jq.getJSON('${ ui.actionLink("kenyaemrorderentry", "patientdashboard/generalLabOrders", "addOrderToManifest") }',{
+                    'manifestId': manifestID,
+                    'orderId': oID,
+                    'sampleType': sampleType,
+                    'dateSampleCollected': dCollected,
+                    'dateSampleSeparated': dSeparated
+                })
+                    .success(function (data) {
+                        if (data.status == 'successful') {
+                            console.log('Sample successfully added to the manifest');
+                        } else {
+                            console.log('Could not add to the manifest!. Please check that current regimen shows the regimen line');
+                        }
+                    })
+                    .error(function (xhr, status, err) {
+                        console.log('The system encountered a problem while adding the sample. Please try again');
+                    })
+            }
+        }
+
+        jq('#eligibleList').on('click','.addAllOrders',function () {
+            addAllOrders();
+        });
+
         // a function that adds an order to a manifest
         jq('#eligibleList').on('click','.addOrderToManifest',function () {
             // clear previously entered values
