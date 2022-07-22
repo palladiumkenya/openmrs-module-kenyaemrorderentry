@@ -102,11 +102,20 @@ public class ChaiSystemWebRequest extends LabWebRequest {
             API_KEY = gpVLApiToken.getPropertyValue().trim();
         }
 
-        SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
-                SSLContexts.createDefault(),
-                new String[]{"TLSv1.2"},
-                null,
-                SSLConnectionSocketFactory.getDefaultHostnameVerifier());
+
+        SSLConnectionSocketFactory sslsf = null;
+        GlobalProperty gpSslVerification = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_SSL_VERIFICATION_ENABLED);
+
+        if (gpSslVerification != null) {
+            String sslVerificationEnabled = gpSslVerification.getPropertyValue();
+            if (StringUtils.isNotBlank(sslVerificationEnabled)) {
+                if (sslVerificationEnabled.equals("true")) {
+                    sslsf = Utils.sslConnectionSocketFactoryDefault();
+                } else {
+                    sslsf = Utils.sslConnectionSocketFactoryWithDisabledSSLVerification();
+                }
+            }
+        }
 
         CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
         //CloseableHttpClient httpClient = HttpClientBuilder.create().build();
@@ -214,9 +223,9 @@ public class ChaiSystemWebRequest extends LabWebRequest {
             String sslVerificationEnabled = gpSslVerification.getPropertyValue();
             if (StringUtils.isNotBlank(sslVerificationEnabled)) {
                 if (sslVerificationEnabled.equals("true")) {
-                    sslsf = Utils.sslConnectionSocketFactoryWithDisabledSSLVerification();
-                } else {
                     sslsf = Utils.sslConnectionSocketFactoryDefault();
+                } else {
+                    sslsf = Utils.sslConnectionSocketFactoryWithDisabledSSLVerification();
                 }
             }
         }
