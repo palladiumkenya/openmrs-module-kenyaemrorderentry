@@ -9,18 +9,6 @@
             ]
     ]
 
-
-    def manifestDispatch = [
-            [
-
-                    [object: command, property: "dispatchDate", label: "Dispatch Date"],
-                    [object: command, property: "identifier", label: "Manifest/Dispatch ID *"],
-                    [object: command, property: "courier", label: "Courier Name"],
-                    [object: command, property: "courierOfficer", label: "Person handed to"]
-
-            ]
-    ]
-
     def facilityContactFields = [
             [
 
@@ -84,11 +72,11 @@
             <legend>Manifest type</legend>
             <table>
                 <tr>
-                    <td>Type</td>
+                    <td>Type *</td>
                 </tr>
                 <tr>
                     <td>
-                        <select name="manifestType" id="manifestType">
+                        <select name="manifestType" id="manifestType" ${command.original ? "disabled" : ""}>
                             <option></option>
                             <% manifestTypeOptions.each { %>
                             <option ${
@@ -102,9 +90,20 @@
         </fieldset>
         <fieldset>
             <legend>Dispatch Details</legend>
-            <% manifestDispatch.each { %>
-            ${ui.includeFragment("kenyaui", "widget/rowOfFields", [fields: it])}
-            <% } %>
+            <table>
+                <tr>
+                    <td class="ke-field-label" style="width: 270px">Dispatch Date</td>
+                    <td class="ke-field-label" style="width: 270px">Courier Name</td>
+                    <td class="ke-field-label" style="width: 270px">Person handed to</td>
+                </tr>
+                <tr>
+                    <td id="dispatchDate" name="dispatchDate" style="width: 270px">
+                        ${ui.includeFragment("kenyaui", "widget/field", [object: command, property: "dispatchDate"])}
+                    </td>
+                    <td style="width: 270px"><input type="text" id="courier" name="courier" value="${command.courier ?: ''}"></td>
+                    <td style="width: 270px"><input type="text" id="courierOfficer" name="courierOfficer" value="${command.courierOfficer ?: ''}"></td>
+                </tr>
+            </table>
         </fieldset>
 
     <fieldset>
@@ -150,11 +149,11 @@
             <legend>Manifest status</legend>
             <table>
                 <tr>
-                    <td class="ke-field-label">Status</td>
+                    <td class="ke-field-label">Status *</td>
                 </tr>
                 <tr>
                     <td>
-                        <select name="status">
+                        <select name="status" id="status">
                             <option></option>
                             <% manifestStatusOptions.each { %>
                             <option ${(command.status == null)? "" : it == command.status ? "selected" : ""} value="${it}">${it}</option>
@@ -166,7 +165,7 @@
         </fieldset>
 
         <div class="ke-panel-footer">
-            <button type="submit">
+            <button type="submit" id="btnCreateManifest" disabled>
                 <img src="${ui.resourceLink("kenyaui", "images/glyphs/ok.png")}"/> ${command.original ? "Save Changes" : "Create Lab Manifest"}
             </button>
 
@@ -182,12 +181,55 @@
 
     //On ready
     jQuery(function () {
+        
+        //Enable save button if it is an edit
+        //if("${command.original}" !== 'null') {
+        if("${isAnEdit}" == 'true') {
+            console.log("This is an edit");
+            jq('#btnCreateManifest').attr('disabled', false);
+            jq('#manifestType').attr('disabled', true);
+        }
+
+        //functions
+        //checks if a value is empty or null - true if no, false if yes
+        function checkVarIfEmptyOrNull(msg) {
+            return((msg && (msg = msg.trim())) ? true : false);
+        }
+
+        // must select status
+        jQuery('#status').change(function () {
+            let status = jq("#status").val();
+            let manifestType = jq("#manifestType").val();
+            if(checkVarIfEmptyOrNull(status) && checkVarIfEmptyOrNull(manifestType)) {
+                console.log("Status and Type is Selected");
+                jq('#btnCreateManifest').attr('disabled', false);
+            } else {
+                console.log("Status and Type is NOT Selected");
+                jq('#btnCreateManifest').attr('disabled', true);
+            }
+        });
+
+        //must select manifest type
+        jQuery('#manifestType').change(function () {
+            //get value of manifest type
+            let manifestType = jq("#manifestType").val();
+            let status = jq("#status").val();
+            if(checkVarIfEmptyOrNull(manifestType) && checkVarIfEmptyOrNull(status)) {
+                console.log("Manifest Type and Status is Selected");
+                jq('#btnCreateManifest').attr('disabled', false);
+            } else {
+                console.log("Manifest Type and status is NOT Selected");
+                jq('#btnCreateManifest').attr('disabled', true);
+            }
+        });
+
         //defaults
         jQuery('#county').change(updateSubcounty);
 
         jQuery('#new-edit-manifest-form .cancel-button').click(function () {
             ui.navigate('${ config.returnUrl }');
         });
+
         kenyaui.setupAjaxPost('new-edit-manifest-form', {
             onSuccess: function (data) {
                 if (data.manifestId) {
@@ -198,6 +240,7 @@
             }
         });
         //Prepopulations
+
         // For new entries
         if('${command.county}' == 'null' && '${lastCounty}' != ""){
             jQuery('select[name=county]').val('${lastCounty}');

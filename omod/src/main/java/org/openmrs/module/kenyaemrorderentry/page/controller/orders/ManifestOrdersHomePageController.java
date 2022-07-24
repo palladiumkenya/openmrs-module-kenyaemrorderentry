@@ -10,6 +10,7 @@ import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 import org.openmrs.module.kenyaemrorderentry.util.Utils;
 import org.openmrs.module.kenyaui.KenyaUiUtils;
 import org.openmrs.module.kenyaui.annotation.AppPage;
+import org.openmrs.ui.framework.SimpleObject;
 import org.openmrs.ui.framework.UiUtils;
 import org.openmrs.ui.framework.annotation.SpringBean;
 import org.openmrs.ui.framework.page.PageModel;
@@ -69,8 +70,23 @@ public class ManifestOrdersHomePageController {
             }
         }
 
+        List<SimpleObject> VLOrders = new ArrayList<SimpleObject>();
+        for(Order order : activeVlOrdersNotInManifest){
+            SimpleObject so = new SimpleObject();
+            so.put("orderId", order.getId());
+            VLOrders.add(so);
+        }
+        List<SimpleObject> EIDOrders = new ArrayList<SimpleObject>();
+        for(Order order : activeEidOrdersNotInManifest){
+            SimpleObject so = new SimpleObject();
+            so.put("orderId", order.getId());
+            EIDOrders.add(so);
+        }
+
         model.put("eligibleVlOrders", activeVlOrdersNotInManifest );
         model.put("eligibleEidOrders", activeEidOrdersNotInManifest );
+        model.put("VLOrders", ui.toJson(VLOrders) );
+        model.put("EIDOrders", ui.toJson(EIDOrders) );
         model.put("manifestType", manifestType);
         model.put("manifest", manifest);
         //model.put("manifestOrders", allOrdersForManifest);

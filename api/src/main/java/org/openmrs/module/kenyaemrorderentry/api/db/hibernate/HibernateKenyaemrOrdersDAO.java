@@ -48,6 +48,14 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
     }
 
     @Override
+    public Long getLastManifestID() {
+        Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifest.class);
+        criteria.setProjection(Projections.max("id"));
+        Long maxId = ((Number)criteria.uniqueResult()).longValue();
+        return(maxId);
+    }
+
+    @Override
     public List<LabManifest> getLabOrderManifest() throws DataException {
         Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifest.class);
         criteria.add(Restrictions.eq("voided", false));

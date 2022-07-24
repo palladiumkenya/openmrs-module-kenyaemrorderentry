@@ -27,6 +27,11 @@ public class KenyaemrOrdersServiceImpl extends BaseOpenmrsService implements Ken
     }
 
     @Override
+    public Long getLastManifestID() {
+        return dao.getLastManifestID();
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public List<LabManifest> getLabOrderManifest() {
         return dao.getLabOrderManifest();
