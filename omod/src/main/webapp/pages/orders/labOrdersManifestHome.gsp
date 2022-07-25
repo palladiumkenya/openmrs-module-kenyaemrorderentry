@@ -125,9 +125,6 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                 <th>Type</th>
                 <th>Courier</th>
                 <th>Manifest ID</th>
-                <th>Facility Email/phone</th>
-                <th>Clinician name</th>
-                <th>Clinician contact</th>
                 <th>Lab person contact</th>
                 <th>Status</th>
                 <th>Dispatch</th>
@@ -214,9 +211,6 @@ tr:nth-child(even) {background-color: #f2f2f2;}
             tr.append("<td>" + displayRecords[i].manifest.manifestType + "</td>");
             tr.append("<td>" + displayRecords[i].manifest.courier + "</td>");
             tr.append("<td>" + displayRecords[i].manifest.identifier + "</td>");
-            tr.append("<td>" + displayRecords[i].manifest.facilityEmail + " , " + displayRecords[i].manifest.facilityPhoneContact +  "</td>");
-            tr.append("<td>" + displayRecords[i].manifest.clinicianName + "</td>");
-            tr.append("<td>" + displayRecords[i].manifest.clinicianPhoneContact + "</td>");
             tr.append("<td>" + displayRecords[i].manifest.labPocPhoneNumber + "</td>");
             var tdStatus = jq('<td/>');
             var spanStatus = jq('<span/>', {
