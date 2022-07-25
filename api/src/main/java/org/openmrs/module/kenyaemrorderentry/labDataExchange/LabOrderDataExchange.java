@@ -511,8 +511,8 @@ public class LabOrderDataExchange {
         Context.addProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
         Set<Order> activeLabs = new HashSet<Order>();
         String sql = "select o.order_id from orders o\n" +
-                "left join kenyaemr_order_entry_lab_manifest_order mo on mo.order_id = o.order_id\n" +
-                "where o.order_action='NEW' and o.concept_id = 1030 and o.date_stopped is null and o.voided=0 and mo.order_id is null ";
+                "left join kenyaemr_order_entry_lab_manifest_order mo on mo.order_id = o.order_id left join patient_identifier k on o.patient_id = k.patient_id \n" +
+                "where o.order_action='NEW' and o.concept_id = 1030 and o.date_stopped is null and o.voided=0 and mo.order_id is null and k.identifier_type=7 and k.identifier is not null ";
 
         if (startDate != null && endDate != null) {
             sql = sql + " and date(o.date_activated) between ':startDate' and ':endDate' ";
