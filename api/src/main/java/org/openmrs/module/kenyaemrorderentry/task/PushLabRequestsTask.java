@@ -1,7 +1,5 @@
 package org.openmrs.module.kenyaemrorderentry.task;
 
-import org.apache.commons.lang3.StringUtils;
-import org.openmrs.GlobalProperty;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.ChaiSystemWebRequest;
@@ -44,16 +42,6 @@ public class PushLabRequestsTask extends AbstractTask {
             URLConnection connection = new URL(url).openConnection();
             connection.connect();
             try {
-                // GlobalProperty gpServerUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LAB_SERVER_REQUEST_URL);
-                // GlobalProperty gpApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LAB_SERVER_API_TOKEN);
-
-                // String serverUrl = gpServerUrl.getPropertyValue();
-                // String API_KEY = gpApiToken.getPropertyValue();
-
-                // if (StringUtils.isBlank(serverUrl) || StringUtils.isBlank(API_KEY)) {
-                //     System.out.println("Lab Results POST: Please set credentials for posting lab requests to the lab system");
-                //     return;
-                // }
 
                 // Get a manifest ready to be sent
                 LabManifest toProcess = null;
@@ -79,12 +67,12 @@ public class PushLabRequestsTask extends AbstractTask {
                 List<LabManifestOrder> ordersInManifest = kenyaemrOrdersService.getLabManifestOrdersToSend(toProcess);
                 
                 if (ordersInManifest.size() < 1) {
-                    System.out.println("Lab Results POST: Found no lab requests to post.");
-                    // System.out.println("Lab Results POST: Found no lab requests to post. Will mark the manifest as complete");
-                    // if (toProcess != null) {
-                    //     toProcess.setStatus("Completed");
-                    //     kenyaemrOrdersService.saveLabOrderManifest(toProcess);
-                    // }
+                    System.out.println("Lab Results POST: All orders were sent. Marking manifest as submitted. Manifest ID " + toProcess.getId());
+                    if (toProcess != null) {
+                        toProcess.setStatus("Submitted");
+                        toProcess.setDateChanged(new Date());
+                        kenyaemrOrdersService.saveLabOrderManifest(toProcess);
+                    }
                     return;
                 } else {
                     System.out.println("Lab Results POST: Number of lab requests to push: " + ordersInManifest.size());
@@ -109,11 +97,11 @@ public class PushLabRequestsTask extends AbstractTask {
                     }
                 }
 
-                if(checkIfSent) {
+                if (checkIfSent && ordersCount.intValue() == ordersInManifest.size()) {
                     System.out.println("Lab Results POST: All orders were sent. Marking manifest as submitted");
                     if (toProcess != null) {
                         toProcess.setStatus("Submitted");
-                        toProcess.setDispatchDate(new Date()); // set dispatch date to today
+                        toProcess.setDateChanged(new Date());
                         kenyaemrOrdersService.saveLabOrderManifest(toProcess);
                     }
                 }
