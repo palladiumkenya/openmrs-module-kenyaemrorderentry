@@ -11,7 +11,6 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.ssl.SSLContexts;
 import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -118,7 +117,6 @@ public class ChaiSystemWebRequest extends LabWebRequest {
         }
 
         CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
-        //CloseableHttpClient httpClient = HttpClientBuilder.create().build();
 
         try {
 
@@ -132,13 +130,16 @@ public class ChaiSystemWebRequest extends LabWebRequest {
 
             //Set the request post body
             String payload = manifestOrder.getPayload();
-            System.out.println("CHAI Lab POST: Server Payload: " + payload);
+            //System.out.println("CHAI Lab POST: Server Payload: " + payload);
             StringEntity userEntity = new StringEntity(payload);
             postRequest.setEntity(userEntity);
 
             HttpResponse response = httpClient.execute(postRequest);
 
             int statusCode = response.getStatusLine().getStatusCode();
+            String message = EntityUtils.toString(response.getEntity(), "UTF-8");
+            String duplicateEntryMessage = "already exists in database";
+
 
             if (statusCode == 429) { // too many requests. just terminate
                 System.out.println("CHAI Lab Results POST: 429 The push lab scheduler has been configured to run at very short intervals. Please change this to at least 30min");
@@ -147,24 +148,35 @@ public class ChaiSystemWebRequest extends LabWebRequest {
             }
 
             if (statusCode != 201 && statusCode != 200 && statusCode != 422 && statusCode != 403) { // skip for status code 422: unprocessable entity, and status code 403 for forbidden response
-                manifestOrder.setStatus("Pending");
+
+                JSONParser parser = new JSONParser();
+                JSONObject responseObj = (JSONObject) parser.parse(message);
+                JSONObject errorObj = (JSONObject) responseObj.get("error");
+
+                if (statusCode == 400 ) { // sample already exists in the database. Change status to sample already exist
+                    if (StringUtils.isNotBlank(message) && message.contains(duplicateEntryMessage)) {
+                        manifestOrder.setStatus("Duplicate entry");
+                        manifestOrder.setDateChanged(new Date());
+                        kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
+                        System.out.println("CHAI Lab Results POST: Error - duplicate entry. " + "Error - " + message);
+                        return(true);
+                    }
+                }
+                System.out.println("CHAI Lab Results POST: Error while sending manifest sample. " + "Error - " + statusCode + ". Msg" + errorObj.get("message"));
+
+                manifestOrder.setStatus("Error - " + statusCode + ". Msg" + errorObj.get("message"));
                 kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
-                System.out.println("CHAI Lab Results POST: There was an error sending lab id = " + manifestOrder.getId() + " Status: " + statusCode);
-                log.warn("CHAI Lab Results POST: There was an error sending lab id = " + manifestOrder.getId() + " Status: " + statusCode);
-                // throw new RuntimeException("Failed with HTTP error code : " + statusCode + ". Error msg: " + errorObj.get("message"));
                 return(false);
             } else if (statusCode == 403 || statusCode == 422) {
                 manifestOrder.setStatus("Pending");
                 kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
-                System.out.println("CHAI Lab Results POST: Error while submitting manifest sample. " + "Error - " + statusCode);
+                System.out.println("CHAI Lab Results POST: Error while submitting manifest sample. " + "Error - " + statusCode + ", message: " + message);
                 log.error("CHAI Lab Results POST: Error while submitting manifest sample. " + "Error - " + statusCode);
                 return(false);
             } else if (statusCode == 201 || statusCode == 200) {
                 manifestOrder.setStatus("Sent");
                 manifestOrder.setDateSent(new Date());
-                System.out.println("CHAI Lab Results POST: Successfully pushed a EID lab test id " + manifestOrder.getId());
-                log.info("CHAI Lab Results POST: Successfully pushed a EID lab test id " + manifestOrder.getId());
-
+                System.out.println("CHAI Lab Results POST: Successfully pushed " + (toProcess.getManifestType() == LabManifest.EID_TYPE ? "an EID" : "a Viral load")  + " test");
                 kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
 
                 if (toProcess != null && manifestStatus.equals("Ready to send")) {
