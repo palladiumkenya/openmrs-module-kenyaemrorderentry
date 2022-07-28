@@ -72,19 +72,10 @@
             <legend>Manifest type</legend>
             <table>
                 <tr>
-                    <td>Type *</td>
+                    <td>Type: Viral Load</td>
                 </tr>
                 <tr>
-                    <td>
-                        <select name="manifestType" id="manifestType" ${command.original ? "disabled" : ""}>
-                            <option></option>
-                            <% manifestTypeOptions.each { %>
-                            <option ${
-                                    (command.manifestType == null) ? "" : it.value == command.manifestType ? "selected" : ""}
-                                    value="${it.value}">${it.label}</option>
-                            <% } %>
-                        </select>
-                    </td>
+                    <td><input type="hidden" name="manifestType" id="manifestType" value=2></td>
                 </tr>
             </table>
         </fieldset>
