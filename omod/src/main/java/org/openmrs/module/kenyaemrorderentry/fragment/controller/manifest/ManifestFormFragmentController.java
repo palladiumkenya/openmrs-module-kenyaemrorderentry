@@ -73,16 +73,15 @@ public class ManifestFormFragmentController {
         List<SimpleObject> options = new ArrayList<SimpleObject>();
         for (Map.Entry<Integer, String> option : createManifestTypeOptions().entrySet())
             options.add(SimpleObject.create("value", option.getKey(), "label", option.getValue()));
-
         return options;
     }
+
     private Map<Integer, String> createManifestTypeOptions() {
         Map<Integer, String> options = new HashMap<Integer, String>();
         options.put(LabManifest.VL_TYPE, "Viral Load");
-        options.put(LabManifest.EID_TYPE, "EID");
+        //options.put(LabManifest.EID_TYPE, "EID");//disabling EID for the first release
         return options;
     }
-
 
     public SimpleObject saveManifest(@MethodParam("newEditManifestForm") @BindParams EditManifestForm
                                                 form,
