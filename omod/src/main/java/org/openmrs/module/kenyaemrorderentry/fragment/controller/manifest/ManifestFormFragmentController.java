@@ -38,13 +38,14 @@ public class ManifestFormFragmentController {
         model.addAttribute("manifestStatusOptions", manifestStatus());
 
         //prepopulations
-        model.addAttribute("lastCounty", kenyaemrOrdersService.getLastLabOrderManifest().getCounty() !=null ? kenyaemrOrdersService.getLastLabOrderManifest().getCounty() : "");
-        model.addAttribute("lastSubCounty", kenyaemrOrdersService.getLastLabOrderManifest().getSubCounty() !=null ? kenyaemrOrdersService.getLastLabOrderManifest().getSubCounty() : "");
-        model.addAttribute("lastFacilityEmail", kenyaemrOrdersService.getLastLabOrderManifest().getFacilityEmail() !=null ? kenyaemrOrdersService.getLastLabOrderManifest().getFacilityEmail() : "");
-        model.addAttribute("lastFacilityPhoneContact", kenyaemrOrdersService.getLastLabOrderManifest().getFacilityPhoneContact() !=null ? kenyaemrOrdersService.getLastLabOrderManifest().getFacilityPhoneContact() : "");
-        model.addAttribute("lastFacilityClinicianName", kenyaemrOrdersService.getLastLabOrderManifest().getClinicianName() !=null ? kenyaemrOrdersService.getLastLabOrderManifest().getClinicianName() : "");
-        model.addAttribute("lastFacilityClinicianPhone", kenyaemrOrdersService.getLastLabOrderManifest().getClinicianPhoneContact() !=null ? kenyaemrOrdersService.getLastLabOrderManifest().getClinicianPhoneContact() : "");
-        model.addAttribute("lastFacilityLabPhone", kenyaemrOrdersService.getLastLabOrderManifest().getLabPocPhoneNumber() !=null ? kenyaemrOrdersService.getLastLabOrderManifest().getLabPocPhoneNumber() : "");
+        LabManifest lastManifest = kenyaemrOrdersService.getLastLabOrderManifest();
+        model.addAttribute("lastCounty", lastManifest != null && kenyaemrOrdersService.getLastLabOrderManifest().getCounty() !=null ? kenyaemrOrdersService.getLastLabOrderManifest().getCounty() : "");
+        model.addAttribute("lastSubCounty", lastManifest != null && kenyaemrOrdersService.getLastLabOrderManifest().getSubCounty() !=null ? kenyaemrOrdersService.getLastLabOrderManifest().getSubCounty() : "");
+        model.addAttribute("lastFacilityEmail", lastManifest != null && kenyaemrOrdersService.getLastLabOrderManifest().getFacilityEmail() !=null ? kenyaemrOrdersService.getLastLabOrderManifest().getFacilityEmail() : "");
+        model.addAttribute("lastFacilityPhoneContact", lastManifest != null && kenyaemrOrdersService.getLastLabOrderManifest().getFacilityPhoneContact() !=null ? kenyaemrOrdersService.getLastLabOrderManifest().getFacilityPhoneContact() : "");
+        model.addAttribute("lastFacilityClinicianName", lastManifest != null && kenyaemrOrdersService.getLastLabOrderManifest().getClinicianName() !=null ? kenyaemrOrdersService.getLastLabOrderManifest().getClinicianName() : "");
+        model.addAttribute("lastFacilityClinicianPhone", lastManifest != null && kenyaemrOrdersService.getLastLabOrderManifest().getClinicianPhoneContact() !=null ? kenyaemrOrdersService.getLastLabOrderManifest().getClinicianPhoneContact() : "");
+        model.addAttribute("lastFacilityLabPhone", lastManifest != null && kenyaemrOrdersService.getLastLabOrderManifest().getLabPocPhoneNumber() !=null ? kenyaemrOrdersService.getLastLabOrderManifest().getLabPocPhoneNumber() : "");
 
              // create list of counties
         List<String> countyList = new ArrayList<String>();
