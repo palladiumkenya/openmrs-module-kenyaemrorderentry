@@ -73,12 +73,14 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                     <th>Start Date</th>
                     <th>End Date</th>
                     <th>Status</th>
+                    <th>Type</th>
                     <th>Dispatch Date</th>
                 </tr>
                 <tr>
                     <td>${kenyaui.formatDate(manifest.startDate)}</td>
                     <td>${kenyaui.formatDate(manifest.endDate)}</td>
                     <td>${manifest.status}</td>
+                    <td>${manifestType}</td>
                     <td>${manifest.dispatchDate != null ? kenyaui.formatDate(manifest.dispatchDate) : ""}</td>
                 </tr>
 
@@ -113,10 +115,15 @@ tr:nth-child(even) {background-color: #f2f2f2;}
         <br/>
         <fieldset>
             <legend>Samples in the manifest</legend>
+
             <table class="simple-table" width="90%">
                 <tr>
                     <th class="nameColumn">Patient Name</th>
-                    <th class="cccNumberColumn">CCC Number</th>
+                    <% if (manifest.manifestType == 2) { %>
+                        <th class="cccNumberColumn">CCC Number</th>
+                    <% } else { %>
+                        <th class="cccNumberColumn">HEI Number</th>
+                    <% } %>
                     <th class="sampleTypeColumn">Sample type</th>
                     <th class="dateRequestColumn">Date requested</th>
                     <th class="sampleStatusColumn">Status</th>
@@ -127,7 +134,11 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                 <% manifestOrders.each { o -> %>
                 <tr>
                 <td class="nameColumn"><a href="${ ui.pageLink("kenyaemr", "chart/chartViewPatient", [ patientId: o.order.patient.id ]) }">${o.order.patient.givenName} ${o.order.patient.familyName} ${o.order.patient.middleName ?: ""}</a></td>
-                    <td class="cccNumberColumn">${o.order.patient.getPatientIdentifier(cccNumberType)}</td>
+                <% if (manifest.manifestType == 2) { %>
+                     <td class="cccNumberColumn">${o.order.patient.getPatientIdentifier(cccNumberType)}</td>
+                <% } else { %>
+                <td class="cccNumberColumn">${o.order.patient.getPatientIdentifier(heiNumberType)}</td>
+                <% } %>
                     <td class="sampleTypeColumn">${o.sampleType}</td>
                     <td class="dateRequestColumn">${kenyaui.formatDate(o.order.dateActivated)}</td>
                     <td class="sampleStatusColumn">${o.status}</td>
@@ -152,24 +163,44 @@ tr:nth-child(even) {background-color: #f2f2f2;}
         <% if (manifest.status == "Draft") { %>
         <fieldset>
             <legend>Active requests</legend>
+
             <table class="simple-table" width="90%">
                 <tr>
                     <th class="nameColumn">Patient Name</th>
+                    <% if (manifest.manifestType == 2) { %>
                     <th class="cccNumberColumn">CCC Number</th>
+                    <% } else { %>
+                    <th class="cccNumberColumn">HEI Number</th>
+                    <% } %>
                     <th class="dateRequestColumn">Date requested</th>
                     <th class="actionColumn"></th>
                     <th></th>
                 </tr>
-                <% eligibleOrders.each { o -> %>
-                <tr>
-                    <td class="nameColumn">${o.patient.givenName} ${o.patient.familyName} </td>
-                    <td class="cccNumberColumn">${o.patient.getPatientIdentifier(cccNumberType)}</td>
-                    <td class="dateRequestColumn">${kenyaui.formatDate(o.dateActivated)}</td>
-                    <td class="actionColumn">
-                        <button class="addOrderToManifest" style="background-color: cadetblue; color: white" value="od_${o.orderId}" data-target="#updateSampleDetails">Add to manifest</button>
-                    </td>
-                    <td><span id="alert_${o.orderId}"></span></td>
-                </tr>
+                <% if (manifest.manifestType == 2) { %>
+                        <% eligibleVlOrders.each { o -> %>
+                            <tr>
+                                <td class="nameColumn">${o.patient.givenName} ${o.patient.familyName} </td>
+                                <td class="cccNumberColumn">${o.patient.getPatientIdentifier(cccNumberType)}</td>
+                                <td class="dateRequestColumn">${kenyaui.formatDate(o.dateActivated)}</td>
+                                <td class="actionColumn">
+                                    <button class="addOrderToManifest" style="background-color: cadetblue; color: white" value="od_${o.orderId}" data-target="#updateSampleDetails">Add to manifest</button>
+                                </td>
+                                <td><span id="alert_${o.orderId}"></span></td>
+                            </tr>
+                        <% } %>
+                <% } %>
+                <% if (manifest.manifestType == 1) { %>
+                    <% eligibleEidOrders.each { o -> %>
+                    <tr>
+                        <td class="nameColumn">${o.patient.givenName} ${o.patient.familyName} </td>
+                        <td class="cccNumberColumn">${o.patient.getPatientIdentifier(heiNumberType)}</td>
+                        <td class="dateRequestColumn">${kenyaui.formatDate(o.dateActivated)}</td>
+                        <td class="actionColumn">
+                            <button class="addOrderToManifest" style="background-color: cadetblue; color: white" value="od_${o.orderId}" data-target="#updateSampleDetails">Add to manifest</button>
+                        </td>
+                        <td><span id="alert_${o.orderId}"></span></td>
+                    </tr>
+                    <% } %>
                 <% } %>
 
             </table>
@@ -196,8 +227,10 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                             <td>
                                 <select id="sampleType">
                                     <option>select ...</option>
-                                    <option value="Frozen plasma">Frozen plasma</option>
-                                    <option value="Whole Blood">Whole Blood</option>
+                                    <% if(manifest.manifestType == 2) { %>
+                                        <option value="Frozen plasma">Frozen plasma</option>
+                                        <option value="Whole Blood">Whole Blood</option>
+                                    <% } %>
                                     <option value="DBS">DBS</option>
                                 </select>
                             </td>
@@ -252,6 +285,57 @@ tr:nth-child(even) {background-color: #f2f2f2;}
     //On ready
     jq = jQuery;
     jq(function () {
+        //Global Vars
+        var manifestID = ${ manifest.id };
+        var manifestType = ${ manifest.manifestType };
+        var eligibleOrdersToInsert = [];
+        if(manifestType == 1) {
+            eligibleOrdersToInsert = ${ EIDOrders };
+        } else if(manifestType == 2) {
+            eligibleOrdersToInsert = ${ VLOrders };
+        }
+
+        //Bulk add all orders
+        function addAllOrders() {
+            console.log("Add all orders activated");
+            var dCollected = "2022-07-22";
+            var dSeparated = "2022-07-22";
+            var dToday = new Date();
+            var sampleType = "";
+            if(manifestType == 2) {
+                sampleType = "Whole Blood";
+            } else if(manifestType == 1) {
+                sampleType = "DBS";
+            }
+            //loop through the orders
+            for (var i = 0; i < eligibleOrdersToInsert.length; i++) {
+                var oID = eligibleOrdersToInsert[i].orderId;
+                console.log("Inserting order: " + oID);
+                // Push order to manifest
+                jq.getJSON('${ ui.actionLink("kenyaemrorderentry", "patientdashboard/generalLabOrders", "addOrderToManifest") }',{
+                    'manifestId': manifestID,
+                    'orderId': oID,
+                    'sampleType': sampleType,
+                    'dateSampleCollected': dCollected,
+                    'dateSampleSeparated': dSeparated
+                })
+                    .success(function (data) {
+                        if (data.status == 'successful') {
+                            console.log('Sample successfully added to the manifest');
+                        } else {
+                            console.log('Could not add to the manifest!. Please check that current regimen shows the regimen line');
+                        }
+                    })
+                    .error(function (xhr, status, err) {
+                        console.log('The system encountered a problem while adding the sample. Please try again');
+                    })
+            }
+        }
+
+        jq('#eligibleList').on('click','.addAllOrders',function () {
+            addAllOrders();
+        });
+
         // a function that adds an order to a manifest
         jq('#eligibleList').on('click','.addOrderToManifest',function () {
             // clear previously entered values

@@ -26,6 +26,7 @@ public class LabManifestOrder extends BaseOpenmrsData implements Serializable {
     private Date sampleReceivedDate;
     private Date sampleTestedDate;
     private String uuid;
+    private Integer orderType;
 
     public LabManifestOrder() {
         prePersist();
@@ -170,5 +171,24 @@ public class LabManifestOrder extends BaseOpenmrsData implements Serializable {
 
     public void setSampleTestedDate(Date sampleTestedDate) {
         this.sampleTestedDate = sampleTestedDate;
+    }
+
+    public Integer getOrderType() {
+        return orderType;
+    }
+
+    public void setOrderType(Integer orderType) {
+        this.orderType = orderType;
+    }
+
+    @Override
+    public String toString() {
+        return "LabManifestOrder{" +
+                "id=" + id +
+                ", sampleType='" + sampleType + '\'' +
+                ", status='" + status + '\'' +
+                ", result='" + result + '\'' +
+                ", lastStatusCheckDate=" + lastStatusCheckDate +
+                '}';
     }
 }

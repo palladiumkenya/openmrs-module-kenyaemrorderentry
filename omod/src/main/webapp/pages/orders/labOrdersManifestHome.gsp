@@ -122,12 +122,9 @@ tr:nth-child(even) {background-color: #f2f2f2;}
             <tr>
                 <th>Start Date</th>
                 <th>End Date</th>
+                <th>Type</th>
                 <th>Courier</th>
-                <th>County/Sub-county</th>
-                <th>Facility Email</th>
-                <th>Facility Phone</th>
-                <th>Clinician name</th>
-                <th>Clinician contact</th>
+                <th>Manifest ID</th>
                 <th>Lab person contact</th>
                 <th>Status</th>
                 <th>Dispatch</th>
@@ -207,15 +204,13 @@ tr:nth-child(even) {background-color: #f2f2f2;}
         jq('#manifest-list').html('');
         for (var i = 0; i < displayRecords.length; i++) {
             var manifestID = displayRecords[i].manifest.id;
+
             tr = jq('<tr/>');
             tr.append("<td>" + displayRecords[i].manifest.startDate + "</td>");
             tr.append("<td>" + displayRecords[i].manifest.endDate + "</td>");
+            tr.append("<td>" + displayRecords[i].manifest.manifestType + "</td>");
             tr.append("<td>" + displayRecords[i].manifest.courier + "</td>");
-            tr.append("<td>" + displayRecords[i].manifest.county + "/" + displayRecords[i].manifest.subCounty + "</td>");
-            tr.append("<td>" + displayRecords[i].manifest.facilityEmail + "</td>");
-            tr.append("<td>" + displayRecords[i].manifest.facilityPhoneContact + "</td>");
-            tr.append("<td>" + displayRecords[i].manifest.clinicianName + "</td>");
-            tr.append("<td>" + displayRecords[i].manifest.clinicianPhoneContact + "</td>");
+            tr.append("<td>" + displayRecords[i].manifest.identifier + "</td>");
             tr.append("<td>" + displayRecords[i].manifest.labPocPhoneNumber + "</td>");
             var tdStatus = jq('<td/>');
             var spanStatus = jq('<span/>', {

@@ -33,17 +33,23 @@ public class LabOrdersManifestHomePageController {
             List<LabManifestOrder> missingInLab = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifest, "Record not found");
             List<LabManifestOrder> allSamples = kenyaemrOrdersService.getLabManifestOrderByManifest(manifest);
 
+            String manifestType = "";
+            if (manifest.getManifestType() != null && manifest.getManifestType().intValue() == 1) {
+                manifestType = "EID";
+            } else if (manifest.getManifestType() != null && manifest.getManifestType().intValue() == 2) {
+                manifestType = "VL";
+            }
             SimpleObject m = SimpleObject.create(
                     "id", manifest.getId(),
                     "startDate", manifest.getStartDate() != null ? ui.formatDatePretty(manifest.getStartDate()) : "",
                     "endDate", manifest.getEndDate() != null ? ui.formatDatePretty(manifest.getEndDate()) : "",
+                    "manifestType", manifestType,
                     "dispatchDate", manifest.getDispatchDate() != null ? ui.formatDatePretty(manifest.getDispatchDate()) : "",
                     "courier", StringUtils.capitalize(manifest.getCourier() != null ? manifest.getCourier().toLowerCase() : ""),
                     "courierOfficer", StringUtils.capitalize(manifest.getCourierOfficer() != null ? manifest.getCourierOfficer().toLowerCase() : ""),
                     "status", manifest.getStatus(),
-                    "county", StringUtils.capitalize(manifest.getCounty() != null ? manifest.getCounty().toLowerCase() : ""),
-                    "subCounty", StringUtils.capitalize(manifest.getSubCounty() != null ? manifest.getSubCounty().toLowerCase() : ""),
                     "facilityEmail", manifest.getFacilityEmail(),
+                    "identifier", manifest.getIdentifier() != null ? manifest.getIdentifier() : "",
                     "facilityPhoneContact", manifest.getFacilityPhoneContact(),
                     "clinicianPhoneContact", manifest.getClinicianPhoneContact(),
                     "clinicianName", StringUtils.capitalize(manifest.getClinicianName() != null ? manifest.getClinicianName().toLowerCase() : ""),
