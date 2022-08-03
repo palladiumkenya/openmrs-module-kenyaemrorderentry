@@ -980,19 +980,15 @@ public class LabOrderDataExchange {
         String ret = "";
         try {
             String facilityCode = Utils.getDefaultLocationMflCode(Utils.getDefaultLocation());
-            System.out.println("Got facility as: " + facilityCode);
             Calendar cal = Calendar.getInstance();
             String currentYear = String.valueOf(cal.get(Calendar.YEAR));
             currentYear = currentYear.substring(Math.max(currentYear.length() - 2, 0)); // gets the last 2 digits
-            System.out.println("Got current year as: " + currentYear);
             //Get the last manifest ID and increment by one
             long lastManifestID = kenyaemrOrdersService.getLastManifestID();
-            System.out.println("Got last manifest ID as: " + lastManifestID);
             lastManifestID += 1; // adding one to last ID
             String rawManifestID = String.valueOf(lastManifestID);
             String newManifestID = String.format("%1$" + 6 + "s", rawManifestID).replace(' ', '0'); // padding the ID with zeros (6 chars)
             ret = manifestType + currentYear + "-" + facilityCode + "-" + newManifestID;
-            System.out.println("Got new manifest ID as: " + newManifestID);
         } catch(Exception er) {
             System.err.println("Error getting new manifest ID: " + er.getMessage());
             er.printStackTrace();
