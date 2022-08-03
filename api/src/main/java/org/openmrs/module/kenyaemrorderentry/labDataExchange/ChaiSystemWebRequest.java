@@ -6,7 +6,6 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -30,9 +29,7 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URI;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -370,31 +367,17 @@ public class ChaiSystemWebRequest extends LabWebRequest {
         }
     }
 
-    public URI convertJSONTOURLEncoded(String URL, String jsonPayload) {
-        URI uri = null;
-        try {
-            URIBuilder builder = new URIBuilder(URL);
-            JSONParser parser = new JSONParser();
-            JSONObject payloadObject = (JSONObject) parser.parse(jsonPayload);
-            Iterator iterator = payloadObject.keySet().iterator();
-            //Set<String> keys = payloadObject.keySet();
-            //for(String key : keys) {
-            while (iterator.hasNext()) {
-                String key = (String) iterator.next();
-                builder.addParameter(key, payloadObject.get(key).toString());
-            }
-            builder.addParameter("facility_code", "");
-            uri = builder.build();
-        } catch(Exception ex) {}
-        return(uri);
-    }
-
     @Override
     public ObjectNode completePostPayload(Order o, Date dateSampleCollected, Date dateSampleSeparated, String sampleType, String manifestID) {
         ObjectNode node = baselinePostRequestPayload(o, dateSampleCollected, dateSampleSeparated, sampleType, manifestID);
-        node.put("mfl_code", Utils.getDefaultLocationMflCode(null));
-        node.put("mflCode", Utils.getDefaultLocationMflCode(null));
-        node.put("facility_email", "info@example.com");
+        if (!node.isEmpty()) {
+            node.put("mflCode", Utils.getDefaultLocationMflCode(null));
+
+            if (o.getPatient().getGender().equals("F")) {
+                node.put("pmtct", "3");
+            }
+            node.put("lab", "");
+        }
         return node;
     }
 

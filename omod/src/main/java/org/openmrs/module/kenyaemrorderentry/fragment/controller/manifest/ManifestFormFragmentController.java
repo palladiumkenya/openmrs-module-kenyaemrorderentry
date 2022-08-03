@@ -1,14 +1,5 @@
 package org.openmrs.module.kenyaemrorderentry.fragment.controller.manifest;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.commons.lang.StringUtils;
 import org.openmrs.Location;
 import org.openmrs.api.context.Context;
@@ -25,12 +16,20 @@ import org.openmrs.ui.framework.page.PageModel;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 public class ManifestFormFragmentController {
     public void controller(@FragmentParam(value = "manifestId", required = false) LabManifest labManifest,
                            @RequestParam(value = "returnUrl") String returnUrl,
                            PageModel model) {
         KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
-        LabOrderDataExchange labOrderDataExchange = new LabOrderDataExchange();
         LabManifest exists = labManifest != null ? labManifest : null;
         model.addAttribute("labManifest", labManifest);
         model.addAttribute("manifestTypeOptions", manifestTypeOptions());

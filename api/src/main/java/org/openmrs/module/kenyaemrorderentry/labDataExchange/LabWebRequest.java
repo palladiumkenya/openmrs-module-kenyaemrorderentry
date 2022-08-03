@@ -21,7 +21,6 @@ import java.util.Date;
 import java.util.List;
 
 import static org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange.getOrderReasonCode;
-import static org.openmrs.module.kenyaemrorderentry.util.Utils.getHeiMothersAge;
 
 /**
  * A generic class for implementing system specific web requests
@@ -53,7 +52,6 @@ public abstract class LabWebRequest {
      * @return
      */
     public ObjectNode baselinePostRequestPayload(Order o, Date dateSampleCollected, Date dateSampleSeparated, String sampleType, String manifestID) {
-        System.out.println("The Manifest Type is: " + manifestType);
         Patient patient = o.getPatient();
         ObjectNode test = Utils.getJsonNodeFactory().objectNode();
 
@@ -72,18 +70,58 @@ public abstract class LabWebRequest {
         if (patient.getFamilyName() != null) {
             fullName += " " + patient.getFamilyName();
         }
-        test.put("dob", dob);
-        //test.put("patient_name", fullName);
-        test.put("sex", patient.getGender().equals("M") ? "1" : patient.getGender().equals("F") ? "2" : "3");
-        test.put("order_no", o.getOrderId().toString());
-        test.put("patient_identifier", cccNumber != null ? cccNumber.getIdentifier() : "");
-        test.put("lab", "");
 
-        if (manifestType == LabManifest.EID_TYPE) { // we are using 1 for EID and 2 for VL
+        if (manifestType == LabManifest.VL_TYPE) {
+
+            if (cccNumber == null || StringUtils.isBlank(cccNumber.getIdentifier())) {
+                return test;
+            }
+            Encounter originalRegimenEncounter = RegimenMappingUtils.getFirstEncounterForProgram(patient, "ARV");
+            Encounter currentRegimenEncounter = RegimenMappingUtils.getLastEncounterForProgram(patient, "ARV");
+            if (currentRegimenEncounter == null) {
+                return test;
+            }
+
+            SimpleObject regimenDetails = RegimenMappingUtils.buildRegimenChangeObject(currentRegimenEncounter.getObs(), currentRegimenEncounter);
+            String regimenName = (String) regimenDetails.get("regimenShortDisplay");
+            String regimenLine = (String) regimenDetails.get("regimenLine");
+            String nascopCode = "";
+            if (StringUtils.isNotBlank(regimenName )) {
+                nascopCode = RegimenMappingUtils.getDrugNascopCodeByDrugNameAndRegimenLine(regimenName, regimenLine);
+            }
+
+            if (StringUtils.isBlank(nascopCode) && StringUtils.isNotBlank(regimenLine)) {
+                nascopCode = RegimenMappingUtils.getNonStandardCodeFromRegimenLine(regimenLine);
+            }
+
+            if (StringUtils.isBlank(nascopCode)) {
+                return test;
+            }
+
+            test.put("dob", dob);
+            test.put("sex", patient.getGender().equals("M") ? "1" : patient.getGender().equals("F") ? "2" : "3");
+            test.put("order_no", o.getOrderId().toString());
+            test.put("patient_identifier", cccNumber != null ? cccNumber.getIdentifier() : "");
+            test.put("sampletype", sampleType);
+            test.put("datereceived", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
+            test.put("patient_name", fullName);
+
+            test.put("regimenline", regimenLine);
+            test.put("justification", o.getOrderReason() != null ? getOrderReasonCode(o.getOrderReason().getUuid()) : "");
+            test.put("datecollected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
+            test.put("sampletype", manifestType.toString());
+            test.put("prophylaxis", nascopCode);
+            test.put("initiation_date", originalRegimenEncounter != null ? Utils.getSimpleDateFormat("yyyy-MM-dd").format(originalRegimenEncounter.getEncounterDatetime()) : "");
+            test.put("dateinitiatedonregimen", currentRegimenEncounter != null ? Utils.getSimpleDateFormat("yyyy-MM-dd").format(currentRegimenEncounter.getEncounterDatetime()) : "");
+
+        } else if (manifestType == LabManifest.EID_TYPE) { // we are using 1 for EID and 2 for VL TODO: this block needs to be reviewed
             PatientIdentifier heiNumber = patient.getPatientIdentifier(Utils.getHeiNumberIdentifierType());
             SimpleObject heiDetailsObject = getHeiDetailsForEidPostObject(patient,o);
             SimpleObject heiMothersAgeObject = Utils.getHeiMothersAge(patient);
 
+            if (heiNumber == null || StringUtils.isBlank(heiNumber.getIdentifier()) || heiDetailsObject == null) {
+                return test;
+            }
             //API differences
             test.put("sample_type", sampleType);
             test.put("date_received", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
@@ -109,46 +147,8 @@ public abstract class LabWebRequest {
             test.put("mother_age", heiMothersAgeObject != null ? heiMothersAgeObject.get("mothersAge").toString() : "" );
             test.put("mother_ccc", Utils.getMothersUniquePatientNumber(patient) !=null ? Utils.getMothersUniquePatientNumber(patient) : "");
             test.put("ccc_no",  cccNumber != null ? cccNumber.getIdentifier() : "");
-        } else if (manifestType == LabManifest.VL_TYPE) {
-            Encounter originalRegimenEncounter = RegimenMappingUtils.getFirstEncounterForProgram(patient, "ARV");
-            Encounter currentRegimenEncounter = RegimenMappingUtils.getLastEncounterForProgram(patient, "ARV");
-            if (currentRegimenEncounter == null) {
-                return test;
-            }
-
-            //API differences
-            test.put("sampletype", sampleType);
-            test.put("datereceived", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
-            test.put("patient_name", fullName);
-
-            SimpleObject regimenDetails = RegimenMappingUtils.buildRegimenChangeObject(currentRegimenEncounter.getObs(), currentRegimenEncounter);
-            String regimenName = (String) regimenDetails.get("regimenShortDisplay");
-            String regimenLine = (String) regimenDetails.get("regimenLine");
-            String nascopCode = "";
-            if (StringUtils.isNotBlank(regimenName )) {
-                nascopCode = RegimenMappingUtils.getDrugNascopCodeByDrugNameAndRegimenLine(regimenName, regimenLine);
-            }
-
-            if (StringUtils.isBlank(nascopCode) && StringUtils.isNotBlank(regimenLine)) {
-                nascopCode = RegimenMappingUtils.getNonStandardCodeFromRegimenLine(regimenLine);
-            }
-
-            test.put("regimenline", regimenLine);
-            test.put("justification", o.getOrderReason() != null ? getOrderReasonCode(o.getOrderReason().getUuid()) : "");
-            test.put("datecollected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
-            test.put("sampletype", manifestType.toString());
-            //add to list only if code is found. This is a temp measure to avoid sending messages with null regimen codes
-            if (StringUtils.isNotBlank(nascopCode)) {
-
-                test.put("prophylaxis", nascopCode);
-                if (patient.getGender().equals("F")) {
-                    test.put("pmtct", "3");
-                }
-                test.put("initiation_date", originalRegimenEncounter != null ? Utils.getSimpleDateFormat("yyyy-MM-dd").format(originalRegimenEncounter.getEncounterDatetime()) : "");
-                test.put("dateinitiatedonregimen", currentRegimenEncounter != null ? Utils.getSimpleDateFormat("yyyy-MM-dd").format(currentRegimenEncounter.getEncounterDatetime()) : "");
-
-            }
         }
+
         return test;
     }
 
