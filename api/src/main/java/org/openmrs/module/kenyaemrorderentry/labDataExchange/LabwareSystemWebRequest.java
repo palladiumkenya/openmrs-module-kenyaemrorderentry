@@ -1,14 +1,6 @@
 package org.openmrs.module.kenyaemrorderentry.labDataExchange;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URI;
-import java.util.Date;
-import java.util.List;
-//import java.util.stream.Collectors;
-import java.util.stream.Collectors;
-
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
@@ -20,7 +12,6 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContexts;
 import org.json.simple.JSONArray;
@@ -37,7 +28,15 @@ import org.openmrs.module.kenyaemrorderentry.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URI;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange.DEFAULT_APHL_LAB_CODE;
 
 /**
  * An implementation for Labware
@@ -320,15 +319,26 @@ public class LabwareSystemWebRequest extends LabWebRequest {
     @Override
     public ObjectNode completePostPayload(Order order, Date dateSampleCollected, Date dateSampleSeparated, String sampleType, String manifestID) {
         ObjectNode node = baselinePostRequestPayload(order, dateSampleCollected, dateSampleSeparated, sampleType, manifestID);
-        node.put("mfl_code", Utils.getDefaultLocationMflCode(Utils.getDefaultLocation()));
-        if (order.getPatient().getGender().equals("F")) {
-            node.put("female_status", "none");
+
+        if (!node.isEmpty()) {
+
+            node.put("mfl_code", Utils.getDefaultLocationMflCode(Utils.getDefaultLocation()));
+            if (order.getPatient().getGender().equals("F")) {
+                node.put("female_status", "none");
+            }
+            node.put("lab", DEFAULT_APHL_LAB_CODE.toString());
+            node.put("facility_email", "none");
+            node.put("recency_id", "");
+            node.put("emr_shipment", StringUtils.isNotBlank(manifestID) ? manifestID : "");
+            node.put("date_separated", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleSeparated));
+
+
+            node.put("mfl_code", Utils.getDefaultLocationMflCode(Utils.getDefaultLocation()));
+            if (order.getPatient().getGender().equals("F")) {
+                node.put("female_status", "none");
+            }
         }
-        node.put("lab", "7");
-        node.put("facility_email", "info@example.com");
-        node.put("recency_id", "");
-        node.put("emr_shipment", StringUtils.isNotBlank(manifestID) ? manifestID : "");
-        node.put("date_separated", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleSeparated));
+
         return node;
     }
 

@@ -111,7 +111,13 @@ public class GeneralLabOrdersFragmentController {
                                            @RequestParam(value = "dateSampleSeparated") Date dateSampleSeparated
                                            ) {
 
-        if (manifest != null && order != null && LabOrderDataExchange.getSystemType() != 0) { // check for the configured lab system so that appropriate payload structure is generated
+        if (manifest != null && order != null) { // check for the configured lab system so that appropriate payload structure is generated
+
+            if (LabOrderDataExchange.getSystemType() == LabOrderDataExchange.NO_SYSTEM_CONFIGURED) {
+                System.out.println("The System Type has not been set: Please set it to continue" );
+                return SimpleObject.create("status", "Not successful", "cause", "LAB system is not configured! Please configure it to proceed");
+            }
+
             LabManifestOrder labOrder = new LabManifestOrder();
 
             labOrder.setLabManifest(manifest);
@@ -120,22 +126,22 @@ public class GeneralLabOrdersFragmentController {
             labOrder.setSampleCollectionDate(dateSampleCollected);
             labOrder.setSampleSeparationDate(dateSampleSeparated);
 
-            LabWebRequest postRequest = new LabwareSystemWebRequest();
+            LabWebRequest payloadGenerator = null;
 
             if (LabOrderDataExchange.getSystemType() == LabOrderDataExchange.CHAI_SYSTEM) {
-                System.out.println("The System Type is CHAI");
-                postRequest = new ChaiSystemWebRequest();
+                payloadGenerator = new ChaiSystemWebRequest();
             } else if (LabOrderDataExchange.getSystemType() == LabOrderDataExchange.LABWARE_SYSTEM) {
-                System.out.println("The System Type is LABWARE");
-                postRequest = new LabwareSystemWebRequest();
-            } else {
-                System.out.println("The System Type has not been set: " + LabOrderDataExchange.getSystemType());
+                payloadGenerator = new LabwareSystemWebRequest();
             }
 
-            postRequest.setManifestType(manifest.getManifestType());
-            ObjectNode payload = postRequest.completePostPayload(order, dateSampleCollected, dateSampleSeparated, sampleType, manifest.getIdentifier());
+            if (payloadGenerator == null) {
+                return SimpleObject.create("status", "Not successful", "cause", "An error occured while adding sample to manifest");
+            }
 
-            // TODO: check if the payload is not null. Currently, an empty payload is generated if nascop code is null
+            payloadGenerator.setManifestType(manifest.getManifestType());
+            ObjectNode payload = payloadGenerator.completePostPayload(order, dateSampleCollected, dateSampleSeparated, sampleType, manifest.getIdentifier());
+
+            // TODO: check if the payload is not null. Currently, an empty payload is generated if nascop code or ccc number (if VL) or hei number (if HEI) is null
             if (!payload.isEmpty()) {
                 labOrder.setPayload(payload.toString());
                 labOrder.setStatus("Pending");
@@ -144,7 +150,7 @@ public class GeneralLabOrdersFragmentController {
                 return SimpleObject.create("status", "successful");
             }
         }
-        return SimpleObject.create("status", "Not successful");
+        return SimpleObject.create("status", "Not successful", "cause", "Documentation of patient identifier and/or regimen is required");
     }
 
     /**

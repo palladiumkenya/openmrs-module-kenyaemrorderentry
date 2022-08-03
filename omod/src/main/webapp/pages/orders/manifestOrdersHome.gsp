@@ -323,7 +323,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                         if (data.status == 'successful') {
                             console.log('Sample successfully added to the manifest');
                         } else {
-                            console.log('Could not add to the manifest!. Please check that current regimen shows the regimen line');
+                            console.log('Could not add to the manifest!. Please check that patient has correct regimen line and/or identifier');
                         }
                     })
                     .error(function (xhr, status, err) {
@@ -387,7 +387,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                                 window.location.reload();
                             }, 2000);
                         } else {
-                            jq('.modal-body #msgBox').text('Could not add to the manifest!. Please check that current regimen shows the regimen line');
+                            jq('.modal-body #msgBox').text('Could not add to the manifest! ' + data.cause);
 
                         }
                     })
