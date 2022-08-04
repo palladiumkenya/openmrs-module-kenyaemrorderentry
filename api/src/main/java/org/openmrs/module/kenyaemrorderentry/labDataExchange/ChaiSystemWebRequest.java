@@ -17,6 +17,7 @@ import org.json.simple.parser.JSONParser;
 import org.openmrs.GlobalProperty;
 import org.openmrs.Order;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.kenyaemrorderentry.ModuleConstants;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
@@ -49,14 +50,14 @@ public class ChaiSystemWebRequest extends LabWebRequest {
     @Override
     public boolean checkRequirements() {
         // EID settings
-        GlobalProperty gpEIDServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_CHAI_EID_LAB_SERVER_REQUEST_URL);
-        GlobalProperty gpEIDServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_CHAI_EID_LAB_SERVER_RESULT_URL);
-        GlobalProperty gpEIDApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_CHAI_EID_LAB_SERVER_API_TOKEN);
+        GlobalProperty gpEIDServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_EID_LAB_SERVER_REQUEST_URL);
+        GlobalProperty gpEIDServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_EID_LAB_SERVER_RESULT_URL);
+        GlobalProperty gpEIDApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_EID_LAB_SERVER_API_TOKEN);
 
         // VL Settings
-        GlobalProperty gpVLServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_CHAI_VL_LAB_SERVER_REQUEST_URL);
-        GlobalProperty gpVLServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_CHAI_VL_LAB_SERVER_RESULT_URL);
-        GlobalProperty gpVLApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_CHAI_VL_LAB_SERVER_API_TOKEN);
+        GlobalProperty gpVLServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_VL_LAB_SERVER_REQUEST_URL);
+        GlobalProperty gpVLServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_VL_LAB_SERVER_RESULT_URL);
+        GlobalProperty gpVLApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_VL_LAB_SERVER_API_TOKEN);
 
         String EIDServerPushUrl = gpEIDServerPushUrl.getPropertyValue();
         String EIDServerPullUrl = gpEIDServerPullUrl.getPropertyValue();
@@ -66,7 +67,7 @@ public class ChaiSystemWebRequest extends LabWebRequest {
         String VLServerPullUrl = gpVLServerPullUrl.getPropertyValue();
         String VLApiToken = gpVLApiToken.getPropertyValue();
 
-        if (StringUtils.isBlank(EIDServerPushUrl) || StringUtils.isBlank(EIDServerPullUrl) || StringUtils.isBlank(EIDApiToken) || StringUtils.isBlank(VLServerPushUrl) || StringUtils.isBlank(VLServerPullUrl) || StringUtils.isBlank(VLApiToken) || LabOrderDataExchange.getSystemType() == 0) {
+        if (StringUtils.isBlank(VLServerPushUrl) || StringUtils.isBlank(VLServerPullUrl) || StringUtils.isBlank(VLApiToken) || LabOrderDataExchange.getSystemType() == 0) {
             System.out.println("CHAI Lab Results: Please set credentials for posting lab requests to the CHAI system");
             return false;
         }
@@ -76,7 +77,6 @@ public class ChaiSystemWebRequest extends LabWebRequest {
     public boolean postSamples(LabManifestOrder manifestOrder, String manifestStatus) throws IOException {
 
         if (!checkRequirements()) {
-            System.out.println("CHAI Lab Results POST: Failed to satisfy requirements");
             return(false);
         }
 
@@ -87,20 +87,20 @@ public class ChaiSystemWebRequest extends LabWebRequest {
         String API_KEY = "";
 
         if(toProcess.getManifestType() == LabManifest.EID_TYPE) {
-            GlobalProperty gpEIDServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_CHAI_EID_LAB_SERVER_REQUEST_URL);
-            GlobalProperty gpEIDApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_CHAI_EID_LAB_SERVER_API_TOKEN);
+            GlobalProperty gpEIDServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_EID_LAB_SERVER_REQUEST_URL);
+            GlobalProperty gpEIDApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_EID_LAB_SERVER_API_TOKEN);
             serverUrl = gpEIDServerPushUrl.getPropertyValue().trim();
             API_KEY = gpEIDApiToken.getPropertyValue().trim();
         } else if(toProcess.getManifestType() == LabManifest.VL_TYPE) {
-            GlobalProperty gpVLServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_CHAI_VL_LAB_SERVER_REQUEST_URL);
-            GlobalProperty gpVLApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_CHAI_VL_LAB_SERVER_API_TOKEN);
+            GlobalProperty gpVLServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_VL_LAB_SERVER_REQUEST_URL);
+            GlobalProperty gpVLApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_VL_LAB_SERVER_API_TOKEN);
             serverUrl = gpVLServerPushUrl.getPropertyValue().trim();
             API_KEY = gpVLApiToken.getPropertyValue().trim();
         }
 
 
         SSLConnectionSocketFactory sslsf = null;
-        GlobalProperty gpSslVerification = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_SSL_VERIFICATION_ENABLED);
+        GlobalProperty gpSslVerification = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_SSL_VERIFICATION_ENABLED);
 
         if (gpSslVerification != null) {
             String sslVerificationEnabled = gpSslVerification.getPropertyValue();
@@ -211,22 +211,22 @@ public class ChaiSystemWebRequest extends LabWebRequest {
         String API_KEY = "";
         System.out.println("Processing manifest ID: " + manifestToUpdateResults.getId());
         if(manifestToUpdateResults.getManifestType() == LabManifest.EID_TYPE) {
-            GlobalProperty gpEIDServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_CHAI_EID_LAB_SERVER_RESULT_URL);
-            GlobalProperty gpEIDApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_CHAI_EID_LAB_SERVER_API_TOKEN);
+            GlobalProperty gpEIDServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_EID_LAB_SERVER_RESULT_URL);
+            GlobalProperty gpEIDApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_EID_LAB_SERVER_API_TOKEN);
             serverUrl = gpEIDServerPullUrl.getPropertyValue().trim();
             API_KEY = gpEIDApiToken.getPropertyValue().trim();
         } else if(manifestToUpdateResults.getManifestType() == LabManifest.VL_TYPE) {
-            GlobalProperty gpVLServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_CHAI_VL_LAB_SERVER_RESULT_URL);
-            GlobalProperty gpVLApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_CHAI_VL_LAB_SERVER_API_TOKEN);
+            GlobalProperty gpVLServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_VL_LAB_SERVER_RESULT_URL);
+            GlobalProperty gpVLApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_VL_LAB_SERVER_API_TOKEN);
             serverUrl = gpVLServerPullUrl.getPropertyValue().trim();
             API_KEY = gpVLApiToken.getPropertyValue().trim();
         }
 
-        GlobalProperty gpLastProcessedManifest = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_MANIFEST_LAST_PROCESSED);
-        GlobalProperty gpLastProcessedManifestUpdatetime = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_MANIFEST_LAST_UPDATETIME);
+        GlobalProperty gpLastProcessedManifest = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_MANIFEST_LAST_PROCESSED);
+        GlobalProperty gpLastProcessedManifestUpdatetime = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_MANIFEST_LAST_UPDATETIME);
 
         SSLConnectionSocketFactory sslsf = null;
-        GlobalProperty gpSslVerification = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_SSL_VERIFICATION_ENABLED);
+        GlobalProperty gpSslVerification = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_SSL_VERIFICATION_ENABLED);
 
         if (gpSslVerification != null) {
             String sslVerificationEnabled = gpSslVerification.getPropertyValue();
@@ -347,7 +347,7 @@ public class ChaiSystemWebRequest extends LabWebRequest {
                     // update manifest global property
                     if (samplesYetToCheckResults.size() > 0) {
                         gpLastProcessedManifest.setPropertyValue(manifestToUpdateResults.getId().toString());
-                        gpLastProcessedManifestUpdatetime.setPropertyValue(Utils.getSimpleDateFormat(LabOrderDataExchange.MANIFEST_LAST_UPDATE_PATTERN).format(new Date()));
+                        gpLastProcessedManifestUpdatetime.setPropertyValue(Utils.getSimpleDateFormat(ModuleConstants.MANIFEST_LAST_UPDATE_PATTERN).format(new Date()));
                         Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifest);
                         Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifestUpdatetime);
                     }

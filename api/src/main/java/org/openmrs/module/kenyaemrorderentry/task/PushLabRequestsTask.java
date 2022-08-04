@@ -1,6 +1,7 @@
 package org.openmrs.module.kenyaemrorderentry.task;
 
 import org.openmrs.api.context.Context;
+import org.openmrs.module.kenyaemrorderentry.ModuleConstants;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.ChaiSystemWebRequest;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange;
@@ -43,6 +44,22 @@ public class PushLabRequestsTask extends AbstractTask {
             connection.connect();
             try {
 
+                LabWebRequest labSystemConnectionRequest;
+
+                if (LabOrderDataExchange.getSystemType() == ModuleConstants.CHAI_SYSTEM) {
+                    labSystemConnectionRequest = new ChaiSystemWebRequest();
+                } else if (LabOrderDataExchange.getSystemType() == ModuleConstants.LABWARE_SYSTEM){
+                    labSystemConnectionRequest = new LabwareSystemWebRequest();
+                } else {
+                    System.out.println("LAB POST: No lab system has been configured. Please configure the global properties");
+                    return;
+                }
+
+                if (!labSystemConnectionRequest.checkRequirements()) {
+                    System.out.println("LAB POST: Failed to satisfy requirements for pushing samples. Please configure appropriate global properties for your facility");
+                    return;
+                }
+
                 // Get a manifest ready to be sent
                 LabManifest toProcess = null;
                 String manifestStatus = "";
@@ -84,15 +101,7 @@ public class PushLabRequestsTask extends AbstractTask {
 
                 boolean checkIfSent = true;
                 for (LabManifestOrder manifestOrder : ordersInManifest) {
-
-                    LabWebRequest postRequest;
-
-                    if (LabOrderDataExchange.getSystemType() == LabOrderDataExchange.CHAI_SYSTEM) {
-                        postRequest = new ChaiSystemWebRequest();
-                    } else {
-                        postRequest = new LabwareSystemWebRequest();
-                    }
-                    if(!postRequest.postSamples(manifestOrder, manifestStatus)) {
+                    if(!labSystemConnectionRequest.postSamples(manifestOrder, manifestStatus)) {
                         checkIfSent = false;
                     }
                 }

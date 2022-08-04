@@ -21,6 +21,7 @@ import org.apache.http.ssl.SSLContexts;
 import org.apache.http.util.EntityUtils;
 import org.openmrs.GlobalProperty;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.kenyaemrorderentry.ModuleConstants;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.ChaiSystemWebRequest;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange;
@@ -60,10 +61,27 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
             URLConnection connection = new URL(url).openConnection();
             connection.connect();
             try {
-                GlobalProperty gpLastProcessedManifest = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_MANIFEST_LAST_PROCESSED);
-                GlobalProperty gpRetryPeriodForIncompleteResults = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_RETRY_PERIOD_FOR_ORDERS_WITH_INCOMPLETE_RESULTS);
-                GlobalProperty gpLabTatForVlResults = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LAB_TAT_FOR_VL_RESULTS);
-                GlobalProperty gpLastProcessedManifestUpdatetime = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_MANIFEST_LAST_UPDATETIME);
+
+                LabWebRequest labSystemConnectionRequest;
+
+                if (LabOrderDataExchange.getSystemType() == ModuleConstants.CHAI_SYSTEM) {
+                    labSystemConnectionRequest = new ChaiSystemWebRequest();
+                } else if (LabOrderDataExchange.getSystemType() == ModuleConstants.LABWARE_SYSTEM){
+                    labSystemConnectionRequest = new LabwareSystemWebRequest();
+                } else {
+                    System.out.println("LAB GET: No lab system has been configured. Please configure the global properties");
+                    return;
+                }
+
+                if (!labSystemConnectionRequest.checkRequirements()) {
+                    System.out.println("LAB GET: Failed to satisfy requirements for pushing samples. Please configure appropriate global properties for your facility");
+                    return;
+                }
+
+                GlobalProperty gpLastProcessedManifest = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_MANIFEST_LAST_PROCESSED);
+                GlobalProperty gpRetryPeriodForIncompleteResults = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_RETRY_PERIOD_FOR_ORDERS_WITH_INCOMPLETE_RESULTS);
+                GlobalProperty gpLabTatForVlResults = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LAB_TAT_FOR_VL_RESULTS);
+                GlobalProperty gpLastProcessedManifestUpdatetime = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_MANIFEST_LAST_UPDATETIME);
 
                 String lastProcessedManifest = gpLastProcessedManifest.getPropertyValue();
                 String retryPeriodForIncompleteResults = gpRetryPeriodForIncompleteResults.getPropertyValue();
@@ -199,18 +217,7 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
                 }
 
                 // Pull Lab Results
-                LabWebRequest pullRequest = null;;
-
-                if (LabOrderDataExchange.getSystemType() == LabOrderDataExchange.NO_SYSTEM_CONFIGURED) {
-                    System.out.println("Lab Results Get: Lab system not configured. Exiting now");
-                    return;
-                }
-                if (LabOrderDataExchange.getSystemType() == LabOrderDataExchange.CHAI_SYSTEM) {
-                    pullRequest = new ChaiSystemWebRequest();
-                } else if (LabOrderDataExchange.getSystemType() == LabOrderDataExchange.LABWARE_SYSTEM) {
-                    pullRequest = new LabwareSystemWebRequest();
-                }
-                pullRequest.pullResult(orderIds, manifestOrderIds, manifestToUpdateResults);
+                labSystemConnectionRequest.pullResult(orderIds, manifestOrderIds, manifestToUpdateResults);
 
             } catch (Exception e) {
                 throw new IllegalArgumentException("Lab Results Get: Unable to execute task that pulls lab requests", e);
