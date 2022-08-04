@@ -67,7 +67,7 @@ public class ChaiSystemWebRequest extends LabWebRequest {
         String VLServerPullUrl = gpVLServerPullUrl.getPropertyValue();
         String VLApiToken = gpVLApiToken.getPropertyValue();
 
-        if (StringUtils.isBlank(EIDServerPushUrl) || StringUtils.isBlank(EIDServerPullUrl) || StringUtils.isBlank(EIDApiToken) || StringUtils.isBlank(VLServerPushUrl) || StringUtils.isBlank(VLServerPullUrl) || StringUtils.isBlank(VLApiToken) || LabOrderDataExchange.getSystemType() == 0) {
+        if (StringUtils.isBlank(VLServerPushUrl) || StringUtils.isBlank(VLServerPullUrl) || StringUtils.isBlank(VLApiToken) || LabOrderDataExchange.getSystemType() == 0) {
             System.out.println("CHAI Lab Results: Please set credentials for posting lab requests to the CHAI system");
             return false;
         }
@@ -77,7 +77,6 @@ public class ChaiSystemWebRequest extends LabWebRequest {
     public boolean postSamples(LabManifestOrder manifestOrder, String manifestStatus) throws IOException {
 
         if (!checkRequirements()) {
-            System.out.println("CHAI Lab Results POST: Failed to satisfy requirements");
             return(false);
         }
 
