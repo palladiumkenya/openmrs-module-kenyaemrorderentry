@@ -3,7 +3,6 @@ package org.openmrs.module.kenyaemrorderentry.fragment.controller.manifest;
 import org.apache.commons.lang.StringUtils;
 import org.openmrs.Location;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.kenyaemrorderentry.ModuleConstants;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
@@ -153,7 +152,7 @@ public class ManifestFormFragmentController {
                 //This is a save
                 toSave = new LabManifest();
                 LabOrderDataExchange labOrderDataExchange = new LabOrderDataExchange();
-                if(LabOrderDataExchange.getSystemType() == ModuleConstants.LABWARE_SYSTEM) {
+                if(LabOrderDataExchange.getSystemType() == LabOrderDataExchange.LABWARE_SYSTEM) {
                     String mType = "E";
                     if(manifestType == LabManifest.EID_TYPE) {
                         mType = "E";

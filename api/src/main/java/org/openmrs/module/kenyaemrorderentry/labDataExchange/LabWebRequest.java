@@ -11,7 +11,6 @@ import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyacore.RegimenMappingUtils;
-import org.openmrs.module.kenyaemrorderentry.ModuleConstants;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 import org.openmrs.module.kenyaemrorderentry.util.Utils;
@@ -123,52 +122,31 @@ public abstract class LabWebRequest {
             if (heiNumber == null || StringUtils.isBlank(heiNumber.getIdentifier()) || heiDetailsObject == null) {
                 return test;
             }
+            //API differences
+            test.put("sample_type", sampleType);
+            test.put("date_received", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
+            test.put("datereceived", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
+            test.put("pat_name", fullName);
+            test.put("patient_name", fullName);
 
-            if (LabOrderDataExchange.getSystemType() == ModuleConstants.CHAI_SYSTEM) {
-
-                test.put("dob", dob);
-                test.put("sex", patient.getGender().equals("M") ? "1" : patient.getGender().equals("F") ? "2" : "3");
-                test.put("order_no", o.getOrderId().toString());
-                test.put("patient_identifier", heiNumber != null ? heiNumber.getIdentifier() : "");
-                test.put("sampletype", sampleType);
-                test.put("patient_name", fullName);
-                test.put("datecollected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
-                test.put("feeding", "yes");
+            if(heiDetailsObject !=null) {
+                test.put("infant_prophylaxis", heiDetailsObject.get("prophylaxisAnswer") != null ? heiDetailsObject.get("prophylaxisAnswer").toString() : "");
+                test.put("pcr_code", heiDetailsObject.get("pcrSampleCodeAnswer") != null ? heiDetailsObject.get("pcrSampleCodeAnswer").toString() : "");
                 test.put("pcrtype", heiDetailsObject.get("pcrSampleCodeAnswer") != null ? heiDetailsObject.get("pcrSampleCodeAnswer").toString() : "");
-                test.put("regimen", "1");
                 test.put("entry_point", heiDetailsObject.get("entryPointAnswer") != null ? heiDetailsObject.get("entryPointAnswer").toString() : "");
-                test.put("mother_prophylaxis", heiDetailsObject.get("mothersRegimenAnswer") != null ? heiDetailsObject.get("mothersRegimenAnswer").toString() : "");
-                test.put("mother_last_result", heiDetailsObject.get("validMothersVL") != null ? heiDetailsObject.get("validMothersVL").toString() : ""); // vl within last 6 months
-                test.put("spots", "");
-                test.put("mother_age", heiMothersAgeObject != null ? heiMothersAgeObject.get("mothersAge").toString() : "" );
-                test.put("ccc_no", Utils.getMothersUniquePatientNumber(patient) !=null ? Utils.getMothersUniquePatientNumber(patient) : "");
-
-            } else if (LabOrderDataExchange.getSystemType() == ModuleConstants.LABWARE_SYSTEM) {
-                test.put("sample_type", sampleType);
-                test.put("date_received", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
-                test.put("datereceived", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
-                test.put("pat_name", fullName);
-                test.put("patient_name", fullName);
-
-                if(heiDetailsObject !=null) {
-                    test.put("infant_prophylaxis", heiDetailsObject.get("prophylaxisAnswer") != null ? heiDetailsObject.get("prophylaxisAnswer").toString() : "");
-                    test.put("pcr_code", heiDetailsObject.get("pcrSampleCodeAnswer") != null ? heiDetailsObject.get("pcrSampleCodeAnswer").toString() : "");
-                    test.put("pcrtype", heiDetailsObject.get("pcrSampleCodeAnswer") != null ? heiDetailsObject.get("pcrSampleCodeAnswer").toString() : "");
-                    test.put("entry_point", heiDetailsObject.get("entryPointAnswer") != null ? heiDetailsObject.get("entryPointAnswer").toString() : "");
-                    test.put("infant_feeding", heiDetailsObject.get("feedingMethodAnswer") != null ? heiDetailsObject.get("feedingMethodAnswer").toString() : "");
-                    test.put("mother_pmtct", heiDetailsObject.get("mothersRegimenAnswer") != null ? heiDetailsObject.get("mothersRegimenAnswer").toString() : "");
-                    test.put("mother_vl_res", heiDetailsObject.get("validMothersVL") != null ? heiDetailsObject.get("validMothersVL").toString() : ""); // vl within last 6 months
-                }
-                test.put("date_collected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
-                test.put("datecollected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
-                test.put("regimen", "1");
-                test.put("feeding", "yes");
-                test.put("sample_type", "DBS");
-                test.put("hei_id", heiNumber != null ? heiNumber.getIdentifier() : "");
-                test.put("mother_age", heiMothersAgeObject != null ? heiMothersAgeObject.get("mothersAge").toString() : "" );
-                test.put("mother_ccc", Utils.getMothersUniquePatientNumber(patient) !=null ? Utils.getMothersUniquePatientNumber(patient) : "");
-                test.put("ccc_no",  cccNumber != null ? cccNumber.getIdentifier() : "");
+                test.put("infant_feeding", heiDetailsObject.get("feedingMethodAnswer") != null ? heiDetailsObject.get("feedingMethodAnswer").toString() : "");
+                test.put("mother_pmtct", heiDetailsObject.get("mothersRegimenAnswer") != null ? heiDetailsObject.get("mothersRegimenAnswer").toString() : "");
+                test.put("mother_vl_res", heiDetailsObject.get("validMothersVL") != null ? heiDetailsObject.get("validMothersVL").toString() : ""); // vl within last 6 months
             }
+            test.put("date_collected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
+            test.put("datecollected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
+            test.put("regimen", "1");
+            test.put("feeding", "yes");
+            test.put("sample_type", "DBS");
+            test.put("hei_id", heiNumber != null ? heiNumber.getIdentifier() : "");
+            test.put("mother_age", heiMothersAgeObject != null ? heiMothersAgeObject.get("mothersAge").toString() : "" );
+            test.put("mother_ccc", Utils.getMothersUniquePatientNumber(patient) !=null ? Utils.getMothersUniquePatientNumber(patient) : "");
+            test.put("ccc_no",  cccNumber != null ? cccNumber.getIdentifier() : "");
         }
 
         return test;

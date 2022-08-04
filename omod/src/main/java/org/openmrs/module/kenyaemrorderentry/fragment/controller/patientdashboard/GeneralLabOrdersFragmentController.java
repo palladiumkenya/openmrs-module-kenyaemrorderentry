@@ -17,7 +17,6 @@ import org.openmrs.api.PatientService;
 import org.openmrs.api.ProviderService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appui.UiSessionContext;
-import org.openmrs.module.kenyaemrorderentry.ModuleConstants;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.ChaiSystemWebRequest;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange;
@@ -114,7 +113,7 @@ public class GeneralLabOrdersFragmentController {
 
         if (manifest != null && order != null) { // check for the configured lab system so that appropriate payload structure is generated
 
-            if (LabOrderDataExchange.getSystemType() == ModuleConstants.NO_SYSTEM_CONFIGURED) {
+            if (LabOrderDataExchange.getSystemType() == LabOrderDataExchange.NO_SYSTEM_CONFIGURED) {
                 System.out.println("The System Type has not been set: Please set it to continue" );
                 return SimpleObject.create("status", "Not successful", "cause", "LAB system is not configured! Please configure it to proceed");
             }
@@ -129,9 +128,9 @@ public class GeneralLabOrdersFragmentController {
 
             LabWebRequest payloadGenerator = null;
 
-            if (LabOrderDataExchange.getSystemType() == ModuleConstants.CHAI_SYSTEM) {
+            if (LabOrderDataExchange.getSystemType() == LabOrderDataExchange.CHAI_SYSTEM) {
                 payloadGenerator = new ChaiSystemWebRequest();
-            } else if (LabOrderDataExchange.getSystemType() == ModuleConstants.LABWARE_SYSTEM) {
+            } else if (LabOrderDataExchange.getSystemType() == LabOrderDataExchange.LABWARE_SYSTEM) {
                 payloadGenerator = new LabwareSystemWebRequest();
             }
 

@@ -1,7 +1,6 @@
 package org.openmrs.module.kenyaemrorderentry.task;
 
 import org.openmrs.api.context.Context;
-import org.openmrs.module.kenyaemrorderentry.ModuleConstants;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.ChaiSystemWebRequest;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange;
@@ -88,7 +87,7 @@ public class PushLabRequestsTask extends AbstractTask {
 
                     LabWebRequest postRequest;
 
-                    if (LabOrderDataExchange.getSystemType() == ModuleConstants.CHAI_SYSTEM) {
+                    if (LabOrderDataExchange.getSystemType() == LabOrderDataExchange.CHAI_SYSTEM) {
                         postRequest = new ChaiSystemWebRequest();
                     } else {
                         postRequest = new LabwareSystemWebRequest();
