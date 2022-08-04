@@ -1,7 +1,5 @@
 package org.openmrs.module.kenyaemrorderentry.labDataExchange;
 
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -9,67 +7,29 @@ import com.google.gson.JsonParser;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.time.DateUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.openmrs.Concept;
 import org.openmrs.Encounter;
 import org.openmrs.EncounterType;
 import org.openmrs.GlobalProperty;
 import org.openmrs.Obs;
 import org.openmrs.Order;
-import org.openmrs.Patient;
-import org.openmrs.PatientIdentifier;
 import org.openmrs.TestOrder;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.OrderService;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.kenyacore.RegimenMappingUtils;
+import org.openmrs.module.kenyaemrorderentry.ModuleConstants;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 import org.openmrs.module.kenyaemrorderentry.util.Utils;
-import org.openmrs.ui.framework.SimpleObject;
 import org.openmrs.util.PrivilegeConstants;
 
-import java.io.IOException;
 import java.text.ParseException;
 import java.util.*;
 
-import static org.openmrs.module.metadatasharing.util.MetadataSharingGlobalPropertyListener.log;
-
 public class LabOrderDataExchange {
 
-    public static final String GP_CHAI_VL_LAB_SERVER_REQUEST_URL = "chai_vl_server_url";
-    public static final String GP_CHAI_VL_LAB_SERVER_RESULT_URL = "chai_vl_server_result_url";
-    public static final String GP_CHAI_VL_LAB_SERVER_API_TOKEN = "chai_vl_server_api_token";
-    public static final String GP_CHAI_EID_LAB_SERVER_REQUEST_URL = "chai_eid_server_url";
-    public static final String GP_CHAI_EID_LAB_SERVER_RESULT_URL = "chai_eid_server_result_url";
-    public static final String GP_CHAI_EID_LAB_SERVER_API_TOKEN = "chai_eid_server_api_token";
-    public static final String GP_LABWARE_VL_LAB_SERVER_REQUEST_URL = "labware_vl_server_url";
-    public static final String GP_LABWARE_VL_LAB_SERVER_RESULT_URL = "labware_vl_server_result_url";
-    public static final String GP_LABWARE_VL_LAB_SERVER_API_TOKEN = "labware_vl_server_api_token";
-    public static final String GP_LABWARE_EID_LAB_SERVER_REQUEST_URL = "labware_eid_server_url";
-    public static final String GP_LABWARE_EID_LAB_SERVER_RESULT_URL = "labware_eid_server_result_url";
-    public static final String GP_LABWARE_EID_LAB_SERVER_API_TOKEN = "labware_eid_server_api_token";
-    public static final String GP_MANIFEST_LAST_PROCESSED = "kemrorder.last_processed_manifest";// used when fetching results from the server
-    public static final String GP_RETRY_PERIOD_FOR_ORDERS_WITH_INCOMPLETE_RESULTS = "kemrorder.retry_period_for_incomplete_vl_result";
-    public static final String GP_LAB_TAT_FOR_VL_RESULTS = "kemrorder.viral_load_result_tat_in_days";
-    public static final String GP_MANIFEST_LAST_UPDATETIME = "kemrorder.manifest_last_update_time";
-    public static final String MANIFEST_LAST_UPDATE_PATTERN = "yyyy-MM-dd HH:mm:ss";
-    public static final String LAB_SYSTEM_DATE_PATTERN = "yyyy-MM-dd";
-    public static final String GP_LAB_SYSTEM_IN_USE = "kemrorder.labsystem_identifier";
-
-    // System Types e.g CHAI, LABWARE etc
-
-    public static final int NO_SYSTEM_CONFIGURED = 0;
-    public static final int CHAI_SYSTEM = 1;
-    public static final int LABWARE_SYSTEM = 2;
-    public static final Integer DEFAULT_APHL_LAB_CODE = 7;
-    public static final String GP_SSL_VERIFICATION_ENABLED = "kemrorder.ssl_verification_enabled";
 
     ConceptService conceptService = Context.getConceptService();
     EncounterService encounterService = Context.getEncounterService();
@@ -84,184 +44,7 @@ public class LabOrderDataExchange {
     EncounterType labEncounterType = encounterService.getEncounterTypeByUuid(LAB_ENCOUNTER_TYPE_UUID);
 
 
-    /**
-     * Returns an array of active lab request
-     *
-     * @param o
-     * @return
-     */
-    protected ArrayNode generateActiveVLPayload(Order o, ArrayNode labTests) {
-        Patient patient = o.getPatient();
 
-        String dob = patient.getBirthdate() != null ? Utils.getSimpleDateFormat("yyyy-MM-dd").format(patient.getBirthdate()) : "";
-
-        String fullName = "";
-
-        if (patient.getGivenName() != null) {
-            fullName += patient.getGivenName();
-        }
-
-        if (patient.getMiddleName() != null) {
-            fullName += " " + patient.getMiddleName();
-        }
-
-        if (patient.getFamilyName() != null) {
-            fullName += " " + patient.getFamilyName();
-        }
-
-        PatientIdentifier cccNumber = patient.getPatientIdentifier(Utils.getUniquePatientNumberIdentifierType());
-        Encounter originalRegimenEncounter = RegimenMappingUtils.getFirstEncounterForProgram(patient, "ARV");
-        Encounter currentRegimenEncounter = RegimenMappingUtils.getLastEncounterForProgram(patient, "ARV");
-        SimpleObject regimenDetails = RegimenMappingUtils.buildRegimenChangeObject(currentRegimenEncounter.getObs(), currentRegimenEncounter);
-        String regimenName = (String) regimenDetails.get("regimenShortDisplay");
-        String regimenLine = (String) regimenDetails.get("regimenLine");
-        String nascopCode = "";
-        if (StringUtils.isNotBlank(regimenName)) {
-            nascopCode = RegimenMappingUtils.getDrugNascopCodeByDrugNameAndRegimenLine(regimenName, regimenLine);
-        }
-
-        if (StringUtils.isBlank(nascopCode) && StringUtils.isNotBlank(regimenLine)) {
-            nascopCode = RegimenMappingUtils.getNonStandardCodeFromRegimenLine(regimenLine);
-        }
-
-        //add to list only if code is found. This is a temp measure to avoid sending messages with null regimen codes
-        if (StringUtils.isNotBlank(nascopCode)) {
-            ObjectNode test = Utils.getJsonNodeFactory().objectNode();
-
-            test.put("mflCode", Utils.getDefaultLocationMflCode(null));
-            test.put("patient_identifier", cccNumber != null ? cccNumber.getIdentifier() : "");
-            test.put("dob", dob);
-            test.put("patient_name", fullName);
-            test.put("sex", patient.getGender().equals("M") ? "1" : patient.getGender().equals("F") ? "2" : "3");
-            test.put("sampletype", "1");
-            test.put("datecollected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(o.getDateActivated()));
-            test.put("datereceived", Utils.getSimpleDateFormat("yyyy-MM-dd").format(o.getDateActivated()));
-            test.put("order_no", o.getOrderId().toString());
-            test.put("lab", "");
-            test.put("justification", o.getOrderReason() != null ? getOrderReasonCode(o.getOrderReason().getUuid()) : "");
-            //test.put("justification", "1");
-            test.put("prophylaxis", nascopCode);
-            if (patient.getGender().equals("F")) {
-                test.put("pmtct", "3");
-            }
-            test.put("initiation_date", originalRegimenEncounter != null ? Utils.getSimpleDateFormat("yyyy-MM-dd").format(originalRegimenEncounter.getEncounterDatetime()) : "");
-            test.put("dateinitiatedonregimen", currentRegimenEncounter != null ? Utils.getSimpleDateFormat("yyyy-MM-dd").format(currentRegimenEncounter.getEncounterDatetime()) : "");
-            labTests.add(test);
-        }
-        return labTests;
-    }
-
-    /**
-     * Returns a single object for an active lab order
-     *
-     * @param o
-     * @param dateSampleCollected
-     * @param sampleType          @return
-     */
-    public ObjectNode generatePayloadForLabOrder(Order o, Date dateSampleCollected, Date dateSampleSeparated, String sampleType, String manifestID) {
-        Patient patient = o.getPatient();
-        ObjectNode test = Utils.getJsonNodeFactory().objectNode();
-
-        String dob = patient.getBirthdate() != null ? Utils.getSimpleDateFormat("yyyy-MM-dd").format(patient.getBirthdate()) : "";
-
-        String fullName = "";
-
-        if (patient.getGivenName() != null) {
-            fullName += patient.getGivenName();
-        }
-
-        if (patient.getMiddleName() != null) {
-            fullName += " " + patient.getMiddleName();
-        }
-
-        if (patient.getFamilyName() != null) {
-            fullName += " " + patient.getFamilyName();
-        }
-
-        PatientIdentifier cccNumber = patient.getPatientIdentifier(Utils.getUniquePatientNumberIdentifierType());
-        Encounter originalRegimenEncounter = RegimenMappingUtils.getFirstEncounterForProgram(patient, "ARV");
-        Encounter currentRegimenEncounter = RegimenMappingUtils.getLastEncounterForProgram(patient, "ARV");
-        if (currentRegimenEncounter == null) {
-            return test;
-        }
-        SimpleObject regimenDetails = RegimenMappingUtils.buildRegimenChangeObject(currentRegimenEncounter.getObs(), currentRegimenEncounter);
-        String regimenName = (String) regimenDetails.get("regimenShortDisplay");
-        String regimenLine = (String) regimenDetails.get("regimenLine");
-        String nascopCode = "";
-        if (StringUtils.isNotBlank(regimenName)) {
-            nascopCode = RegimenMappingUtils.getDrugNascopCodeByDrugNameAndRegimenLine(regimenName, regimenLine);
-        }
-
-        if (StringUtils.isBlank(nascopCode) && StringUtils.isNotBlank(regimenLine)) {
-            nascopCode = RegimenMappingUtils.getNonStandardCodeFromRegimenLine(regimenLine);
-        }
-
-        //add to list only if code is found. This is a temp measure to avoid sending messages with null regimen codes
-        if (StringUtils.isNotBlank(nascopCode)) {
-
-            test.put(getSystemType() == CHAI_SYSTEM ? "mflCode" : "mfl_code", Utils.getDefaultLocationMflCode(null));
-            test.put("patient_identifier", cccNumber != null ? cccNumber.getIdentifier() : "");
-            test.put("dob", dob);
-            test.put("patient_name", fullName);
-            test.put("sex", patient.getGender().equals("M") ? "1" : patient.getGender().equals("F") ? "2" : "3");
-            test.put("sampletype", StringUtils.isNotBlank(sampleType) && getSystemType() == CHAI_SYSTEM ? LabOrderDataExchange.getSampleTypeCode(sampleType) : StringUtils.isNotBlank(sampleType) && getSystemType() == LABWARE_SYSTEM ? sampleType : "");
-            test.put("datecollected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
-            test.put("datereceived", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
-            test.put("order_no", o.getOrderId().toString());
-            test.put("lab", "");
-            test.put("justification", o.getOrderReason() != null ? getOrderReasonCode(o.getOrderReason().getUuid()) : "");
-            test.put("prophylaxis", nascopCode);
-            if (patient.getGender().equals("F")) {
-                test.put("pmtct", "3");
-            }
-            test.put("initiation_date", originalRegimenEncounter != null ? Utils.getSimpleDateFormat("yyyy-MM-dd").format(originalRegimenEncounter.getEncounterDatetime()) : "");
-            test.put("dateinitiatedonregimen", currentRegimenEncounter != null ? Utils.getSimpleDateFormat("yyyy-MM-dd").format(currentRegimenEncounter.getEncounterDatetime()) : "");
-
-            if (getSystemType() == LABWARE_SYSTEM) { // if labware
-
-                if (patient.getGender().equals("F")) {
-                    test.put("female_status", "none");
-                }
-
-                test.put("lab", DEFAULT_APHL_LAB_CODE.toString());
-                test.put("facility_email", "");
-                test.put("recency_id", "");
-                test.put("emr_shipment", StringUtils.isNotBlank(manifestID) ? manifestID : "");
-                test.put("date_separated", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleSeparated));
-
-            }
-        }
-        return test;
-    }
-
-    public static void updateAfterPost(HttpResponse response, CloseableHttpClient httpClient, LabManifestOrder manifestOrder) throws IOException, org.json.simple.parser.ParseException {
-        int statusCode = response.getStatusLine().getStatusCode();
-
-        if (statusCode == 429) { // too many requests. just terminate
-            System.out.println("The push lab scheduler has been configured to run at very short intervals. Please change this to at least 30min");
-            //log.warn("The push scheduler has been configured to run at very short intervals. Please change this to at least 30min");
-            return;
-        }
-
-        if (statusCode != 201 && statusCode != 200 && statusCode != 422 && statusCode != 403) { // skip for status code 422: unprocessable entity, and status code 403 for forbidden response
-            JSONParser parser = new JSONParser();
-            JSONObject responseObj = (JSONObject) parser.parse(EntityUtils.toString(response.getEntity()));
-            JSONObject errorObj = (JSONObject) responseObj.get("error");
-            manifestOrder.setStatus("Error - " + statusCode + ". Msg" + errorObj.get("message"));
-            System.out.println("There was an error sending lab id = " + manifestOrder.getId());
-            log.warn("There was an error sending lab id = " + manifestOrder.getId());
-            // throw new RuntimeException("Failed with HTTP error code : " + statusCode + ". Error msg: " + errorObj.get("message"));
-        } else if (statusCode == 201 || statusCode == 200) {
-            manifestOrder.setStatus("Sent");
-            log.info("Successfully pushed a VL lab test id " + manifestOrder.getId());
-        } else if (statusCode == 403 || statusCode == 422) {
-            JSONParser parser = new JSONParser();
-            JSONObject responseObj = (JSONObject) parser.parse(EntityUtils.toString(response.getEntity()));
-            JSONObject errorObj = (JSONObject) responseObj.get("error");
-            System.out.println("Error while submitting manifest sample. " + "Error - " + statusCode + ". Msg" + errorObj.get("message"));
-            log.error("Error while submitting manifest sample. " + "Error - " + statusCode + ". Msg" + errorObj.get("message"));
-        }
-    }
 
     /**
      * Give the kind of lab system configured i.e CHAI or LABWARE
@@ -270,23 +53,23 @@ public class LabOrderDataExchange {
      */
     public static int getSystemType() {
         String systemType = "";
-        GlobalProperty gpLabSystemInUse = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LAB_SYSTEM_IN_USE);
+        GlobalProperty gpLabSystemInUse = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LAB_SYSTEM_IN_USE);
         if (gpLabSystemInUse == null) {
-            return NO_SYSTEM_CONFIGURED; // return 0 if not set
+            return ModuleConstants.NO_SYSTEM_CONFIGURED; // return 0 if not set
         } else {
             systemType = gpLabSystemInUse.getPropertyValue();
         }
 
         if (StringUtils.isBlank(systemType)) {
-            return NO_SYSTEM_CONFIGURED;
+            return ModuleConstants.NO_SYSTEM_CONFIGURED;
         }
 
         if (systemType.equalsIgnoreCase("CHAI")) {
-            return CHAI_SYSTEM;
+            return ModuleConstants.CHAI_SYSTEM;
         } else if (systemType.equalsIgnoreCase("LABWARE")) {
-            return LABWARE_SYSTEM;
+            return ModuleConstants.LABWARE_SYSTEM;
         } else {
-            return NO_SYSTEM_CONFIGURED; // The default if empty string or another string
+            return ModuleConstants.NO_SYSTEM_CONFIGURED; // The default if empty string or another string
         }
     }
 
@@ -574,7 +357,7 @@ public class LabOrderDataExchange {
                 String dateSampleTested = "";
                 String specimenRejectedReason = "";
 
-                if (getSystemType() == LABWARE_SYSTEM) {
+                if (getSystemType() == ModuleConstants.LABWARE_SYSTEM) {
                     try {
                         JsonObject dateReceivedObject = o.get("date_received").getAsJsonObject();
                         dateSampleReceived = dateReceivedObject.get("date").getAsString().trim();
@@ -585,7 +368,7 @@ public class LabOrderDataExchange {
                         dateSampleTested = dateTestedObject.get("date").getAsString().trim();
                     } catch (Exception ex) {
                     }
-                } else if (getSystemType() == CHAI_SYSTEM) {
+                } else if (getSystemType() == ModuleConstants.CHAI_SYSTEM) {
                     try {
                         dateSampleReceived = o.get("date_received").getAsString().trim();
                     } catch (Exception ex) {
@@ -600,7 +383,7 @@ public class LabOrderDataExchange {
 
                 if (StringUtils.isNotBlank(dateSampleReceived)) {
                     try {
-                        sampleReceivedDate = Utils.getSimpleDateFormat(LAB_SYSTEM_DATE_PATTERN).parse(dateSampleReceived);
+                        sampleReceivedDate = Utils.getSimpleDateFormat(ModuleConstants.LAB_SYSTEM_DATE_PATTERN).parse(dateSampleReceived);
                     } catch (ParseException e) {
                         System.err.println("Lab Results Get Results: Unable to get sample receive date" + e.getMessage());
                         e.printStackTrace();
@@ -609,7 +392,7 @@ public class LabOrderDataExchange {
 
                 if (StringUtils.isNotBlank(dateSampleTested)) {
                     try {
-                        sampleTestedDate = Utils.getSimpleDateFormat(LAB_SYSTEM_DATE_PATTERN).parse(dateSampleTested);
+                        sampleTestedDate = Utils.getSimpleDateFormat(ModuleConstants.LAB_SYSTEM_DATE_PATTERN).parse(dateSampleTested);
                     } catch (ParseException e) {
                         System.err.println("Lab Results Get Results: Unable to get sample tested date" + e.getMessage());
                         e.printStackTrace();
