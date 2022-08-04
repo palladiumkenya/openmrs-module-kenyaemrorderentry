@@ -13,12 +13,12 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.ssl.SSLContexts;
 import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.openmrs.GlobalProperty;
 import org.openmrs.Order;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.kenyaemrorderentry.ModuleConstants;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
@@ -36,6 +36,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange.DEFAULT_APHL_LAB_CODE;
 
 /**
  * An implementation for Labware
@@ -51,14 +52,14 @@ public class LabwareSystemWebRequest extends LabWebRequest {
     @Override
     public boolean checkRequirements() {
         // EID settings
-        GlobalProperty gpEIDServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_EID_LAB_SERVER_REQUEST_URL);
-        GlobalProperty gpEIDServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_EID_LAB_SERVER_RESULT_URL);
-        GlobalProperty gpEIDApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_EID_LAB_SERVER_API_TOKEN);
+        GlobalProperty gpEIDServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LABWARE_EID_LAB_SERVER_REQUEST_URL);
+        GlobalProperty gpEIDServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LABWARE_EID_LAB_SERVER_RESULT_URL);
+        GlobalProperty gpEIDApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LABWARE_EID_LAB_SERVER_API_TOKEN);
 
         // VL Settings
-        GlobalProperty gpVLServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_VL_LAB_SERVER_REQUEST_URL);
-        GlobalProperty gpVLServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_VL_LAB_SERVER_RESULT_URL);
-        GlobalProperty gpVLApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_VL_LAB_SERVER_API_TOKEN);
+        GlobalProperty gpVLServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LABWARE_VL_LAB_SERVER_REQUEST_URL);
+        GlobalProperty gpVLServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LABWARE_VL_LAB_SERVER_RESULT_URL);
+        GlobalProperty gpVLApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LABWARE_VL_LAB_SERVER_API_TOKEN);
 
         String EIDServerPushUrl = gpEIDServerPushUrl.getPropertyValue();
         String EIDServerPullUrl = gpEIDServerPullUrl.getPropertyValue();
@@ -89,32 +90,25 @@ public class LabwareSystemWebRequest extends LabWebRequest {
         String API_KEY = "";
 
         if(toProcess.getManifestType() == LabManifest.EID_TYPE) {
-            GlobalProperty gpEIDServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_EID_LAB_SERVER_REQUEST_URL);
-            GlobalProperty gpEIDApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_EID_LAB_SERVER_API_TOKEN);
+            GlobalProperty gpEIDServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LABWARE_EID_LAB_SERVER_REQUEST_URL);
+            GlobalProperty gpEIDApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LABWARE_EID_LAB_SERVER_API_TOKEN);
             serverUrl = gpEIDServerPushUrl.getPropertyValue().trim();
             API_KEY = gpEIDApiToken.getPropertyValue().trim();
         } else if(toProcess.getManifestType() == LabManifest.VL_TYPE) {
-            GlobalProperty gpVLServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_VL_LAB_SERVER_REQUEST_URL);
-            GlobalProperty gpVLApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_VL_LAB_SERVER_API_TOKEN);
+            GlobalProperty gpVLServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LABWARE_VL_LAB_SERVER_REQUEST_URL);
+            GlobalProperty gpVLApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LABWARE_VL_LAB_SERVER_API_TOKEN);
             serverUrl = gpVLServerPushUrl.getPropertyValue().trim();
             API_KEY = gpVLApiToken.getPropertyValue().trim();
         }
 
-        SSLConnectionSocketFactory sslsf = null;
-        GlobalProperty gpSslVerification = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_SSL_VERIFICATION_ENABLED);
-
-        if (gpSslVerification != null) {
-            String sslVerificationEnabled = gpSslVerification.getPropertyValue();
-            if (StringUtils.isNotBlank(sslVerificationEnabled)) {
-                if (sslVerificationEnabled.equals("true")) {
-                    sslsf = Utils.sslConnectionSocketFactoryDefault();
-                } else {
-                    sslsf = Utils.sslConnectionSocketFactoryWithDisabledSSLVerification();
-                }
-            }
-        }
+        SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
+                SSLContexts.createDefault(),
+                new String[]{"TLSv1.2"},
+                null,
+                SSLConnectionSocketFactory.getDefaultHostnameVerifier());
 
         CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
+        //CloseableHttpClient httpClient = HttpClientBuilder.create().build();
 
         try {
 
@@ -189,37 +183,30 @@ public class LabwareSystemWebRequest extends LabWebRequest {
         String API_KEY = "";
 
         if(manifestToUpdateResults.getManifestType() == LabManifest.EID_TYPE) {
-            GlobalProperty gpEIDServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_EID_LAB_SERVER_RESULT_URL);
-            GlobalProperty gpEIDApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_EID_LAB_SERVER_API_TOKEN);
+            GlobalProperty gpEIDServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LABWARE_EID_LAB_SERVER_RESULT_URL);
+            GlobalProperty gpEIDApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LABWARE_EID_LAB_SERVER_API_TOKEN);
             serverUrl = gpEIDServerPullUrl.getPropertyValue().trim();
             API_KEY = gpEIDApiToken.getPropertyValue().trim();
         } else if(manifestToUpdateResults.getManifestType() == LabManifest.VL_TYPE) {
-            GlobalProperty gpVLServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_VL_LAB_SERVER_RESULT_URL);
-            GlobalProperty gpVLApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_VL_LAB_SERVER_API_TOKEN);
+            GlobalProperty gpVLServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LABWARE_VL_LAB_SERVER_RESULT_URL);
+            GlobalProperty gpVLApiToken = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_LABWARE_VL_LAB_SERVER_API_TOKEN);
             serverUrl = gpVLServerPullUrl.getPropertyValue().trim();
             API_KEY = gpVLApiToken.getPropertyValue().trim();
         }
 
-        GlobalProperty gpLastProcessedManifest = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_MANIFEST_LAST_PROCESSED);
-        GlobalProperty gpLastProcessedManifestUpdatetime = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_MANIFEST_LAST_UPDATETIME);
+        GlobalProperty gpLastProcessedManifest = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_MANIFEST_LAST_PROCESSED);
+        GlobalProperty gpLastProcessedManifestUpdatetime = Context.getAdministrationService().getGlobalPropertyObject(LabOrderDataExchange.GP_MANIFEST_LAST_UPDATETIME);
 
 
         //Using SSL
-        SSLConnectionSocketFactory sslsf = null;
-        GlobalProperty gpSslVerification = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_SSL_VERIFICATION_ENABLED);
-
-        if (gpSslVerification != null) {
-            String sslVerificationEnabled = gpSslVerification.getPropertyValue();
-            if (StringUtils.isNotBlank(sslVerificationEnabled)) {
-                if (sslVerificationEnabled.equals("true")) {
-                    sslsf = Utils.sslConnectionSocketFactoryDefault();
-                } else {
-                    sslsf = Utils.sslConnectionSocketFactoryWithDisabledSSLVerification();
-                }
-            }
-        }
+        SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
+                SSLContexts.createDefault(),
+                new String[]{"TLSv1.2"},
+                null,
+                SSLConnectionSocketFactory.getDefaultHostnameVerifier());
 
         CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
+        //CloseableHttpClient httpClient = HttpClientBuilder.create().build();
 
         try {
             String facilityCode = Utils.getDefaultLocationMflCode(Utils.getDefaultLocation());
@@ -296,7 +283,7 @@ public class LabwareSystemWebRequest extends LabWebRequest {
                     if (pendingResultsForNextIteration.size() > 0) {
                         System.out.println("Labware Lab Results Get: Updating manifest global property");
                         gpLastProcessedManifest.setPropertyValue(manifestToUpdateResults.getId().toString());
-                        gpLastProcessedManifestUpdatetime.setPropertyValue(Utils.getSimpleDateFormat(ModuleConstants.MANIFEST_LAST_UPDATE_PATTERN).format(new Date()));
+                        gpLastProcessedManifestUpdatetime.setPropertyValue(Utils.getSimpleDateFormat(LabOrderDataExchange.MANIFEST_LAST_UPDATE_PATTERN).format(new Date()));
                         Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifest);
                         Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifestUpdatetime);
                     }
@@ -339,7 +326,7 @@ public class LabwareSystemWebRequest extends LabWebRequest {
             if (order.getPatient().getGender().equals("F")) {
                 node.put("female_status", "none");
             }
-            node.put("lab", ModuleConstants.DEFAULT_APHL_LAB_CODE.toString());
+            node.put("lab", DEFAULT_APHL_LAB_CODE.toString());
             node.put("facility_email", "none");
             node.put("recency_id", "");
             node.put("emr_shipment", StringUtils.isNotBlank(manifestID) ? manifestID : "");
