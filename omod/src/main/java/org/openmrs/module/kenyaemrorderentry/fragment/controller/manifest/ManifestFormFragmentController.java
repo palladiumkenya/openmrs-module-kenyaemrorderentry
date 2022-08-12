@@ -1,7 +1,10 @@
 package org.openmrs.module.kenyaemrorderentry.fragment.controller.manifest;
 
+import org.apache.commons.lang.StringUtils;
+import org.openmrs.Location;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
+import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaui.form.AbstractWebForm;
 import org.openmrs.ui.framework.SimpleObject;
@@ -13,20 +16,48 @@ import org.openmrs.ui.framework.page.PageModel;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class ManifestFormFragmentController {
     public void controller(@FragmentParam(value = "manifestId", required = false) LabManifest labManifest,
                            @RequestParam(value = "returnUrl") String returnUrl,
                            PageModel model) {
-
+        KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
         LabManifest exists = labManifest != null ? labManifest : null;
         model.addAttribute("labManifest", labManifest);
+        model.addAttribute("manifestTypeOptions", manifestTypeOptions());
         model.addAttribute("command", newEditManifestForm(exists));
         model.addAttribute("manifestStatusOptions", manifestStatus());
-        model.addAttribute("countyList", getCountyList());
+
+        //prepopulations
+        LabManifest lastManifest = kenyaemrOrdersService.getLastLabOrderManifest();
+        model.addAttribute("lastCounty", lastManifest != null && kenyaemrOrdersService.getLastLabOrderManifest().getCounty() !=null ? kenyaemrOrdersService.getLastLabOrderManifest().getCounty() : "");
+        model.addAttribute("lastSubCounty", lastManifest != null && kenyaemrOrdersService.getLastLabOrderManifest().getSubCounty() !=null ? kenyaemrOrdersService.getLastLabOrderManifest().getSubCounty() : "");
+        model.addAttribute("lastFacilityEmail", lastManifest != null && kenyaemrOrdersService.getLastLabOrderManifest().getFacilityEmail() !=null ? kenyaemrOrdersService.getLastLabOrderManifest().getFacilityEmail() : "");
+        model.addAttribute("lastFacilityPhoneContact", lastManifest != null && kenyaemrOrdersService.getLastLabOrderManifest().getFacilityPhoneContact() !=null ? kenyaemrOrdersService.getLastLabOrderManifest().getFacilityPhoneContact() : "");
+        model.addAttribute("lastFacilityClinicianName", lastManifest != null && kenyaemrOrdersService.getLastLabOrderManifest().getClinicianName() !=null ? kenyaemrOrdersService.getLastLabOrderManifest().getClinicianName() : "");
+        model.addAttribute("lastFacilityClinicianPhone", lastManifest != null && kenyaemrOrdersService.getLastLabOrderManifest().getClinicianPhoneContact() !=null ? kenyaemrOrdersService.getLastLabOrderManifest().getClinicianPhoneContact() : "");
+        model.addAttribute("lastFacilityLabPhone", lastManifest != null && kenyaemrOrdersService.getLastLabOrderManifest().getLabPocPhoneNumber() !=null ? kenyaemrOrdersService.getLastLabOrderManifest().getLabPocPhoneNumber() : "");
+
+             // create list of counties
+        List<String> countyList = new ArrayList<String>();
+        List<Location> locationList = Context.getLocationService().getAllLocations();
+        for(Location loc: locationList) {
+            String locationCounty = loc.getCountyDistrict();
+            if(!StringUtils.isEmpty(locationCounty) && !StringUtils.isBlank(locationCounty)) {
+                countyList.add(locationCounty);
+            }
+        }
+        Set<String> uniqueCountyList = new HashSet<String>(countyList);
+        model.addAttribute("countyList", uniqueCountyList);
+        model.addAttribute("isAnEdit", exists == null ? false : true);
         model.addAttribute("returnUrl", returnUrl);
     }
 
@@ -38,61 +69,19 @@ public class ManifestFormFragmentController {
                 );
     }
 
-    private List<String> getCountyList() {
-
-        return Arrays.asList(
-                new String("Kwale"),
-                new String("Bungoma"),
-                new String("Kisumu"),
-                new String("Meru"),
-                new String("Mandera"),
-                new String("Kirinyaga"),
-                new String("Lamu"),
-                new String("Uasin Gishu"),
-                new String("Kisii"),
-                new String("Nakuru"),
-                new String("Kitui"),
-                new String("Baringo"),
-                new String("Migori"),
-                new String("Vihiga"),
-                new String("Taita Taveta"),
-                new String("Tana River"),
-                new String("Kakamega"),
-                new String("Siaya"),
-                new String("Marsabit"),
-                new String("Laikipia"),
-                new String("Kilifi"),
-                new String("Isiolo"),
-                new String("Nyeri"),
-                new String("Nairobi"),
-                new String("Narok"),
-                new String("Kajiado"),
-                new String("Nyamira"),
-                new String("Elgeyo Marakwet"),
-                new String("Embu"),
-                new String("Turkana"),
-                new String("Samburu"),
-                new String("Muranga"),
-                new String("Nandi"),
-                new String("Tharaka Nithi"),
-                new String("Kericho"),
-                new String("Trans Nzoia"),
-                new String("Bomet"),
-                new String("Machakos"),
-                new String("West Pokot"),
-                new String("Garissa"),
-                new String("Mombasa"),
-                new String("Wajir"),
-                new String("Homa Bay"),
-                new String("Makueni"),
-                new String("Nyandarua"),
-                new String("Kiambu"),
-                new String("Busia")
-        );
-
+    protected List<SimpleObject> manifestTypeOptions() {
+        List<SimpleObject> options = new ArrayList<SimpleObject>();
+        for (Map.Entry<Integer, String> option : createManifestTypeOptions().entrySet())
+            options.add(SimpleObject.create("value", option.getKey(), "label", option.getValue()));
+        return options;
     }
 
-
+    private Map<Integer, String> createManifestTypeOptions() {
+        Map<Integer, String> options = new HashMap<Integer, String>();
+        options.put(LabManifest.VL_TYPE, "Viral Load");
+        //options.put(LabManifest.EID_TYPE, "EID");//disabling EID for the first release
+        return options;
+    }
 
     public SimpleObject saveManifest(@MethodParam("newEditManifestForm") @BindParams EditManifestForm
                                                 form,
@@ -116,12 +105,14 @@ public class ManifestFormFragmentController {
 
     public class EditManifestForm extends AbstractWebForm {
         private LabManifest original;
+        private String identifier;
         private Date startDate;
-        private  Date endDate;
+        private Date endDate;
         private String courier;
         private String courierOfficer;
         private String status;
-        private  Date dispatchDate;
+        private Integer manifestType;
+        private Date dispatchDate;
         private String county;
         private String subCounty;
         private String facilityEmail;
@@ -135,8 +126,10 @@ public class ManifestFormFragmentController {
 
         public EditManifestForm(LabManifest manifest) {
             this.original = manifest;
+            this.identifier = manifest.getIdentifier();
             this.startDate = manifest.getStartDate();
             this.status = manifest.getStatus();
+            this.manifestType = manifest.getManifestType();
             this.endDate = manifest.getEndDate();
             this.courier = manifest.getCourier();
             this.courierOfficer = manifest.getCourierOfficer();
@@ -152,17 +145,33 @@ public class ManifestFormFragmentController {
         }
         public LabManifest save(){
             LabManifest toSave;
-            if (original !=null){
 
-                toSave = original;
-            }
-            else{
+            //Check if it is labware system and if so generate a manifest ID
+            //Avoid doing this if it is an edit
+            if(original == null) {
+                //This is a save
                 toSave = new LabManifest();
+                LabOrderDataExchange labOrderDataExchange = new LabOrderDataExchange();
+                if(LabOrderDataExchange.getSystemType() == LabOrderDataExchange.LABWARE_SYSTEM) {
+                    String mType = "E";
+                    if(manifestType == LabManifest.EID_TYPE) {
+                        mType = "E";
+                    } else if(manifestType == LabManifest.VL_TYPE) {
+                        mType = "V";
+                    }
+                    toSave.setIdentifier(labOrderDataExchange.generateUniqueManifestID(mType));
+                }
+            } else {
+                //This is an edit
+                toSave = original;
+                toSave.setIdentifier(identifier);
             }
+            
             toSave.setStartDate(startDate);
             toSave.setEndDate(endDate);
             toSave.setDispatchDate(dispatchDate);
             toSave.setStatus(status);
+            toSave.setManifestType(manifestType);
             toSave.setCourier(courier);
             toSave.setCourierOfficer(courierOfficer);
             toSave.setCounty(county);
@@ -183,31 +192,7 @@ public class ManifestFormFragmentController {
             require(errors, "startDate");
             require(errors, "endDate");
             require(errors, "status");
-
-            /*if (startDate != null) {
-                if (startDate.after(new Date())) {
-                    errors.rejectValue("startDate", "Cannot be in the future");
-                } else {
-                    Calendar calendar = Calendar.getInstance();
-                    calendar.setTime(new Date());
-                    calendar.add(Calendar.YEAR, -120);
-                    if (startDate.before(calendar.getTime())) {
-                        errors.rejectValue("startDate", " Invalid date");
-                    }
-                }
-            }
-            if (endDate != null) {
-                if (endDate.after(new Date())) {
-                    errors.rejectValue("endDate", "Cannot be in the future");
-                } else {
-                    Calendar calendar = Calendar.getInstance();
-                    calendar.setTime(new Date());
-                    calendar.add(Calendar.YEAR, -120);
-                    if (endDate.before(calendar.getTime())) {
-                        errors.rejectValue("endDate", " Invalid date");
-                    }
-                }
-            }*/
+            require(errors, "manifestType");
         }
 
         public LabManifest getOriginal() {
@@ -216,6 +201,14 @@ public class ManifestFormFragmentController {
 
         public void setOriginal(LabManifest original) {
             this.original = original;
+        }
+
+        public String getIdentifier() {
+            return identifier;
+        }
+
+        public void setIdentifier(String identifier) {
+            this.identifier = identifier;
         }
 
         public Date getStartDate() {
@@ -256,6 +249,14 @@ public class ManifestFormFragmentController {
 
         public void setStatus(String status) {
             this.status = status;
+        }
+
+        public Integer getManifestType() {
+            return manifestType;
+        }
+
+        public void setManifestType(Integer manifestType) {
+            this.manifestType = manifestType;
         }
 
         public Date getDispatchDate() {

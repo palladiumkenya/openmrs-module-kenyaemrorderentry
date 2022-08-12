@@ -11,6 +11,7 @@ import java.util.UUID;
  */
 public class LabManifest extends BaseOpenmrsData implements Serializable {
     private Integer id;
+    private String identifier;
     private Date startDate;
     private Date endDate;
     private Date dispatchDate;
@@ -24,7 +25,12 @@ public class LabManifest extends BaseOpenmrsData implements Serializable {
     private String clinicianPhoneContact;
     private String clinicianName;
     private String labPocPhoneNumber;
+    private Integer manifestType;
     private String uuid;
+
+    //Manifest Type and Order Type
+    public static final int EID_TYPE = 1;
+    public static final int VL_TYPE = 2;
 
     public LabManifest() {
         prePersist();
@@ -48,6 +54,14 @@ public class LabManifest extends BaseOpenmrsData implements Serializable {
     @Override
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
     }
 
     public Date getStartDate() {
@@ -154,6 +168,14 @@ public class LabManifest extends BaseOpenmrsData implements Serializable {
         this.labPocPhoneNumber = labPocPhoneNumber;
     }
 
+    public Integer getManifestType() {
+        return manifestType;
+    }
+
+    public void setManifestType(Integer manifestType) {
+        this.manifestType = manifestType;
+    }
+
     @Override
     public String getUuid() {
         return uuid;
@@ -170,4 +192,26 @@ public class LabManifest extends BaseOpenmrsData implements Serializable {
             setUuid(UUID.randomUUID().toString());
     }
 
+    @Override
+    public String toString() {
+        return "LabManifest{" +
+                "id=" + id +
+                ", identifier='" + identifier + '\'' +
+                ", startDate=" + startDate +
+                ", endDate=" + endDate +
+                ", dispatchDate=" + dispatchDate +
+                ", courier='" + courier + '\'' +
+                ", courierOfficer='" + courierOfficer + '\'' +
+                ", status='" + status + '\'' +
+                ", county='" + county + '\'' +
+                ", subCounty='" + subCounty + '\'' +
+                ", facilityEmail='" + facilityEmail + '\'' +
+                ", facilityPhoneContact='" + facilityPhoneContact + '\'' +
+                ", clinicianPhoneContact='" + clinicianPhoneContact + '\'' +
+                ", clinicianName='" + clinicianName + '\'' +
+                ", labPocPhoneNumber='" + labPocPhoneNumber + '\'' +
+                ", manifestType=" + manifestType +
+                ", uuid='" + uuid + '\'' +
+                '}';
+    }
 }

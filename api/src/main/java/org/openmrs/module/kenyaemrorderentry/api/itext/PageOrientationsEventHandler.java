@@ -18,6 +18,6 @@ public class PageOrientationsEventHandler implements IEventHandler {
     @Override
     public void handleEvent(Event currentEvent) {
         PdfDocumentEvent docEvent = (PdfDocumentEvent) currentEvent;
-        docEvent.getPage().put(PdfName.Rotate, LabManifestReport.LANDSCAPE);
+        docEvent.getPage().put(PdfName.Rotate, ViralLoadLabManifestReport.LANDSCAPE);
     }
 }

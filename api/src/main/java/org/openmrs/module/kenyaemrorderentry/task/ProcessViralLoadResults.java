@@ -1,5 +1,9 @@
 package org.openmrs.module.kenyaemrorderentry.task;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHeaders;
@@ -13,6 +17,9 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.openmrs.GlobalProperty;
 import org.openmrs.api.context.Context;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * this class composes a POST request to an end point that processes lab results.
@@ -80,5 +87,40 @@ public class ProcessViralLoadResults {
         catch (Exception e) {
             throw new IllegalArgumentException("Unable to update lab results through REST", e);
         }
+    }
+
+    /**
+     * Util method for extracting order ids from lab system response
+     * The list is used with what was used in querying for results to determine which samples aren't in the lab
+     * @param resultPayload
+     * @return
+     */
+    public static List<Integer> extractOrderIdListFromLabResponse(String resultPayload) {
+
+        JsonElement rootNode = JsonParser.parseString(resultPayload);
+        List<Integer> orderIds = null;
+        JsonArray resultsObj = null;
+        try {
+            if (rootNode.isJsonArray()) {
+                resultsObj = rootNode.getAsJsonArray();
+                orderIds = new ArrayList<Integer>();
+            } else {
+                System.out.println("Lab Results Get list of order ids: The payload could not be understood. An array is expected!");
+                return null;
+            }
+        } catch (Exception e) {
+            System.err.println("Lab Results Get Results: Could not extract order ids: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        if (resultsObj.size() > 0) {
+            for (int i = 0; i < resultsObj.size(); i++) {
+
+                JsonObject o = resultsObj.get(i).getAsJsonObject();
+                Integer orderId = o.get("order_number").getAsInt();
+                orderIds.add(orderId);
+            }
+        }
+        return orderIds;
     }
 }

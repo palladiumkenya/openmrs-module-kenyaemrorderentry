@@ -3,8 +3,7 @@ package org.openmrs.module.kenyaemrorderentry.api.service;
 import org.junit.Test;
 import org.openmrs.api.context.Context;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
 
 public class KenyaemrOrdersServiceTest extends BaseModuleContextSensitiveTest {
 

@@ -1,11 +1,18 @@
 package org.openmrs.module.kenyaemrorderentry.api.db.hibernate;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.CacheMode;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.exception.DataException;
 import org.openmrs.Cohort;
@@ -15,8 +22,6 @@ import org.openmrs.module.kenyaemrorderentry.api.db.KenyaemrOrdersDAO;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 import org.openmrs.module.reporting.common.DurationUnit;
-
-import java.util.*;
 
 public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
     protected final Log log = LogFactory.getLog(this.getClass());
@@ -43,6 +48,14 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
     }
 
     @Override
+    public Long getLastManifestID() {
+        Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifest.class);
+        criteria.setProjection(Projections.max("id"));
+        Long maxId = ((Number)criteria.uniqueResult()).longValue();
+        return(maxId);
+    }
+
+    @Override
     public List<LabManifest> getLabOrderManifest() throws DataException {
         Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifest.class);
         criteria.add(Restrictions.eq("voided", false));
@@ -53,6 +66,22 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
     @Override
     public LabManifest getLabOrderManifestById(Integer id) throws DataException {
         return (LabManifest) this.sessionFactory.getCurrentSession().get(LabManifest.class, id);
+    }
+
+    @Override
+    public LabManifest getLabOrderManifestByManifestType(Integer manifestType) throws DataException {
+        Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifestOrder.class);
+        criteria.add(Restrictions.eq("manifestType", manifestType));
+        criteria.addOrder(org.hibernate.criterion.Order.asc("id"));
+        return (LabManifest) criteria.uniqueResult();
+    }
+
+    @Override
+    public LabManifest getLastLabOrderManifest() throws DataException {
+        Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifest.class);
+        criteria.setMaxResults(1);
+        criteria.addOrder(org.hibernate.criterion.Order.desc("id"));
+        return (LabManifest) criteria.uniqueResult();
     }
 
     @Override
@@ -98,6 +127,14 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
     @Override
     public LabManifestOrder getLabManifestOrderById(Integer id) throws DataException {
         return (LabManifestOrder) this.sessionFactory.getCurrentSession().get(LabManifestOrder.class, id);
+    }
+
+    @Override
+    public LabManifestOrder getLabManifestOrderByOrderType(Integer orderType) throws DataException {
+        Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifestOrder.class);
+        criteria.add(Restrictions.eq("orderType", orderType));
+        criteria.addOrder(org.hibernate.criterion.Order.asc("id"));
+        return (LabManifestOrder) criteria.uniqueResult();
     }
 
     @Override
@@ -183,14 +220,26 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
     }
 
     @Override
-    public List<LabManifestOrder> getLabManifestOrdersToSend(LabManifest labManifestOrder) {
+    public List<LabManifestOrder> getLabManifestOrdersToSend(LabManifest labManifest) {
         Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifestOrder.class);
-        criteria.add(Restrictions.eq("labManifest", labManifestOrder));
+        criteria.add(Restrictions.eq("labManifest", labManifest));
         criteria.add(Restrictions.eq("status", "Pending"));
         criteria.addOrder(org.hibernate.criterion.Order.asc("id"));
         criteria.add(Restrictions.eq("voided", false));
         criteria.setMaxResults(50);
         return criteria.list();
+    }
+
+    @Override
+    public Long countLabManifestOrdersToSend(LabManifest labManifest) {
+        Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifestOrder.class);
+        criteria.add(Restrictions.eq("labManifest", labManifest));
+        criteria.add(Restrictions.eq("status", "Pending"));
+        criteria.add(Restrictions.eq("voided", false));
+        criteria.setProjection(Projections.rowCount());
+        List rowCount = criteria.list();
+        Long count = (Long) rowCount.get(0);
+        return(count);
     }
 
     //Patient contact dimensions methods
@@ -285,6 +334,18 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
     }
 
     @Override
+    public Long countLabManifestOrderByStatusBeforeDate(String status, Date lastStatusCheckDate) {
+        Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifestOrder.class);
+        criteria.add(Restrictions.eq("status", status));
+        criteria.add(Restrictions.eq("voided", false));
+        criteria.add(Restrictions.or(Restrictions.isNull("lastStatusCheckDate"), Restrictions.le("lastStatusCheckDate", lastStatusCheckDate)));
+        criteria.setProjection(Projections.rowCount());
+        List rowCount = criteria.list();
+        Long count = (Long) rowCount.get(0);
+        return(count);
+    }
+
+    @Override
     public LabManifest getLabOrderManifestByStatus(String status, Date onOrBefore) {
         Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifest.class);
         criteria.add(Restrictions.eq("status", status));
@@ -328,6 +389,45 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
         criteria.setMaxResults(50);
 
         return criteria.list();
+    }
+
+    @Override
+    public Long countLabManifestOrderByManifestAndStatus(LabManifest labManifestOrder, Date updatedBefore, String... status) {
+        Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifestOrder.class);
+        criteria.add(Restrictions.le("lastStatusCheckDate", updatedBefore));
+        criteria.add(Restrictions.eq("labManifest", labManifestOrder));
+        criteria.add(Restrictions.in("status", status));
+        criteria.add(Restrictions.eq("voided", false));
+        criteria.setProjection(Projections.rowCount());
+        List rowCount = criteria.list();
+        Long count = (Long) rowCount.get(0);
+        return(count);
+    }
+
+    @Override
+    public LabManifestOrder getLabManifestOrderByOrderId(Order specimenId) {
+        Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifestOrder.class);
+        criteria.add(Restrictions.eq("order", specimenId));
+        if (criteria.list().size() > 0) {
+            return (LabManifestOrder) criteria.list().get(0);
+        }
+        return null;
+    }
+
+    @Override
+    public LabManifest getFirstLabManifestByOrderStatusCheckedBeforeDate(String status, Date lastStatusCheckDate) {
+        Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifestOrder.class);
+        criteria.add(Restrictions.eq("status", status));
+        criteria.add(Restrictions.eq("voided", false));
+        criteria.add(Restrictions.or(Restrictions.isNull("lastStatusCheckDate"), Restrictions.le("lastStatusCheckDate", lastStatusCheckDate)));
+        criteria.addOrder(org.hibernate.criterion.Order.asc("id"));
+        criteria.setMaxResults(1);
+
+        if (criteria.list().size() > 0) {
+            LabManifestOrder manifestOrder = (LabManifestOrder) criteria.list().get(0);
+            return manifestOrder.getLabManifest();
+        }
+        return null;
     }
 
 }

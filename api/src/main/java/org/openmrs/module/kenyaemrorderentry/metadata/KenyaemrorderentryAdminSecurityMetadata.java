@@ -3,7 +3,9 @@ package org.openmrs.module.kenyaemrorderentry.metadata;
 import org.openmrs.module.metadatadeploy.bundle.AbstractMetadataBundle;
 import org.springframework.stereotype.Component;
 
-import static org.openmrs.module.metadatadeploy.bundle.CoreConstructors.*;
+import static org.openmrs.module.metadatadeploy.bundle.CoreConstructors.privilege;
+import static org.openmrs.module.metadatadeploy.bundle.CoreConstructors.idSet;
+import static org.openmrs.module.metadatadeploy.bundle.CoreConstructors.role;
 
 /**
  * Implementation of access control to the app.

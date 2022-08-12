@@ -13,9 +13,12 @@ import java.util.List;
 
 public interface KenyaemrOrdersService extends OpenmrsService {
     LabManifest saveLabOrderManifest(LabManifest labManifest);
+    Long getLastManifestID();
     List<LabManifest> getLabOrderManifest();
     List<LabManifest> getLabOrderManifest(String status);
     LabManifest getLabOrderManifestById(Integer id);
+    LabManifest getLabOrderManifestByManifestType(Integer manifestType);
+    LabManifest getLastLabOrderManifest();
     LabManifest getLabOrderManifestByStatus(String status);
     LabManifest getLabOrderManifestByStatus(String status, Date onOrBefore);
     List<LabManifest> getLabOrderManifestBetweenDates(Date startDate, Date endDate);
@@ -25,6 +28,7 @@ public interface KenyaemrOrdersService extends OpenmrsService {
     LabManifestOrder saveLabManifestOrder(LabManifestOrder labManifestOrder);
     List<LabManifestOrder> getLabManifestOrders();
     LabManifestOrder getLabManifestOrderById(Integer id);
+    LabManifestOrder getLabManifestOrderByOrderType(Integer orderType);
     List<LabManifestOrder> getLabManifestOrderByManifest(LabManifest labManifestOrder);
     void voidLabManifestOrder(Integer manifestOrder);
 
@@ -32,10 +36,14 @@ public interface KenyaemrOrdersService extends OpenmrsService {
     List<LabManifestOrder> getLabManifestOrderByStatus(String status);
     List<LabManifestOrder> getLabManifestOrderByNotFoundInLabSystem(Integer... ordersList);
     List<LabManifestOrder> getLabManifestOrderByStatusBeforeDate(String status, Date lastStatusCheckDate);
+    LabManifest getFirstLabManifestByOrderStatusCheckedBeforeDate(String status, Date lastStatusCheckDate);
+    Long countLabManifestOrderByStatusBeforeDate(String status, Date lastStatusCheckDate);
     List<LabManifestOrder> getLabManifestOrderByManifestAndStatus(LabManifest labManifestOrder, String status);
     List<LabManifestOrder> getLabManifestOrderByManifestAndStatus(LabManifest labManifestOrder, String ... status);
     List<LabManifestOrder> getLabManifestOrderByManifestAndStatus(LabManifest labManifestOrder, Date updatedBefore, String ... status);
+    Long countLabManifestOrderByManifestAndStatus(LabManifest labManifestOrder, Date updatedBefore, String ... status);
     List<LabManifestOrder> getLabManifestOrdersToSend(LabManifest labManifestOrder);
+    Long countLabManifestOrdersToSend(LabManifest labManifestOrder);
     Cohort getPatientsWithCadre(boolean includeTroupes, boolean includeCivilians);
 
     //Patient contact dimensions service methods

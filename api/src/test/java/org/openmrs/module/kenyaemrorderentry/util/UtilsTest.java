@@ -3,8 +3,6 @@ package org.openmrs.module.kenyaemrorderentry.util;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-
 public class UtilsTest {
     @Before
     public void setUp() throws Exception {

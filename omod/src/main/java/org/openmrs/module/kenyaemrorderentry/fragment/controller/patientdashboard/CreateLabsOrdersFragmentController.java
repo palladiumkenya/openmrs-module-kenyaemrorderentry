@@ -1,10 +1,28 @@
 package org.openmrs.module.kenyaemrorderentry.fragment.controller.patientdashboard;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
 import org.apache.commons.beanutils.PropertyUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.openmrs.*;
-import org.openmrs.api.*;
+import org.openmrs.CareSetting;
+import org.openmrs.Concept;
+import org.openmrs.EncounterRole;
+import org.openmrs.EncounterType;
+import org.openmrs.OrderType;
+import org.openmrs.Patient;
+import org.openmrs.api.ConceptService;
+import org.openmrs.api.EncounterService;
+import org.openmrs.api.ObsService;
+import org.openmrs.api.OrderService;
+import org.openmrs.api.OrderSetService;
+import org.openmrs.api.PatientService;
+import org.openmrs.api.ProviderService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appui.UiSessionContext;
 import org.openmrs.module.webservices.rest.web.ConversionUtil;
@@ -14,8 +32,6 @@ import org.openmrs.ui.framework.annotation.SpringBean;
 import org.openmrs.ui.framework.fragment.FragmentConfiguration;
 import org.openmrs.ui.framework.fragment.FragmentModel;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import java.util.*;
 
 public class CreateLabsOrdersFragmentController {
     public static final Locale LOCALE = Locale.ENGLISH;
@@ -159,7 +175,6 @@ public class CreateLabsOrdersFragmentController {
                     labTestObj.put("concept", labTest.getUuid());
                     labTestObj.put("name", conceptService.getConcept(labTest.getConceptId()).getName(LOCALE).getName());
                     labTestArray.add(labTestObj);
-
 
                 }
                 panelObj.put("name", panelName);
