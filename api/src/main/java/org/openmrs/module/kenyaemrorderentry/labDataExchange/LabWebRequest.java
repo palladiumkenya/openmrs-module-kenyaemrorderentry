@@ -104,7 +104,6 @@ public abstract class LabWebRequest {
             test.put("order_no", o.getOrderId().toString());
             test.put("patient_identifier", cccNumber != null ? cccNumber.getIdentifier() : "");
             test.put("sampletype", sampleType);
-            test.put("datereceived", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
             test.put("patient_name", fullName);
 
             test.put("regimenline", regimenLine);
@@ -145,8 +144,6 @@ public abstract class LabWebRequest {
 
             } else if (LabOrderDataExchange.getSystemType() == ModuleConstants.LABWARE_SYSTEM) {
                 test.put("sample_type", sampleType);
-                test.put("date_received", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
-                test.put("datereceived", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
                 test.put("pat_name", fullName);
                 test.put("patient_name", fullName);
 
