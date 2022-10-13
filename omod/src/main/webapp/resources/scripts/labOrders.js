@@ -328,6 +328,9 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                         if (data.display ==='Tuberculosis polymerase chain reaction with rifampin resistance checking' ) {
                             data['display'] =  'GeneXpert';
                         }
+                        if (data.display ==='Serum cryptococcal antigen status' ) {
+                            data['display'] =  'Serum Cryptococcal Antigen (CRAG)';
+                        }
                         if(data.orderReason) {
                             if (data.orderReason.uuid === '843AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
                                 data['orderReasonCoded'] = "Confirmation of treatment failure (repeat VL) ";
@@ -399,6 +402,9 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                         }
                         if (data.label ==='Tuberculosis polymerase chain reaction with rifampin resistance checking' ) {
                             data['label'] =  'GeneXpert';
+                        }
+                        if (data.label ==='Serum cryptococcal antigen status' ) {
+                            data['label'] =  'Serum Cryptococcal Antigen (CRAG)';
                         }
 
                     if(data.concept ==='856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
@@ -554,11 +560,11 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             $scope.panelTypeName = tests.name;
             $scope.showTestFields = true;
             $scope.panelTests = test;
-            $scope.panelTests = mapGeneXpertName($scope.panelTests);
+            $scope.panelTests = customTestName($scope.panelTests);
 
         }
 
-        function mapGeneXpertName (res) {
+        function customTestName (res) {
             var orders = [];
             for (var i = 0; i < res.length; ++i) {
                 var data = res[i];
@@ -568,6 +574,9 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
                         if (data.name ==='Tuberculosis polymerase chain reaction with rifampin resistance checking' ) {
                             data['name'] =  'GeneXpert';
+                        }
+                        if (data.name ==='Serum cryptococcal antigen status' ) {
+                            data['name'] =  'Serum Cryptococcal Antigen (CRAG)';
                         }
 
                     }
