@@ -109,7 +109,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                     },
                     {
                         name:'3rd PCR (12months)',
-                        uuid:'164860AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+                        uuid:'844AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
                     },
                     {
                         name:'Confirmatory PCR and Baseline VL',
@@ -274,7 +274,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                         if (data.orderReasonCoded === '1326AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
                             data['orderReasonCoded'] = "2nd PCR (6 months)";
                         }
-                        if (data.orderReasonCoded === '164860AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                        if (data.orderReasonCoded === '844AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
                             data['orderReasonCoded'] = "3rd PCR (12months)";
                         }
                         if (data.orderReasonCoded === '162082AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
@@ -363,7 +363,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                             if (data.orderReason.uuid === '1326AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
                                 data['orderReasonCoded'] = "2nd PCR (6 months)";
                             }
-                            if (data.orderReason.uuid === '164860AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                            if (data.orderReason.uuid === '844AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
                                 data['orderReasonCoded'] = "3rd PCR (12months)";
                             }
                             if (data.orderReason.uuid === '162082AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
