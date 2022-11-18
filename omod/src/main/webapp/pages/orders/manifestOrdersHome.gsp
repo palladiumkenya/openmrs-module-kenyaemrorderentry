@@ -98,7 +98,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
             </button>
                     </td>
             <% } %>
-            <% if (manifestOrders.size() > 0) { %>
+            <% if (manifestOrders.size() > 0 && manifest.status.trim().toLowerCase() == 'submitted') { %>
                     <td>
                         <a href="${ ui.pageLink("kenyaemrorderentry","manifest/downloadManifest",[manifest : manifest.id]) }"   target="_blank">
                             <button style="background-color: cadetblue; color: white">
@@ -223,24 +223,24 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                     <span style="color: firebrick" id="msgBox"></span>
                     <table>
                         <tr>
-                            <td>Sample type</td>
+                            <td>Sample type *</td>
                             <td>
                                 <select id="sampleType">
-                                    <option>select ...</option>
                                     <% if(manifest.manifestType == 2) { %>
                                         <option value="Frozen plasma">Frozen plasma</option>
                                         <option value="Whole Blood">Whole Blood</option>
+                                    <% } else if(manifest.manifestType == 1) {%>
+                                        <option value="DBS">DBS</option>
                                     <% } %>
-                                    <option value="DBS">DBS</option>
                                 </select>
                             </td>
                         </tr>
                         <tr>
-                            <td>Sample collection date</td>
+                            <td>Sample collection date *</td>
                             <td>${ ui.includeFragment("kenyaui", "field/java.util.Date", [ id: "dateSampleCollected", formFieldName: "dateSampleCollected"]) }</td>
                         </tr>
                         <tr>
-                            <td>Sample separation/centrifugation date</td>
+                            <td>Sample separation/centrifugation date *</td>
                             <td>${ ui.includeFragment("kenyaui", "field/java.util.Date", [ id: "dateSampleSeparated", formFieldName: "dateSampleSeparated"]) }</td>
                         </tr>
                     </table>
@@ -362,7 +362,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
             var dSeparated = new Date(dateSampleSeparated);
             var dToday = new Date();
 
-            if (dateSampleCollected == "" || dateSampleSeparated == "" || sampleType == "") {
+            if ( dateSampleCollected == "" || dateSampleSeparated == "" || sampleType == "" || sampleType == null || !sampleType ) {
                 jq('.modal-body #msgBox').text('Please fill all fields');
             }else if (dateSampleCollected > dToday){
                 jq('.modal-body #msgBox').text('Sample collection date cannot be in future');
