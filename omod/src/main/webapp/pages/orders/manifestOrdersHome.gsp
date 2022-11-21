@@ -98,7 +98,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
             </button>
                     </td>
             <% } %>
-            <% if (manifestOrders.size() > 0 && manifest.status.trim().toLowerCase() == 'submitted') { %>
+            <% if (manifestOrders.size() > 0 && (manifest.status != null && manifest.status.trim().toLowerCase() == 'submitted')) { %>
                     <td>
                         <a href="${ ui.pageLink("kenyaemrorderentry","manifest/downloadManifest",[manifest : manifest.id]) }"   target="_blank">
                             <button style="background-color: cadetblue; color: white">
