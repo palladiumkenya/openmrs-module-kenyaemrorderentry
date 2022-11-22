@@ -157,6 +157,7 @@ public class LabwareSystemWebRequest extends LabWebRequest {
                 return(false);
             } else if (statusCode == 201 || statusCode == 200) {
                 manifestOrder.setStatus("Sent");
+                manifestOrder.setDateSent(new Date());
                 System.out.println("Labware Lab Results POST: Successfully pushed a VL lab test id " + manifestOrder.getId());
                 log.info("Labware Lab Results POST: Successfully pushed a VL lab test id " + manifestOrder.getId());
                 kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);

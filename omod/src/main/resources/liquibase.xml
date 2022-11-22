@@ -293,4 +293,11 @@
         </addColumn>
     </changeSet>
 
+    <changeSet author="pwaweru" id="kenyaemr_order_entry_unique_order_per_manifest_20221118_183100">
+        <createIndex indexName="index_manifest_order_unique_order_per_manifest" tableName="kenyaemr_order_entry_lab_manifest_order" unique="true">
+            <column name="manifest_id"/>
+            <column name="order_id"/>
+        </createIndex>
+    </changeSet>
+
 </databaseChangeLog>
