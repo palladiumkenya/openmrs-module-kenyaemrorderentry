@@ -68,12 +68,13 @@ public class ProcessViralLoadResults {
                 //verify the valid error code first
                 int statusCode = response.getStatusLine().getStatusCode();
                 if (statusCode != 200 && statusCode != 201) {
-                    JSONParser parser = new JSONParser();
-                    JSONObject responseObj = (JSONObject) parser.parse(EntityUtils.toString(response.getEntity()));
-                    JSONObject errorObj = (JSONObject) responseObj.get("error");
-                    if (statusCode == 400) {// bad request
-                    }
-                    throw new RuntimeException("Failed with HTTP error code : " + statusCode + ". Error msg: " + errorObj.get("message"));
+                    // JSONParser parser = new JSONParser();
+                    // JSONObject responseObj = (JSONObject) parser.parse(EntityUtils.toString(response.getEntity()));
+                    // JSONObject errorObj = (JSONObject) responseObj.get("error");
+                    // if (statusCode == 400) {// bad request
+                    // }
+                    // throw new RuntimeException("Failed with HTTP error code : " + statusCode + ". Error msg: " + errorObj.get("message"));
+                    System.err.println("Failed with HTTP error code : " + statusCode);
                 } else {
                     //System.out.println("Successfully updated VL result"); -- remain mute
                 }
