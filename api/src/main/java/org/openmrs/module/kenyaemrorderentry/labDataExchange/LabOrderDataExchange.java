@@ -348,62 +348,66 @@ public class LabOrderDataExchange {
 
         if (resultsObj.size() > 0) {
             for (int i = 0; i < resultsObj.size(); i++) {
+                try {
+                    JsonObject o = resultsObj.get(i).getAsJsonObject();
+                    Integer orderId = o.get("order_number").getAsInt();
+                    Date sampleReceivedDate = null;
+                    Date sampleTestedDate = null;
+                    String dateSampleReceived = "";
+                    String dateSampleTested = "";
+                    String specimenRejectedReason = "";
 
-                JsonObject o = resultsObj.get(i).getAsJsonObject();
-                Integer orderId = o.get("order_number").getAsInt();
-                Date sampleReceivedDate = null;
-                Date sampleTestedDate = null;
-                String dateSampleReceived = "";
-                String dateSampleTested = "";
-                String specimenRejectedReason = "";
+                    if (getSystemType() == ModuleConstants.LABWARE_SYSTEM) {
+                        try {
+                            JsonObject dateReceivedObject = o.get("date_received").getAsJsonObject();
+                            dateSampleReceived = dateReceivedObject.get("date").getAsString().trim();
+                        } catch (Exception ex) {
+                        }
+                        try {
+                            JsonObject dateTestedObject = o.get("date_tested").getAsJsonObject();
+                            dateSampleTested = dateTestedObject.get("date").getAsString().trim();
+                        } catch (Exception ex) {
+                        }
+                    } else if (getSystemType() == ModuleConstants.CHAI_SYSTEM) {
+                        try {
+                            dateSampleReceived = o.get("date_received").getAsString().trim();
+                        } catch (Exception ex) {
+                        }
+                        try {
+                            dateSampleTested = o.get("date_tested").getAsString().trim();
+                        } catch (Exception ex) {
+                        }
+                    }
 
-                if (getSystemType() == ModuleConstants.LABWARE_SYSTEM) {
-                    try {
-                        JsonObject dateReceivedObject = o.get("date_received").getAsJsonObject();
-                        dateSampleReceived = dateReceivedObject.get("date").getAsString().trim();
-                    } catch (Exception ex) {
+                    specimenRejectedReason = (o.has("rejected_reason") && o.get("rejected_reason") != null && o.get("rejected_reason").getAsString() != null) ? o.get("rejected_reason").getAsString().trim() : "";
+
+                    if (StringUtils.isNotBlank(dateSampleReceived)) {
+                        try {
+                            sampleReceivedDate = Utils.getSimpleDateFormat(ModuleConstants.LAB_SYSTEM_DATE_PATTERN).parse(dateSampleReceived);
+                        } catch (ParseException e) {
+                            System.err.println("Lab Results Get Results: Unable to get sample receive date" + e.getMessage());
+                            e.printStackTrace();
+                        }
                     }
-                    try {
-                        JsonObject dateTestedObject = o.get("date_tested").getAsJsonObject();
-                        dateSampleTested = dateTestedObject.get("date").getAsString().trim();
-                    } catch (Exception ex) {
+
+                    if (StringUtils.isNotBlank(dateSampleTested)) {
+                        try {
+                            sampleTestedDate = Utils.getSimpleDateFormat(ModuleConstants.LAB_SYSTEM_DATE_PATTERN).parse(dateSampleTested);
+                        } catch (ParseException e) {
+                            System.err.println("Lab Results Get Results: Unable to get sample tested date" + e.getMessage());
+                            e.printStackTrace();
+                        }
                     }
-                } else if (getSystemType() == ModuleConstants.CHAI_SYSTEM) {
-                    try {
-                        dateSampleReceived = o.get("date_received").getAsString().trim();
-                    } catch (Exception ex) {
-                    }
-                    try {
-                        dateSampleTested = o.get("date_tested").getAsString().trim();
-                    } catch (Exception ex) {
-                    }
+
+                    String specimenReceivedStatus = (!o.isJsonNull() && o.has("sample_status") && !o.get("sample_status").isJsonNull() && o.get("sample_status") != null && o.get("sample_status").getAsString() != null) ? o.get("sample_status").getAsString().trim() : "";
+                    String result = !o.isJsonNull() && !o.get("result").isJsonNull() ? o.get("result").getAsString() : "";
+
+                    // update manifest object to reflect received status
+                    updateOrder(orderId, result, specimenReceivedStatus, specimenRejectedReason, sampleReceivedDate, sampleTestedDate);
+                } catch (Exception ex) {
+                    System.err.println("Lab Results Get Results: Unable to update order with results: " + ex.getMessage());
+                    ex.printStackTrace();
                 }
-
-                specimenRejectedReason = (o.has("rejected_reason") && o.get("rejected_reason") != null && o.get("rejected_reason").getAsString() != null) ? o.get("rejected_reason").getAsString().trim() : "";
-
-                if (StringUtils.isNotBlank(dateSampleReceived)) {
-                    try {
-                        sampleReceivedDate = Utils.getSimpleDateFormat(ModuleConstants.LAB_SYSTEM_DATE_PATTERN).parse(dateSampleReceived);
-                    } catch (ParseException e) {
-                        System.err.println("Lab Results Get Results: Unable to get sample receive date" + e.getMessage());
-                        e.printStackTrace();
-                    }
-                }
-
-                if (StringUtils.isNotBlank(dateSampleTested)) {
-                    try {
-                        sampleTestedDate = Utils.getSimpleDateFormat(ModuleConstants.LAB_SYSTEM_DATE_PATTERN).parse(dateSampleTested);
-                    } catch (ParseException e) {
-                        System.err.println("Lab Results Get Results: Unable to get sample tested date" + e.getMessage());
-                        e.printStackTrace();
-                    }
-                }
-
-                String specimenReceivedStatus = (o.has("sample_status") && o.get("sample_status") != null && o.get("sample_status").getAsString() != null) ? o.get("sample_status").getAsString().trim() : "";
-                String result = !o.isJsonNull() && !o.get("result").isJsonNull() ? o.get("result").getAsString() : "";
-
-                // update manifest object to reflect received status
-                updateOrder(orderId, result, specimenReceivedStatus, specimenRejectedReason, sampleReceivedDate, sampleTestedDate);
             }
         }
         System.out.println("Lab Results Get Results: Viral load results pulled and updated successfully in the database");
