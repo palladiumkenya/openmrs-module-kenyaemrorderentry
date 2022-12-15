@@ -538,16 +538,43 @@ public class LabOrderDataExchange {
                     String aboveMillionResult = "> 10,000,000 cp/ml";
                     Obs o = new Obs();
 
-                    if (result.equalsIgnoreCase(lDLResult) || result.equalsIgnoreCase(labwarelDLResult) || result.contains("LDL")) {
-                        conceptToRetain = vlTestConceptQualitative;
-                        o.setValueCoded(LDLConcept);
-                    } else if (result.equalsIgnoreCase(aboveMillionResult)) {
-                        conceptToRetain = vlTestConceptQuantitative;
-                        o.setValueNumeric(new Double(10000001));
-                    } else {
-                        conceptToRetain = vlTestConceptQuantitative;
-                        Double vlVal = NumberUtils.toDouble(result);
-                        o.setValueNumeric(vlVal);
+                    if (getSystemType() == ModuleConstants.CHAI_SYSTEM) {
+                        if (result.equalsIgnoreCase(lDLResult) || result.equalsIgnoreCase(labwarelDLResult) || result.contains("LDL")) {
+                            conceptToRetain = vlTestConceptQualitative;
+                            o.setValueCoded(LDLConcept);
+                        } else if (result.equalsIgnoreCase(aboveMillionResult)) {
+                            conceptToRetain = vlTestConceptQuantitative;
+                            o.setValueNumeric(new Double(10000001));
+                        } else {
+                            conceptToRetain = vlTestConceptQuantitative;
+                            Double vlVal = NumberUtils.toDouble(result);
+                            o.setValueNumeric(vlVal);
+                        }
+                    } else if (getSystemType() == ModuleConstants.LABWARE_SYSTEM) {
+                        result = result.toLowerCase().trim(); // convert to lowercase and trim
+                        if (result.equalsIgnoreCase(lDLResult) || result.equalsIgnoreCase(labwarelDLResult) || result.contains("LDL")) {
+                            conceptToRetain = vlTestConceptQualitative;
+                            o.setValueCoded(LDLConcept);
+                        } else if (result.equalsIgnoreCase(aboveMillionResult)) {
+                            conceptToRetain = vlTestConceptQuantitative;
+                            o.setValueNumeric(new Double(10000001));
+                        } else {
+                            result = result.replaceAll("\\s", ""); //strip all white spaces
+                            if (result.endsWith("copies/ml")) {
+                                int index = result.indexOf("copies/ml");
+                                if (index != -1) {
+                                    String val = result.substring(0, index); // Get the 40 from (40 copies/ml)
+                                    val = val.trim();
+                                    conceptToRetain = vlTestConceptQuantitative;
+                                    Double vlVal = NumberUtils.toDouble(val);
+                                    o.setValueNumeric(vlVal);
+                                }
+                            } else {
+                                conceptToRetain = vlTestConceptQuantitative;
+                                Double vlVal = NumberUtils.toDouble(result);
+                                o.setValueNumeric(vlVal);
+                            }
+                        }
                     }
 
                     // In order to record results both qualitative (LDL) and quantitative,
