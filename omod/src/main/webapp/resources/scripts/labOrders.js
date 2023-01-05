@@ -311,9 +311,13 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
         function customizeActiveOrdersToDisplaySingHivVl(result) {
 
             return _.filter(result, function(o) {
+            if(o.display === 'HIV VIRAL LOAD') {
+             return o.display !== 'HIV VIRAL LOAD, QUALITATIVE';
+            }
+            if(o.display === 'CD4 COUNT') {
+             return o.display !== 'CD4 count result (qualitative)';
+            }
 
-
-                return o.display !== 'HIV VIRAL LOAD, QUALITATIVE';
             });
         }
 
@@ -874,6 +878,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
             for (var i = 0; i < selectedOrders.length; ++i) {
                 var vl = {};
+                var cd4Qualitative = {};
                 var data = selectedOrders[i];
 
                 for (var r in data) {
@@ -943,7 +948,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
         $scope.typeValues = {};
         $scope.postLabOrderResults = function() {
             var obsDate ='';
-            $scope.obsPayload = createLabResultsObsPaylaod($scope.labResultsRaw);
+            $scope.obsPayload = hvVl($scope.labResultsRaw);
             if ($scope.obsPayload.length === 0) {
                 $scope.showErrorToast = 'You have not filled any results to post';
 
@@ -1101,6 +1106,9 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 for (var r in data) {
                     if (data.hasOwnProperty(r)) {
                         if(data.concept.uuid === '1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                            $scope.OrderUuidHvl = data.uuid;
+                        }
+                        if(data.concept.uuid === 'd0a3677f-3b3a-404c-9010-6ec766d7072e') {
                             $scope.OrderUuidHvl = data.uuid;
                         }
 
@@ -1496,7 +1504,18 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                                 display:'POSITIVE',
                                 uuid:'703AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
                             }]
-                        } else {
+                        }
+                        else if (conceptUuid === 'd0a3677f-3b3a-404c-9010-6ec766d7072e') {
+                             $scope.answers = [{
+                                 display:'CD4 COUNT GREATER THAN 200',
+                                 uuid:'1254AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+                             }, {
+                                 display:'CD4 count less than or equal to 200',
+                                 uuid:'9395a2a8-21e9-4e06-bd2f-24c52f56cd21'
+                             }]
+                                                 }
+
+                        else {
                             $scope.answers = posts.answers;
 
                         }
