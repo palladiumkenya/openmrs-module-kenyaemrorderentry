@@ -1298,12 +1298,12 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
         $scope.getOrderUuid = function(order) {
             $scope.OrderUuid = order.uuid;
             $scope.ldlDateActivated = order.dateActivated;
-            $scope.ldlConcept = order.concept.uuid;
+            $scope.orderConcept = order.concept.uuid;
 
         }
         $scope.voidAllHivViralLoadOrders = function () {
             $scope.voidActiveLabOrders();
-            if($scope.ldlConcept ==='856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+            if($scope.orderConcept ==='856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' || $scope.orderConcept ==='5497AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
                 cancelOrder();
             }
         }
