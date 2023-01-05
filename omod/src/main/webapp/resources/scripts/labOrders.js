@@ -898,9 +898,25 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
                         }
                     }
+                      if(data.concept ==='5497AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+
+                        // create cd4 qualitative
+                        cd4Qualitative = {
+                            orderer:config.provider.uuid,
+                            careSetting:$scope.careSetting.uuid,
+                            type:"testorder",
+                            concept:"d0a3677f-3b3a-404c-9010-6ec766d7072e",
+                            concept_id: 167718,
+                            orderReasonNonCoded:$scope.orderReasonNonCoded,
+                            orderReason:$scope.orderReasonCoded,
+                            dateActivated:data.dateActivated
+
+                        }
+                      }
                 }
                 orders.push(data);
                 orders.push(vl);
+                orders.push(cd4Qualitative);
 
             }
             orders =_.uniq(orders);
