@@ -243,8 +243,11 @@ public class LabOrdersPageController {
 
 
             JSONObject labOrderObject = new JSONObject();
+
             // develop rendering for result
             JSONArray testResultList = new JSONArray();
+            JSONArray filterTestResultList = new JSONArray();
+
 
             labOrderObject.put("label", labTestConcept.getName(LOCALE).getName());
             labOrderObject.put("concept", labTestConcept.getUuid());
@@ -257,11 +260,13 @@ public class LabOrdersPageController {
                 inputType = "select";
                 // construct answers for VDRL TITRE
                 JSONArray vdrlAnsList = new JSONArray();
+
                 if(labTestConcept.getConceptId() == 1029) {
                     vdrlAnsList = constructVDRLAnswers();
                     testResultList.addAll(vdrlAnsList);
 
                 }
+               
                 for (ConceptAnswer ans : labTestConcept.getAnswers()) {
                     JSONObject testResultObject = new JSONObject();
 
@@ -269,6 +274,11 @@ public class LabOrdersPageController {
                     testResultObject.put("label", ans.getAnswerConcept().getName(LOCALE).getName());
                     testResultList.add(testResultObject);
                 }
+                JSONObject filterResultObject = new JSONObject();
+                filterResultObject.put("concept", "160565AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+                filterResultObject.put("label", "CD4 count less than 250 cells/mm3");
+                filterTestResultList.add(filterResultObject);
+                testResultList.removeAll(filterTestResultList);
 
                 labOrderObject.put("answers", testResultList);
 
@@ -427,6 +437,7 @@ public class LabOrdersPageController {
             }
         }    return value;
     }
+
 
 
 }

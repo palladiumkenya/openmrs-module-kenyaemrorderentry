@@ -309,16 +309,15 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
 
         function customizeActiveOrdersToDisplaySingHivVl(result) {
-
-            return _.filter(result, function(o) {
-            if(o.display === 'HIV VIRAL LOAD') {
-             return o.display !== 'HIV VIRAL LOAD, QUALITATIVE';
-            }
-            if(o.display === 'CD4 COUNT') {
-             return o.display !== 'CD4 count result (qualitative)';
-            }
-
+           var orderResults = _.filter(result, function(o) {
+              return o.display !== 'HIV VIRAL LOAD, QUALITATIVE';
             });
+
+            orderResults = _.filter(orderResults, function(o) {
+                return o.display !== 'CD4 count result (qualitative)';
+                
+            });
+            return orderResults;
         }
 
         function mapTestNameAndOrderReason(result) {
@@ -948,7 +947,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
         $scope.typeValues = {};
         $scope.postLabOrderResults = function() {
             var obsDate ='';
-            $scope.obsPayload = hvVl($scope.labResultsRaw);
+            $scope.obsPayload = createLabResultsObsPaylaod($scope.labResultsRaw);
             if ($scope.obsPayload.length === 0) {
                 $scope.showErrorToast = 'You have not filled any results to post';
 
@@ -1077,6 +1076,8 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
         $scope.hivViralValues = {};
         $scope.hivViralValuesLDL = {};
+        $scope.cd4QualitativeValue = {};
+        $scope.cd4QuantitativeValue = {};
         $scope.toggleSelection = function (vl) {
             if ($scope.flag === false || $scope.flag === undefined) {
                 $scope.flag = true;
@@ -1158,7 +1159,17 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                             data['concept'] = data.concept;
                             data['encounter'] = data.encounter;
 
-                        } else {
+                        } 
+                        else if (data.concept==='d0a3677f-3b3a-404c-9010-6ec766d7072e') {
+                            data['order'] = data.orderUuid;
+                            data['value'] =  $scope.cd4QualitativeValue[data.orderId];
+                        }
+                        else if (data.concept==='5497AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                            data['order'] = data.orderUuid;
+                            data['value'] =  $scope.cd4QuantitativeValue[data.orderId];
+                        }
+                        
+                        else {
                             data['order'] = data.orderUuid;
                             data['value'] =  $scope.typeValues[data.orderId];
                         }
@@ -1182,6 +1193,12 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 if (o.concept === '1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
                     $scope.hivLdlUuid = o.order;
                 }
+                if (o.concept === '5497AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                    $scope.cd4Numeric = o.order;
+                }
+                if (o.concept === 'd0a3677f-3b3a-404c-9010-6ec766d7072e') {
+                    $scope.cd4Coded = o.order;
+                }
             });
             _.each(obs, function(o) {
 
@@ -1194,6 +1211,16 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                    if (o.concept === '1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
                         if(o.value !== undefined) {
                             $scope.OrderUuid = $scope.hivVlUuid;
+                        }
+                    }
+                    if (o.concept === 'd0a3677f-3b3a-404c-9010-6ec766d7072e') {
+                        if(o.value !== undefined) {
+                            $scope.OrderUuid = $scope.cd4Numeric;
+                        }
+                    }
+                    if (o.concept === '5497AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                        if(o.value !== undefined) {
+                            $scope.OrderUuid = $scope.cd4Coded;
                         }
                     }
                 }
@@ -1942,6 +1969,13 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             }
             return orders;
 
+        }
+
+        $scope.syncCd4CountResults = function (value) {
+            if (value == $scope.cd4QualitativeValue) 
+                $scope.cd4QuantitativeValue = {};
+            else
+                $scope.cd4QualitativeValue = {};
         }
 
 

@@ -258,7 +258,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                     <div class="row" ng-repeat="items in InspireList">
                                                         <div class="col" ng-repeat="control in items" >
 
-                                                            <div ng-if="control.rendering === 'select'">
+                                                            <div ng-if="control.rendering === 'select' && control.concept !=='d0a3677f-3b3a-404c-9010-6ec766d7072e'">
                                                                 <div class="form-group row">
                                                                     <label class="label label-md "><b>{{control.label}}:</b>
                                                                         <p>  <span >({{control.dateActivated | date:'dd-MM-yyyy'}})</span>
@@ -277,6 +277,44 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                                             ng-click="orderSelectedToAddResultsDate(control)"></span>
                                                                 </div>
                                                             </div>
+                                                           
+
+                                                             <div ng-if="control.rendering === 'inputnumeric' && control.concept ==='5497AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'" class="label">
+                                                                <div class="form-group row">
+                                                                    <label class="label label-md" ><b>CD4 Count::</b>
+                                                                        <p>  <span >({{control.dateActivated | date:'dd-MM-yyyy'}})</span>
+                                                                        </p></label>
+
+                                                                    <div>
+                                                                        <input class="form-control set-width" type="number"
+                                                                               ng-model="cd4QuantitativeValue[control.orderId]"
+                                                                               ng-disabled="cd4QualitativeValue !=={} && cd4QuantitativeValue ==={}"
+                                                                               ng-change=syncCd4CountResults(cd4QuantitativeValue)>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                               <div ng-if="control.rendering === 'select' && control.concept ==='d0a3677f-3b3a-404c-9010-6ec766d7072e'">
+                                                                <div class="form-group row">
+
+                                                                    <div >
+                                                                        <select class="form-control set-width"
+                                                                                ng-model="cd4QualitativeValue[control.orderId]"
+                                                                                ng-disabled="cd4QuantitativeValue !=={} && cd4QualitativeValue === {}"
+                                                                                ng-change=syncCd4CountResults(cd4QualitativeValue)>
+                                                                            <option ng-repeat=" o in control.answers"
+                                                                                    ng-value="o.concept">{{o.label}}
+                                                                            </option>
+                                                                        </select>
+                                                                    </div>
+                                                                    <span class="btn-xl fa fa-calendar fa-1x" style="cursor: pointer;"
+                                                                            data-toggle="modal" data-target="#dateOrder"
+                                                                            ng-click="orderSelectedToAddResultsDate(control)"></span>
+                                                                </div>
+                                                            </div>
+
+
+
 
                                                             <div ng-if="control.rendering === 'inputtext'" class="label">
                                                                 <div class="form-group row">
@@ -295,7 +333,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                                 </div>
                                                             </div>
 
-                                                            <div ng-if="control.rendering === 'inputnumeric'" class="label">
+                                                            <div ng-if="control.rendering === 'inputnumeric' && control.concept !=='5497AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'" class="label">
                                                                 <div class="form-group row">
                                                                     <label class="label label-md" ><b>{{control.label}}:</b>
                                                                         <p>  <span >({{control.dateActivated | date:'dd-MM-yyyy'}})</span>
