@@ -395,6 +395,10 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             var ldl ={};
             var vLoad =[];
             var finalVl = {};
+            var cd4 =[];
+            var cd4Quantitative = {};
+            var cd4Qualitative ={};
+            var combinedCd4 = {};
             for (var i = 0; i < panelList.length; ++i) {
                 var data = panelList[i];
                 for (var r in data) {
@@ -438,6 +442,36 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
                             }
                     }
+                    else if(data.concept ==='5497AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                        delete data.label;
+                        delete data.rendering;
+                        cd4Quantitative =
+                            {
+                                concept:data.concept,
+                                encounter:data.encounter,
+                                orderId:data.orderId,
+                                orderUuid:data.orderUuid,
+                                rendering:'inputnumeric',
+                                dateActivated:data.dateActivated
+
+                            }
+                    }
+                    else if(data.concept ==='d0a3677f-3b3a-404c-9010-6ec766d7072e') {
+                        delete data.label;
+                        delete data.rendering;
+                        cd4Qualitative =
+                            {
+                                concept:data.concept,
+                                encounter:data.encounter,
+                                orderId:data.orderId,
+                                orderUuid:data.orderUuid,
+                                rendering:'select',
+                                dateActivated:data.dateActivated,
+                                answers:data.answers
+
+                            }
+                    }
+
 
                     }
                 }
@@ -447,6 +481,13 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 }
                 if(ldl) {
                     vLoad.push(ldl);
+                }
+                if(cd4Quantitative) {
+                    cd4.push(cd4Quantitative);
+
+                }
+                if(cd4Qualitative) {
+                    cd4.push(cd4Qualitative);
                 }
 
                 orders.push(data);
@@ -458,16 +499,22 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 return Object.keys(o).length !== 0;
             });
 
+            cd4 =_.uniq(cd4);
+            var cd4Res = _.filter(cd4, function(o) {
+
+                return Object.keys(o).length !== 0;
+            });
+
             if(!_.isEmpty(vls)) {
                 finalVl['hvVl'] = vls;
                 finalVl['name'] ='HIV viral load';
                 orders.push(finalVl);
-                return orders;
-            } else {
-                return  panelList
             }
-
-
+            if(!_.isEmpty(cd4Res)) {
+                combinedCd4['cd4'] = cd4Res;
+                orders.push(combinedCd4);
+            }
+            return orders;
 
         }
 
