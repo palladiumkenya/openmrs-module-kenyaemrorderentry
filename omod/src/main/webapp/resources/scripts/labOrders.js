@@ -309,12 +309,15 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
 
         function customizeActiveOrdersToDisplaySingHivVl(result) {
-
-            return _.filter(result, function(o) {
-
-
-                return o.display !== 'HIV VIRAL LOAD, QUALITATIVE';
+           var orderResults = _.filter(result, function(o) {
+              return o.display !== 'HIV VIRAL LOAD, QUALITATIVE';
             });
+
+            orderResults = _.filter(orderResults, function(o) {
+                return o.display !== 'CD4 count result (qualitative)';
+                
+            });
+            return orderResults;
         }
 
         function mapTestNameAndOrderReason(result) {
@@ -392,6 +395,10 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             var ldl ={};
             var vLoad =[];
             var finalVl = {};
+            var cd4 =[];
+            var cd4Quantitative = {};
+            var cd4Qualitative ={};
+            var combinedCd4 = {};
             for (var i = 0; i < panelList.length; ++i) {
                 var data = panelList[i];
                 for (var r in data) {
@@ -435,6 +442,36 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
                             }
                     }
+                    else if(data.concept ==='5497AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                        delete data.label;
+                        delete data.rendering;
+                        cd4Quantitative =
+                            {
+                                concept:data.concept,
+                                encounter:data.encounter,
+                                orderId:data.orderId,
+                                orderUuid:data.orderUuid,
+                                rendering:'inputnumeric',
+                                dateActivated:data.dateActivated
+
+                            }
+                    }
+                    else if(data.concept ==='d0a3677f-3b3a-404c-9010-6ec766d7072e') {
+                        delete data.label;
+                        delete data.rendering;
+                        cd4Qualitative =
+                            {
+                                concept:data.concept,
+                                encounter:data.encounter,
+                                orderId:data.orderId,
+                                orderUuid:data.orderUuid,
+                                rendering:'select',
+                                dateActivated:data.dateActivated,
+                                answers:data.answers
+
+                            }
+                    }
+
 
                     }
                 }
@@ -444,6 +481,13 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 }
                 if(ldl) {
                     vLoad.push(ldl);
+                }
+                if(cd4Quantitative) {
+                    cd4.push(cd4Quantitative);
+
+                }
+                if(cd4Qualitative) {
+                    cd4.push(cd4Qualitative);
                 }
 
                 orders.push(data);
@@ -455,16 +499,22 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 return Object.keys(o).length !== 0;
             });
 
+            cd4 =_.uniq(cd4);
+            var cd4Res = _.filter(cd4, function(o) {
+
+                return Object.keys(o).length !== 0;
+            });
+
             if(!_.isEmpty(vls)) {
                 finalVl['hvVl'] = vls;
                 finalVl['name'] ='HIV viral load';
                 orders.push(finalVl);
-                return orders;
-            } else {
-                return  panelList
             }
-
-
+            if(!_.isEmpty(cd4Res)) {
+                combinedCd4['cd4'] = cd4Res;
+                orders.push(combinedCd4);
+            }
+            return orders;
 
         }
 
@@ -874,6 +924,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
             for (var i = 0; i < selectedOrders.length; ++i) {
                 var vl = {};
+                var cd4Qualitative = {};
                 var data = selectedOrders[i];
 
                 for (var r in data) {
@@ -898,9 +949,25 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
                         }
                     }
+                      if(data.concept ==='5497AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+
+                        // create cd4 qualitative
+                        cd4Qualitative = {
+                            orderer:config.provider.uuid,
+                            careSetting:$scope.careSetting.uuid,
+                            type:"testorder",
+                            concept:"d0a3677f-3b3a-404c-9010-6ec766d7072e",
+                            concept_id: 167718,
+                            orderReasonNonCoded:$scope.orderReasonNonCoded,
+                            orderReason:$scope.orderReasonCoded,
+                            dateActivated:data.dateActivated
+
+                        }
+                      }
                 }
                 orders.push(data);
                 orders.push(vl);
+                orders.push(cd4Qualitative);
 
             }
             orders =_.uniq(orders);
@@ -1056,6 +1123,8 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
         $scope.hivViralValues = {};
         $scope.hivViralValuesLDL = {};
+        $scope.cd4QualitativeValue = {};
+        $scope.cd4QuantitativeValue = {};
         $scope.toggleSelection = function (vl) {
             if ($scope.flag === false || $scope.flag === undefined) {
                 $scope.flag = true;
@@ -1085,6 +1154,9 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 for (var r in data) {
                     if (data.hasOwnProperty(r)) {
                         if(data.concept.uuid === '1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                            $scope.OrderUuidHvl = data.uuid;
+                        }
+                        if(data.concept.uuid === 'd0a3677f-3b3a-404c-9010-6ec766d7072e') {
                             $scope.OrderUuidHvl = data.uuid;
                         }
 
@@ -1134,7 +1206,17 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                             data['concept'] = data.concept;
                             data['encounter'] = data.encounter;
 
-                        } else {
+                        } 
+                        else if (data.concept==='d0a3677f-3b3a-404c-9010-6ec766d7072e') {
+                            data['order'] = data.orderUuid;
+                            data['value'] =  $scope.cd4QualitativeValue[data.orderId];
+                        }
+                        else if (data.concept==='5497AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                            data['order'] = data.orderUuid;
+                            data['value'] =  $scope.cd4QuantitativeValue[data.orderId];
+                        }
+                        
+                        else {
                             data['order'] = data.orderUuid;
                             data['value'] =  $scope.typeValues[data.orderId];
                         }
@@ -1158,6 +1240,12 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 if (o.concept === '1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
                     $scope.hivLdlUuid = o.order;
                 }
+                if (o.concept === '5497AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                    $scope.cd4Numeric = o.order;
+                }
+                if (o.concept === 'd0a3677f-3b3a-404c-9010-6ec766d7072e') {
+                    $scope.cd4Coded = o.order;
+                }
             });
             _.each(obs, function(o) {
 
@@ -1170,6 +1258,16 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                    if (o.concept === '1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
                         if(o.value !== undefined) {
                             $scope.OrderUuid = $scope.hivVlUuid;
+                        }
+                    }
+                    if (o.concept === 'd0a3677f-3b3a-404c-9010-6ec766d7072e') {
+                        if(o.value !== undefined) {
+                            $scope.OrderUuid = $scope.cd4Numeric;
+                        }
+                    }
+                    if (o.concept === '5497AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                        if(o.value !== undefined) {
+                            $scope.OrderUuid = $scope.cd4Coded;
                         }
                     }
                 }
@@ -1274,12 +1372,12 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
         $scope.getOrderUuid = function(order) {
             $scope.OrderUuid = order.uuid;
             $scope.ldlDateActivated = order.dateActivated;
-            $scope.ldlConcept = order.concept.uuid;
+            $scope.orderConcept = order.concept.uuid;
 
         }
         $scope.voidAllHivViralLoadOrders = function () {
             $scope.voidActiveLabOrders();
-            if($scope.ldlConcept ==='856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+            if($scope.orderConcept ==='856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' || $scope.orderConcept ==='5497AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
                 cancelOrder();
             }
         }
@@ -1480,7 +1578,18 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                                 display:'POSITIVE',
                                 uuid:'703AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
                             }]
-                        } else {
+                        }
+                        else if (conceptUuid === 'd0a3677f-3b3a-404c-9010-6ec766d7072e') {
+                             $scope.answers = [{
+                                 display:'CD4 COUNT GREATER THAN 200',
+                                 uuid:'1254AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+                             }, {
+                                 display:'CD4 count less than or equal to 200',
+                                 uuid:'9395a2a8-21e9-4e06-bd2f-24c52f56cd21'
+                             }]
+                                                 }
+
+                        else {
                             $scope.answers = posts.answers;
 
                         }
@@ -1907,6 +2016,13 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             }
             return orders;
 
+        }
+
+        $scope.syncCd4CountResults = function (value) {
+            if (value == $scope.cd4QualitativeValue) 
+                $scope.cd4QuantitativeValue = {};
+            else
+                $scope.cd4QualitativeValue = {};
         }
 
 
