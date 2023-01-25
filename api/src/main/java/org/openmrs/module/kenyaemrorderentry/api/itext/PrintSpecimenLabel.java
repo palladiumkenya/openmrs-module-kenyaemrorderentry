@@ -13,7 +13,7 @@ import com.itextpdf.layout.element.Image;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.element.Text;
-import com.itextpdf.layout.property.UnitValue;
+import com.itextpdf.layout.properties.UnitValue;
 import org.apache.commons.lang.WordUtils;
 import org.openmrs.Patient;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
