@@ -56,7 +56,7 @@
         <jacksonVersion>2.10.1</jacksonVersion>
         <apacheHttpClientVersion>4.5.10</apacheHttpClientVersion>
         <itextPdfVersion>7.2.5</itextPdfVersion>
-        <gsonVersion>2.8.7</gsonVersion>
+        <gsonVersion>2.8.9</gsonVersion>
         <apacheCommonsVersion>1.3</apacheCommonsVersion>
 
     </properties>
