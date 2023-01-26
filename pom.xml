@@ -54,7 +54,7 @@
         <kenyauiVersion>3.0.0</kenyauiVersion>
         <webservices.restVersion>2.26.0</webservices.restVersion>
         <jacksonVersion>2.10.1</jacksonVersion>
-        <apacheHttpClientVersion>4.5.10</apacheHttpClientVersion>
+        <apacheHttpClientVersion>4.5.13</apacheHttpClientVersion>
         <itextPdfVersion>7.2.5</itextPdfVersion>
         <gsonVersion>2.8.7</gsonVersion>
         <apacheCommonsVersion>1.3</apacheCommonsVersion>
