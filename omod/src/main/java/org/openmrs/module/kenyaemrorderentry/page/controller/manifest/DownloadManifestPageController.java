@@ -12,6 +12,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 public class DownloadManifestPageController {
 
 
@@ -39,9 +41,14 @@ public class DownloadManifestPageController {
         if (generatedManifest != null) {
             try {
                 InputStream is = new FileInputStream(generatedManifest);
+                // response.setContentType(MediaType.APPLICATION_PDF);
                 response.setContentType("application/pdf");
-                response.addHeader("content-disposition", "inline;filename=" + generatedManifest.getName());
-                IOUtils.copy(is, response.getOutputStream());
+                // To open PDF in browser
+                // response.addHeader(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=" + generatedManifest.getName());
+                // To download PDF
+                response.addHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + generatedManifest.getName());
+                int bytes = IOUtils.copy(is, response.getOutputStream());
+                response.setContentLength(bytes);
                 response.flushBuffer();
             } catch (IOException ex) {
                 System.out.println("Error writing file to output stream");
