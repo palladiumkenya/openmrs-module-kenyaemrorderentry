@@ -164,6 +164,30 @@
 	</globalProperty>
 
 	<globalProperty>
+		<property>edarp_vl_server_url</property>
+		<defaultValue></defaultValue>
+		<description>
+			The URL for pushing requests to the EDARP VL server
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>edarp_vl_server_result_url</property>
+		<defaultValue></defaultValue>
+		<description>
+			The URL for fetching EDARP VL result
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>edarp_vl_server_api_token</property>
+		<defaultValue></defaultValue>
+		<description>
+			API token to authenticate communication to the EDARP VL lab system API
+		</description>
+	</globalProperty>
+
+	<globalProperty>
 		<property>kemrorder.last_processed_manifest</property>
 		<defaultValue></defaultValue>
 		<description>
