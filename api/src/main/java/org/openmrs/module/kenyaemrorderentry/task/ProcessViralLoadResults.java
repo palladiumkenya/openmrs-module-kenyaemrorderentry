@@ -67,6 +67,7 @@ public class ProcessViralLoadResults {
 
                 //verify the valid error code first
                 int statusCode = response.getStatusLine().getStatusCode();
+
                 if (statusCode != 200 && statusCode != 201) {
                     try {
                         JSONParser parser = new JSONParser();

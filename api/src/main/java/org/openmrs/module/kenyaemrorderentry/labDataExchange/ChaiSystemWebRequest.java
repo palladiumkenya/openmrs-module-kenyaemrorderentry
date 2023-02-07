@@ -144,7 +144,7 @@ public class ChaiSystemWebRequest extends LabWebRequest {
                 return(false);
             }
 
-            if (statusCode != 201 && statusCode != 200 && statusCode != 422 && statusCode != 403) { // skip for status code 422: unprocessable entity, and status code 403 for forbidden response
+            if (statusCode != 201 && statusCode != 200 && statusCode != 403 && statusCode != 500) { // skip for status code 422: unprocessable entity, and status code 403 for forbidden response
 
                 JSONParser parser = new JSONParser();
                 JSONObject responseObj = (JSONObject) parser.parse(message);
@@ -158,19 +158,23 @@ public class ChaiSystemWebRequest extends LabWebRequest {
                         System.out.println("CHAI Lab Results POST: Error - duplicate entry. " + "Error - " + message);
                         return(true);
                     }
+                } else if (statusCode == 422 ) { // General validation errors
+                    manifestOrder.setStatus("Error - " + statusCode + ". Msg" + errorObj.get("message"));
+                    manifestOrder.setDateChanged(new Date());
+                    kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
+                    System.out.println("CHAI Lab Results POST: Error - validation error. " + "Error - " + message);
+                    return(true);
                 }
                 System.out.println("CHAI Lab Results POST: Error while sending manifest sample. " + "Error - " + statusCode + ". Msg" + errorObj.get("message"));
 
                 manifestOrder.setStatus("Error - " + statusCode + ". Msg" + errorObj.get("message"));
                 kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
                 return(false);
-            } else if (statusCode == 403 || statusCode == 422) {
-                manifestOrder.setStatus("Pending");
-                kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
+            } else if (statusCode == 403 || statusCode == 500) { // just skip for now. There should be a new attempt
                 System.out.println("CHAI Lab Results POST: Error while submitting manifest sample. " + "Error - " + statusCode + ", message: " + message);
                 log.error("CHAI Lab Results POST: Error while submitting manifest sample. " + "Error - " + statusCode);
                 return(false);
-            } else if (statusCode == 201 || statusCode == 200) {
+            } else if (statusCode == 201 || statusCode == 200) { // successful attempt
                 manifestOrder.setStatus("Sent");
                 manifestOrder.setDateSent(new Date());
                 System.out.println("CHAI Lab Results POST: Successfully pushed " + (toProcess.getManifestType() == LabManifest.EID_TYPE ? "an EID" : "a Viral load")  + " test");
@@ -292,7 +296,6 @@ public class ChaiSystemWebRequest extends LabWebRequest {
                }
             }
 
-           //System.out.println("GET request payload: " + jsonString);
             JSONParser parser = new JSONParser();
             JSONObject responseObject = (JSONObject) parser.parse(jsonString);
             JSONArray responseArray = (JSONArray)responseObject.get("data");
