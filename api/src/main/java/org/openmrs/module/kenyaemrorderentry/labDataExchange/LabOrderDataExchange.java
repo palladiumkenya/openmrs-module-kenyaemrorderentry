@@ -49,7 +49,7 @@ public class LabOrderDataExchange {
     /**
      * Give the kind of lab system configured i.e CHAI or LABWARE
      *
-     * @return int system type LABWARE_SYSTEM or CHAI_SYSTEM
+     * @return int system type LABWARE_SYSTEM, CHAI_SYSTEM, or EDARP
      */
     public static int getSystemType() {
         String systemType = "";
@@ -68,6 +68,8 @@ public class LabOrderDataExchange {
             return ModuleConstants.CHAI_SYSTEM;
         } else if (systemType.equalsIgnoreCase("LABWARE")) {
             return ModuleConstants.LABWARE_SYSTEM;
+        } else if (systemType.equalsIgnoreCase("EDARP")) {
+            return ModuleConstants.EDARP_SYSTEM;
         } else {
             return ModuleConstants.NO_SYSTEM_CONFIGURED; // The default if empty string or another string
         }

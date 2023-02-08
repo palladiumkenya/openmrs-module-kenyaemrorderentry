@@ -20,6 +20,7 @@ import org.openmrs.module.appui.UiSessionContext;
 import org.openmrs.module.kenyaemrorderentry.ModuleConstants;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.ChaiSystemWebRequest;
+import org.openmrs.module.kenyaemrorderentry.labDataExchange.EdarpSystemWebRequest;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabWebRequest;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabwareSystemWebRequest;
@@ -133,6 +134,8 @@ public class GeneralLabOrdersFragmentController {
                 payloadGenerator = new ChaiSystemWebRequest();
             } else if (LabOrderDataExchange.getSystemType() == ModuleConstants.LABWARE_SYSTEM) {
                 payloadGenerator = new LabwareSystemWebRequest();
+            } else if (LabOrderDataExchange.getSystemType() == ModuleConstants.EDARP_SYSTEM) {
+                payloadGenerator = new EdarpSystemWebRequest();
             }
 
             if (payloadGenerator == null) {

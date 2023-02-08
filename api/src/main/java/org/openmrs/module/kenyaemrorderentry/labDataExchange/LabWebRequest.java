@@ -123,7 +123,7 @@ public abstract class LabWebRequest {
                 return test;
             }
 
-            if (LabOrderDataExchange.getSystemType() == ModuleConstants.CHAI_SYSTEM) {
+            if (LabOrderDataExchange.getSystemType() == ModuleConstants.CHAI_SYSTEM || LabOrderDataExchange.getSystemType() == ModuleConstants.EDARP_SYSTEM) {
 
                 test.put("dob", dob);
                 test.put("sex", patient.getGender().equals("M") ? "1" : patient.getGender().equals("F") ? "2" : "3");
