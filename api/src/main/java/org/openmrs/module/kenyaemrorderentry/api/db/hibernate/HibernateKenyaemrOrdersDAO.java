@@ -364,7 +364,7 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
         Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifest.class);
         criteria.add(Restrictions.eq("status", status));
         criteria.add(Restrictions.eq("voided", false));
-        criteria.addOrder(org.hibernate.criterion.Order.asc("id"));
+        criteria.addOrder(org.hibernate.criterion.Order.desc("id"));
         return criteria.list();
     }
 
