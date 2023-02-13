@@ -16,16 +16,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 @AppPage("kenyaemr.labmanifest")
-public class LabOrdersManifestHomePageController {
+public class LabOrdersSubmittedManifestHomePageController {
 
     KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
 
     public void get(@SpringBean KenyaUiUtils kenyaUi,
                     UiUtils ui, PageModel model) {
-        List<LabManifest> allManifests = Context.getService(KenyaemrOrdersService.class).getLabOrderManifest("Draft");
+        List<LabManifest> allManifests = Context.getService(KenyaemrOrdersService.class).getLabOrderManifest("Submitted");
         List<SimpleObject> manifestList1 = new ArrayList<SimpleObject>();
         for (LabManifest manifest : allManifests) {
 
+            List<LabManifestOrder> ordersWithIncompleteResult = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifest, "Incomplete");
+            List<LabManifestOrder> collectNewSampleOrders = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifest, "Collect New Sample");
+            List<LabManifestOrder> manualDiscontinuationOrders = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifest, "Requires manual update in the lab module");
+            List<LabManifestOrder> ordersWithMissingPhysicalSamples = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifest, "Missing Sample ( Physical Sample Missing)");
+            List<LabManifestOrder> missingInLab = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifest, "Record not found");
             List<LabManifestOrder> allSamples = kenyaemrOrdersService.getLabManifestOrderByManifest(manifest);
 
             String manifestType = "";

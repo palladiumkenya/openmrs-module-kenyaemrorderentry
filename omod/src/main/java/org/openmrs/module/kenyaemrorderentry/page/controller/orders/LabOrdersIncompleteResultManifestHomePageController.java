@@ -16,16 +16,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 @AppPage("kenyaemr.labmanifest")
-public class LabOrdersManifestHomePageController {
+public class LabOrdersIncompleteResultManifestHomePageController {
 
     KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
 
     public void get(@SpringBean KenyaUiUtils kenyaUi,
                     UiUtils ui, PageModel model) {
-        List<LabManifest> allManifests = Context.getService(KenyaemrOrdersService.class).getLabOrderManifest("Draft");
+        List<LabManifest> allManifests = Context.getService(KenyaemrOrdersService.class).getLabOrderManifest("Incomplete results");
         List<SimpleObject> manifestList1 = new ArrayList<SimpleObject>();
         for (LabManifest manifest : allManifests) {
 
+            List<LabManifestOrder> ordersWithIncompleteResult = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifest, "Incomplete");
+            List<LabManifestOrder> collectNewSampleOrders = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifest, "Collect New Sample");
+            List<LabManifestOrder> manualDiscontinuationOrders = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifest, "Requires manual update in the lab module");
+            List<LabManifestOrder> ordersWithMissingPhysicalSamples = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifest, "Missing Sample ( Physical Sample Missing)");
+            List<LabManifestOrder> missingInLab = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifest, "Record not found");
             List<LabManifestOrder> allSamples = kenyaemrOrdersService.getLabManifestOrderByManifest(manifest);
 
             String manifestType = "";
@@ -54,12 +59,12 @@ public class LabOrdersManifestHomePageController {
 
             SimpleObject o1 = SimpleObject.create(
                     "manifest", m,
-                    "collectNewSample", 0,
-                    "incompleteSample", 0,
-                    "manualUpdates", 0,
-                    "recordsNotFound", 0,
+                    "collectNewSample", collectNewSampleOrders.size(),
+                    "incompleteSample", ordersWithIncompleteResult.size(),
+                    "manualUpdates", manualDiscontinuationOrders.size(),
+                    "recordsNotFound", missingInLab.size(),
                     "totalSamples", allSamples.size(),
-                    "missingPhysicalSample", 0);
+                    "missingPhysicalSample", ordersWithMissingPhysicalSamples.size());
             manifestList1.add(o1);
         }
         model.put("manifestList", ui.toJson(manifestList1));

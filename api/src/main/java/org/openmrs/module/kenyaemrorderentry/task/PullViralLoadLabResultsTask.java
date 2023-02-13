@@ -1,24 +1,8 @@
 package org.openmrs.module.kenyaemrorderentry.task;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.commons.text.StringEscapeUtils;
-import org.apache.commons.text.translate.UnicodeUnescaper;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.ssl.SSLContexts;
-import org.apache.http.util.EntityUtils;
 import org.openmrs.GlobalProperty;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemrorderentry.ModuleConstants;
@@ -29,7 +13,6 @@ import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabWebRequest;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabwareSystemWebRequest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
-import org.openmrs.module.kenyaemrorderentry.util.Utils;
 import org.openmrs.scheduler.tasks.AbstractTask;
 
 import java.io.IOException;
