@@ -71,7 +71,7 @@ public class EdarpSystemWebRequest extends LabWebRequest {
         String VLApiToken = gpVLApiToken.getPropertyValue();
 
         if (StringUtils.isBlank(VLServerPushUrl) || StringUtils.isBlank(VLServerPullUrl) || StringUtils.isBlank(VLApiToken) || LabOrderDataExchange.getSystemType() == 0) {
-            System.out.println("CHAI Lab Results: Please set credentials for posting lab requests to the CHAI system");
+            System.out.println("CHAI Lab Results: Please set credentials for posting lab requests to the EDARP system");
             return false;
         }
         return true;
