@@ -2,6 +2,7 @@ package org.openmrs.module.kenyaemrorderentry.api.itext;
 
 import com.itextpdf.barcodes.Barcode128;
 import com.itextpdf.kernel.geom.PageSize;
+import com.itextpdf.kernel.geom.Rectangle;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
@@ -38,9 +39,19 @@ public class PrintSpecimenLabel {
         File returnFile = File.createTempFile("printSpecimenLabel", ".pdf");
         FileOutputStream fos = new FileOutputStream(returnFile);
 
-        PdfDocument pdfDoc = new PdfDocument(new PdfWriter(fos));
-        Document doc = new Document(pdfDoc, PageSize.A5);
+        /**
+         * https://kb.itextpdf.com/home/it7kb/faq/how-to-set-the-page-size-to-envelope-size-with-landscape-orientation
+         * page size: 3.5inch length, 1.1 inch height
+         * 1mm = 0.0394 inch
+         * length = 450mm = 17.7165 inch = 127.5588 points
+         * height = 300mm = 11.811 inch = 85.0392 points
+         *
+         * The measurement system in PDF doesn't use inches, but user units. By default, 1 user unit = 1 point, and 1 inch = 72 points.
+         */
 
+        PdfDocument pdfDoc = new PdfDocument(new PdfWriter(fos));
+        Document doc = new Document(pdfDoc, new PageSize(72.0F, 110.0F).rotate());
+        doc.setMargins(6,0,0,18);
         String patientCCCNumber = patient.getPatientIdentifier(Utils.getUniquePatientNumberIdentifierType()).getIdentifier();
 
         Text nameLabel = new Text(WordUtils.capitalizeFully(fullName));
@@ -48,10 +59,10 @@ public class PrintSpecimenLabel {
         Text specimenDateLabel = new Text(Utils.getSimpleDateFormat("dd/MM/yyyy").format(order.getOrder().getDateActivated()));
 
         Paragraph paragraph = new Paragraph();
-        paragraph.setFontSize(10);
-        paragraph.add("CCC No:").add(cccNoLabel).add("\n");
-        paragraph.add("Name: ").add(nameLabel).add("\n");
-        paragraph.add("Sample Date: ").add(specimenDateLabel);
+        paragraph.setFontSize(7);
+        paragraph.add(cccNoLabel).add("\n"); // patient ccc number
+        paragraph.add(nameLabel).add("\n"); // patient name
+        paragraph.add(specimenDateLabel); // sample date
 
         Barcode128 code128 = new Barcode128(pdfDoc);
         String code = patientCCCNumber;
@@ -61,6 +72,7 @@ public class PrintSpecimenLabel {
         code128.setCode(code);
         code128.setCodeType(Barcode128.CODE128);
         Image code128Image = new Image(code128.createFormXObject(pdfDoc));
+
 
         doc.add(code128Image);
         doc.add(paragraph);
