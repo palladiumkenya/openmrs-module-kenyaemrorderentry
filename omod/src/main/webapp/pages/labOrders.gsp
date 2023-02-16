@@ -286,7 +286,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                                         </p></label>
 
                                                                     <div ng-repeat="vl in control.cd4">
-                                                                        <input class="form-control set-width-vl" type="number" id="vload" ng-if="vl.rendering === 'inputnumeric'"
+                                                                        <input class="form-control set-width-vl" type="number" id="vload" min="0" ng-if="vl.rendering === 'inputnumeric'"
                                                                                ng-model="cd4QuantitativeValue[vl.orderId]"
                                                                                ng-disabled="cd4QualitativeValue !=={} && cd4QuantitativeValue ==={}"
                                                                                ng-change=syncCd4CountResults(cd4QuantitativeValue)>
