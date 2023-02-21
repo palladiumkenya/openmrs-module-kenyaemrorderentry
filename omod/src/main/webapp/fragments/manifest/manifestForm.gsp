@@ -92,7 +92,7 @@
             <legend>Dispatch Details</legend>
             <table>
                 <tr>
-                    <td class="ke-field-label" style="width: 270px">Dispatch Date</td>
+                    <td class="ke-field-label" style="width: 270px">Dispatch Date <span style="color: red">*</span></td>
                     <td class="ke-field-label" style="width: 270px">Courier Name</td>
                     <td class="ke-field-label" style="width: 270px">Person handed to</td>
                 </tr>
