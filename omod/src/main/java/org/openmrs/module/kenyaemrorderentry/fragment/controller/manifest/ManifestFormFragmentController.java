@@ -194,6 +194,7 @@ public class ManifestFormFragmentController {
             require(errors, "endDate");
             require(errors, "status");
             require(errors, "manifestType");
+            require(errors, "dispatchDate");
         }
 
         public LabManifest getOriginal() {

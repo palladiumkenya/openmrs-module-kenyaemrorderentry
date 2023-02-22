@@ -44,9 +44,8 @@ public class DownloadManifestPageController {
                 // response.setContentType(MediaType.APPLICATION_PDF);
                 response.setContentType("application/pdf");
                 // To open PDF in browser
-                // response.addHeader(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=" + generatedManifest.getName());
                 // To download PDF
-                response.addHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + generatedManifest.getName());
+                response.addHeader("content-disposition", "inline;filename=" + generatedManifest.getName());
                 int bytes = IOUtils.copy(is, response.getOutputStream());
                 response.setContentLength(bytes);
                 response.flushBuffer();
