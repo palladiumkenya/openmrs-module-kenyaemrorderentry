@@ -144,12 +144,19 @@ public class CreateLabsOrdersFragmentController {
 
 
         );
+        // Build panels for Mucus
+        List<Concept> mucusTestPanels = Arrays.asList(
+//                conceptService.getConcept(163363),
+//                conceptService.getConcept(162614),
+//                conceptService.getConcept(163364)
+
+        );
         sampleTypes.put("Urine", urineTestPanels);
         sampleTypes.put("Blood", bloodTestPanels);
         sampleTypes.put("Stool", stoolTestPanels);
         sampleTypes.put("Histology/Cytology", histologyTestPanels);
         sampleTypes.put("Sputum", sputumTestPanels);
-
+        sampleTypes.put("Mucus", mucusTestPanels);
 
 
         JSONArray labTestJsonPayload = new JSONArray();
@@ -204,6 +211,13 @@ public class CreateLabsOrdersFragmentController {
                         concService.getConcept(730), // cd4%
                         concService.getConcept(163722), // hiv rapid test
                         concService.getConcept(844) // DNA PCR
+                ));
+        JSONArray nasalSwabMonitoring = buildTestPanelWithoutPanelConcept("Mucus", labTestJsonPayload,
+                " NASAL SWAB", Arrays.asList(
+                        concService.getConcept(166556), // hiv viral load
+                        //   concService.getConcept(1305), // hiv viral load Qualitative
+                        concService.getConcept(165895)// cd4 counts
+
                 ));
 
         JSONArray tbMonitoring = buildTestPanelWithoutPanelConcept("Blood", labTestJsonPayload,

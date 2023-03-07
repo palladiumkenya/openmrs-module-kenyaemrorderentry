@@ -100,7 +100,6 @@ public class LabOrdersPageController {
                 conceptService.getConcept(163652),
                 conceptService.getConcept(161446)
 
-
         );
 
         // Build panels for Blood
@@ -140,11 +139,20 @@ public class LabOrdersPageController {
 
 
         );
+
+        // Build panels for Mucus
+        List<Concept> mucusTestPanels = Arrays.asList(
+//                conceptService.getConcept(163363),
+//                conceptService.getConcept(162614),
+//                conceptService.getConcept(163364)
+
+        );
         sampleTypes.put("Urine", urineTestPanels);
         sampleTypes.put("Blood", bloodTestPanels);
         sampleTypes.put("Stool", stoolTestPanels);
         sampleTypes.put("Histology/Cytology", histologyTestPanels);
         sampleTypes.put("Sputum", sputumTestPanels);
+        sampleTypes.put("Mucus", mucusTestPanels);
 
 
 
@@ -186,7 +194,24 @@ public class LabOrdersPageController {
 
 
         }
-
+        JSONArray nasalSwabMonitoring = buildTestPanelWithoutPanelConcept("Mucus", labTestJsonPayload,
+                " Nasal Swab", Arrays.asList(
+                        concService.getConcept(166556), // Flu Antigen Test
+                        //   concService.getConcept(1305), // hiv viral load Qualitative
+                        concService.getConcept(165895)// cd4 counts
+                ));
+        JSONArray swabSpecimenMonitoring = buildTestPanelWithoutPanelConcept("Mucus", labTestJsonPayload,
+                " Swab Specimen", Arrays.asList(
+                        concService.getConcept(166556), // Flu Antigen Test
+                        //   concService.getConcept(1305), // hiv viral load Qualitative
+                        concService.getConcept(165895)// cd4 counts
+                ));
+        JSONArray nasopharyngealSWABMonitoring = buildTestPanelWithoutPanelConcept("Mucus", labTestJsonPayload,
+                "Nasopharyngeal Swab", Arrays.asList(
+                        concService.getConcept(166556), // Flu Antigen Test
+                        //   concService.getConcept(1305), // hiv viral load Qualitative
+                        concService.getConcept(165895)// cd4 counts
+                ));
         // Add panels with no concept ids
         JSONArray finalJsonPayloadArray = buildTestPanelWithoutPanelConcept("Blood", labTestJsonPayload,
                 "GROUPING AND CROSSMATCH", Arrays.asList(
