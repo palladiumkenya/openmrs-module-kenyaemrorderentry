@@ -463,11 +463,11 @@ ${ui.includeFragment("kenyaemr", "prescription/regimenJsonGenerator",[ patient: 
                             </div>
 
                             <div class="card-body">
-                                <span ng-show="pastOrders.loading">${ui.message("uicommons.loading.placeholder")}</span>
-                                <span ng-hide="pastOrders.loading || pastOrders.length > 0">None</span>
+                                
+                                <span ng-hide="pastOrders.length > 0">None</span>
 
                                 <div class="table-responsive" ng-show="pastOrders.length > 0">
-                                    <table ng-hide="pastOrders.loading" class="table table-striped">
+                                    <table class="table table-striped">
                                         <tr>
                                             <th width="25%">Dates</th>
                                             <th width="65%">Instructions</th>

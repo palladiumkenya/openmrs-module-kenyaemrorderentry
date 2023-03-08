@@ -59,6 +59,7 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
           var programRegimens = "";
           $scope.regimenLine = "";
           $scope.patientNotOnRegimen = true;
+          $scope.patientPastDrugOrders = OpenMRS.pastDrugOrdersPayload;
 
         if( OpenMRS.kenyaemrRegimenJsonPayload && OpenMRS.kenyaemrRegimenJsonPayload !== undefined) {
             $scope.patientNotOnRegimen = false;
@@ -75,7 +76,11 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
 
         function loadExistingOrders() {
             loadActiveDrugOrders();
-            loadPastDrugOrders();
+
+            $timeout(function () {
+                loadPastDrugOrders();
+            }, 500);
+            
         }
 
 
@@ -124,49 +129,32 @@ angular.module('drugOrders', ['orderService', 'encounterService', 'uicommons.fil
         }
 
         function loadPastDrugOrders() {
-            $scope.pastDrugOrders = {loading: true};
-            OrderService.getOrders({
-                t: 'drugorder',
-                v: 'full',
-                patient: config.patient.uuid,
-                careSetting: $scope.careSetting.uuid,
-                status: 'inactive'
-            }).then(function (results) {
-
-                $scope.patientPastDrugOrders = OpenMRS.pastDrugOrdersPayload;
-                $scope.pastDrugOrderGroups = $scope.patientPastDrugOrders.pastOrder_groups;
-                $scope.pastDrugOrderGroups.sort(function(a, b) {
-                    var key1 = a.date;
-                    var key2 = b.date;
-                    if (key1 > key2) {
-                        return -1;
-                    } else if (key1 === key2) {
-                        return 0;
-                    } else {
-                        return 1;
-                    }
-                });
-                if($scope.patientPastDrugOrders) {
-                    $scope.patientPastSingleDrugInstruction = formatDisplayOfPastSingleDrugInstructions($scope.patientPastDrugOrders.pastSingle_drugs);
-
-                    if($scope.patientPastDrugOrders.pastOrder_groups) {
-                        $scope.pastOrders = formatDisplayOfPastRegimenInstructions($scope.patientPastDrugOrders.pastOrder_groups);
-                       Array.prototype.push.apply($scope.pastOrders,$scope.patientPastSingleDrugInstruction);
-                        $scope.pastOrders.sort(function(a, b) {
-                            var key1 = a.dateActivated;
-                            var key2 = b.dateActivated;
-                            if (key1 > key2) {
-                                return -1;
-                            } else if (key1 === key2) {
-                                return 0;
-                            } else {
-                                return 1;
-                            }
-                        });
-                    }
+          if ($scope.patientPastDrugOrders) {
+              $scope.pastDrugOrderGroups = $scope.patientPastDrugOrders.pastOrder_groups;
+              $scope.patientPastSingleDrugInstruction =formatDisplayOfPastSingleDrugInstructions(
+                $scope.patientPastDrugOrders.pastSingle_drugs
+              );
+            if ($scope.patientPastDrugOrders.pastOrder_groups) {
+              $scope.pastOrders = formatDisplayOfPastRegimenInstructions(
+                $scope.patientPastDrugOrders.pastOrder_groups
+              );
+              Array.prototype.push.apply(
+                $scope.pastOrders,
+                $scope.patientPastSingleDrugInstruction
+              );
+              $scope.pastOrders.sort(function (a, b) {
+                var key1 = a.dateActivated;
+                var key2 = b.dateActivated;
+                if (key1 > key2) {
+                  return -1;
+                } else if (key1 === key2) {
+                  return 0;
+                } else {
+                  return 1;
                 }
-            });
-
+              });
+            }
+          }
         }
 
 
