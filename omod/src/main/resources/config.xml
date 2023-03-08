@@ -164,6 +164,30 @@
 	</globalProperty>
 
 	<globalProperty>
+		<property>edarp_eid_server_url</property>
+		<defaultValue></defaultValue>
+		<description>
+			The URL for pushing requests to the EDARP EID server
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>edarp_eid_server_result_url</property>
+		<defaultValue></defaultValue>
+		<description>
+			The URL for fetching EDARP EID result
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>edarp_eid_server_api_token</property>
+		<defaultValue></defaultValue>
+		<description>
+			API token to authenticate communication to the EDARP EID lab system API
+		</description>
+	</globalProperty>
+
+	<globalProperty>
 		<property>edarp_vl_server_url</property>
 		<defaultValue></defaultValue>
 		<description>

@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 /**
  * An implementation for EDARP lab system.
  * The lab currently does not process EID samples
- * Instead, EID samples are sent to KEMRI lab and so we'll reuse EID configs for CHAI system
+ * Instead, EID samples are sent to KEMRI lab and so we'll reuse EID configs for EDARP system
  */
 public class EdarpSystemWebRequest extends LabWebRequest {
 
@@ -52,7 +52,7 @@ public class EdarpSystemWebRequest extends LabWebRequest {
     @Override
     public boolean checkRequirements() {
         // EID settings. EDARP lab doesn't currently process EID requests.
-        // Facilities send samples to Kemri which uses CHAI system
+        // Facilities send samples to Kemri which uses EDARP system
         GlobalProperty gpEIDServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_EID_LAB_SERVER_REQUEST_URL);
         GlobalProperty gpEIDServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_EID_LAB_SERVER_RESULT_URL);
         GlobalProperty gpEIDApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_EID_LAB_SERVER_API_TOKEN);
@@ -71,7 +71,7 @@ public class EdarpSystemWebRequest extends LabWebRequest {
         String VLApiToken = gpVLApiToken.getPropertyValue();
 
         if (StringUtils.isBlank(VLServerPushUrl) || StringUtils.isBlank(VLServerPullUrl) || StringUtils.isBlank(VLApiToken) || LabOrderDataExchange.getSystemType() == 0) {
-            System.out.println("CHAI Lab Results: Please set credentials for posting lab requests to the EDARP system");
+            System.out.println("EDARP Lab Results: Please set credentials for posting lab requests to the EDARP system");
             return false;
         }
         return true;
@@ -90,8 +90,8 @@ public class EdarpSystemWebRequest extends LabWebRequest {
         String API_KEY = "";
 
         if(toProcess.getManifestType() == LabManifest.EID_TYPE) {
-            GlobalProperty gpEIDServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_EID_LAB_SERVER_REQUEST_URL);
-            GlobalProperty gpEIDApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_EID_LAB_SERVER_API_TOKEN);
+            GlobalProperty gpEIDServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_EDARP_EID_LAB_SERVER_REQUEST_URL);
+            GlobalProperty gpEIDApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_EDARP_EID_LAB_SERVER_API_TOKEN);
             serverUrl = gpEIDServerPushUrl.getPropertyValue().trim();
             API_KEY = gpEIDApiToken.getPropertyValue().trim();
         } else if(toProcess.getManifestType() == LabManifest.VL_TYPE) {
@@ -218,13 +218,13 @@ public class EdarpSystemWebRequest extends LabWebRequest {
         String API_KEY = "";
         System.out.println("Processing manifest ID: " + manifestToUpdateResults.getId());
         if(manifestToUpdateResults.getManifestType() == LabManifest.EID_TYPE) {
-            GlobalProperty gpEIDServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_EID_LAB_SERVER_RESULT_URL);
-            GlobalProperty gpEIDApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_EID_LAB_SERVER_API_TOKEN);
+            GlobalProperty gpEIDServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_EDARP_EID_LAB_SERVER_RESULT_URL);
+            GlobalProperty gpEIDApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_EDARP_EID_LAB_SERVER_API_TOKEN);
             serverUrl = gpEIDServerPullUrl.getPropertyValue().trim();
             API_KEY = gpEIDApiToken.getPropertyValue().trim();
         } else if(manifestToUpdateResults.getManifestType() == LabManifest.VL_TYPE) {
-            GlobalProperty gpVLServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_VL_LAB_SERVER_RESULT_URL);
-            GlobalProperty gpVLApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_VL_LAB_SERVER_API_TOKEN);
+            GlobalProperty gpVLServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_EDARP_VL_LAB_SERVER_RESULT_URL);
+            GlobalProperty gpVLApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_EDARP_VL_LAB_SERVER_API_TOKEN);
             serverUrl = gpVLServerPullUrl.getPropertyValue().trim();
             API_KEY = gpVLApiToken.getPropertyValue().trim();
         }
@@ -253,7 +253,7 @@ public class EdarpSystemWebRequest extends LabWebRequest {
             String facilityCode = Utils.getDefaultLocationMflCode(Utils.getDefaultLocation());
             String orderNumbers = StringUtils.join(orderIds, ",");
 
-            System.out.println("Get CHAI Lab Results URL: " + serverUrl);
+            System.out.println("Get EDARP Lab Results URL: " + serverUrl);
 
             HttpPost postRequest = new HttpPost(serverUrl);
 
@@ -263,11 +263,11 @@ public class EdarpSystemWebRequest extends LabWebRequest {
             postRequest.addHeader("apikey", API_KEY);
 
             ObjectNode request = Utils.getJsonNodeFactory().objectNode();
-            request.put("test", manifestToUpdateResults.getManifestType().toString());
-            request.put("facility_code", facilityCode);
-            request.put("order_numbers", orderNumbers);
+            // request.put("test", manifestToUpdateResults.getManifestType().toString());
+            request.put("mfl_code", facilityCode);
+            request.put("order_no", orderNumbers);
 
-            System.out.println("CHAI Lab GET: Server Payload: " + request);
+            System.out.println("EDARP Lab GET: Server Payload: " + request);
             StringEntity userEntity = new StringEntity(request.toString());
             postRequest.setEntity(userEntity);
 
@@ -278,13 +278,13 @@ public class EdarpSystemWebRequest extends LabWebRequest {
                 String message = EntityUtils.toString(response.getEntity(), "UTF-8");
 
                 if (statusCode == 429) { // too many requests. just terminate
-                    System.out.println("CHAI Lab Results POST: 429 The push lab scheduler has been configured to run at very short intervals. Please change this to at least 30min");
-                    log.warn("CHAI Lab Results POST: 429 The push scheduler has been configured to run at very short intervals. Please change this to at least 30min");
+                    System.out.println("EDARP Lab Results GET: 429 The pull lab scheduler has been configured to run at very short intervals. Please change this to at least 30min");
+                    log.warn("EDARP Lab Results GET: 429 The pull scheduler has been configured to run at very short intervals. Please change this to at least 30min");
                     return;
                 }
-                throw new RuntimeException("Get CHAI Lab Results Failed with HTTP error code : " + statusCode + ", message: " + message);
+                throw new RuntimeException("Get EDARP Lab Results Failed with HTTP error code : " + statusCode + ", message: " + message);
             } else {
-                System.out.println("Get CHAI Lab Results: REST Call Success");
+                System.out.println("Get EDARP Lab Results: REST Call Success");
             }
 
            String jsonString = null;
@@ -300,8 +300,9 @@ public class EdarpSystemWebRequest extends LabWebRequest {
             }
 
             JSONParser parser = new JSONParser();
-            JSONObject responseObject = (JSONObject) parser.parse(jsonString);
-            JSONArray responseArray = (JSONArray)responseObject.get("data");
+            // JSONObject responseObject = (JSONObject) parser.parse(jsonString);
+            // JSONArray responseArray = (JSONArray) responseObject.get("data");
+            JSONArray responseArray = (JSONArray) parser.parse(jsonString);
             String dataString = responseArray.toString();
             List<Integer> listOfOrderIdsInResponse = ProcessViralLoadResults.extractOrderIdListFromLabResponse(dataString);
 
@@ -357,16 +358,14 @@ public class EdarpSystemWebRequest extends LabWebRequest {
                         Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifest);
                         Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifestUpdatetime);
                     }
-
                 }
-
             }
 
-            System.out.println("Get CHAI Lab Results: Successfully executed the task that pulls lab requests");
-            log.info("Get CHAI Lab Results: Successfully executed the task that pulls lab requests");
+            System.out.println("Get EDARP Lab Results: Successfully executed the task that pulls lab requests");
+            log.info("Get EDARP Lab Results: Successfully executed the task that pulls lab requests");
 
         } catch (Exception e) {
-            System.err.println("Get CHAI Lab Results Error: " + e.getMessage());
+            System.err.println("Get EDARP Lab Results Error: " + e.getMessage());
             e.printStackTrace();
         } finally {
             httpClient.close();
