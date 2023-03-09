@@ -49,7 +49,7 @@ public class LabOrderDataExchange {
     /**
      * Give the kind of lab system configured i.e CHAI or LABWARE
      *
-     * @return int system type LABWARE_SYSTEM or CHAI_SYSTEM
+     * @return int system type LABWARE_SYSTEM, CHAI_SYSTEM, or EDARP
      */
     public static int getSystemType() {
         String systemType = "";
@@ -68,6 +68,8 @@ public class LabOrderDataExchange {
             return ModuleConstants.CHAI_SYSTEM;
         } else if (systemType.equalsIgnoreCase("LABWARE")) {
             return ModuleConstants.LABWARE_SYSTEM;
+        } else if (systemType.equalsIgnoreCase("EDARP")) {
+            return ModuleConstants.EDARP_SYSTEM;
         } else {
             return ModuleConstants.NO_SYSTEM_CONFIGURED; // The default if empty string or another string
         }
@@ -377,6 +379,15 @@ public class LabOrderDataExchange {
                             dateSampleTested = o.get("date_tested").getAsString().trim();
                         } catch (Exception ex) {
                         }
+                    } else if (getSystemType() == ModuleConstants.EDARP_SYSTEM) {
+                        try {
+                            dateSampleReceived = o.get("date_received").getAsString().trim();
+                        } catch (Exception ex) {
+                        }
+                        try {
+                            dateSampleTested = o.get("date_tested").getAsString().trim();
+                        } catch (Exception ex) {
+                        }
                     }
 
                     specimenRejectedReason = (o.has("rejected_reason") && o.get("rejected_reason") != null && o.get("rejected_reason").getAsString() != null) ? o.get("rejected_reason").getAsString().trim() : "";
@@ -579,7 +590,19 @@ public class LabOrderDataExchange {
                                 o.setValueNumeric(vlVal);
                             }
                         }
-                    }
+                    } else if (getSystemType() == ModuleConstants.EDARP_SYSTEM) {
+                        if (result.equalsIgnoreCase(lDLResult) || result.equalsIgnoreCase(labwarelDLResult) || result.contains("LDL")) {
+                            conceptToRetain = vlTestConceptQualitative;
+                            o.setValueCoded(LDLConcept);
+                        } else if (result.equalsIgnoreCase(aboveMillionResult)) {
+                            conceptToRetain = vlTestConceptQuantitative;
+                            o.setValueNumeric(new Double(10000001));
+                        } else {
+                            conceptToRetain = vlTestConceptQuantitative;
+                            Double vlVal = NumberUtils.toDouble(result);
+                            o.setValueNumeric(vlVal);
+                        }
+                    } 
 
                     // In order to record results both qualitative (LDL) and quantitative,
                     // every vl request saves two orders: one with 856(quantitative) for numeric values and another with 1305(quantitative) for LDL value
