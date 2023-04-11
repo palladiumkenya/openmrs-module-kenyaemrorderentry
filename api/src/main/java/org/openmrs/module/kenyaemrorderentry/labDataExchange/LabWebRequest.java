@@ -103,7 +103,7 @@ public abstract class LabWebRequest {
             test.put("sex", patient.getGender().equals("M") ? "1" : patient.getGender().equals("F") ? "2" : "3");
             test.put("order_no", o.getOrderId().toString());
             test.put("patient_identifier", cccNumber != null ? cccNumber.getIdentifier() : "");
-            test.put("sampletype", sampleType);
+            test.put("sampletype", LabOrderDataExchange.getSampleTypeCode(sampleType));
             test.put("patient_name", fullName);
 
             test.put("regimenline", regimenLine);
@@ -128,7 +128,7 @@ public abstract class LabWebRequest {
                 test.put("sex", patient.getGender().equals("M") ? "1" : patient.getGender().equals("F") ? "2" : "3");
                 test.put("order_no", o.getOrderId().toString());
                 test.put("patient_identifier", heiNumber != null ? heiNumber.getIdentifier() : "");
-                test.put("sampletype", sampleType);
+                test.put("sampletype", LabOrderDataExchange.getSampleTypeCode(sampleType));
                 test.put("patient_name", fullName);
                 test.put("datecollected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
                 test.put("feeding", "yes");
