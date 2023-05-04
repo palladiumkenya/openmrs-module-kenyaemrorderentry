@@ -37,6 +37,7 @@ public class Utils {
     public static final String HEI_UNIQUE_NUMBER = "0691f522-dd67-4eeb-92c8-af5083baf338";
     static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd-MMM-yyyy");
     public static final String MCH_MOTHER_SERVICE_PROGRAM = "b5d9e05f-f5ab-4612-98dd-adb75438ed34";
+    public static final String RECENCY_ID = "fd52829a-75d2-4732-8e43-4bff8e5b4f1a";
 
     /**
      * Gets the PatientIdentifierType for a patient UPN
@@ -45,7 +46,15 @@ public class Utils {
      */
     public static PatientIdentifierType getUniquePatientNumberIdentifierType() {
         return Context.getPatientService().getPatientIdentifierTypeByUuid(UNIQUE_PATIENT_NUMBER);
+    }
 
+    /**
+     * Gets the PatientIdentifierType for a patient RECENCY
+     *
+     * @return
+     */
+    public static PatientIdentifierType getRecencyIdentifierType() {
+        return Context.getPatientService().getPatientIdentifierTypeByUuid(RECENCY_ID);
     }
 
     /**
