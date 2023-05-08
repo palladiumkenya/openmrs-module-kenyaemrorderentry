@@ -55,7 +55,7 @@ th, td {
 
 
     window.OpenMRS = window.OpenMRS || {};
-    window.OpenMRS.drugOrdersConfig = ${ jsonConfig };
+    window.OpenMRS.labOrdersConfig = ${ jsonConfig };
     window.OpenMRS.labTestJsonPayload = ${labTestJsonPayload}
     window.OpenMRS.enterLabOrderResults =${enterLabOrderResults}
     window.OpenMRS.pastLabOrdersResults =${pastLabOrdersResults}
@@ -70,11 +70,6 @@ th, td {
 
 
 </script>
-
-${ui.includeFragment("appui", "messages", [codes: [
-        "kenyaemrorderentry.pastAction.REVISE",
-        "kenyaemrorderentry.pastAction.DISCONTINUE"
-]])}
 
 <div class="ke-page-content">
     <div >

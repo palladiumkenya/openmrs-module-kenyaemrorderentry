@@ -1,5 +1,4 @@
-angular.module('labOrders', ['orderService', 'encounterService', 'uicommons.filters', 'uicommons.widget.select-concept-from-list',
-    'uicommons.widget.select-order-frequency', 'uicommons.widget.select-drug', 'session', 'orderEntry']).
+angular.module('labOrders', ['orderService', 'encounterService', 'session', 'orderEntry']).
 
 config(function($locationProvider) {
     $locationProvider.html5Mode({
@@ -8,65 +7,14 @@ config(function($locationProvider) {
     });
 }).
 
-filter('dates', ['serverDateFilter', function(serverDateFilter) {
-    return function(order) {
-        if (!order || typeof order != 'object') {
-            return "";
-        }
-        if (order.action === 'DISCONTINUE' || !order.dateActivated) {
-            return "";
-        } else {
-            var text = serverDateFilter(order.dateActivated);
-            if (order.dateStopped) {
-                text += ' - ' + serverDateFilter(order.dateStopped);
-            }
-            else if (order.autoExpireDate) {
-                text += ' - ' + serverDateFilter(order.autoExpireDate);
-            }
-            return text;
-        }
-    }
-}]).
-
-filter('instructions', function() {
-    return function(order) {
-        if (!order || typeof order != 'object') {
-            return "";
-        }
-        if (order.action == 'DISCONTINUE') {
-            return "Discontinue " + (order.drug ? order.drug : order.concept ).display;
-        }
-        else {
-            var text = order.getDosingType().format(order);
-            if (order.quantity) {
-                text += ' (Dispense: ' + order.quantity + ' ' + order.quantityUnits.display + ')';
-            }
-            return text;
-        }
-    }
-}).
-
-filter('replacement', ['serverDateFilter', function(serverDateFilter) {
-    // given the order that replaced the one we are displaying, display the details of the replacement
-    return function(replacementOrder) {
-        if (!replacementOrder) {
-            return "";
-        }
-        return emr.message("kenyaemrorderentry.pastAction." + replacementOrder.action) + ", " + serverDateFilter(replacementOrder.dateActivated);
-    }
-}]).
-
-controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$timeout', 'OrderService', 'EncounterService', 'SessionInfo', 'OrderEntryService',
-    function($scope, $window,$rootScope, $location, $timeout, OrderService, EncounterService, SessionInfo, OrderEntryService) {
+controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$timeout', 'OrderService', 'SessionInfo', 'OrderEntryService',
+    function($scope, $window,$rootScope, $location, $timeout, OrderService, SessionInfo, OrderEntryService) {
 
         var orderContext = {};
         SessionInfo.get().$promise.then(function(info) {
             orderContext.provider = info.currentProvider;
-            $scope.newDraftDrugOrder = OpenMRS.createEmptyDraftOrder(orderContext);
         });
 
-
-        // TODO changing dosingType of a draft order should reset defaults (and discard non-defaulted properties)
 
         function loadExistingOrders() {
             $scope.activeTestOrders = { loading: true };
@@ -517,35 +465,20 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             return orders;
 
         }
-
-
-        function replaceWithUuids(obj, props) {
-            var replaced = angular.extend({}, obj);
-            _.each(props, function(prop) {
-                if (replaced[prop] && replaced[prop].uuid) {
-                    replaced[prop] = replaced[prop].uuid;
-                }
-            });
-            return replaced;
-        }
-
         $scope.loading = false;
 
         $scope.activeTestOrders = { loading: true };
         $scope.pastLabOrders = { loading: true };
-        $scope.draftDrugOrders = [];
-        $scope.dosingTypes = OpenMRS.dosingTypes;
         $scope.showFields = false;
         $scope.showTestFields = false;
 
-        var config = OpenMRS.drugOrdersConfig;
+        var config = OpenMRS.labOrdersConfig;
         var labs = OpenMRS.labTestJsonPayload;
         var enterLabOrderResults = OpenMRS.enterLabOrderResults;
         var pastOrders = OpenMRS.pastLabOrdersResults;
 
 
         $scope.init = function() {
-            $scope.routes = config.routes;
             $scope.careSettings = config.careSettings;
             $scope.careSetting = config.intialCareSetting ?
                 _.findWhere(config.careSettings, { uuid: config.intialCareSetting }) :
@@ -559,40 +492,6 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 angular.element('#new-order input[type=text]').first().focus();
             });
         }
-
-
-        // functions that affect the overall state of the page
-
-        $scope.setCareSetting = function(careSetting) {
-            // TODO confirm dialog or undo functionality if this is going to discard things
-            $scope.careSetting = careSetting;
-            orderContext.careSetting = $scope.careSetting;
-            loadExistingOrders();
-            $scope.draftDrugOrders = [];
-            $scope.newDraftDrugOrder = OpenMRS.createEmptyDraftOrder(orderContext);
-            $location.search({ patient: config.patient.uuid, careSetting: careSetting.uuid });
-        }
-
-
-        // functions that affect the new order being written
-
-        $scope.addNewDraftOrder = function() {
-            if ($scope.newDraftDrugOrder.getDosingType().validate($scope.newDraftDrugOrder)) {
-                $scope.newDraftDrugOrder.asNeeded = $scope.newDraftDrugOrder.asNeededCondition ? true : false;
-                $scope.draftDrugOrders.push($scope.newDraftDrugOrder);
-                $scope.newDraftDrugOrder = OpenMRS.createEmptyDraftOrder(orderContext);
-                $scope.newOrderForm.$setPristine();
-                // TODO upgrade to angular 1.3 and work on form validation
-                $scope.newOrderForm.$setUntouched();
-            } else {
-                emr.errorMessage("Invalid");
-            }
-        }
-
-        $scope.cancelNewDraftOrder = function() {
-            $scope.newDraftDrugOrder = OpenMRS.createEmptyDraftOrder(orderContext);
-        }
-
 
         // The beginning of lab orders functionality
         $scope.selectedRow = null;
@@ -1339,34 +1238,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             });
         }
 
-        /**
-         * Finds the replacement order for a given active order (e.g. the order that will DC or REVISE it)
-         */
-        $scope.replacementFor = function(activeOrder) {
-            var lookAt = $scope.newDraftDrugOrder ?
-                _.union($scope.draftDrugOrders, [$scope.newDraftDrugOrder]) :
-                $scope.draftDrugOrders;
-            return _.findWhere(lookAt, { previousOrder: activeOrder });
-        }
-
-        $scope.replacementForPastOrder = function(pastOrder) {
-            var candidates = _.union($scope.activeTestOrders, $scope.pastLabOrders);
-            return _.find(candidates, function(item) {
-                return item.previousOrder && item.previousOrder.uuid === pastOrder.uuid;
-            });
-        }
-
-        // functions that affect existing active orders
-
-        $scope.discontinueOrder = function(activeOrder) {
-            var dcOrder = activeOrder.createDiscontinueOrder(orderContext);
-            $scope.draftDrugOrders.push(dcOrder);
-            $scope.$broadcast('added-dc-order', dcOrder);
-        };
-
-        $scope.reviseOrder = function(activeOrder) {
-            $scope.newDraftDrugOrder = activeOrder.createRevisionOrder();
-        };
+    
         $scope.voidOrderReason = '';
         $scope.OrderUuid = '';
         $scope.getOrderUuid = function(order) {
