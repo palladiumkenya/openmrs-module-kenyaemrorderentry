@@ -142,7 +142,7 @@ th, td {
                                                                 <div class="list-group-item"
                                                                      ng-repeat="order in filteredOrders">
                                                                     <div class="link-item">
-                                                                        <div class="btn-group button-size " role="group" aria-label="Basic example">
+                                                                        <div class="btn-group button-size " role="group">
                                                                             <button type="button" class="text-left" style="width: 76%">{{order.name}}</button>
                                                                             <button type="button" class="fa fa-calendar fa-1x" style="width: 8%"
                                                                                     data-toggle="modal" data-target="#dateOrder"
@@ -465,7 +465,7 @@ th, td {
                             </div>
                         </form>
                         <!-- Modal void for lab orders -->
-                        <div class="modal fade" id="voidOrdersModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                        <div class="modal fade" id="voidOrdersModal" tabindex="-1" role="dialog" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered" role="document">
                                 <div class="modal-content">
                                     <div class="modal-header modal-header-primary">
@@ -490,7 +490,7 @@ th, td {
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button"  data-dismiss="modal2" ng-click="closeModal()">Close</button>
-                                        <button type="button"   ng-click="voidAllHivViralLoadOrders()">
+                                        <button type="button"   ng-click="voidAllSelectedLabOrders()">
                                             <img src="${ ui.resourceLink("kenyaui", "images/glyphs/ok.png") }" /> Save</button>
                                     </div>
                                 </div>

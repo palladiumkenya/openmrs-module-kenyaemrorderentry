@@ -1036,7 +1036,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
         };
 
-         function cancelOrder () {
+         function cancelSimilarOrder (concept) {
              var reasonForVoidingOrder = document.getElementById("ddlvoidReason");
              $scope.voidOrderReason = reasonForVoidingOrder.options[reasonForVoidingOrder.selectedIndex].value;
 
@@ -1052,10 +1052,10 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
                 for (var r in data) {
                     if (data.hasOwnProperty(r)) {
-                        if(data.concept.uuid === '1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                        if(data.concept.uuid === '1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' && concept === '856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
                             $scope.OrderUuidHvl = data.uuid;
                         }
-                        if(data.concept.uuid === 'd0a3677f-3b3a-404c-9010-6ec766d7072e') {
+                        if(data.concept.uuid === 'd0a3677f-3b3a-404c-9010-6ec766d7072e' && concept == '5497AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
                             $scope.OrderUuidHvl = data.uuid;
                         }
 
@@ -1247,10 +1247,14 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             $scope.orderConcept = order.concept.uuid;
 
         }
-        $scope.voidAllHivViralLoadOrders = function () {
+        $scope.voidAllSelectedLabOrders = function () {
             $scope.voidActiveLabOrders();
-            if($scope.orderConcept ==='856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' || $scope.orderConcept ==='5497AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                cancelOrder();
+            if($scope.orderConcept ==='856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                 // For Viral load, there are two orders created i.e qualitative and quantitave orders
+                cancelSimilarOrder($scope.orderConcept); 
+            } else if( $scope.orderConcept ==='5497AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                // For cd4, there are two orders created i.e qualitative and quantitave orders
+                cancelSimilarOrder($scope.orderConcept);
             }
         }
 
