@@ -43,7 +43,7 @@ public class ManifestOrdersMissingSamplesHomePageController {
             builder.setOrderTypes(orderTypes);
             List<Concept> vlConcepts = new ArrayList<Concept>();
             vlConcepts.add(Context.getConceptService().getConcept(856));
-            vlConcepts.add(Context.getConceptService().getConcept(1405));
+            vlConcepts.add(Context.getConceptService().getConcept(1305));
             builder.setConcepts(vlConcepts);
             List<Order> orders = orderService.getOrders(builder.build());
             if (orders.size() < 1) {
