@@ -132,7 +132,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             }).then(function(results) {
                 $scope.pList = enterLabOrderResults;
                 if($scope.pList) {
-                    $scope.panelListResults = customiseHivViralLoadObj($scope.pList);
+                    $scope.panelListResults = customiseTestNameToDisplayForResultEntry($scope.pList);
                     $scope.labResultsRaw =$scope.panelListResults;
                     $scope.panelListResults = removeHivVl($scope.panelListResults);
                     $scope.panelListResults = removeHivLdl($scope.panelListResults);
@@ -276,68 +276,55 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
                 for (var r in data) {
                     if (data.hasOwnProperty(r)) {
-                        if (data.display ==='Tuberculosis polymerase chain reaction with rifampin resistance checking' ) {
-                            data['display'] =  'GeneXpert';
+                        if(data.display ==='Tuberculosis polymerase chain reaction with rifampin resistance checking' 
+                        || data.display ==='SERUM GLUCOSE' || data.display ==='Serum cryptococcal antigen status') {
+                            data['display'] = getTestName(data.display)
                         }
-                        if (data.display ==='Serum cryptococcal antigen status' ) {
-                            data['display'] =  'Serum Cryptococcal Antigen (CRAG)';
-                        }
+                       
                         if(data.orderReason) {
-                            if (data.orderReason.uuid === '843AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                                data['orderReasonCoded'] = "Confirmation of treatment failure (repeat VL) ";
-                            }
-                            if (data.orderReason.uuid === '1434AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                                data['orderReasonCoded'] = "Pregnancy";
-                            }
-                            if (data.orderReason.uuid === '162080AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                                data['orderReasonCoded'] = "Baseline VL (for infants diagnosed through EID)";
-                            }
-                            if (data.orderReason.uuid === '1259AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                                data['orderReasonCoded'] = "Single Drug Substitution";
-                            }
-                            if (data.orderReason.uuid === '159882AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                                data['orderReasonCoded'] = "Breastfeeding";
-                            }
-                            if (data.orderReason.uuid === '163523AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                                data['orderReasonCoded'] = "Clinical failure";
-                            }
-                            if (data.orderReason.uuid === '161236AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                                data['orderReasonCoded'] = "Routine";
-                            }
-
-                            if (data.orderReason.uuid === '160032AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                                data['orderReasonCoded'] = "Confirmation of persistent low level Viremia (PLLV)";
-                            }
-                            if (data.orderReason.uuid === '1040AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                                data['orderReasonCoded'] = "Initial PCR (6week or first contact)";
-                            }
-                            if (data.orderReason.uuid === '1326AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                                data['orderReasonCoded'] = "2nd PCR (6 months)";
-                            }
-                            if (data.orderReason.uuid === '844AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                                data['orderReasonCoded'] = "3rd PCR (12months)";
-                            }
-                            if (data.orderReason.uuid === '162082AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                                data['orderReasonCoded'] = "Confirmatory PCR and Baseline VL";
-                            }
-                            if (data.orderReason.uuid === '164460AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                                data['orderReasonCoded'] = "Ab test 6 weeks after cessation of breastfeeding";
-                            }
-                            if (data.orderReason.uuid === '164860AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                                data['orderReasonCoded'] = "Ab test at 18 months (1.5 years)";
-                            }
+                            data['orderReasonCoded'] = getTestOrderReason(data.orderReason.uuid);
                         }
-
                     }
-
                 }
                 orders.push(data);
-
             }
             return orders;
         }
 
-        function customiseHivViralLoadObj(panelList) {
+        var testOrderReasonMap = new Map([
+            ['164860AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', 'Ab test at 18 months (1.5 years)'],
+            ['164460AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', 'Ab test 6 weeks after cessation of breastfeeding'],
+            ['162082AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', 'Confirmatory PCR and Baseline VL'],
+            ['844AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', '3rd PCR (12months)'],
+            ['1326AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', '2nd PCR (6 months)'],
+            ['1040AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', 'Initial PCR (6week or first contact)'],
+            ['160032AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', 'Confirmation of persistent low level Viremia (PLLV)'],
+            ['161236AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', 'Routine'],
+            ['163523AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', 'Clinical failure'], 
+            ['159882AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', 'Breastfeeding'],
+            ['1259AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', 'Single Drug Substitution'],
+            ['162080AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', 'Baseline VL (for infants diagnosed through EID)'],
+            ['1434AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', 'Pregnancy'],
+            ['843AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', 'Confirmation of treatment failure (repeat VL) '],
+          ]);
+        
+        var testNameMap = new Map([
+            ['Tuberculosis polymerase chain reaction with rifampin resistance checking', 'GeneXpert'],
+            ['Serum cryptococcal antigen status', 'Serum Cryptococcal Antigen (CRAG)'],
+            ['SERUM GLUCOSE', 'Random blood sugar'],
+          ]);
+
+        // function to get the test order reason name given order reason UUID
+        function getTestOrderReason(orderReasonUUID) {
+            return testOrderReasonMap.get(orderReasonUUID);
+        }
+
+         // function to get the custom test name given the test concept name
+         function getTestName(conceptName) {
+            return testNameMap.get(conceptName);
+        }
+
+        function customiseTestNameToDisplayForResultEntry(panelList) {
             var orders = [];
             var l = {};
             var ldl ={};
@@ -355,11 +342,9 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                         if (data.dateActivated ) {
                             data['dateActivated'] = new Date(data.dateActivated );
                         }
-                        if (data.label ==='Tuberculosis polymerase chain reaction with rifampin resistance checking' ) {
-                            data['label'] =  'GeneXpert';
-                        }
-                        if (data.label ==='Serum cryptococcal antigen status' ) {
-                            data['label'] =  'Serum Cryptococcal Antigen (CRAG)';
+                        if(data.label ==='Tuberculosis polymerase chain reaction with rifampin resistance checking' 
+                        || data.label ==='SERUM GLUCOSE' || data.label ==='Serum cryptococcal antigen status') {
+                            data['label'] = getTestName(data.label);
                         }
 
                     if(data.concept ==='856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
@@ -520,19 +505,13 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
                 for (var r in data) {
                     if (data.hasOwnProperty(r)) {
-
-                        if (data.name ==='Tuberculosis polymerase chain reaction with rifampin resistance checking' ) {
-                            data['name'] =  'GeneXpert';
-                        }
-                        if (data.name ==='Serum cryptococcal antigen status' ) {
-                            data['name'] =  'Serum Cryptococcal Antigen (CRAG)';
-                        }
-
+                        if(data.name ==='Tuberculosis polymerase chain reaction with rifampin resistance checking' 
+                        || data.name ==='SERUM GLUCOSE' || data.name ==='Serum cryptococcal antigen status') {
+                            data['name'] = getTestName(data.name);
+                        }   
                     }
-
                 }
                 orders.push(data);
-
             }
             return orders;
 
