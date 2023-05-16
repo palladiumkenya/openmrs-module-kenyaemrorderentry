@@ -219,6 +219,10 @@ public class LabOrdersPageController {
                 "PREGNANCY TEST", Arrays.asList(
                         concService.getConcept(45) // Urine pregnancy test
                 ));
+        JSONArray urineTbMonitoring = buildTestPanelWithoutPanelConcept("Urine", labTestJsonPayload,
+                "TB MONITORING", Arrays.asList(
+                        concService.getConcept(167459) // TB LAM
+                ));
 
         model.put("labTestJsonPayload", labTestJsonPayload.toString());
 
