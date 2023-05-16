@@ -236,7 +236,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 for (var r in data) {
                     if (data.hasOwnProperty(r)) {
                         if(data.display ==='Tuberculosis polymerase chain reaction with rifampin resistance checking' 
-                        || data.display ==='SERUM GLUCOSE' || data.display ==='Serum cryptococcal antigen status') {
+                        || data.display ==='SERUM GLUCOSE' || data.display ==='Serum cryptococcal antigen status' || data.display ==='Mycobacterium tuberculosis lipoarabinomannan antigen, urine, rapid') {
                             data['display'] = getTestName(data.display)
                         }
                        
@@ -271,6 +271,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             ['Tuberculosis polymerase chain reaction with rifampin resistance checking', 'GeneXpert'],
             ['Serum cryptococcal antigen status', 'Serum Cryptococcal Antigen (CRAG)'],
             ['SERUM GLUCOSE', 'Random blood sugar'],
+            ['Mycobacterium tuberculosis lipoarabinomannan antigen, urine, rapid', 'TB LAM'],
           ]);
 
         // function to get the test order reason name given order reason UUID
@@ -302,7 +303,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                             data['dateActivated'] = new Date(data.dateActivated );
                         }
                         if(data.label ==='Tuberculosis polymerase chain reaction with rifampin resistance checking' 
-                        || data.label ==='SERUM GLUCOSE' || data.label ==='Serum cryptococcal antigen status') {
+                        || data.label ==='SERUM GLUCOSE' || data.label ==='Serum cryptococcal antigen status' || data.label ==='Mycobacterium tuberculosis lipoarabinomannan antigen, urine, rapid') {
                             data['label'] = getTestName(data.label);
                         }
 
@@ -465,7 +466,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 for (var r in data) {
                     if (data.hasOwnProperty(r)) {
                         if(data.name ==='Tuberculosis polymerase chain reaction with rifampin resistance checking' 
-                        || data.name ==='SERUM GLUCOSE' || data.name ==='Serum cryptococcal antigen status') {
+                        || data.name ==='SERUM GLUCOSE' || data.name ==='Serum cryptococcal antigen status' || data.name ==='Mycobacterium tuberculosis lipoarabinomannan antigen, urine, rapid') {
                             data['name'] = getTestName(data.name);
                         }   
                     }
