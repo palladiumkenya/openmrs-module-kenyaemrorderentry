@@ -156,7 +156,7 @@
                         <select name="status" id="status">
                             <option></option>
                             <% manifestStatusOptions.each { %>
-                            <option ${(command.status == null)? "" : it == command.status ? "selected" : ""} value="${it}">${it}</option>
+                                <option ${(command.status == null)? "" : it == command.status ? "selected" : ""} value="${it}">${it}</option>
                             <% } %>
                         </select>
                     </td>
