@@ -3,6 +3,7 @@
     ui.includeJavascript("kenyaemrorderentry", "jquery.twbsPagination.min.js")
     ui.includeJavascript("kenyaemrorderentry", "ordersUtils.js")
 
+
     def menuItems = [
             [label: "Back to home", iconProvider: "kenyaui", icon: "buttons/back.png", label: "Back to home", href: ui.pageLink("kenyaemr", "userHome")]
     ]
@@ -11,11 +12,11 @@
             [label: "Draft", iconProvider: "kenyaui", icon: "", label: "Draft", href: ui.pageLink("kenyaemrorderentry", "orders/labOrdersManifestHome")],
             [label: "Ready to send", iconProvider: "kenyaui", icon: "", label: "Ready to send", href: ui.pageLink("kenyaemrorderentry", "orders/labOrdersReadyToSendManifestHome")],
             [label: "On hold", iconProvider: "kenyaui", icon: "", label: "On hold", href: ui.pageLink("kenyaemrorderentry", "orders/labOrdersOnHoldManifestHome")],
-            [label: "Sending", iconProvider: "kenyaui", icon: "", label: "Sending", href: ui.pageLink("kenyaemrorderentry", "orders/labOrdersSendingManifestHome")],
+            [label: "Sending", iconProvider: "kenyaui", icon: "", label: "Sending", href: ""],
             [label: "Submitted", iconProvider: "kenyaui", icon: "", label: "Submitted", href: ui.pageLink("kenyaemrorderentry", "orders/labOrdersSubmittedManifestHome")],
-            [label: "Incomplete results", iconProvider: "kenyaui", icon: "", label: "Incomplete results", href: ""],
+            [label: "Incomplete results", iconProvider: "kenyaui", icon: "", label: "Incomplete results", href: ui.pageLink("kenyaemrorderentry", "orders/labOrdersIncompleteResultManifestHome")],
             [label: "Complete With Errors", iconProvider: "kenyaui", icon: "", label: "Complete With Errors", href: ui.pageLink("kenyaemrorderentry", "orders/labOrdersCompleteWithErrorResultsManifestHome")],
-            [label: "Complete results", iconProvider: "kenyaui", icon: "", label: "Complete results", href: ui.pageLink("kenyaemrorderentry", "orders/labOrdersCompleteResultManifestHome")],
+            [label: "Complete results", iconProvider: "kenyaui", icon: "", label: "Complete results", href: ""],
     ]
 
     def actionRequired = [
@@ -124,7 +125,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
 <div class="ke-page-content">
     <div align="left">
 
-        <h2 style="color:steelblue">Manifest list [ Incomplete results ]</h2>
+        <h2 style="color:steelblue">Manifest list [ Sending ]</h2>
         <div>
 
         </div>
@@ -164,9 +165,8 @@ tr:nth-child(even) {background-color: #f2f2f2;}
     //On ready
     jq = jQuery;
     jq(function () {
-// mark the activePage
-        showActivePageOnManifestNavigation('Incomplete results');
-
+        // mark the activePage
+        showActivePageOnManifestNavigation('Sending');
         jq('#generateManifest').click(function () {
             jq.getJSON('${ ui.actionLink("kenyaemrorderentry", "patientdashboard/generalLabOrders", "generateViralLoadPayload") }')
                 .success(function (data) {
