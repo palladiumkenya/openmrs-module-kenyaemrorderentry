@@ -218,4 +218,10 @@ public class KenyaemrOrdersServiceImpl extends BaseOpenmrsService implements Ken
     public void onShutdown() {
 
     }
+
+    @Override
+    @Transactional(readOnly = false)
+    public void requeueLabManifest(Integer manifestId) {
+        dao.requeueLabManifest(manifestId);
+    }
 }

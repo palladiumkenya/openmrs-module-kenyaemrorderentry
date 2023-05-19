@@ -1,5 +1,8 @@
 package org.openmrs.module.kenyaemrorderentry.page.controller.orders;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
@@ -11,9 +14,7 @@ import org.openmrs.ui.framework.SimpleObject;
 import org.openmrs.ui.framework.UiUtils;
 import org.openmrs.ui.framework.annotation.SpringBean;
 import org.openmrs.ui.framework.page.PageModel;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @AppPage("kenyaemr.labmanifest")
 public class LabOrdersCompleteWithErrorResultsManifestHomePageController {
@@ -21,7 +22,7 @@ public class LabOrdersCompleteWithErrorResultsManifestHomePageController {
     KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
 
     public void get(@SpringBean KenyaUiUtils kenyaUi, UiUtils ui, PageModel model) {
-        List<LabManifest> allManifests = Context.getService(KenyaemrOrdersService.class).getLabOrderManifest("Complete With Error results");
+        List<LabManifest> allManifests = Context.getService(KenyaemrOrdersService.class).getLabOrderManifest("Complete results");
         List<SimpleObject> manifestList1 = new ArrayList<SimpleObject>();
         for (LabManifest manifest : allManifests) {
 
@@ -72,5 +73,17 @@ public class LabOrdersCompleteWithErrorResultsManifestHomePageController {
         model.put("manifestList", ui.toJson(manifestList1));
         model.put("manifestListSize", ui.toJson(manifestList1.size()));
     }
+
+    /**
+     * Requeue a manifest that has errors
+     * @param manifestId
+     * @param kenyaUi
+     * @param ui
+     */
+    // public void requeueManifest(@RequestParam("manifestId") Integer manifestId, @SpringBean KenyaUiUtils kenyaUi, UiUtils ui) {
+    //     // We requeue the manifest by changing its status to 'Submitted' and all order items to 'Sent'
+    //     KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
+    //     kenyaemrOrdersService.requeueLabManifest(manifestId);
+    // }
 
 }

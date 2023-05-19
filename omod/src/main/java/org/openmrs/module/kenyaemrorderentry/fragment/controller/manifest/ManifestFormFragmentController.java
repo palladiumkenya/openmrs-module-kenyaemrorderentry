@@ -26,6 +26,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.openmrs.api.context.Context;
+import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
+import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
+import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
+import org.openmrs.module.kenyaui.KenyaUiUtils;
+import org.openmrs.module.kenyaui.annotation.AppPage;
+import org.openmrs.ui.framework.SimpleObject;
+import org.openmrs.ui.framework.UiUtils;
+import org.openmrs.ui.framework.annotation.SpringBean;
+import org.openmrs.ui.framework.page.PageModel;
+import org.springframework.web.bind.annotation.RequestParam;
+
 public class ManifestFormFragmentController {
     public void controller(@FragmentParam(value = "manifestId", required = false) LabManifest labManifest,
                            @RequestParam(value = "returnUrl") String returnUrl,
@@ -60,6 +75,18 @@ public class ManifestFormFragmentController {
         model.addAttribute("countyList", uniqueCountyList);
         model.addAttribute("isAnEdit", exists == null ? false : true);
         model.addAttribute("returnUrl", returnUrl);
+    }
+
+    /**
+     * Requeue a manifest that has errors
+     * @param manifestId
+     * @param kenyaUi
+     * @param ui
+     */
+    public void requeueManifest(@RequestParam("manifestId") Integer manifestId, @SpringBean KenyaUiUtils kenyaUi, UiUtils ui) {
+        // We requeue the manifest by changing its status to 'Submitted' and all order items to 'Sent'
+        KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
+        kenyaemrOrdersService.requeueLabManifest(manifestId);
     }
 
     private List<String> manifestStatus() {

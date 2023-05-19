@@ -94,14 +94,20 @@ tr:nth-child(even) {background-color: #f2f2f2;}
 .viewButton {
     background-color: cadetblue;
     color: white;
+    margin: 5px;
+    padding: 5px;
 }
 .editButton {
     background-color: cadetblue;
     color: white;
+    margin: 5px;
+    padding: 5px;
 }
 .requeueButton {
     background-color: cadetblue;
     color: white;
+    margin: 5px;
+    padding: 5px;
 }
 .viewButton:hover {
     background-color: steelblue;
@@ -133,7 +139,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
 <div class="ke-page-content">
     <div align="left">
 
-        <h2 style="color:steelblue">Manifest list [ Complete With Error Results ]</h2>
+        <h2 style="color:steelblue">Manifest list [ Complete With Errors ]</h2>
         <div>
 
         </div>
@@ -174,7 +180,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
     jq = jQuery;
     jq(function () {
         // mark the activePage
-        showActivePageOnManifestNavigation('Complete With Error results');
+        showActivePageOnManifestNavigation('Complete With Errors');
         jq('#generateManifest').click(function () {
             jq.getJSON('${ ui.actionLink("kenyaemrorderentry", "patientdashboard/generalLabOrders", "generateViralLoadPayload") }')
                 .success(function (data) {
@@ -222,6 +228,31 @@ tr:nth-child(even) {background-color: #f2f2f2;}
 
         jq(document).on('click','.editButton',function(){
             ui.navigate('kenyaemrorderentry', 'manifest/createManifest', { manifestId: jq(this).val(),  returnUrl: location.href });
+        });
+
+        jq(document).on('click','.requeueButton',function(){
+            // We requeue the manifest by changing its status to 'Submitted' and all order items to 'Sent'
+            let manifestId = jq(this).val();
+            console.log('Manifest ID: ' + JSON.stringify(manifestId));
+            ui.getFragmentActionAsJson('kenyaemrorderentry', 'manifest/manifestForm', 'requeueManifest', {manifestId : manifestId}, function (result) {
+                // Done Requeueing
+                alert("Success: Manifest Number: " + manifestId + " requeued");
+                ui.reloadPage();
+                //ui.navigate('kenyaemrorderentry', 'orders/labOrdersSubmittedManifestHome', { manifestId: jq(this).val(),  returnUrl: location.href });
+            }); 
+            ///** 
+                //jq.getJSON('${ ui.actionLink("kenyaemrorderentry", "manifest/manifestForm", "requeueManifest") }',
+                    //{
+                        //manifestId : manifestId
+                    //})
+                    //.success(function (data) {
+                        //console.log('Success');
+                    //})
+                    //.error(function (xhr, status, err) {
+                        //console.log('AJAX error ' + JSON.stringify(xhr));
+                    //})
+                //}); 
+            //*/         
         });
     });
 

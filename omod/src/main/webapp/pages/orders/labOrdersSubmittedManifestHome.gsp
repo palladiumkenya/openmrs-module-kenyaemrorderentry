@@ -93,10 +93,14 @@ tr:nth-child(even) {background-color: #f2f2f2;}
 .viewButton {
     background-color: cadetblue;
     color: white;
+    margin: 5px;
+    padding: 5px;
 }
 .editButton {
     background-color: cadetblue;
     color: white;
+    margin: 5px;
+    padding: 5px;
 }
 .viewButton:hover {
     background-color: steelblue;
