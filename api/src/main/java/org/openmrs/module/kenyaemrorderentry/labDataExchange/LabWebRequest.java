@@ -115,7 +115,7 @@ public abstract class LabWebRequest {
 
         } else if (manifestType == LabManifest.EID_TYPE) { // we are using 1 for EID and 2 for VL TODO: this block needs to be reviewed
             PatientIdentifier heiNumber = patient.getPatientIdentifier(Utils.getHeiNumberIdentifierType());
-            SimpleObject heiDetailsObject = getHeiDetailsForEidPostObject(patient,o);
+            SimpleObject heiDetailsObject = Utils.getHeiDetailsForEidPostObject(patient,o);
             SimpleObject heiMothersAgeObject = Utils.getHeiMothersAge(patient);
 
             if (heiNumber == null || StringUtils.isBlank(heiNumber.getIdentifier()) || heiDetailsObject == null) {
@@ -123,7 +123,7 @@ public abstract class LabWebRequest {
             }
 
             if (LabOrderDataExchange.getSystemType() == ModuleConstants.CHAI_SYSTEM || LabOrderDataExchange.getSystemType() == ModuleConstants.EDARP_SYSTEM) {
-
+                System.out.println("Creating payload for CHAI or EDARP EID");
                 test.put("dob", dob);
                 test.put("sex", patient.getGender().equals("M") ? "1" : patient.getGender().equals("F") ? "2" : "3");
                 test.put("order_no", o.getOrderId().toString());
@@ -142,9 +142,13 @@ public abstract class LabWebRequest {
                 test.put("ccc_no", Utils.getMothersUniquePatientNumber(patient) !=null ? Utils.getMothersUniquePatientNumber(patient) : "");
 
             } else if (LabOrderDataExchange.getSystemType() == ModuleConstants.LABWARE_SYSTEM) {
+                System.out.println("Creating payload for labware EID");
                 test.put("sample_type", sampleType);
                 test.put("pat_name", fullName);
                 test.put("patient_name", fullName);
+                test.put("order_no", o.getOrderId().toString());
+                test.put("dob", dob);
+                test.put("sex", patient.getGender().equals("M") ? "1" : patient.getGender().equals("F") ? "2" : "3");
 
                 if(heiDetailsObject !=null) {
                     test.put("infant_prophylaxis", heiDetailsObject.get("prophylaxisAnswer") != null ? heiDetailsObject.get("prophylaxisAnswer").toString() : "");
@@ -180,127 +184,127 @@ public abstract class LabWebRequest {
         this.manifestType = manifestType;
     }
 
-    /**
-     * Retrieve HEI details required for a successful post
-     * @param patient
-     * @return HEI details
-     */
+    // /**
+    //  * Retrieve HEI details required for a successful post
+    //  * @param patient
+    //  * @return HEI details
+    //  */
 
-    public static SimpleObject getHeiDetailsForEidPostObject(Patient patient,Order o) {
-        SimpleObject object = null;
-        String entryPointAnswer = "";
-        Integer entryPointQuestion = 160540;
-        String prophylaxisAnswer = "";
-        Integer prophylaxisQuestion = 1282;
-        String mothersRegimenAnswer = "";
-        String pcrSampleCodeAnswer = "";
-        String feedingMethodAnswer = "";
-        Integer feedingMethodQuestion = 1151;
+    // public static SimpleObject getHeiDetailsForEidPostObject(Patient patient,Order order) {
+    //     SimpleObject object = null;
+    //     String entryPointAnswer = "";
+    //     Integer entryPointQuestion = 160540;
+    //     String prophylaxisAnswer = "";
+    //     Integer prophylaxisQuestion = 1282;
+    //     String mothersRegimenAnswer = "";
+    //     String pcrSampleCodeAnswer = "";
+    //     String feedingMethodAnswer = "";
+    //     Integer feedingMethodQuestion = 1151;
 
-        //pcr sample code from lab orders
-        Integer orderReason = o.getOrderReason().getConceptId();
-        if (orderReason.equals(1040)) {
-            pcrSampleCodeAnswer = "1";    //Initial PCR (6week or first contact)
-        }else if (orderReason.equals(1326)) {
-            pcrSampleCodeAnswer = "2";    //2nd PCR (6 months)
-        }else if (orderReason.equals(164860)) {
-            pcrSampleCodeAnswer = "3";    //3rd PCR (12months)
-        }else if (orderReason.equals(162082)) {
-            pcrSampleCodeAnswer = "3";    //Confirmatory PCR and Baseline VL
-        }
-        //Get encounter based variables from hei enrollment and followup
-        Encounter lastHeiEnrollmentEncounter = Utils.lastEncounter(Context.getPatientService().getPatient(o.getPatient().getPatientId()), Context.getEncounterService().getEncounterTypeByUuid("415f5136-ca4a-49a8-8db3-f994187c3af6"));   //last Hei Enrollement encounter
-        Encounter lastHeiCWCFollowupEncounter = Utils.lastEncounter(Context.getPatientService().getPatient(o.getPatient().getPatientId()), Context.getEncounterService().getEncounterTypeByUuid("bcc6da85-72f2-4291-b206-789b8186a021"));   //last Hei CWC Folowup encounter
-        if (lastHeiEnrollmentEncounter != null) {
-            //Entry point
-            for (Obs obs : lastHeiEnrollmentEncounter.getObs()) {
-                if (obs.getConcept().getConceptId().equals(entryPointQuestion)) {
-                    Integer heitEntryPointObsAnswer = obs.getValueCoded().getConceptId();
-                    if (heitEntryPointObsAnswer.equals(160542)) {
-                        entryPointAnswer = "2";    //OPD
-                    } else if (heitEntryPointObsAnswer.equals(160456)) {
-                        entryPointAnswer = "3";      //Maternity
-                    } else if (heitEntryPointObsAnswer.equals(162050)) {
-                        entryPointAnswer = "4";      //CCC
-                    } else if (heitEntryPointObsAnswer.equals(160538)) {
-                        entryPointAnswer = "5";      //MCH/PMTCT
-                    } else if (heitEntryPointObsAnswer.equals(5622)) {
-                        entryPointAnswer = "6";      //Other
-                    }
-                }
-                //Prophylaxis
-                if (obs.getConcept().getConceptId().equals(prophylaxisQuestion)) {
-                    Integer heiProphylaxisObsAnswer = obs.getValueCoded().getConceptId();
-                    if (heiProphylaxisObsAnswer.equals(80586)) {
-                        prophylaxisAnswer = "1";    //AZT for 6 weeks + NVP for 12 weeks
-                    } else if (heiProphylaxisObsAnswer.equals(1652)) {
-                        prophylaxisAnswer = "2";      //AZT for 6 weeks + NVP for >12 weeks
-                    } else if (heiProphylaxisObsAnswer.equals(1149)) {
-                        prophylaxisAnswer = "3";      //None
-                    } else if (heiProphylaxisObsAnswer.equals(1107)) {
-                        prophylaxisAnswer = "4";      //Other
-                    }
-                }
+    //     //pcr sample code from lab orders
+    //     Integer orderReason = order.getOrderReason().getConceptId();
+    //     if (orderReason.equals(1040)) {
+    //         pcrSampleCodeAnswer = "1";    //Initial PCR (6week or first contact)
+    //     }else if (orderReason.equals(1326)) {
+    //         pcrSampleCodeAnswer = "2";    //2nd PCR (6 months)
+    //     }else if (orderReason.equals(164860)) {
+    //         pcrSampleCodeAnswer = "3";    //3rd PCR (12months)
+    //     }else if (orderReason.equals(162082)) {
+    //         pcrSampleCodeAnswer = "3";    //Confirmatory PCR and Baseline VL
+    //     }
+    //     //Get encounter based variables from hei enrollment and followup
+    //     Encounter lastHeiEnrollmentEncounter = Utils.lastEncounter(Context.getPatientService().getPatient(order.getPatient().getPatientId()), Context.getEncounterService().getEncounterTypeByUuid("415f5136-ca4a-49a8-8db3-f994187c3af6"));   //last Hei Enrollement encounter
+    //     Encounter lastHeiCWCFollowupEncounter = Utils.lastEncounter(Context.getPatientService().getPatient(order.getPatient().getPatientId()), Context.getEncounterService().getEncounterTypeByUuid("bcc6da85-72f2-4291-b206-789b8186a021"));   //last Hei CWC Folowup encounter
+    //     if (lastHeiEnrollmentEncounter != null) {
+    //         //Entry point
+    //         for (Obs obs : lastHeiEnrollmentEncounter.getObs()) {
+    //             if (obs.getConcept().getConceptId().equals(entryPointQuestion)) {
+    //                 Integer heitEntryPointObsAnswer = obs.getValueCoded().getConceptId();
+    //                 if (heitEntryPointObsAnswer.equals(160542)) {
+    //                     entryPointAnswer = "2";    //OPD
+    //                 } else if (heitEntryPointObsAnswer.equals(160456)) {
+    //                     entryPointAnswer = "3";      //Maternity
+    //                 } else if (heitEntryPointObsAnswer.equals(162050)) {
+    //                     entryPointAnswer = "4";      //CCC
+    //                 } else if (heitEntryPointObsAnswer.equals(160538)) {
+    //                     entryPointAnswer = "5";      //MCH/PMTCT
+    //                 } else if (heitEntryPointObsAnswer.equals(5622)) {
+    //                     entryPointAnswer = "6";      //Other
+    //                 }
+    //             }
+    //             //Prophylaxis
+    //             if (obs.getConcept().getConceptId().equals(prophylaxisQuestion)) {
+    //                 Integer heiProphylaxisObsAnswer = obs.getValueCoded().getConceptId();
+    //                 if (heiProphylaxisObsAnswer.equals(80586)) {
+    //                     prophylaxisAnswer = "1";    //AZT for 6 weeks + NVP for 12 weeks
+    //                 } else if (heiProphylaxisObsAnswer.equals(1652)) {
+    //                     prophylaxisAnswer = "2";      //AZT for 6 weeks + NVP for >12 weeks
+    //                 } else if (heiProphylaxisObsAnswer.equals(1149)) {
+    //                     prophylaxisAnswer = "3";      //None
+    //                 } else if (heiProphylaxisObsAnswer.equals(1107)) {
+    //                     prophylaxisAnswer = "4";      //Other
+    //                 }
+    //             }
 
-            }
-        }
+    //         }
+    //     }
 
-        if (lastHeiCWCFollowupEncounter != null) {
-            for (Obs obs : lastHeiCWCFollowupEncounter.getObs()) {
-                // Baby feeding method
-                if (obs.getConcept().getConceptId().equals(feedingMethodQuestion)) {
-                    Integer heiBabyFeedingObsAnswer = obs.getValueCoded().getConceptId();
-                    if (heiBabyFeedingObsAnswer.equals(5526)) {
-                        feedingMethodAnswer = "EBF";    //Exclusive Breast Feeding
-                    } else if (heiBabyFeedingObsAnswer.equals(1595)) {
-                        feedingMethodAnswer = "ERF";      //Exclusive Replacement Feeding
-                    } else if (heiBabyFeedingObsAnswer.equals(6046)) {
-                        feedingMethodAnswer = "MF";      //MF= Mixed Feeding
-                    }
-                }
-            }
-        }
+    //     if (lastHeiCWCFollowupEncounter != null) {
+    //         for (Obs obs : lastHeiCWCFollowupEncounter.getObs()) {
+    //             // Baby feeding method
+    //             if (obs.getConcept().getConceptId().equals(feedingMethodQuestion)) {
+    //                 Integer heiBabyFeedingObsAnswer = obs.getValueCoded().getConceptId();
+    //                 if (heiBabyFeedingObsAnswer.equals(5526)) {
+    //                     feedingMethodAnswer = "EBF";    //Exclusive Breast Feeding
+    //                 } else if (heiBabyFeedingObsAnswer.equals(1595)) {
+    //                     feedingMethodAnswer = "ERF";      //Exclusive Replacement Feeding
+    //                 } else if (heiBabyFeedingObsAnswer.equals(6046)) {
+    //                     feedingMethodAnswer = "MF";      //MF= Mixed Feeding
+    //                 }
+    //             }
+    //         }
+    //     }
 
-        SimpleObject vlObject = Utils.getMothersLastViralLoad(o.getPatient());
-        String validMothersVL = "";
-        if(vlObject !=null){
-            Date lastVLResultDate = (Date) vlObject.get("lastVlDate");
-            if (Utils.daysBetween(lastVLResultDate, new Date()) <= 183) {
-                validMothersVL = vlObject.get("lastVl").toString();
-            }
-        }
+    //     SimpleObject vlObject = Utils.getMothersLastViralLoad(order.getPatient());
+    //     String validMothersVL = "";
+    //     if(vlObject !=null){
+    //         Date lastVLResultDate = (Date) vlObject.get("lastVlDate");
+    //         if (Utils.daysBetween(lastVLResultDate, new Date()) <= 183) {
+    //             validMothersVL = vlObject.get("lastVl").toString();
+    //         }
+    //     }
 
-        //pmtct_regimen_of_mother
-        SimpleObject mothersRegimenObject = Utils.getHeiMothersCurrentRegimen(o.getPatient());
-        String currentMothersRegimen = "";
-        if(mothersRegimenObject !=null){
-            currentMothersRegimen = mothersRegimenObject.get("mothersCurrentRegimen").toString();
-            if (currentMothersRegimen.equals("AZT/3TC/NVP")) {
-                mothersRegimenAnswer = "PM3";    //PM3= AZT+3TC+NVP
-            } else if (currentMothersRegimen.equals("AZT/3TC/EFV")) {
-                mothersRegimenAnswer = "PM4";      //AZT+ 3TC+ EFV
-            } else if (currentMothersRegimen.equals("AZT/3TC/LPV/r")) {
-                mothersRegimenAnswer = "PM5";      //AZT+3TC+ LPV/r
-            } else if (currentMothersRegimen.equals("TDF/3TC/NVP")) {
-                mothersRegimenAnswer = "PM6";     //TDC+3TC+NVP
-            } else if (currentMothersRegimen.equals("TDF/3TC/EFV")) {
-                mothersRegimenAnswer = "PM9";     //TDF+3TC+EFV
-            } else if (currentMothersRegimen.equals("AZT/3TC/ATV/r")) {
-                mothersRegimenAnswer = "PM10";     //AZT+3TC+ATV/r
-            } else if (currentMothersRegimen.equals("TDF/3TC/ATV/r")) {
-                mothersRegimenAnswer = "PM11";     //TDF+3TC+ATV/r
-            } else if (currentMothersRegimen.equals("TDF/3TC/ATV/r")) {
-                mothersRegimenAnswer = "PM11";     //TDF+3TC+ATV/r
-            }
-        }
+    //     //pmtct_regimen_of_mother
+    //     SimpleObject mothersRegimenObject = Utils.getHeiMothersCurrentRegimen(order.getPatient());
+    //     String currentMothersRegimen = "";
+    //     if(mothersRegimenObject !=null){
+    //         currentMothersRegimen = mothersRegimenObject.get("mothersCurrentRegimen").toString();
+    //         if (currentMothersRegimen.equals("AZT/3TC/NVP")) {
+    //             mothersRegimenAnswer = "PM3";    //PM3= AZT+3TC+NVP
+    //         } else if (currentMothersRegimen.equals("AZT/3TC/EFV")) {
+    //             mothersRegimenAnswer = "PM4";      //AZT+ 3TC+ EFV
+    //         } else if (currentMothersRegimen.equals("AZT/3TC/LPV/r")) {
+    //             mothersRegimenAnswer = "PM5";      //AZT+3TC+ LPV/r
+    //         } else if (currentMothersRegimen.equals("TDF/3TC/NVP")) {
+    //             mothersRegimenAnswer = "PM6";     //TDC+3TC+NVP
+    //         } else if (currentMothersRegimen.equals("TDF/3TC/EFV")) {
+    //             mothersRegimenAnswer = "PM9";     //TDF+3TC+EFV
+    //         } else if (currentMothersRegimen.equals("AZT/3TC/ATV/r")) {
+    //             mothersRegimenAnswer = "PM10";     //AZT+3TC+ATV/r
+    //         } else if (currentMothersRegimen.equals("TDF/3TC/ATV/r")) {
+    //             mothersRegimenAnswer = "PM11";     //TDF+3TC+ATV/r
+    //         } else if (currentMothersRegimen.equals("TDF/3TC/ATV/r")) {
+    //             mothersRegimenAnswer = "PM11";     //TDF+3TC+ATV/r
+    //         }
+    //     }
 
-        object = SimpleObject.create("entryPointAnswer", entryPointAnswer,
-                                      "prophylaxisAnswer", prophylaxisAnswer,
-                                      "mothersRegimenAnswer", mothersRegimenAnswer,
-                                      "pcrSampleCodeAnswer", pcrSampleCodeAnswer,
-                                      "feedingMethodAnswer", feedingMethodAnswer,
-                                      "validMothersVL", validMothersVL);
-        return object;
-       }
+    //     object = SimpleObject.create("entryPointAnswer", entryPointAnswer,
+    //                                   "prophylaxisAnswer", prophylaxisAnswer,
+    //                                   "mothersRegimenAnswer", mothersRegimenAnswer,
+    //                                   "pcrSampleCodeAnswer", pcrSampleCodeAnswer,
+    //                                   "feedingMethodAnswer", feedingMethodAnswer,
+    //                                   "validMothersVL", validMothersVL);
+    //     return object;
+    //    }
 
     }

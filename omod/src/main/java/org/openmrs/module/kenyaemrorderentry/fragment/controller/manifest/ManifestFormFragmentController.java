@@ -1,22 +1,5 @@
 package org.openmrs.module.kenyaemrorderentry.fragment.controller.manifest;
 
-import org.apache.commons.lang.StringUtils;
-import org.openmrs.Location;
-import org.openmrs.api.context.Context;
-import org.openmrs.module.kenyaemrorderentry.ModuleConstants;
-import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
-import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange;
-import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
-import org.openmrs.module.kenyaui.form.AbstractWebForm;
-import org.openmrs.ui.framework.SimpleObject;
-import org.openmrs.ui.framework.UiUtils;
-import org.openmrs.ui.framework.annotation.BindParams;
-import org.openmrs.ui.framework.annotation.FragmentParam;
-import org.openmrs.ui.framework.annotation.MethodParam;
-import org.openmrs.ui.framework.page.PageModel;
-import org.springframework.validation.Errors;
-import org.springframework.web.bind.annotation.RequestParam;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -26,19 +9,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import org.apache.commons.lang.StringUtils;
+import org.openmrs.GlobalProperty;
+import org.openmrs.Location;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.kenyaemrorderentry.ModuleConstants;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
+import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
-import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 import org.openmrs.module.kenyaui.KenyaUiUtils;
-import org.openmrs.module.kenyaui.annotation.AppPage;
+import org.openmrs.module.kenyaui.form.AbstractWebForm;
 import org.openmrs.ui.framework.SimpleObject;
 import org.openmrs.ui.framework.UiUtils;
+import org.openmrs.ui.framework.annotation.BindParams;
+import org.openmrs.ui.framework.annotation.FragmentParam;
+import org.openmrs.ui.framework.annotation.MethodParam;
 import org.openmrs.ui.framework.annotation.SpringBean;
 import org.openmrs.ui.framework.page.PageModel;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.RequestParam;
 
 public class ManifestFormFragmentController {
@@ -106,8 +94,14 @@ public class ManifestFormFragmentController {
 
     private Map<Integer, String> createManifestTypeOptions() {
         Map<Integer, String> options = new HashMap<Integer, String>();
-        options.put(LabManifest.VL_TYPE, "Viral Load");
-        //options.put(LabManifest.EID_TYPE, "EID");//disabling EID for the first release
+        GlobalProperty gpEnableEIDFunction = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.ENABLE_EID_FUNCTION);
+        options.put(LabManifest.VL_TYPE, "Viral Load"); // comment this to disable VL
+        if (gpEnableEIDFunction != null) {
+            String enableEID = gpEnableEIDFunction.getPropertyValue();
+            if(enableEID.trim().equalsIgnoreCase("true")) {
+                options.put(LabManifest.EID_TYPE, "EID"); // comment this to disable EID
+            }
+        }
         return options;
     }
 
