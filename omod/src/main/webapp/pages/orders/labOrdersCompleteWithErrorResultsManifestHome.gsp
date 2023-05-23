@@ -354,7 +354,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
             }
 
             var btnRequeue = jq('<button/>', {
-                text: 'Re-queue',
+                text: 'Re-process',
                 class: 'requeueButton',
                 value: displayRecords[i].manifest.id
             });
