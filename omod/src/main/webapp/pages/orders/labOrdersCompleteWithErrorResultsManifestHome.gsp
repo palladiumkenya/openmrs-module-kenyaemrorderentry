@@ -236,7 +236,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
             console.log('Manifest ID: ' + JSON.stringify(manifestId));
             ui.getFragmentActionAsJson('kenyaemrorderentry', 'manifest/manifestForm', 'requeueManifest', {manifestId : manifestId}, function (result) {
                 // Done Requeueing
-                alert("Success: Manifest Number: " + manifestId + " requeued");
+                console.log("Success: Manifest Number: " + manifestId + " requeued");
                 ui.reloadPage();
                 //ui.navigate('kenyaemrorderentry', 'orders/labOrdersSubmittedManifestHome', { manifestId: jq(this).val(),  returnUrl: location.href });
             }); 
