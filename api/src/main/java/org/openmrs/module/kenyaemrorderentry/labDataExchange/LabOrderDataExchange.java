@@ -591,6 +591,7 @@ public class LabOrderDataExchange {
                             }
                         }
                     } else if (getSystemType() == ModuleConstants.EDARP_SYSTEM) {
+                        // System.out.println("Got sample result as: " + result);
                         if (result.equalsIgnoreCase(lDLResult) || result.equalsIgnoreCase(labwarelDLResult) || result.contains("LDL")) {
                             conceptToRetain = vlTestConceptQualitative;
                             o.setValueCoded(LDLConcept);
@@ -599,7 +600,9 @@ public class LabOrderDataExchange {
                             o.setValueNumeric(new Double(10000001));
                         } else {
                             conceptToRetain = vlTestConceptQuantitative;
-                            Double vlVal = NumberUtils.toDouble(result);
+                            // System.out.println("Converting result to ensure it is an integer");
+                            Double vlVal = Math.floor(NumberUtils.toDouble(result));
+                            // System.out.println("Saving result as: " + vlVal);
                             o.setValueNumeric(vlVal);
                         }
                     } 
