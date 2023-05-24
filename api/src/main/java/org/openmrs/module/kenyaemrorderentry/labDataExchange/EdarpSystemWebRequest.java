@@ -382,6 +382,7 @@ public class EdarpSystemWebRequest extends LabWebRequest {
                 node.put("pmtct", "3");
             }
             node.put("lab", "");
+            // System.out.println("Order Entry: Using EDARP System payload: " + node.toPrettyString());
         }
         return node;
     }

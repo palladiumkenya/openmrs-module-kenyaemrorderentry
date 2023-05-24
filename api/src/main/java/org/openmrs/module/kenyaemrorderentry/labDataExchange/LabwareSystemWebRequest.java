@@ -351,6 +351,8 @@ public class LabwareSystemWebRequest extends LabWebRequest {
             if (order.getPatient().getGender().equals("F")) {
                 node.put("female_status", "none");
             }
+
+            // System.out.println("Order Entry: Using LABWARE System payload: " + node.toPrettyString());
         }
 
         return node;

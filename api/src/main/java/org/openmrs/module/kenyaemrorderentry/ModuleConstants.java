@@ -31,6 +31,9 @@ public class ModuleConstants {
     public static final String LAB_SYSTEM_DATE_PATTERN = "yyyy-MM-dd";
     public static final String GP_LAB_SYSTEM_IN_USE = "kemrorder.labsystem_identifier";
 
+    //EID
+    public static final String ENABLE_EID_FUNCTION = "enable_orderentry_manifest_eid_function";
+
     // System Types e.g CHAI, LABWARE etc
 
     public static final int NO_SYSTEM_CONFIGURED = 0;

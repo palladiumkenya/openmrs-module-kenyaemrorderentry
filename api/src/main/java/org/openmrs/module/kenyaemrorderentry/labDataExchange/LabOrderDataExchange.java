@@ -64,11 +64,11 @@ public class LabOrderDataExchange {
             return ModuleConstants.NO_SYSTEM_CONFIGURED;
         }
 
-        if (systemType.equalsIgnoreCase("CHAI")) {
+        if (systemType.trim().equalsIgnoreCase("CHAI")) {
             return ModuleConstants.CHAI_SYSTEM;
-        } else if (systemType.equalsIgnoreCase("LABWARE")) {
+        } else if (systemType.trim().equalsIgnoreCase("LABWARE")) {
             return ModuleConstants.LABWARE_SYSTEM;
-        } else if (systemType.equalsIgnoreCase("EDARP")) {
+        } else if (systemType.trim().equalsIgnoreCase("EDARP")) {
             return ModuleConstants.EDARP_SYSTEM;
         } else {
             return ModuleConstants.NO_SYSTEM_CONFIGURED; // The default if empty string or another string

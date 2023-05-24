@@ -60,6 +60,14 @@
 	<!-- /Internationalization -->
 
 	<globalProperty>
+		<property>enable_orderentry_manifest_eid_function</property>
+		<defaultValue>false</defaultValue>
+		<description>
+			Enable (true) or Disable (false) Order Entry Manifest EID functionality
+		</description>
+	</globalProperty>
+
+	<globalProperty>
 		<property>kenyaemrorderentry.drugsMappingDirectory</property>
 		<defaultValue>kenyaemrorderentry</defaultValue>
 		<description>

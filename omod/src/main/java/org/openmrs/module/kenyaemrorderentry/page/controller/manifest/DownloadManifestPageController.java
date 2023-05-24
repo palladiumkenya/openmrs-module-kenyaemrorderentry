@@ -21,14 +21,14 @@ public class DownloadManifestPageController {
 
         File generatedManifest = null;
 
-        if (manifest.getManifestType().intValue() == 1) {
+        if (manifest.getManifestType().intValue() == LabManifest.EID_TYPE) {
             HeiLabManifestReport report = new HeiLabManifestReport(manifest);
             try {
                 generatedManifest = report.generateReport("");
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
-        } else {
+        } else if (manifest.getManifestType().intValue() == LabManifest.VL_TYPE) {
             ViralLoadLabManifestReport report = new ViralLoadLabManifestReport(manifest);
             try {
                 generatedManifest = report.generateReport("");

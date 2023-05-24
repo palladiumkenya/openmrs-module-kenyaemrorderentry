@@ -5,15 +5,22 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 
 import org.apache.commons.lang.WordUtils;
+import org.openmrs.Concept;
+import org.openmrs.Obs;
+import org.openmrs.Order;
 import org.openmrs.Patient;
+import org.openmrs.PatientIdentifier;
+import org.openmrs.PatientIdentifierType;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
-import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 import org.openmrs.module.kenyaemrorderentry.util.Utils;
+import org.openmrs.module.metadatadeploy.MetadataUtils;
+import org.openmrs.ui.framework.SimpleObject;
 
 import com.itextpdf.io.font.constants.StandardFonts;
 import com.itextpdf.io.image.ImageDataFactory;
@@ -47,6 +54,22 @@ public class HeiLabManifestReport {
     public HeiLabManifestReport(LabManifest manifest) {
         this.manifest = manifest;
     }
+
+    /**
+	 * Get the latest OBS (Observation)
+	 * @param patient
+	 * @param conceptIdentifier
+	 * @return
+	 */
+	public Obs getLatestObs(Patient patient, String conceptIdentifier) {
+		Concept concept = Context.getConceptService().getConceptByUuid(conceptIdentifier);
+		List<Obs> obs = Context.getObsService().getObservationsByPersonAndConcept(patient, concept);
+		if (obs.size() > 0) {
+			// these are in reverse chronological order
+			return obs.get(0);
+		}
+		return null;
+	}
 
     public File generateReport(String dest) throws IOException {
 
@@ -88,7 +111,7 @@ public class HeiLabManifestReport {
         document.add(new Paragraph("\n"));
         document.add(new Paragraph("\n"));
         document.add(new Paragraph("MINISTRY OF HEALTH").setTextAlignment(TextAlignment.CENTER).setFontSize(12));
-        document.add(new Paragraph("EID (DNA-PCR) Laboratory Requisition Form").setTextAlignment(TextAlignment.CENTER).setBold().setFontSize(16));
+        document.add(new Paragraph("EARLY INFANT DIAGNOSIS (DNA-PCR) Laboratory Requisition Form").setTextAlignment(TextAlignment.CENTER).setBold().setFontSize(16));
         document.add(new Paragraph("Manifest/Shipping ID: " + manifest.getIdentifier()).setTextAlignment(TextAlignment.LEFT).setBold().setFontSize(10).setFont(courier));
 
         Table manifestMetadata = new Table(4);
@@ -159,7 +182,7 @@ public class HeiLabManifestReport {
 
         document.add(manifestMetadata);
 
-        Table table = new Table(12);
+        Table table = new Table(15); // 15 columns for the report details
         table.setWidth(UnitValue.createPercentValue(100));
         table.setFont(font);
 
@@ -176,6 +199,7 @@ public class HeiLabManifestReport {
     }
     private Table addHeaderRow(Table table) {
 
+        table.addHeaderCell(new Paragraph("Date of Sample \ncollection").setBold().setTextAlignment(TextAlignment.CENTER));
         table.addHeaderCell(new Paragraph("Infant Name").setBold());
 
         Paragraph cccNumberCol = new Paragraph();
@@ -184,6 +208,8 @@ public class HeiLabManifestReport {
         cccNumberCol.add(cccNoText);
         cccNumberCol.add(cccNoDetail1);
         table.addHeaderCell(cccNumberCol);
+  
+        table.addHeaderCell(new Paragraph("PCR sample \n(code)").setBold().setTextAlignment(TextAlignment.CENTER));
 
         Paragraph dobCol = new Paragraph();
         Text dobText = new Text("Date of Birth \n").setBold();
@@ -192,21 +218,20 @@ public class HeiLabManifestReport {
         dobCol.add(dobDetails);
         table.addHeaderCell(dobCol);
 
-        table.addHeaderCell(new Paragraph("Sex").setBold());
+        table.addHeaderCell(new Paragraph("Sex (M/F)").setBold());
 
-        Paragraph pregnancyCol = new Paragraph();
-        Text pregnancyText = new Text("(M/F)").setBold();
+        table.addHeaderCell(new Paragraph("Entry Point \n(code)").setBold().setTextAlignment(TextAlignment.CENTER));
+        
+        table.addHeaderCell(new Paragraph("Infant Prophylaxis \n(code)").setBold().setTextAlignment(TextAlignment.CENTER));
+        table.addHeaderCell(new Paragraph("Infant Feeding \n(code)").setBold().setTextAlignment(TextAlignment.CENTER));
+        table.addHeaderCell(new Paragraph("Infant CCC No").setBold().setTextAlignment(TextAlignment.CENTER));
+        
+        // For the Mother
+        table.addHeaderCell(new Paragraph("Mothers \nAge").setBold().setTextAlignment(TextAlignment.CENTER));
+        table.addHeaderCell(new Paragraph("Mothers \nCCC Number").setBold().setTextAlignment(TextAlignment.CENTER));
+        table.addHeaderCell(new Paragraph("Mothers \nPMTCT Regimen \n(code)").setBold().setTextAlignment(TextAlignment.CENTER));
+        table.addHeaderCell(new Paragraph("Mothers \nVL result \nwithin last \n6 months").setBold().setTextAlignment(TextAlignment.CENTER));
 
-        pregnancyCol.add(pregnancyText);
-
-        table.addHeaderCell(pregnancyCol);
-        table.addHeaderCell(new Paragraph("Sample \ntype").setBold().setTextAlignment(TextAlignment.CENTER));
-        table.addHeaderCell(new Paragraph("Date & \ntime of \ncollection").setBold().setTextAlignment(TextAlignment.CENTER));
-        table.addHeaderCell(new Paragraph("Date & time \nof separation \n/centrifugation").setBold().setTextAlignment(TextAlignment.CENTER));
-        table.addHeaderCell(new Paragraph("Date \nstarted \non ART").setBold().setTextAlignment(TextAlignment.CENTER));
-        table.addHeaderCell(new Paragraph("Current \nART \nRegimen").setBold().setTextAlignment(TextAlignment.CENTER));
-        table.addHeaderCell(new Paragraph("Date \ninitiated \non \ncurrent \nRegimen").setBold().setTextAlignment(TextAlignment.CENTER));
-        table.addHeaderCell(new Paragraph("Justification \ncode").setBold().setTextAlignment(TextAlignment.CENTER));
         return table;
     }
 
@@ -224,30 +249,81 @@ public class HeiLabManifestReport {
     private void addManifestRow(LabManifestOrder sample, Table table) {
 
         Patient patient = sample.getOrder().getPatient();
+        Order order = sample.getOrder();
+        SimpleObject heiDetailsObject = Utils.getHeiDetailsForEidPostObject(patient, order);
+        String mothersCCC = Utils.getMothersUniquePatientNumber(patient);
+        SimpleObject heiMothersAgeObject = Utils.getHeiMothersAge(patient);
+
+        // Sample Collection Date
+        table.addCell(new Paragraph(sample.getSampleCollectionDate() != null ? Utils.getSimpleDateFormat("dd/MM/yyyy").format(sample.getSampleCollectionDate()) : "")).setFontSize(10);
+
+        // Child Name
         String fullName = patient.getGivenName().concat(" ").concat(
                 patient.getFamilyName() != null ? sample.getOrder().getPatient().getFamilyName() : ""
         ).concat(" ").concat(
                 patient.getMiddleName() != null ? sample.getOrder().getPatient().getMiddleName() : ""
         );
-
-
-
         table.addCell(new Paragraph(WordUtils.capitalizeFully(fullName))).setFontSize(10);
+
+        // HEI Identifier
         table.addCell(new Paragraph(patient.getPatientIdentifier(Utils.getHeiNumberIdentifierType()).getIdentifier())).setFontSize(10);
+
+        // PCR Sample Code
+        String pcrSampleCode = "";
+        pcrSampleCode = heiDetailsObject.get("pcrSampleCodeAnswer") != null ? heiDetailsObject.get("pcrSampleCodeAnswer").toString() : "";
+        table.addCell(new Paragraph(pcrSampleCode)).setFontSize(10);
+
+        // Date of Birth
         table.addCell(new Paragraph(Utils.getSimpleDateFormat("dd/MM/yyyy").format(sample.getOrder().getPatient().getBirthdate()))).setFontSize(10);
+        
+        // Sex
         table.addCell(new Paragraph(sample.getOrder().getPatient().getGender())).setFontSize(10);
-        if (patient.getGender().equals("F")) {
-            table.addCell(new Paragraph("3")).setFontSize(10);
-        } else {
-            table.addCell(new Paragraph(""));
+
+        // Entry Point
+        String entryPoint = "";
+        entryPoint = heiDetailsObject.get("entryPointAnswer") != null ? heiDetailsObject.get("entryPointAnswer").toString() : "";
+        table.addCell(new Paragraph(entryPoint)).setFontSize(10);
+        
+        // Prophylaxis Code
+        String infantProphylaxisCode = "";
+        infantProphylaxisCode = heiDetailsObject.get("prophylaxisAnswer") != null ? heiDetailsObject.get("prophylaxisAnswer").toString() : "";
+        table.addCell(new Paragraph(infantProphylaxisCode)).setFontSize(10);
+
+        // Feeding Method
+        String infantFeedingCode = "";
+        infantFeedingCode = heiDetailsObject.get("feedingMethodAnswer") != null ? heiDetailsObject.get("feedingMethodAnswer").toString() : "";
+        table.addCell(new Paragraph(infantFeedingCode)).setFontSize(10);
+
+        // Infant CCC
+        String infantCCC = "";
+        PatientIdentifierType pit = MetadataUtils.existing(PatientIdentifierType.class, Utils.getUniquePatientNumberIdentifierType().getUuid());
+        PatientIdentifier cccObject = patient.getPatientIdentifier(pit);
+        if (cccObject != null) {
+            infantCCC = cccObject.getIdentifier();
         }
-        table.addCell(new Paragraph(LabOrderDataExchange.getSampleTypeCode(sample.getSampleType()))).setFontSize(10);
-        table.addCell(new Paragraph(sample.getSampleCollectionDate() != null ? Utils.getSimpleDateFormat("dd/MM/yyyy").format(sample.getSampleCollectionDate()) : "")).setFontSize(10);
-        table.addCell(new Paragraph(sample.getSampleSeparationDate() != null ? Utils.getSimpleDateFormat("dd/MM/yyyy").format(sample.getSampleSeparationDate()) : "")).setFontSize(10);
-        table.addCell(new Paragraph("")).setFontSize(10);
-        table.addCell(new Paragraph("")).setFontSize(10);
-        table.addCell(new Paragraph( "")).setFontSize(10);
-        table.addCell(new Paragraph(sample.getOrder().getOrderReason() != null ? LabOrderDataExchange.getOrderReasonCode(sample.getOrder().getOrderReason().getUuid()) : "")).setFontSize(10);
+        table.addCell(new Paragraph(infantCCC)).setFontSize(10);
+
+        // Mothers Age
+        String mothersAge = "";
+        mothersAge = heiMothersAgeObject != null ? heiMothersAgeObject.get("mothersAge").toString() : "";
+        table.addCell(new Paragraph(mothersAge)).setFontSize(10);
+
+        // Mothers CCC
+        mothersCCC = mothersCCC !=null ? mothersCCC : "";
+        table.addCell(new Paragraph(mothersCCC)).setFontSize(10);
+
+        // Mothers Regimen
+        String mothersRegimen = "";
+        mothersRegimen = heiDetailsObject.get("mothersRegimenAnswer") != null ? heiDetailsObject.get("mothersRegimenAnswer").toString() : "";
+        table.addCell(new Paragraph(mothersRegimen)).setFontSize(10);
+
+        // Mothers Last VL
+        String mothersLastVL = "";
+        SimpleObject vlObject = Utils.getMothersLastViralLoad(patient);
+        if(vlObject !=null){
+            mothersLastVL = vlObject.get("lastVl") != null ? vlObject.get("lastVl").toString() : "";
+        }
+        table.addCell(new Paragraph(mothersLastVL)).setFontSize(10);
 
     }
 
