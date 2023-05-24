@@ -86,7 +86,7 @@ public class ManifestFormFragmentController {
     public void requeueManifest(@RequestParam("manifestId") Integer manifestId, @SpringBean KenyaUiUtils kenyaUi, UiUtils ui) {
         // We requeue the manifest by changing its status to 'Submitted' and all order items to 'Sent'
         KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
-        kenyaemrOrdersService.requeueLabManifest(manifestId);
+        kenyaemrOrdersService.reprocessLabManifest(manifestId);
     }
 
     private List<String> manifestStatus() {

@@ -78,6 +78,6 @@ public interface KenyaemrOrdersDAO {
 
     LabManifest getFirstLabManifestByOrderStatusCheckedBeforeDate(String status, Date lastStatusCheckDate);
 
-    void requeueLabManifest(Integer manifestId);
+    void reprocessLabManifest(Integer manifestId);
     //End of Patient Contact dimensions methods
 }

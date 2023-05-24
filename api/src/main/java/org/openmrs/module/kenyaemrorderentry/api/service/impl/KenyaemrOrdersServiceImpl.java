@@ -221,7 +221,7 @@ public class KenyaemrOrdersServiceImpl extends BaseOpenmrsService implements Ken
 
     @Override
     @Transactional(readOnly = false)
-    public void requeueLabManifest(Integer manifestId) {
-        dao.requeueLabManifest(manifestId);
+    public void reprocessLabManifest(Integer manifestId) {
+        dao.reprocessLabManifest(manifestId);
     }
 }

@@ -233,26 +233,10 @@ tr:nth-child(even) {background-color: #f2f2f2;}
         jq(document).on('click','.requeueButton',function(){
             // We requeue the manifest by changing its status to 'Submitted' and all order items to 'Sent'
             let manifestId = jq(this).val();
-            console.log('Manifest ID: ' + JSON.stringify(manifestId));
             ui.getFragmentActionAsJson('kenyaemrorderentry', 'manifest/manifestForm', 'requeueManifest', {manifestId : manifestId}, function (result) {
                 // Done Requeueing
-                console.log("Success: Manifest Number: " + manifestId + " requeued");
                 ui.reloadPage();
-                //ui.navigate('kenyaemrorderentry', 'orders/labOrdersSubmittedManifestHome', { manifestId: jq(this).val(),  returnUrl: location.href });
-            }); 
-            ///** 
-                //jq.getJSON('${ ui.actionLink("kenyaemrorderentry", "manifest/manifestForm", "requeueManifest") }',
-                    //{
-                        //manifestId : manifestId
-                    //})
-                    //.success(function (data) {
-                        //console.log('Success');
-                    //})
-                    //.error(function (xhr, status, err) {
-                        //console.log('AJAX error ' + JSON.stringify(xhr));
-                    //})
-                //}); 
-            //*/         
+            });        
         });
     });
 

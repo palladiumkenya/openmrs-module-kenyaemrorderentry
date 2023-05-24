@@ -12,7 +12,7 @@ import java.util.Date;
 import java.util.List;
 
 public interface KenyaemrOrdersService extends OpenmrsService {
-    void requeueLabManifest(Integer manifestId);
+    void reprocessLabManifest(Integer manifestId);
     LabManifest saveLabOrderManifest(LabManifest labManifest);
     Long getLastManifestID();
     List<LabManifest> getLabOrderManifest();
