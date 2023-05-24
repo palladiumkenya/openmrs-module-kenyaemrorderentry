@@ -380,7 +380,7 @@ public class ChaiSystemWebRequest extends LabWebRequest {
                 node.put("pmtct", "3");
             }
             node.put("lab", "");
-            System.out.println("Order Entry: Using CHAI System payload: " + node.toPrettyString());
+            // System.out.println("Order Entry: Using CHAI System payload: " + node.toPrettyString());
         }
         
         return node;

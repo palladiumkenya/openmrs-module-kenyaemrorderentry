@@ -352,7 +352,7 @@ public class LabwareSystemWebRequest extends LabWebRequest {
                 node.put("female_status", "none");
             }
 
-            System.out.println("Order Entry: Using LABWARE System payload: " + node.toPrettyString());
+            // System.out.println("Order Entry: Using LABWARE System payload: " + node.toPrettyString());
         }
 
         return node;
