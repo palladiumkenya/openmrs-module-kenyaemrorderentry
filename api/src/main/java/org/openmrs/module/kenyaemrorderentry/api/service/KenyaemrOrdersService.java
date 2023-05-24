@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.List;
 
 public interface KenyaemrOrdersService extends OpenmrsService {
+    void reprocessLabManifest(Integer manifestId);
     LabManifest saveLabOrderManifest(LabManifest labManifest);
     Long getLastManifestID();
     List<LabManifest> getLabOrderManifest();
@@ -52,5 +53,4 @@ public interface KenyaemrOrdersService extends OpenmrsService {
     public Cohort getPatientContactWithAgeRange(Integer minAge, DurationUnit minAgeUnit, Integer maxAge, DurationUnit maxAgeUnit, boolean unknownAgeIncluded, Date effectiveDate);
 
     //End of Patient contact dimensions service methods
-
 }

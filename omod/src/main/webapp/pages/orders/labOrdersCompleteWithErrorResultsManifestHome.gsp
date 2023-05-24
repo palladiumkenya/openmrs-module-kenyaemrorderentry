@@ -3,6 +3,7 @@
     ui.includeJavascript("kenyaemrorderentry", "jquery.twbsPagination.min.js")
     ui.includeJavascript("kenyaemrorderentry", "ordersUtils.js")
 
+
     def menuItems = [
             [label: "Back to home", iconProvider: "kenyaui", icon: "buttons/back.png", label: "Back to home", href: ui.pageLink("kenyaemr", "userHome")]
     ]
@@ -14,7 +15,7 @@
             [label: "Sending", iconProvider: "kenyaui", icon: "", label: "Sending", href: ui.pageLink("kenyaemrorderentry", "orders/labOrdersSendingManifestHome")],
             [label: "Submitted", iconProvider: "kenyaui", icon: "", label: "Submitted", href: ui.pageLink("kenyaemrorderentry", "orders/labOrdersSubmittedManifestHome")],
             [label: "Incomplete results", iconProvider: "kenyaui", icon: "", label: "Incomplete results", href: ui.pageLink("kenyaemrorderentry", "orders/labOrdersIncompleteResultManifestHome")],
-            [label: "Complete With Errors", iconProvider: "kenyaui", icon: "", label: "Complete With Errors", href: ui.pageLink("kenyaemrorderentry", "orders/labOrdersCompleteWithErrorResultsManifestHome")],
+            [label: "Complete With Errors", iconProvider: "kenyaui", icon: "", label: "Complete With Errors", href: ""],
             [label: "Complete results", iconProvider: "kenyaui", icon: "", label: "Complete results", href: ui.pageLink("kenyaemrorderentry", "orders/labOrdersCompleteResultManifestHome")],
     ]
 
@@ -102,11 +103,21 @@ tr:nth-child(even) {background-color: #f2f2f2;}
     margin: 5px;
     padding: 5px;
 }
+.requeueButton {
+    background-color: cadetblue;
+    color: white;
+    margin: 5px;
+    padding: 5px;
+}
 .viewButton:hover {
     background-color: steelblue;
     color: white;
 }
 .editButton:hover {
+    background-color: steelblue;
+    color: white;
+}
+.requeueButton:hover {
     background-color: steelblue;
     color: white;
 }
@@ -128,7 +139,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
 <div class="ke-page-content">
     <div align="left">
 
-        <h2 style="color:steelblue">Manifest list [ Submitted ]</h2>
+        <h2 style="color:steelblue">Manifest list [ Complete With Errors ]</h2>
         <div>
 
         </div>
@@ -168,8 +179,8 @@ tr:nth-child(even) {background-color: #f2f2f2;}
     //On ready
     jq = jQuery;
     jq(function () {
-        showActivePageOnManifestNavigation('Submitted');
-
+        // mark the activePage
+        showActivePageOnManifestNavigation('Complete With Errors');
         jq('#generateManifest').click(function () {
             jq.getJSON('${ ui.actionLink("kenyaemrorderentry", "patientdashboard/generalLabOrders", "generateViralLoadPayload") }')
                 .success(function (data) {
@@ -217,6 +228,15 @@ tr:nth-child(even) {background-color: #f2f2f2;}
 
         jq(document).on('click','.editButton',function(){
             ui.navigate('kenyaemrorderentry', 'manifest/createManifest', { manifestId: jq(this).val(),  returnUrl: location.href });
+        });
+
+        jq(document).on('click','.requeueButton',function(){
+            // We requeue the manifest by changing its status to 'Submitted' and all order items to 'Sent'
+            let manifestId = jq(this).val();
+            ui.getFragmentActionAsJson('kenyaemrorderentry', 'manifest/manifestForm', 'requeueManifest', {manifestId : manifestId}, function (result) {
+                // Done Requeueing
+                ui.reloadPage();
+            });        
         });
     });
 
@@ -306,6 +326,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
             });
             actionTd.append(btnView);
             tr.append(actionTd);
+
             if (displayRecords[i].manifest.status == "Draft") {
                 var btnEdit = jq('<button/>', {
                     text: 'Edit',
@@ -315,6 +336,15 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                 actionTd.append(btnEdit);
                 tr.append(actionTd);
             }
+
+            var btnRequeue = jq('<button/>', {
+                text: 'Re-process',
+                class: 'requeueButton',
+                value: displayRecords[i].manifest.id
+            });
+            actionTd.append(btnRequeue);
+            tr.append(actionTd);
+
             jq('#manifest-list').append(tr);
         }
     }

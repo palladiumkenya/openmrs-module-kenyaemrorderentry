@@ -1,5 +1,8 @@
 package org.openmrs.module.kenyaemrorderentry.page.controller.orders;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
@@ -12,16 +15,12 @@ import org.openmrs.ui.framework.UiUtils;
 import org.openmrs.ui.framework.annotation.SpringBean;
 import org.openmrs.ui.framework.page.PageModel;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @AppPage("kenyaemr.labmanifest")
-public class LabOrdersCompleteResultManifestHomePageController {
+public class LabOrdersCompleteWithErrorResultsManifestHomePageController {
 
     KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
 
-    public void get(@SpringBean KenyaUiUtils kenyaUi,
-                    UiUtils ui, PageModel model) {
+    public void get(@SpringBean KenyaUiUtils kenyaUi, UiUtils ui, PageModel model) {
         List<LabManifest> allManifests = Context.getService(KenyaemrOrdersService.class).getLabOrderManifest("Complete results");
         List<SimpleObject> manifestList1 = new ArrayList<SimpleObject>();
         for (LabManifest manifest : allManifests) {
@@ -33,8 +32,8 @@ public class LabOrdersCompleteResultManifestHomePageController {
             List<LabManifestOrder> missingInLab = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifest, "Record not found");
             List<LabManifestOrder> allSamples = kenyaemrOrdersService.getLabManifestOrderByManifest(manifest);
 
-            if(ordersWithIncompleteResult.size() == 0 &&
-                    missingInLab.size() == 0) {
+            if(ordersWithIncompleteResult.size() > 0 ||
+                    missingInLab.size() > 0) {
                 String manifestType = "";
                 if (manifest.getManifestType() != null && manifest.getManifestType().intValue() == LabManifest.EID_TYPE) {
                     manifestType = "EID";

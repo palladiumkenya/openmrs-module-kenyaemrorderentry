@@ -12,8 +12,10 @@
             [label: "Draft", iconProvider: "kenyaui", icon: "", label: "Draft", href: ui.pageLink("kenyaemrorderentry", "orders/labOrdersManifestHome")],
             [label: "Ready to send", iconProvider: "kenyaui", icon: "", label: "Ready to send", href: ""],
             [label: "On hold", iconProvider: "kenyaui", icon: "", label: "On hold", href: ui.pageLink("kenyaemrorderentry", "orders/labOrdersOnHoldManifestHome")],
+            [label: "Sending", iconProvider: "kenyaui", icon: "", label: "Sending", href: ui.pageLink("kenyaemrorderentry", "orders/labOrdersSendingManifestHome")],
             [label: "Submitted", iconProvider: "kenyaui", icon: "", label: "Submitted", href: ui.pageLink("kenyaemrorderentry", "orders/labOrdersSubmittedManifestHome")],
             [label: "Incomplete results", iconProvider: "kenyaui", icon: "", label: "Incomplete results", href: ui.pageLink("kenyaemrorderentry", "orders/labOrdersIncompleteResultManifestHome")],
+            [label: "Complete With Errors", iconProvider: "kenyaui", icon: "", label: "Complete With Errors", href: ui.pageLink("kenyaemrorderentry", "orders/labOrdersCompleteWithErrorResultsManifestHome")],
             [label: "Complete results", iconProvider: "kenyaui", icon: "", label: "Complete results", href: ""],
     ]
 
@@ -92,10 +94,14 @@ tr:nth-child(even) {background-color: #f2f2f2;}
 .viewButton {
     background-color: cadetblue;
     color: white;
+    margin: 5px;
+    padding: 5px;
 }
 .editButton {
     background-color: cadetblue;
     color: white;
+    margin: 5px;
+    padding: 5px;
 }
 .viewButton:hover {
     background-color: steelblue;
