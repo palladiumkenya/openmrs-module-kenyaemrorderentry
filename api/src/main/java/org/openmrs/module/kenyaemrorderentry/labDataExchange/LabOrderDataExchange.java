@@ -618,9 +618,12 @@ public class LabOrderDataExchange {
                     o.setConcept(conceptToRetain);
                     o.setDateCreated(new Date());
                     o.setCreator(Context.getUserService().getUser(1));
-                    o.setObsDatetime(orderToRetain.getDateActivated());
                     o.setPerson(od.getPatient());
-                    o.setOrder(orderToRetain);
+
+                    if (orderToRetain != null) {
+                        o.setObsDatetime(orderToRetain.getDateActivated());
+                        o.setOrder(orderToRetain);
+                    }
 
                     enc.addObs(o);
 
