@@ -781,13 +781,23 @@ public class LabOrderDataExchange {
 
         Map<String, Order> listToProcess = new HashMap<String, Order>();
         Concept conceptToVoid = conceptToRetain.equals(vlTestConceptQualitative) ? vlTestConceptQuantitative : vlTestConceptQualitative;
-        List<Order> ordersOnSameDay = orderService.getActiveOrders(referenceOrder.getPatient(), referenceOrder.getOrderType(), referenceOrder.getCareSetting(), referenceOrder.getDateActivated());
+        // List<Order> ordersOnSameDay = orderService.getActiveOrders(referenceOrder.getPatient(), referenceOrder.getOrderType(), referenceOrder.getCareSetting(), referenceOrder.getDateActivated());
+        List<Order> orders = orderService.getOrders(referenceOrder.getPatient(), referenceOrder.getCareSetting(), referenceOrder.getOrderType(), true);
+        Date today = new Date();
 
-        for (Order order : ordersOnSameDay) {
-            if (order.getConcept().equals(conceptToVoid)) {
-                listToProcess.put("orderToVoid", order);
-            } else if (order.getConcept().equals(conceptToRetain)) {
-                listToProcess.put("orderToRetain", order);
+        // for (Order order : ordersOnSameDay) {
+        // We have all orders, we need to use the same day orders only
+        for (Order order : orders) {
+            if(DateUtils.isSameDay(order.getDateActivated(), today)) {
+                if (order.getConcept().equals(conceptToVoid)) {
+                    listToProcess.put("orderToVoid", order);
+                } else if (order.getConcept().equals(conceptToRetain)) {
+                    // Reactivate the order if it is already voided
+                    if(order.getVoided()) {
+                        order.setVoided(false);
+                    }
+                    listToProcess.put("orderToRetain", order);
+                }
             }
         }
         return listToProcess;
