@@ -783,12 +783,12 @@ public class LabOrderDataExchange {
         Concept conceptToVoid = conceptToRetain.equals(vlTestConceptQualitative) ? vlTestConceptQuantitative : vlTestConceptQualitative;
         // List<Order> ordersOnSameDay = orderService.getActiveOrders(referenceOrder.getPatient(), referenceOrder.getOrderType(), referenceOrder.getCareSetting(), referenceOrder.getDateActivated());
         List<Order> orders = orderService.getOrders(referenceOrder.getPatient(), referenceOrder.getCareSetting(), referenceOrder.getOrderType(), true);
-        Date today = new Date();
+        Date refDate = referenceOrder.getDateActivated();
 
         // for (Order order : ordersOnSameDay) {
         // We have all orders, we need to use the same day orders only
         for (Order order : orders) {
-            if(DateUtils.isSameDay(order.getDateActivated(), today)) {
+            if(DateUtils.isSameDay(order.getDateActivated(), refDate)) {
                 if (order.getConcept().equals(conceptToVoid)) {
                     listToProcess.put("orderToVoid", order);
                 } else if (order.getConcept().equals(conceptToRetain)) {
