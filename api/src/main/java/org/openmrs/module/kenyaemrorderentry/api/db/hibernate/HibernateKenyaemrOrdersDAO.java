@@ -446,7 +446,7 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
         for (LabManifestOrder labManifestOrder : ordersList) {
             // Modify the order in case the status is in error
             String status = labManifestOrder.getStatus();
-            if(!status.trim().equalsIgnoreCase("Complete")) {
+            if(!status.trim().equalsIgnoreCase("Complete") && !status.trim().equalsIgnoreCase("Incomplete")) {
                 labManifestOrder.setStatus("Sent");
                 saveLabManifestOrder(labManifestOrder);
             }
