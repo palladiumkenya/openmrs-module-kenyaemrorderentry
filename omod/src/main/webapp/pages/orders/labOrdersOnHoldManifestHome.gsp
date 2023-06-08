@@ -14,6 +14,7 @@
             [label: "On hold", iconProvider: "kenyaui", icon: "", label: "On hold", href: ""],
             [label: "Sending", iconProvider: "kenyaui", icon: "", label: "Sending", href: ui.pageLink("kenyaemrorderentry", "orders/labOrdersSendingManifestHome")],
             [label: "Submitted", iconProvider: "kenyaui", icon: "", label: "Submitted", href: ui.pageLink("kenyaemrorderentry", "orders/labOrdersSubmittedManifestHome")],
+            [label: "Incomplete With Errors", iconProvider: "kenyaui", icon: "", label: "Incomplete With Errors", href: ui.pageLink("kenyaemrorderentry", "orders/labOrdersIncompleteWithErrorResultsManifestHome")],
             [label: "Incomplete results", iconProvider: "kenyaui", icon: "", label: "Incomplete results", href: ui.pageLink("kenyaemrorderentry", "orders/labOrdersIncompleteResultManifestHome")],
             [label: "Complete With Errors", iconProvider: "kenyaui", icon: "", label: "Complete With Errors", href: ui.pageLink("kenyaemrorderentry", "orders/labOrdersCompleteWithErrorResultsManifestHome")],
             [label: "Complete results", iconProvider: "kenyaui", icon: "", label: "Complete results", href: ""],
