@@ -781,13 +781,21 @@ public class LabOrderDataExchange {
 
         Map<String, Order> listToProcess = new HashMap<String, Order>();
         Concept conceptToVoid = conceptToRetain.equals(vlTestConceptQualitative) ? vlTestConceptQuantitative : vlTestConceptQualitative;
-        List<Order> ordersOnSameDay = orderService.getActiveOrders(referenceOrder.getPatient(), referenceOrder.getOrderType(), referenceOrder.getCareSetting(), referenceOrder.getDateActivated());
+        List<Order> orders = orderService.getOrders(referenceOrder.getPatient(), referenceOrder.getCareSetting(), referenceOrder.getOrderType(), true);
+        Date refDate = referenceOrder.getDateActivated();
 
-        for (Order order : ordersOnSameDay) {
-            if (order.getConcept().equals(conceptToVoid)) {
-                listToProcess.put("orderToVoid", order);
-            } else if (order.getConcept().equals(conceptToRetain)) {
-                listToProcess.put("orderToRetain", order);
+        // We have all orders, we need to use the same day orders only
+        for (Order order : orders) {
+            if(DateUtils.isSameDay(order.getDateActivated(), refDate)) {
+                if (order.getConcept().equals(conceptToVoid)) {
+                    listToProcess.put("orderToVoid", order);
+                } else if (order.getConcept().equals(conceptToRetain)) {
+                    // Unvoid the order if it is already voided
+                    if(order.getVoided()) {
+                        orderService.unvoidOrder(order);
+                    }
+                    listToProcess.put("orderToRetain", order);
+                }
             }
         }
         return listToProcess;
