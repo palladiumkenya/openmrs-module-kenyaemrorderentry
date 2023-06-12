@@ -122,8 +122,8 @@ public class CreateLabsOrdersFragmentController {
                 conceptService.getConcept(953),
                 conceptService.getConcept(161476),
                 conceptService.getConcept(161426),
-                conceptService.getConcept(161431),
-                conceptService.getConcept(161475)
+                conceptService.getConcept(161431)
+               // conceptService.getConcept(161475)
 
 
         );
@@ -205,7 +205,11 @@ public class CreateLabsOrdersFragmentController {
                         concService.getConcept(163722), // hiv rapid test
                         concService.getConcept(844) // DNA PCR
                 ));
-
+        JSONArray hepatitisBSerologicalTest = buildTestPanelWithoutPanelConcept("Blood", labTestJsonPayload,
+                "HEPATITIS B SEROLOGICAL TEST", Arrays.asList(
+                        concService.getConcept(159430), // Hepatitis B Surface Antigen Test
+                        concService.getConcept(161472) // Hepatitis B Surface antigen spot test
+                ));
         JSONArray tbMonitoring = buildTestPanelWithoutPanelConcept("Blood", labTestJsonPayload,
                 "TB MONITORING", Arrays.asList(
                         concService.getConcept(162202) // GeneXpert MTB/RIF
