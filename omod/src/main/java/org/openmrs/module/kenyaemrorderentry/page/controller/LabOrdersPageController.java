@@ -416,9 +416,9 @@ public class LabOrdersPageController {
 
         for (Concept labTest : testConcepts) {
             labTestObj = new JSONObject();
-            labTestObj.put("concept_id", labTest.getConceptId());
-            labTestObj.put("concept", labTest.getUuid());
-            labTestObj.put("name", concService.getConcept(labTest.getConceptId()).getName(LOCALE).getName());
+            labTestObj.put("concept_id", labTest != null ? labTest.getConceptId() : "");
+            labTestObj.put("concept", labTest != null ? labTest.getUuid() : "");
+            labTestObj.put("name",  labTest != null ?  concService.getConcept(labTest.getConceptId()).getName(LOCALE).getName(): "");
             labTestArray.add(labTestObj);
 
 
