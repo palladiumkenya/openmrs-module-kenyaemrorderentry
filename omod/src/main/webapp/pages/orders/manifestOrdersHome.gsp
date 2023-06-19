@@ -111,7 +111,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                     </td>
             <% } %>
 
-            <% if (manifestOrders.size() > 0 && (manifest.status != null && manifest.status.trim().toLowerCase() == 'complete')) { %>
+            <% if (manifestOrders.size() > 0 && (manifest.status != null && manifest.status.trim().toLowerCase() == 'complete results')) { %>
                     <td>
                         <a href="${ ui.pageLink("kenyaemrorderentry","manifest/downloadManifestLog",[manifest : manifest.id]) }"   target="_blank">
                             <button style="background-color: cadetblue; color: white">
