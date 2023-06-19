@@ -1,6 +1,22 @@
 package org.openmrs.module.kenyaemrorderentry.api.itext;
 
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.URL;
+import java.util.Date;
+
+import org.apache.commons.lang.WordUtils;
+import org.apache.commons.lang3.math.NumberUtils;
+import org.openmrs.Patient;
+import org.openmrs.api.context.Context;
+import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
+import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange;
+import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
+import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
+import org.openmrs.module.kenyaemrorderentry.util.Utils;
+
 import com.itextpdf.io.font.constants.StandardFonts;
 import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.kernel.font.PdfFont;
@@ -11,7 +27,6 @@ import com.itextpdf.kernel.pdf.PdfNumber;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.borders.Border;
-import com.itextpdf.layout.borders.SolidBorder;
 import com.itextpdf.layout.element.Cell;
 import com.itextpdf.layout.element.Image;
 import com.itextpdf.layout.element.Paragraph;
@@ -19,29 +34,6 @@ import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.element.Text;
 import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.properties.UnitValue;
-import org.apache.commons.lang.WordUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
-import org.openmrs.Encounter;
-import org.openmrs.Patient;
-import org.openmrs.api.context.Context;
-import org.openmrs.module.kenyacore.RegimenMappingUtils;
-import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
-import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange;
-import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
-import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
-import org.openmrs.module.kenyaemrorderentry.util.Utils;
-import org.openmrs.ui.framework.SimpleObject;
-import org.openmrs.PatientIdentifier;
-import org.openmrs.PatientIdentifierType;
-import org.apache.commons.lang3.time.DateUtils;
-import org.openmrs.module.kenyaemrorderentry.util.Utils;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.URL;
-import java.util.Date;
 
 public class LabManifestLog {
 
@@ -107,95 +99,41 @@ public class LabManifestLog {
 
         // adding column 1
         Paragraph fDetailsCol1 = new Paragraph();
-        // Text column1Label = new Text("Facility Details").setBold().setFontSize(10).setUnderline();
         Text totalSamples = new Text("Total Samples: ").setFontSize(10);
         Text totalSamplesVal = new Text(String.valueOf(Utils.getTotalSamplesInAManifest(manifest))).setFontSize(10).setFont(courier);
-        // Text mflCodeLabel = new Text("MFL Code: ").setFontSize(10);
-        // Text mflCodeVal = new Text(Utils.getDefaultLocationMflCode(Utils.getDefaultLocation())).setFontSize(10).setFont(courier);
-
-        // Text facilityEmailLabel = new Text("Facility/CCC email: ").setFontSize(10);
-        // Text facilityEmailVal = new Text((manifest.getFacilityEmail() != null ? manifest.getFacilityEmail() : "")).setFontSize(10).setFont(courier);
-        // Text facilityPhoneNoLabel = new Text("Facility/CCC phone no: ").setFontSize(10);
-        // Text facilityPhoneNoVal = new Text((manifest.getFacilityPhoneContact() != null ? manifest.getFacilityPhoneContact() : "")).setFontSize(10).setFont(courier);
-        // fDetailsCol1.setFixedLeading(13); // sets line spacing
-        // fDetailsCol1.add(column1Label).add("\n").add(facilityNameLabel).add(facilityNameVal).add("\n").add(mflCodeLabel).add(mflCodeVal).add("\n").add(facilityEmailLabel).add(facilityEmailVal).add("\n").add(facilityPhoneNoLabel).add(facilityPhoneNoVal);
         fDetailsCol1.add(totalSamples).add(totalSamplesVal);
 
         // adding column 2
         Paragraph fDetailsCol2 = new Paragraph();
-        // Text column2Label = new Text("");
         Text totalSuppressed = new Text("Total Suppressed: ").setFontSize(10);
         Text totalSuppressedVal = new Text(String.valueOf(Utils.getSamplesSuppressedInAManifest(manifest))).setFontSize(10).setFont(courier);
-        // Text countyVal = new Text((manifest.getCounty() != null ? manifest.getCounty() : "")).setFontSize(10).setFont(courier);
-        // Text subCountyLabel = new Text("Sub-county: ").setFontSize(10);
-        // Text subCountyVal = new Text((manifest.getSubCounty() != null ? manifest.getSubCounty() : "")).setFontSize(10).setFont(courier);
-        // Text clinicianPhoneNoLabel = new Text("Clinician's phone no: ").setFontSize(10);
-        // Text clinicianPhoneNoVal = new Text((manifest.getClinicianPhoneContact() != null ? manifest.getClinicianPhoneContact() : "")).setFontSize(10).setFont(courier);
-        // Text clinicianNameLabel = new Text("Clinician's Name: ").setFontSize(10);
-        // Text clinicianNameVal = new Text((manifest.getClinicianName() != null ? manifest.getClinicianName() : "")).setFontSize(10).setFont(courier);
-        // fDetailsCol2.setFixedLeading(13);
-        // fDetailsCol2.add(column2Label).add("\n").add(countyLabel).add(countyVal).add("\n").add(subCountyLabel).add(subCountyVal).add("\n").add(clinicianPhoneNoLabel).add(clinicianPhoneNoVal).add("\n").add(clinicianNameLabel).add(clinicianNameVal);
         fDetailsCol2.add(totalSuppressed).add(totalSuppressedVal);
 
         // adding column 3
         Paragraph fDetailsCol3 = new Paragraph();
-        // Text column3Label = new Text("Facility Laboratory details").setBold().setFontSize(10).setUnderline();
         Text totalUnsuppressed = new Text("Total unsuppressed: ").setFontSize(10);
         Text totalUnsuppressedVal = new Text(String.valueOf(Utils.getSamplesUnsuppressedInAManifest(manifest))).setFontSize(10).setFont(courier);
-        // Text facilityDispatchVal = new Text((manifest.getDispatchDate() != null ? Utils.getSimpleDateFormat("dd/MM/yyyy").format(manifest.getDispatchDate()) : "")).setFontSize(10).setFont(courier);
-        // Text facilityFocalPointLabel = new Text("Lab focal person phone contact: ").setFontSize(10);
-        // Text facilityFocalPointVal = new Text((manifest.getLabPocPhoneNumber() != null ? manifest.getLabPocPhoneNumber() : "")).setFontSize(10).setFont(courier);
-        // Text hubDetailsLabel = new Text("Hub details").setFontSize(10).setBold().setFontSize(10).setUnderline();
-        // Text hubDispatchLabel = new Text("Date & time sample dispatched: ........................").setFontSize(10);
-        // Text hubFocalPointLabel = new Text("Lab focal person phone contact: ........................").setFontSize(10);
-        // fDetailsCol3.setFixedLeading(13);
-        // fDetailsCol3.add(column3Label).add("\n").add(facilityDispatchLabel).add(facilityDispatchVal).add("\n").add(facilityFocalPointLabel).add(facilityFocalPointVal).add("\n").add(hubDetailsLabel).add("\n").add(hubDispatchLabel).add("\n").add(hubFocalPointLabel);
         fDetailsCol3.add(totalUnsuppressed).add(totalUnsuppressedVal);
 
         // adding column 4
         Paragraph fDetailsCol4 = new Paragraph();
-        // Text column3Label = new Text("Facility Laboratory details").setBold().setFontSize(10).setUnderline();
         Text totalRejected = new Text("Total Rejected: ").setFontSize(10);
         Text totalRejectedVal = new Text(String.valueOf(Utils.getSamplesRejectedInAManifest(manifest))).setFontSize(10).setFont(courier);
-        // Text facilityDispatchVal = new Text((manifest.getDispatchDate() != null ? Utils.getSimpleDateFormat("dd/MM/yyyy").format(manifest.getDispatchDate()) : "")).setFontSize(10).setFont(courier);
-        // Text facilityFocalPointLabel = new Text("Lab focal person phone contact: ").setFontSize(10);
-        // Text facilityFocalPointVal = new Text((manifest.getLabPocPhoneNumber() != null ? manifest.getLabPocPhoneNumber() : "")).setFontSize(10).setFont(courier);
-        // Text hubDetailsLabel = new Text("Hub details").setFontSize(10).setBold().setFontSize(10).setUnderline();
-        // Text hubDispatchLabel = new Text("Date & time sample dispatched: ........................").setFontSize(10);
-        // Text hubFocalPointLabel = new Text("Lab focal person phone contact: ........................").setFontSize(10);
-        // fDetailsCol3.setFixedLeading(13);
-        // fDetailsCol3.add(column3Label).add("\n").add(facilityDispatchLabel).add(facilityDispatchVal).add("\n").add(facilityFocalPointLabel).add(facilityFocalPointVal).add("\n").add(hubDetailsLabel).add("\n").add(hubDispatchLabel).add("\n").add(hubFocalPointLabel);
         fDetailsCol4.add(totalRejected).add(totalRejectedVal);
 
 
         Cell col1 = new Cell();
         col1.setBorder(Border.NO_BORDER);
-        col1.setBorderTop(new SolidBorder(1f));
-        col1.setBorderBottom(new SolidBorder(1f));
-        col1.setBorderLeft(new SolidBorder(1f));
-        col1.setBorderRight(new SolidBorder(1f));
-
+        
         Cell col2 = new Cell();
         col2.setBorder(Border.NO_BORDER);
-        col2.setBorderTop(new SolidBorder(1f));
-        col2.setBorderBottom(new SolidBorder(1f));
-        col2.setBorderLeft(new SolidBorder(1f));
-        col2.setBorderRight(new SolidBorder(1f));
-
+        
         Cell col3 = new Cell();
         col3.setBorder(Border.NO_BORDER);
-        col3.setBorderTop(new SolidBorder(1f));
-        col3.setBorderBottom(new SolidBorder(1f));
-        col3.setBorderLeft(new SolidBorder(1f));
-        col3.setBorderRight(new SolidBorder(1f));
-
+        
         Cell col4 = new Cell();
         col4.setBorder(Border.NO_BORDER);
-        col4.setBorderTop(new SolidBorder(1f));
-        col4.setBorderBottom(new SolidBorder(1f));
-        col4.setBorderLeft(new SolidBorder(1f));
-        col4.setBorderRight(new SolidBorder(1f));
-
+        
         col1.add(fDetailsCol1);
         col2.add(fDetailsCol2);
         col3.add(fDetailsCol3);
