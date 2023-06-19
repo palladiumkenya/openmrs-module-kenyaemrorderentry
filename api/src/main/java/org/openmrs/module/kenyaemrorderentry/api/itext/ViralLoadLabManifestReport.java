@@ -94,7 +94,7 @@ public class ViralLoadLabManifestReport {
         document.add(new Paragraph("\n"));
         document.add(new Paragraph("MINISTRY OF HEALTH").setTextAlignment(TextAlignment.CENTER).setFontSize(12));
         document.add(new Paragraph("Viral Load Request Form").setTextAlignment(TextAlignment.CENTER).setBold().setFontSize(16));
-        document.add(new Paragraph("Manifest/Shipping ID: " + manifest.getIdentifier()).setTextAlignment(TextAlignment.LEFT).setBold().setFontSize(10).setFont(courier));
+        document.add(new Paragraph("Manifest/Shipping ID: " + (manifest.getIdentifier() != null ?  manifest.getIdentifier() : "")).setTextAlignment(TextAlignment.LEFT).setBold().setFontSize(10).setFont(courier));
 
         Table manifestMetadata = new Table(4); // The number of columns in the manifest form (with manifest HEADER)
         manifestMetadata.setWidth(UnitValue.createPercentValue(100));

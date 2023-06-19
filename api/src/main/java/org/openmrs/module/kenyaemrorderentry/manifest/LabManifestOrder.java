@@ -27,6 +27,15 @@ public class LabManifestOrder extends BaseOpenmrsData implements Serializable {
     private Date sampleTestedDate;
     private String uuid;
     private Integer orderType;
+    private String batchNumber;
+
+    public String getBatchNumber() {
+        return batchNumber;
+    }
+
+    public void setBatchNumber(String batchNumber) {
+        this.batchNumber = batchNumber;
+    }
 
     public LabManifestOrder() {
         prePersist();

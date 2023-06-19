@@ -305,4 +305,20 @@
         </createIndex>
     </changeSet>
 
+    <changeSet id="kenyaemr_order_entry_add_batch_number_20230613110500" author="pwaweru">
+
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="kenyaemr_order_entry_lab_manifest_order"/>
+            <not>
+                <columnExists tableName="kenyaemr_order_entry_lab_manifest_order" columnName="batch_number"/>
+            </not>
+        </preConditions>
+        <comment>
+            Adds a column to record batch number of manifest order
+        </comment>
+        <addColumn tableName="kenyaemr_order_entry_lab_manifest_order">
+            <column name="batch_number" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

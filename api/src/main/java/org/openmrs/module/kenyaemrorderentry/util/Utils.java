@@ -11,9 +11,12 @@ import org.joda.time.Days;
 import org.openmrs.*;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyacore.RegimenMappingUtils;
+import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
+import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.metadatadeploy.MetadataUtils;
 import org.openmrs.ui.framework.SimpleObject;
 import org.openmrs.util.PrivilegeConstants;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLException;
@@ -65,6 +68,34 @@ public class Utils {
     public static PatientIdentifierType getHeiNumberIdentifierType() {
         return Context.getPatientService().getPatientIdentifierTypeByUuid(HEI_UNIQUE_NUMBER);
 
+    }
+
+    public static Integer getTotalSamplesInAManifest(LabManifest labManifest) {
+        Integer ret = 0;
+        KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
+        ret = kenyaemrOrdersService.countTotalSamples(labManifest);
+        return(ret);
+    }
+
+    public static Integer getSamplesSuppressedInAManifest(LabManifest labManifest) {
+        Integer ret = 0;
+        KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
+        ret = kenyaemrOrdersService.countSamplesSuppressed(labManifest);
+        return(ret);
+    }
+
+    public static Integer getSamplesUnsuppressedInAManifest(LabManifest labManifest) {
+        Integer ret = 0;
+        KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
+        ret = kenyaemrOrdersService.countSamplesUnsuppressed(labManifest);
+        return(ret);
+    }
+
+    public static Integer getSamplesRejectedInAManifest(LabManifest labManifest) {
+        Integer ret = 0;
+        KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
+        ret = kenyaemrOrdersService.countSamplesRejected(labManifest);
+        return(ret);
     }
 
     /**
@@ -447,6 +478,12 @@ public class Utils {
         return null;
     }
 
+    /**
+     * Get date difference between two dates (in days)
+     * @param date1
+     * @param date2
+     * @return
+     */
     public static int daysBetween(Date date1, Date date2) {
         DateTime d1 = new DateTime(date1.getTime());
         DateTime d2 = new DateTime(date2.getTime());

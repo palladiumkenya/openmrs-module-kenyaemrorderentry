@@ -179,14 +179,38 @@ public class KenyaemrOrdersServiceImpl extends BaseOpenmrsService implements Ken
 
     @Override
     @Transactional(readOnly = true)
-    public List<LabManifestOrder> getLabManifestOrdersToSend(LabManifest labManifestOrder) {
-        return dao.getLabManifestOrdersToSend(labManifestOrder);
+    public List<LabManifestOrder> getLabManifestOrdersToSend(LabManifest labManifest) {
+        return dao.getLabManifestOrdersToSend(labManifest);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Long countLabManifestOrdersToSend(LabManifest labManifestOrder) {
-        return dao.countLabManifestOrdersToSend(labManifestOrder);
+    public Long countLabManifestOrdersToSend(LabManifest labManifest) {
+        return dao.countLabManifestOrdersToSend(labManifest);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Integer countTotalSamples(LabManifest labManifest) {
+        return dao.countTotalSamples(labManifest);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Integer countSamplesSuppressed(LabManifest labManifest) {
+        return dao.countSamplesSuppressed(labManifest);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Integer countSamplesUnsuppressed(LabManifest labManifest) {
+        return dao.countSamplesUnsuppressed(labManifest);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Integer countSamplesRejected(LabManifest labManifest) {
+        return dao.countSamplesRejected(labManifest);
     }
 
     public HibernateKenyaemrOrdersDAO getDao() {
