@@ -191,6 +191,9 @@ public class LabManifestLog {
         vlJustCol.add(vlDetails);
         table.addHeaderCell(vlJustCol);
 
+        //Batch Number
+        table.addHeaderCell(new Paragraph("Batch No.").setBold());
+
         // Date of sample collection
         table.addHeaderCell(new Paragraph("Date & \n time of \ncollection").setBold().setTextAlignment(TextAlignment.CENTER));
 
@@ -259,6 +262,10 @@ public class LabManifestLog {
 
         // VL Justification Codes
         table.addCell(new Paragraph(sample.getOrder().getOrderReason() != null ? LabOrderDataExchange.getOrderReasonCode(sample.getOrder().getOrderReason().getUuid()) : "")).setFontSize(10);
+
+        //Batch Number
+        String batchNumber = sample.getBatchNumber();
+        table.addCell(new Paragraph(batchNumber != null ? batchNumber : "")).setFontSize(10);
 
         // Date of sample collection
         table.addCell(new Paragraph(sample.getSampleCollectionDate() != null ? Utils.getSimpleDateFormat("dd/MM/yyyy").format(sample.getSampleCollectionDate()) : "")).setFontSize(10);
