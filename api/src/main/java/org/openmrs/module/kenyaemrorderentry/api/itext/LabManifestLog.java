@@ -121,7 +121,6 @@ public class LabManifestLog {
         Text totalRejectedVal = new Text(String.valueOf(Utils.getSamplesRejectedInAManifest(manifest))).setFontSize(10).setFont(courier);
         fDetailsCol4.add(totalRejected).add(totalRejectedVal);
 
-
         Cell col1 = new Cell();
         col1.setBorder(Border.NO_BORDER);
         
@@ -148,15 +147,91 @@ public class LabManifestLog {
 
         // End Summary Row
 
-        Table table = new Table(13); // The number of columns in the sample log form (with manifest DATA)
+        Table table = new Table(14); // The number of columns in the sample log form (with manifest DATA)
         table.setWidth(UnitValue.createPercentValue(100));
         table.setFont(font);
 
         Table tWithHeaderRow = addHeaderRow(table);
         Table tWithData = addManifestSamples(this.manifest, tWithHeaderRow);
 
-
         document.add(tWithData);
+
+        // Add Empty Row
+        Table emptyRow = new Table(1); // The number of columns
+        emptyRow.setWidth(UnitValue.createPercentValue(100));
+        emptyRow.setHeight(20);
+        document.add(emptyRow);
+
+        //Start signature row
+
+        Table signatureRow = new Table(3); // The number of columns
+        signatureRow.setWidth(UnitValue.createPercentValue(100));
+        signatureRow.setFont(font);
+
+        // adding column 1
+        Paragraph sDetailsCol1 = new Paragraph();
+        Text reviewedBy = new Text("Reviewed by: ").setFontSize(10);
+        Text reviewedByVal = new Text("...................").setFontSize(10).setFont(courier);
+        sDetailsCol1.add(reviewedBy).add(reviewedByVal);
+
+        // adding column 2
+        Paragraph sDetailsCol2 = new Paragraph();
+        Text signature = new Text("Signature: ").setFontSize(10);
+        Text signatureVal = new Text("...................").setFontSize(10).setFont(courier);
+        sDetailsCol2.add(signature).add(signatureVal);
+
+        // adding column 3
+        Paragraph sDetailsCol3 = new Paragraph();
+        Text date = new Text("Date: ").setFontSize(10);
+        Text dateVal = new Text("...................").setFontSize(10).setFont(courier);
+        sDetailsCol3.add(date).add(dateVal);
+
+        Cell scol1 = new Cell();
+        scol1.setBorder(Border.NO_BORDER);
+        
+        Cell scol2 = new Cell();
+        scol2.setBorder(Border.NO_BORDER);
+        
+        Cell scol3 = new Cell();
+        scol3.setBorder(Border.NO_BORDER);
+        
+        scol1.add(sDetailsCol1);
+        scol2.add(sDetailsCol2);
+        scol3.add(sDetailsCol3);
+
+        signatureRow.addCell(scol1);
+        signatureRow.addCell(scol2);
+        signatureRow.addCell(scol3);
+
+        document.add(signatureRow);
+
+        //End signature row
+
+        //Add Empty Row
+        document.add(emptyRow);
+
+        // Start Date Row
+        Table dateRow = new Table(1); // The number of columns
+        dateRow.setWidth(UnitValue.createPercentValue(100));
+        dateRow.setFont(font);
+
+        // adding column 1
+        Paragraph cDetailsCol1 = new Paragraph();
+        Text effectiveDate = new Text("Effective date: ").setFontSize(10);
+        Date currentDate = new Date();
+        Text effectiveDateVal = new Text(Utils.getSimpleDateFormat("dd/MM/yyyy").format(currentDate)).setFontSize(10).setFont(courier);
+        cDetailsCol1.add(effectiveDate).add(effectiveDateVal);
+
+        Cell ccol1 = new Cell();
+        ccol1.setBorder(Border.NO_BORDER);
+
+        ccol1.add(cDetailsCol1);
+
+        dateRow.addCell(ccol1);
+
+        document.add(dateRow);
+
+        // End Date Row
 
         //Close document
         document.close();
