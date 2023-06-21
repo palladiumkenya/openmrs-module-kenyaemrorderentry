@@ -46,6 +46,26 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                     }
                 });
 
+                $scope.cd4TestOrderReasons = [
+                    {
+                        name:'Baseline',
+                        uuid:'167390AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+                    },
+                    {
+                        name:'Suspected treatment failure',
+                        uuid:'167387AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+                    },
+                    {
+                        name:'Return to care after Interrupting treatment for >3months',
+                        uuid:'160740AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+                    },
+                    {
+                        name:'Patient on fluconazole maintenance therapy',
+                        uuid:'167527AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+                    }
+
+                ];
+
                 $scope.heiPCRTestOrderReasons = [
                     {
                         name:'Initial PCR (6week or first contact)',
@@ -265,7 +285,11 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             ['162080AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', 'Baseline VL (for infants diagnosed through EID)'],
             ['1434AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', 'Pregnancy'],
             ['843AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', 'Confirmation of treatment failure (repeat VL) '],
-          ]);
+            ['167390AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', 'Baseline '],
+            ['167387AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', 'Suspected treatment failure '],
+            ['160740AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', 'Return to care after Interrupting treatment for >3months'],
+            ['167527AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', 'Patient on fluconazole maintenance therapy'],
+          ]); 
         
         var testNameMap = new Map([
             ['Tuberculosis polymerase chain reaction with rifampin resistance checking', 'GeneXpert'],
@@ -535,6 +559,11 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             // PCR test
             if (test.concept === '1030AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'&& config.patient.person.age <= 5) {
                 $scope.OrderReason = $scope.heiPCRTestOrderReasons;
+            }
+            // cd4 count and cd4% order reasons
+            if (test.concept === '5497AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' || test.concept === '730AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                $scope.OrderReason = $scope.cd4TestOrderReasons
+
             }
         }
         
