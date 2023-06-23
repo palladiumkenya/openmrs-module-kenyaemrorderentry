@@ -636,51 +636,60 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 encounterRole: config.encounterRole
             };
 
-            var checkVlOrderReason = _.filter($scope.lOrdersPayload, function(o) {
-                return o.concept ==='856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
-                    || o.concept ==='1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
+            var checkVlOrderReason = _.find($scope.lOrdersPayload, function(o) {
+                return o.concept === '856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' || o.concept === '1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
             });
-            var checkCd4OrderReason = _.filter($scope.lOrdersPayload, function(o) {
-                return o.concept ==='730AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
-
+            
+            var checkCd4OrderReason = _.find($scope.lOrdersPayload, function(o) {
+                return o.concept === '730AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
             });
-
-            var checkCd4CountOrderReason = _.filter($scope.lOrdersPayload, function(o) {
-                return o.concept ==='5497AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
-
+            
+            var checkCd4CountOrderReason = _.find($scope.lOrdersPayload, function(o) {
+                return o.concept === '5497AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
             });
 
-
-            if(checkVlOrderReason && checkVlOrderReason[0]) {
-                if ((checkVlOrderReason[0].orderReasonNonCoded === '' || checkVlOrderReason[0].orderReasonNonCoded === null
-                    || checkVlOrderReason[0].orderReasonNonCoded === undefined) && (checkVlOrderReason[0].orderReason === ''
-                    || checkVlOrderReason[0].orderReason === null || checkVlOrderReason[0].orderReason === undefined)) {
+            var checkPCROrderReason = _.find($scope.lOrdersPayload, function(o) {
+                return o.concept === '1030AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
+            });
+            var checkRapidTestOrderReason = _.find($scope.lOrdersPayload, function(o) {
+                return o.concept === '163722AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
+            });
+            
+            if (checkVlOrderReason) {
+                if (!checkVlOrderReason.orderReasonNonCoded && !checkVlOrderReason.orderReason) {
                     $scope.showErrorToast = 'Order reason for HIV viral load is required';
-
                     $('#orderError').modal('show');
                     return;
                 }
             }
-
-            if(checkCd4CountOrderReason && checkCd4CountOrderReason[0]) {
-                if ((checkCd4CountOrderReason[0].orderReasonNonCoded === '' || checkCd4CountOrderReason[0].orderReasonNonCoded === null ||
-                    checkCd4CountOrderReason[0].orderReasonNonCoded === undefined) && (checkCd4CountOrderReason[0].orderReason === ''
-                    || checkCd4CountOrderReason[0].orderReason === null || checkCd4CountOrderReason[0].orderReason === undefined)) {
-
+            
+            if (checkCd4CountOrderReason) {
+                if (!checkCd4CountOrderReason.orderReasonNonCoded && !checkCd4CountOrderReason.orderReason) {
                     $scope.showErrorToast = 'Order reason for CD4 Count is required';
-
                     $('#orderError').modal('show');
                     return;
                 }
             }
 
-            if(checkCd4OrderReason && checkCd4OrderReason[0]) {
-                if ((checkCd4OrderReason[0].orderReasonNonCoded === '' || checkCd4OrderReason[0].orderReasonNonCoded === null
-                    || checkCd4OrderReason[0].orderReasonNonCoded === undefined) && (checkCd4OrderReason[0].orderReason === ''
-                    || checkCd4OrderReason[0].orderReason === null || checkCd4OrderReason[0].orderReason === undefined)) {
-
+            if (checkCd4OrderReason) {
+                if (!checkCd4CountOrderReason.orderReasonNonCoded && !checkCd4CountOrderReason.orderReason) {
                     $scope.showErrorToast = 'Order reason for CD4% is required';
+                    $('#orderError').modal('show');
+                    return;
+                }
+            }
+            
+            if (checkPCROrderReason) {
+                if (!checkPCROrderReason.orderReasonNonCoded && !checkPCROrderReason.orderReason) {
+                    $scope.showErrorToast = 'Order reason for PCR is required';
+                    $('#orderError').modal('show');
+                    return;
+                }
+            }
 
+            if (checkRapidTestOrderReason) {
+                if (!checkRapidTestOrderReason.orderReasonNonCoded && !checkRapidTestOrderReason.orderReason) {
+                    $scope.showErrorToast = 'Order reason for Rapid Test is required';
                     $('#orderError').modal('show');
                     return;
                 }
