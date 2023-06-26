@@ -54,6 +54,9 @@ tr:nth-child(even) {background-color: #f2f2f2;}
 .sampleStatusColumn {
     width: 150px;
 }
+.batchNumberColumn {
+    width: 100px;
+}
 .sampleTypeColumn {
     width: 100px;
 }
@@ -106,8 +109,18 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                             </button>
                         </a>
                     </td>
-
             <% } %>
+
+            <% if (manifestOrders.size() > 0 && (manifest.status != null && (manifest.status.trim().toLowerCase() == 'complete results' || manifest.status.trim().toLowerCase() == 'incomplete results'))) { %>
+                    <td>
+                        <a href="${ ui.pageLink("kenyaemrorderentry","manifest/downloadManifestLog",[manifest : manifest.id]) }"   target="_blank">
+                            <button style="background-color: cadetblue; color: white">
+                                Print LOG
+                            </button>
+                        </a>
+                    </td>
+            <% } %>
+
                 </tr>
             </table>
         </fieldset>
@@ -124,6 +137,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                     <% } else { %>
                         <th class="cccNumberColumn">HEI Number</th>
                     <% } %>
+                    <th class="batchNumberColumn">Batch Number</th>
                     <th class="sampleTypeColumn">Sample type</th>
                     <th class="dateRequestColumn">Date requested</th>
                     <th class="sampleStatusColumn">Status</th>
@@ -139,6 +153,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                 <% } else { %>
                 <td class="cccNumberColumn">${o.order.patient.getPatientIdentifier(heiNumberType)}</td>
                 <% } %>
+                    <td class="batchNumberColumn">${o.batchNumber != null ? o.batchNumber : ""}</td>
                     <td class="sampleTypeColumn">${o.sampleType}</td>
                     <td class="dateRequestColumn">${kenyaui.formatDate(o.order.dateActivated)}</td>
                     <td class="sampleStatusColumn">${o.status}</td>

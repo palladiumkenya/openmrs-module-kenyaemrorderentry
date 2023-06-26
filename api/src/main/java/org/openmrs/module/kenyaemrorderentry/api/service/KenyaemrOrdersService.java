@@ -47,6 +47,11 @@ public interface KenyaemrOrdersService extends OpenmrsService {
     Long countLabManifestOrdersToSend(LabManifest labManifestOrder);
     Cohort getPatientsWithCadre(boolean includeTroupes, boolean includeCivilians);
 
+    public Integer countTotalSamples(LabManifest labManifest);
+    public Integer countSamplesSuppressed(LabManifest labManifest);
+    public Integer countSamplesUnsuppressed(LabManifest labManifest);
+    public Integer countSamplesRejected(LabManifest labManifest);
+
     //Patient contact dimensions service methods
 
     public Cohort getPatientContactWithGender(boolean includeMales, boolean includeFemales, boolean includeUnknownGender);

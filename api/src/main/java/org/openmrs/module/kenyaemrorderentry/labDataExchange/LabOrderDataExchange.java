@@ -357,6 +357,7 @@ public class LabOrderDataExchange {
                     Date sampleTestedDate = null;
                     String dateSampleReceived = "";
                     String dateSampleTested = "";
+                    String batchNumber = "";
                     String specimenRejectedReason = "";
 
                     if (getSystemType() == ModuleConstants.LABWARE_SYSTEM) {

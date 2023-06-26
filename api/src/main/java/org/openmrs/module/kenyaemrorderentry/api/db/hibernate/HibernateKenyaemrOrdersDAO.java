@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.CacheMode;
@@ -22,6 +23,7 @@ import org.openmrs.module.kenyaemrorderentry.api.db.KenyaemrOrdersDAO;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 import org.openmrs.module.reporting.common.DurationUnit;
+import org.springframework.transaction.annotation.Transactional;
 
 public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
     protected final Log log = LogFactory.getLog(this.getClass());
@@ -123,6 +125,99 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
         //criteria.addOrder(org.hibernate.criterion.Order.asc("id"));
         criteria.addOrder(org.hibernate.criterion.Order.asc("dateSent"));
         return criteria.list();
+    }
+
+    @Override
+    public Integer countTotalSamples(LabManifest labManifest) {
+        Integer ret = 0;
+        Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifestOrder.class);
+        criteria.add(Restrictions.eq("labManifest", labManifest));
+        criteria.add(Restrictions.eq("voided", false));
+        ret = criteria.list().size();
+        return(ret);
+    }
+
+    @Override
+    public Integer countSamplesSuppressed(LabManifest labManifest) {
+        Integer ret = 0;
+        Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifestOrder.class);
+        criteria.add(Restrictions.eq("labManifest", labManifest));
+        criteria.add(Restrictions.eq("voided", false));
+        List<LabManifestOrder> allOrders = criteria.list();
+        for (LabManifestOrder labManifestOrder : allOrders) {
+            String results = labManifestOrder.getResult();
+            results = results.toLowerCase().trim();
+            if(results.contains("ldl") || results.equalsIgnoreCase("ldl")) {
+                ret++;
+            } else if(results.endsWith("copies/ml")) {
+                int index = results.indexOf("copies/ml");
+                if (index != -1) {
+                    String val = results.substring(0, index); // Get the 40 from (40 copies/ml)
+                    val = val.trim();
+                    Integer vlVal = NumberUtils.toInt(val);
+                    if(vlVal >= 200) {
+                        // unsuppressed
+                    } else {
+                        ret++;
+                    }
+                }
+            } else {
+                Integer vlVal = NumberUtils.toInt(results);
+                if(vlVal >= 200) {
+                    // unsuppressed
+                } else {
+                    ret++;
+                }
+            }
+        }
+        return(ret);
+    }
+
+    @Override
+    public Integer countSamplesUnsuppressed(LabManifest labManifest) {
+        Integer ret = 0;
+        Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifestOrder.class);
+        criteria.add(Restrictions.eq("labManifest", labManifest));
+        criteria.add(Restrictions.eq("voided", false));
+        List<LabManifestOrder> allOrders = criteria.list();
+        for (LabManifestOrder labManifestOrder : allOrders) {
+            String results = labManifestOrder.getResult();
+            results = results.toLowerCase().trim();
+            if(results.contains("ldl") || results.equalsIgnoreCase("ldl")) {
+                // suppressed
+            } else if(results.endsWith("copies/ml")) {
+                int index = results.indexOf("copies/ml");
+                if (index != -1) {
+                    String val = results.substring(0, index); // Get the 40 from (40 copies/ml)
+                    val = val.trim();
+                    Integer vlVal = NumberUtils.toInt(val);
+                    if(vlVal >= 200) {
+                        ret++;
+                    } else {
+                        // suppressed
+                    }
+                }
+            } else {
+                Integer vlVal = NumberUtils.toInt(results);
+                if(vlVal >= 200) {
+                    ret++;
+                } else {
+                    // suppressed
+                }
+            }
+        }
+        return(ret);
+    }
+
+    @Override
+    public Integer countSamplesRejected(LabManifest labManifest) {
+        Integer ret = 0;
+        Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifestOrder.class);
+        criteria.add(Restrictions.eq("labManifest", labManifest));
+        criteria.add(Restrictions.eq("voided", false));
+        criteria.add(Restrictions.eq("status", "Rejected"));
+        ret = criteria.list().size();
+        return(ret);
     }
 
     @Override
