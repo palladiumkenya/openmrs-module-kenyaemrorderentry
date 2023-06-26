@@ -32,6 +32,7 @@ import com.itextpdf.layout.element.Image;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.element.Text;
+import com.itextpdf.layout.properties.HorizontalAlignment;
 import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.properties.UnitValue;
 
@@ -90,7 +91,8 @@ public class LabManifestLog {
         document.add(new Paragraph("\n"));
         document.add(new Paragraph("MINISTRY OF HEALTH").setTextAlignment(TextAlignment.CENTER).setFontSize(12));
         document.add(new Paragraph("HEALTH FACILITY SAMPLES AND RESULTS TRACKING LOG BOOK").setTextAlignment(TextAlignment.CENTER).setBold().setFontSize(12));
-        document.add(new Paragraph("Manifest / Shipping ID: " + (manifest.getIdentifier() != null ? manifest.getIdentifier() : "")).setTextAlignment(TextAlignment.LEFT).setBold().setFontSize(10).setFont(courier));
+        document.add(new Paragraph("FACILITY: " + Utils.getDefaultLocation().getName() + " (" + Utils.getDefaultLocationMflCode(Utils.getDefaultLocation()) + ")").setTextAlignment(TextAlignment.LEFT).setFontSize(10).setFont(courier));
+        document.add(new Paragraph("Manifest/Shipping ID: " + (manifest.getIdentifier() != null ? manifest.getIdentifier() : "")).setTextAlignment(TextAlignment.LEFT).setFontSize(10).setFont(courier));
 
         // Start Summary Row
         Table sampleLogMetadata = new Table(4); // The number of columns in the manifest form (with manifest HEADER)
@@ -217,6 +219,7 @@ public class LabManifestLog {
 
         // adding column 1
         Paragraph cDetailsCol1 = new Paragraph();
+        cDetailsCol1.setHorizontalAlignment(HorizontalAlignment.RIGHT);
         Text effectiveDate = new Text("Effective date: ").setFontSize(10);
         Date currentDate = new Date();
         Text effectiveDateVal = new Text(Utils.getSimpleDateFormat("dd/MM/yyyy").format(currentDate)).setFontSize(10).setFont(courier);
@@ -224,10 +227,12 @@ public class LabManifestLog {
 
         Cell ccol1 = new Cell();
         ccol1.setBorder(Border.NO_BORDER);
+        ccol1.setHorizontalAlignment(HorizontalAlignment.RIGHT);
 
         ccol1.add(cDetailsCol1);
 
         dateRow.addCell(ccol1);
+        dateRow.setHorizontalAlignment(HorizontalAlignment.RIGHT);
 
         document.add(dateRow);
 
@@ -354,7 +359,10 @@ public class LabManifestLog {
         table.addCell(new Paragraph(resultDate != null ? Utils.getSimpleDateFormat("dd/MM/yyyy").format(resultDate) : "")).setFontSize(10);
 
         // Turn Around Time - TAT (DAYS)
-        Integer tat = Utils.daysBetween(dispatchDate, resultDate);
+        Integer tat = 0;
+        if(dispatchDate != null && resultDate != null) {
+            tat = Utils.daysBetween(dispatchDate, resultDate);
+        }
         table.addCell(new Paragraph(String.valueOf(tat))).setFontSize(10);
 
         // Results
