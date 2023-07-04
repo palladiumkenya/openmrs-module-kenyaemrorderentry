@@ -119,7 +119,7 @@ th, td {
                                                              ng-click="loadLabPanels(lab)">
                                                             <div class="link-item">
                                                                 <a class="formLink">
-                                                                    {{lab.name}}
+                                                                    {{lab.display}}
                                                                 </a>
                                                             </div>
 
@@ -143,7 +143,7 @@ th, td {
                                                                      ng-repeat="order in filteredOrders">
                                                                     <div class="link-item">
                                                                         <div class="btn-group button-size " role="group">
-                                                                            <button type="button" class="text-left" style="width: 76%">{{order.name}}</button>
+                                                                            <button type="button" class="text-left" style="width: 76%">{{order.display}}</button>
                                                                             <button type="button" class="fa fa-calendar fa-1x" style="width: 8%"
                                                                                     data-toggle="modal" data-target="#dateOrder"
                                                                                     ng-click="orderSelectedToAddDateActivated(order)"></button>
@@ -175,7 +175,7 @@ th, td {
                                                                     <li ng-repeat="panel in labPanels"
                                                                         ng-click="loadLabPanelTests(panel)">
                                                                         <button type="button" class="column">
-                                                                            {{panel.name}}</button>
+                                                                            {{panel.display}}</button>
                                                                     </li>
                                                                 </ul>
                                                             </div>
@@ -200,7 +200,7 @@ th, td {
                                                                                    name="feature"
                                                                                    ng-model='test.selected'
                                                                                    value="test.concept_id">
-                                                                            <label class="form-check-label">{{test.name}}</label>
+                                                                            <label class="form-check-label">{{test.display}}</label>
                                                                         </div>
                                                                     </div>
 
@@ -255,7 +255,7 @@ th, td {
 
                                                             <div ng-if="control.rendering === 'select' && control.concept !=='d0a3677f-3b3a-404c-9010-6ec766d7072e'">
                                                                 <div class="form-group row">
-                                                                    <label class="label label-md "><b>{{control.label}}:</b>
+                                                                    <label class="label label-md "><b>{{control.display}}:</b>
                                                                         <p>  <span >({{control.dateActivated | date:'dd-MM-yyyy'}})</span>
                                                                         </p></label>
 
@@ -263,7 +263,7 @@ th, td {
                                                                         <select class="form-control set-width"
                                                                                 ng-model="typeValues[control.orderId]">
                                                                             <option ng-repeat=" o in control.answers"
-                                                                                    ng-value="o.concept">{{o.label}}
+                                                                                    ng-value="o.concept">{{o.display}}
                                                                             </option>
                                                                         </select>
                                                                     </div>
@@ -291,7 +291,7 @@ th, td {
                                                                                 ng-disabled="cd4QuantitativeValue !=={} && cd4QualitativeValue === {}"
                                                                                 ng-change=syncCd4CountResults(cd4QualitativeValue)>
                                                                             <option ng-repeat=" o in vl.answers"
-                                                                                    ng-value="o.concept">{{o.label}}
+                                                                                    ng-value="o.concept">{{o.display}}
                                                                             </option>
                                                                         </select>
                                                                          <span class="btn-xl fa fa-calendar fa-1x" style="cursor: pointer;" ng-if="vl.rendering ==='select'"
@@ -308,7 +308,7 @@ th, td {
 
                                                             <div ng-if="control.rendering === 'inputtext'" class="label">
                                                                 <div class="form-group row">
-                                                                    <label class="label label-md" ><b>{{control.label}}:</b>
+                                                                    <label class="label label-md" ><b>{{control.display}}:</b>
                                                                         <p>  <span >({{control.dateActivated | date:'dd-MM-yyyy'}})</span>
                                                                         </p></label>
 
@@ -325,7 +325,7 @@ th, td {
 
                                                             <div ng-if="control.rendering === 'inputnumeric' && control.concept !=='5497AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'" class="label">
                                                                 <div class="form-group row">
-                                                                    <label class="label label-md" ><b>{{control.label}}:</b>
+                                                                    <label class="label label-md" ><b>{{control.display}}:</b>
                                                                         <p>  <span >({{control.dateActivated | date:'dd-MM-yyyy'}})</span>
                                                                         </p></label>
 
@@ -341,7 +341,7 @@ th, td {
 
                                                             <div ng-if="control.rendering === 'textarea'">
                                                                 <div class="form-group row">
-                                                                    <label class="label label-md"><b>{{control.label}}:</b>
+                                                                    <label class="label label-md"><b>{{control.display}}:</b>
                                                                         <p>  <span >({{control.dateActivated | date:'dd-MM-yyyy'}})</span>
                                                                         </p></label>
 
@@ -523,7 +523,7 @@ th, td {
                                                     {{ past.dateActivated | date:'dd-MM-yyyy'}}
                                                 </td>
                                                 <td>
-                                                    {{past.name}}
+                                                    {{past.display}}
                                                 </td>
                                                 <td>
                                                     {{ past.resultDate | date:'dd-MM-yyyy' }}
@@ -594,7 +594,7 @@ th, td {
                                                 </span>
                                                 </td>
                                                 <td>
-                                                    {{testSummary.name}}
+                                                    {{testSummary.display}}
                                                 </td>
                                                 <td>
                                                     {{testSummary.orderReasonCodedName}}

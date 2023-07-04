@@ -173,7 +173,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 $scope.limit = 12;
                 $scope.pastLabOrders = pastOrders;
                 if($scope.pastLabOrders ) {
-                    $scope.pastLabOrders = filterDuplicates($scope.pastLabOrders);
+                    $scope.pastLabOrders = filterDuplicates(mapTestNameAndOrderReason($scope.pastLabOrders));
                     $scope.pastLabOrders = renameNotDetectedToLDL($scope.pastLabOrders);
                     $scope.pastLabOrders.sort(function (a, b) {
                         var key1 = a.dateActivated;
@@ -194,32 +194,29 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
         function renameNotDetectedToLDL(res) {
             var orders = [];
-            for (var i = 0; i < res.length; ++i) {
+            
+            for (var i = 0; i < res.length; i++) {
                 var data = res[i];
-
-                for (var r in data) {
-                    if (data.hasOwnProperty(r)) {
-
-                        if (data.valueCoded === 'NOT DETECTED') {
-                            data['valueCoded'] = "LDL";
-                        }
-
-                        if (data.resultDate ) {
-                            data['resultDate'] = new Date(data.resultDate );
-                        }
-                        if (data.dateActivated ) {
-                            data['dateActivated'] = new Date(data.dateActivated );
-                        }
-                        if(data.orderReason || data.orderReason !=='' || data.orderReason !== null || data.orderReason !== undefined) {
-                            data['orderReasonCoded'] = getTestOrderReason(data.orderReason);
-                        }
-
-                    }
-
+                
+                if (data.valueCoded === 'NOT DETECTED') {
+                    data.valueCoded = "LDL";
                 }
+                
+                if (data.resultDate) {
+                    data.resultDate = new Date(data.resultDate);
+                }
+                
+                if (data.dateActivated) {
+                    data.dateActivated = new Date(data.dateActivated);
+                }
+                
+                if (data.orderReason) {
+                    data.orderReasonCoded = getTestOrderReason(data.orderReason);
+                }
+                
                 orders.push(data);
-
             }
+            
             return orders;
         }
         function filterDuplicates(arr){
@@ -248,16 +245,22 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
         }
 
         function mapTestNameAndOrderReason(result) {
-
             var orders = [];
             for (var i = 0; i < result.length; ++i) {
                 var data = result[i];
-
                 for (var r in data) {
                     if (data.hasOwnProperty(r)) {
-                        if(data.display ==='Tuberculosis polymerase chain reaction with rifampin resistance checking' 
-                        || data.display ==='SERUM GLUCOSE' || data.display ==='Serum cryptococcal antigen status' || data.display ==='Mycobacterium tuberculosis lipoarabinomannan antigen, urine, rapid') {
-                            data['display'] = getTestName(data.display)
+                        switch (data.display) {
+                            case 'Tuberculosis polymerase chain reaction with rifampin resistance checking':
+                            case 'SERUM GLUCOSE':
+                            case 'Serum cryptococcal antigen status':
+                            case 'Mycobacterium tuberculosis lipoarabinomannan antigen, urine, rapid':
+                            case 'SPUTUM GRAM STAIN':
+                            case 'Resistance level of organism against antimicrobial':
+                            case 'Trichomonas vaginalis in microscopy of saline mount':
+                            case 'polymerase chain reaction, human papilloma virus, qualitative':
+                                data.display = getTestName(data.display);
+                                break;
                         }
                        
                         if(data.orderReason) {
@@ -296,6 +299,13 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             ['Serum cryptococcal antigen status', 'Serum Cryptococcal Antigen (CRAG)'],
             ['SERUM GLUCOSE', 'Random blood sugar'],
             ['Mycobacterium tuberculosis lipoarabinomannan antigen, urine, rapid', 'TB LAM'],
+            ['SPUTUM GRAM STAIN', 'Gram stain'],
+            ['Resistance level of organism against antimicrobial', 'Antiretroviral Drug Resistance'],
+            ['Trichomonas vaginalis in microscopy of saline mount', 'Wet preparation'],
+            ['polymerase chain reaction, human papilloma virus, qualitative','HPV Test']
+
+
+           
           ]);
 
         // function to get the test order reason name given order reason UUID
@@ -326,13 +336,22 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                         if (data.dateActivated ) {
                             data['dateActivated'] = new Date(data.dateActivated );
                         }
-                        if(data.label ==='Tuberculosis polymerase chain reaction with rifampin resistance checking' 
-                        || data.label ==='SERUM GLUCOSE' || data.label ==='Serum cryptococcal antigen status' || data.label ==='Mycobacterium tuberculosis lipoarabinomannan antigen, urine, rapid') {
-                            data['label'] = getTestName(data.label);
+                        switch (data.display) {
+                            case 'Tuberculosis polymerase chain reaction with rifampin resistance checking':
+                            case 'SERUM GLUCOSE':
+                            case 'Serum cryptococcal antigen status':
+                            case 'Mycobacterium tuberculosis lipoarabinomannan antigen, urine, rapid':
+                            case 'SPUTUM GRAM STAIN':
+                            case 'Resistance level of organism against antimicrobial':
+                            case 'Trichomonas vaginalis in microscopy of saline mount':
+                            case 'polymerase chain reaction, human papilloma virus, qualitative':
+                                data.display = getTestName(data.display);
+                                break;
                         }
+                        
 
                     if(data.concept ==='856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                        delete data.label;
+                        delete data.display;
                         delete data.rendering;
                          l =
                             {
@@ -346,7 +365,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                             }
                     }
                    else if(data.concept ==='1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                        delete data.label;
+                        delete data.display;
                         delete data.rendering;
                         ldl =
                             {
@@ -374,7 +393,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                             }
                     }
                     else if(data.concept ==='d0a3677f-3b3a-404c-9010-6ec766d7072e') {
-                        delete data.label;
+                        delete data.display;
                         delete data.rendering;
                         cd4Qualitative =
                             {
@@ -424,7 +443,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
             if(!_.isEmpty(vls)) {
                 finalVl['hvVl'] = vls;
-                finalVl['name'] ='HIV viral load';
+                finalVl['display'] ='HIV viral load';
                 orders.push(finalVl);
             }
             if(!_.isEmpty(cd4Res)) {
@@ -478,28 +497,10 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             $scope.panelTypeName = tests.name;
             $scope.showTestFields = true;
             $scope.panelTests = test;
-            $scope.panelTests = customTestName($scope.panelTests);
+            $scope.panelTests = mapTestNameAndOrderReason($scope.panelTests);
 
         }
 
-        function customTestName (res) {
-            var orders = [];
-            for (var i = 0; i < res.length; ++i) {
-                var data = res[i];
-
-                for (var r in data) {
-                    if (data.hasOwnProperty(r)) {
-                        if(data.name ==='Tuberculosis polymerase chain reaction with rifampin resistance checking' 
-                        || data.name ==='SERUM GLUCOSE' || data.name ==='Serum cryptococcal antigen status' || data.name ==='Mycobacterium tuberculosis lipoarabinomannan antigen, urine, rapid') {
-                            data['name'] = getTestName(data.name);
-                        }   
-                    }
-                }
-                orders.push(data);
-            }
-            return orders;
-
-        }
         $scope.deselectedOrder = function(order) {
             order.selected = false;
             var unchecked = _.filter($scope.filteredOrders, function(o) {
