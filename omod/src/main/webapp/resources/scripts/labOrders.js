@@ -657,40 +657,40 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             });
             
             if (checkVlOrderReason) {
-                if (!checkVlOrderReason.orderReasonNonCoded && !checkVlOrderReason.orderReason) {
-                    $scope.showErrorToast = 'Order reason for HIV viral load is required';
+                if (!checkVlOrderReason.orderReason) {
+                    $scope.showErrorToast = 'Please select order  reason for HIV viral load is required';
                     $('#orderError').modal('show');
                     return;
                 }
             }
             
             if (checkCd4CountOrderReason) {
-                if (!checkCd4CountOrderReason.orderReasonNonCoded && !checkCd4CountOrderReason.orderReason) {
-                    $scope.showErrorToast = 'Order reason for CD4 Count is required';
+                if (!checkCd4CountOrderReason.orderReason) {
+                    $scope.showErrorToast = 'Please select order  reason for CD4 Count is required';
                     $('#orderError').modal('show');
                     return;
                 }
             }
 
             if (checkCd4OrderReason) {
-                if (!checkCd4CountOrderReason.orderReasonNonCoded && !checkCd4CountOrderReason.orderReason) {
-                    $scope.showErrorToast = 'Order reason for CD4% is required';
+                if (!checkCd4CountOrderReason.orderReason) {
+                    $scope.showErrorToast = 'Please select order  reason for CD4% is required';
                     $('#orderError').modal('show');
                     return;
                 }
             }
             
             if (checkPCROrderReason) {
-                if (!checkPCROrderReason.orderReasonNonCoded && !checkPCROrderReason.orderReason) {
-                    $scope.showErrorToast = 'Order reason for PCR is required';
+                if (!checkPCROrderReason.orderReason) {
+                    $scope.showErrorToast = 'Please select order reason for PCR is required';
                     $('#orderError').modal('show');
                     return;
                 }
             }
 
             if (checkRapidTestOrderReason) {
-                if (!checkRapidTestOrderReason.orderReasonNonCoded && !checkRapidTestOrderReason.orderReason) {
-                    $scope.showErrorToast = 'Order reason for Rapid Test is required';
+                if (!checkRapidTestOrderReason.orderReason) {
+                    $scope.showErrorToast = 'Please select order  reason for Rapid Test is required';
                     $('#orderError').modal('show');
                     return;
                 }
@@ -1327,19 +1327,29 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
         $scope.orderReasonNonCoded = '';
         $scope.orderReasonCoded = '';
+        
 
         $scope.setOrderUrgency = function() {
             var e = document.getElementById("ddlOrderUrgency");
             $scope.orderUrgency['urgency'] =  e.options[e.selectedIndex].value;
             $scope.orderUrgency['orderReasonNonCoded'] =  $scope.orderReasonNonCoded;
             $scope.orderUrgency['orderReason'] =  $scope.orderReasonCoded;
+            $scope.name  = '';
 
             _.each($scope.OrderReason, function(o) {
                 if (o.uuid === $scope.orderReasonCoded) {
                     $scope.name = o.name;
-
                 }
-                $scope.orderUrgency['orderReasonCodedName'] = $scope.name + ',' + $scope.orderReasonNonCoded;
+
+                if ($scope.name || $scope.orderReasonNonCoded) {
+                    if ($scope.name && $scope.orderReasonNonCoded) {
+                        $scope.orderUrgency['orderReasonCodedName'] = $scope.name + ', ' + $scope.orderReasonNonCoded;
+                    } else if ($scope.name) {
+                        $scope.orderUrgency['orderReasonCodedName'] = $scope.name;
+                    } else {
+                        $scope.orderUrgency['orderReasonCodedName'] = $scope.orderReasonNonCoded;
+                    }
+                }
 
             });
             $scope.filteredOrders.push($scope.orderUrgency);
