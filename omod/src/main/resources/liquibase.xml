@@ -198,7 +198,10 @@
     <changeSet id="kenyaemr_order_entry_005" author="aojwang">
 
         <preConditions onFail="MARK_RAN">
-                <tableExists tableName="kenyaemr_order_entry_lab_manifest_order"/>
+            <tableExists tableName="kenyaemr_order_entry_lab_manifest_order"/>
+            <not>
+                <columnExists tableName="kenyaemr_order_entry_lab_manifest_order" columnName="last_status_check_date"/>
+            </not>
         </preConditions>
         <comment>
             Adds a column to store the last time the system checked results for a particular order from the lab system
@@ -210,13 +213,31 @@
     </changeSet>
 
     <changeSet author="aojwang" id="kenyaemr_order_entry_006">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="kenyaemr_order_entry_lab_manifest"/>
+            <not>
+                <indexExists indexName="index_manifest_status"/>
+            </not>
+        </preConditions>
+        <comment>
+            Adds an index for status and voided for manifest order
+        </comment>
         <createIndex indexName="index_manifest_status" tableName="kenyaemr_order_entry_lab_manifest">
             <column name="status"/>
             <column name="voided"/>
         </createIndex>
     </changeSet>
-
+    
     <changeSet author="aojwang" id="kenyaemr_order_entry_007">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="kenyaemr_order_entry_lab_manifest_order"/>
+            <not>
+                <indexExists indexName="index_manifest_order_status"/>
+            </not>
+        </preConditions>
+        <comment>
+            Adds an index for status and voided for manifest order
+        </comment>
         <createIndex indexName="index_manifest_order_status" tableName="kenyaemr_order_entry_lab_manifest_order">
             <column name="status"/>
             <column name="voided"/>
@@ -224,9 +245,11 @@
     </changeSet>
 
     <changeSet id="kenyaemr_order_entry_008" author="aojwang">
-
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="kenyaemr_order_entry_lab_manifest_order"/>
+            <not>
+                <columnExists tableName="kenyaemr_order_entry_lab_manifest_order" columnName="date_sample_received"/>
+            </not>
         </preConditions>
         <comment>
             Adds a column to record date when a sample was received at the testing lab
@@ -238,9 +261,11 @@
     </changeSet>
 
     <changeSet id="kenyaemr_order_entry_009" author="aojwang">
-
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="kenyaemr_order_entry_lab_manifest_order"/>
+            <not>
+                <columnExists tableName="kenyaemr_order_entry_lab_manifest_order" columnName="date_sample_tested"/>
+            </not>
         </preConditions>
         <comment>
             Adds a column to record date when a sample was tested at the testing lab and results made available
@@ -252,9 +277,11 @@
     </changeSet>
 
     <changeSet id="kenyaemr_order_entry_010" author="aojwang">
-
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="kenyaemr_order_entry_lab_manifest"/>
+            <not>
+                <columnExists tableName="kenyaemr_order_entry_lab_manifest" columnName="identifier"/>
+            </not>
         </preConditions>
         <comment>
             Adds a column to record a manifest/shipment identifier for ease of tracking at the lab
@@ -266,9 +293,11 @@
     </changeSet>
 
     <changeSet id="kenyaemr_order_entry_011" author="pwaweru">
-
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="kenyaemr_order_entry_lab_manifest_order"/>
+            <not>
+                <columnExists tableName="kenyaemr_order_entry_lab_manifest_order" columnName="order_type"/>
+            </not>
         </preConditions>
         <comment>
             Adds a column to record order type. There are various types of lab orders
@@ -280,9 +309,11 @@
     </changeSet>
 
     <changeSet id="kenyaemr_order_entry_012" author="pwaweru">
-
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="kenyaemr_order_entry_lab_manifest"/>
+            <not>
+                <columnExists tableName="kenyaemr_order_entry_lab_manifest" columnName="manifest_type"/>
+            </not>
         </preConditions>
         <comment>
             Adds a column to record manifest type. There are various types of manifests
@@ -295,6 +326,7 @@
 
     <changeSet author="pwaweru" id="kenyaemr_order_entry_unique_order_per_manifest_20221118_183100">
         <preConditions onFail="MARK_RAN">
+            <tableExists tableName="kenyaemr_order_entry_lab_manifest_order"/>
             <not>
                 <indexExists indexName="index_manifest_order_unique_order_per_manifest"/>
             </not>
@@ -306,7 +338,6 @@
     </changeSet>
 
     <changeSet id="kenyaemr_order_entry_add_batch_number_20230613110500" author="pwaweru">
-
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="kenyaemr_order_entry_lab_manifest_order"/>
             <not>
@@ -318,6 +349,38 @@
         </comment>
         <addColumn tableName="kenyaemr_order_entry_lab_manifest_order">
             <column name="batch_number" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="kenyaemr_order_entry_add_results_pulled_20230626110500" author="pwaweru">
+
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="kenyaemr_order_entry_lab_manifest_order"/>
+            <not>
+                <columnExists tableName="kenyaemr_order_entry_lab_manifest_order" columnName="results_pulled_date"/>
+            </not>
+        </preConditions>
+        <comment>
+            Adds a column to record date of pulling results
+        </comment>
+        <addColumn tableName="kenyaemr_order_entry_lab_manifest_order">
+            <column name="results_pulled_date" type="date"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="kenyaemr_order_entry_add_results_dispatch_20230626100500" author="pwaweru">
+
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="kenyaemr_order_entry_lab_manifest_order"/>
+            <not>
+                <columnExists tableName="kenyaemr_order_entry_lab_manifest_order" columnName="results_dispatch_date"/>
+            </not>
+        </preConditions>
+        <comment>
+            Adds a column to record date of dispatching results
+        </comment>
+        <addColumn tableName="kenyaemr_order_entry_lab_manifest_order">
+            <column name="results_dispatch_date" type="date"/>
         </addColumn>
     </changeSet>
 

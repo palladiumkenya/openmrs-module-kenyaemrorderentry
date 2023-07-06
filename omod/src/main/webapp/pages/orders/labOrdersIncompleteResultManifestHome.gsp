@@ -8,7 +8,8 @@
     ]
 
     def manifestCategories = [
-            [label: "Draft", iconProvider: "kenyaui", icon: "", label: "Draft", href: ui.pageLink("kenyaemrorderentry", "orders/labOrdersManifestHome")],
+            [label: "Summary", iconProvider: "kenyaui", icon: "", label: "Summary", href: ui.pageLink("kenyaemrorderentry", "orders/labOrdersManifestHome")],
+            [label: "Draft", iconProvider: "kenyaui", icon: "", label: "Draft", href: ui.pageLink("kenyaemrorderentry", "orders/labOrdersDraftManifestHome")],
             [label: "Ready to send", iconProvider: "kenyaui", icon: "", label: "Ready to send", href: ui.pageLink("kenyaemrorderentry", "orders/labOrdersReadyToSendManifestHome")],
             [label: "On hold", iconProvider: "kenyaui", icon: "", label: "On hold", href: ui.pageLink("kenyaemrorderentry", "orders/labOrdersOnHoldManifestHome")],
             [label: "Sending", iconProvider: "kenyaui", icon: "", label: "Sending", href: ui.pageLink("kenyaemrorderentry", "orders/labOrdersSendingManifestHome")],

@@ -160,7 +160,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                     <td class="dateRequestColumn">${o.result ?: "Not ready"}</td>
                     <td class="dateRequestColumn">${o.resultDate != null ? kenyaui.formatDate(o.resultDate) : ""}</td>
                     <td class="actionColumn">
-                        <% if (manifest.status == 'Draft') { %>
+                        <% if (o.status != 'Complete') { %>
                             <button class="removeManifestOrder" style="background-color: cadetblue; color: white" value="od_${o.id}" data-target="#removeManifestOrder">Remove</button>
                         <% } %>
                         <a href="${ ui.pageLink("kenyaemrorderentry","manifest/printSpecimenLabel",[manifestOrder : o.id]) }"   target="_blank">
@@ -194,7 +194,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                 <% if (manifest.manifestType == 2) { %>
                         <% eligibleVlOrders.each { o -> %>
                             <tr>
-                                <td class="nameColumn">${o.patient.givenName} ${o.patient.familyName} </td>
+                                <td class="nameColumn"> <a href="${ ui.pageLink("kenyaemr", "clinician/clinicianViewPatient", [ patientId: o.patient.id ]) }"> ${o.patient.givenName} ${o.patient.familyName} ${o.patient.middleName ?: ""} </a></td>
                                 <td class="cccNumberColumn">${o.patient.getPatientIdentifier(cccNumberType)}</td>
                                 <td class="dateRequestColumn">${kenyaui.formatDate(o.dateActivated)}</td>
                                 <td class="actionColumn">

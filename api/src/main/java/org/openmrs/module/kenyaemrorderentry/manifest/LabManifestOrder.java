@@ -25,9 +25,27 @@ public class LabManifestOrder extends BaseOpenmrsData implements Serializable {
     private Date lastStatusCheckDate;
     private Date sampleReceivedDate;
     private Date sampleTestedDate;
+    private Date resultsPulledDate;
+    private Date resultsDispatchDate;
     private String uuid;
     private Integer orderType;
     private String batchNumber;
+
+    public Date getResultsPulledDate() {
+        return resultsPulledDate;
+    }
+
+    public void setResultsPulledDate(Date resultsPulledDate) {
+        this.resultsPulledDate = resultsPulledDate;
+    }
+
+    public Date getResultsDispatchDate() {
+        return resultsDispatchDate;
+    }
+
+    public void setResultsDispatchDate(Date resultsDispatchDate) {
+        this.resultsDispatchDate = resultsDispatchDate;
+    }
 
     public String getBatchNumber() {
         return batchNumber;
