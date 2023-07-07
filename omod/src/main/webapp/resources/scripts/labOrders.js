@@ -485,7 +485,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
         $scope.selectedRow = null;
 
         $scope.loadLabPanels = function(panels) {
-            $scope.sampleTypeName =panels.name;
+            $scope.sampleTypeName =panels.display;
             $scope.showFields = true;
             $scope.panelTests = [];
             $scope.panelTypeName = '';
@@ -494,7 +494,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
         $scope.loadLabPanelTests = function(tests) {
             var test = filterTestWithDataTypeNA(tests.tests);
-            $scope.panelTypeName = tests.name;
+            $scope.panelTypeName = tests.display;
             $scope.showTestFields = true;
             $scope.panelTests = test;
             $scope.panelTests = mapTestNameAndOrderReason($scope.panelTests);
