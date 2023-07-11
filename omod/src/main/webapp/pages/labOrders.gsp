@@ -146,11 +146,11 @@ th, td {
                                                                             <button type="button" class="text-left" style="width: 76%">{{order.display}}</button>
                                                                             <button type="button" class="fa fa-calendar fa-1x" style="width: 8%"
                                                                                     data-toggle="modal" data-target="#dateOrder"
-                                                                                    ng-click="orderSelectedToAddDateActivated(order)"></button>
+                                                                                    ng-click="selectOrderToAddDateActivatedReasonOrUrgency(order)"></button>
                                                                             <button type="button" class="fa fa-warning fa-1x" style="width: 8%"
                                                                                     data-placement="top" title="Urgency | Reason"
                                                                                     data-toggle="modal" data-target="#orderUrgency"
-                                                                                    ng-click="orderSelectedToAddDateActivated(order)"
+                                                                                    ng-click="selectOrderToAddDateActivatedReasonOrUrgency(order)"
                                                                             ></button>
                                                                             <button type="button" class="fa fa-remove fa-1x"
                                                                                     ng-click="deselectedOrder(order)" style="color:#9D0101;cursor: pointer; width: 8%"></button>
@@ -529,13 +529,13 @@ th, td {
                                                     {{ past.resultDate | date:'dd-MM-yyyy' }}
                                                 </td>
                                                 <td>
-                                                    <span ng-if="past.valueNumeric !==null">
+                                                    <span ng-if="past.valueNumeric !== null">
                                                         {{past.valueNumeric}}
                                                     </span>
-                                                    <span ng-if="past.valueCoded !==null">
+                                                    <span ng-if="past.valueCoded !== null">
                                                         {{past.valueCoded}}
                                                     </span>
-                                                    <span ng-if="past.valueText !==null">
+                                                    <span ng-if="past.valueText !== null">
                                                         {{past.valueText}}
                                                     </span>
 
@@ -590,7 +590,7 @@ th, td {
                                                     <span>
                                                     <button type="button" class="fa fa-calendar fa-1x"
                                                             data-toggle="modal" data-target="#dateOrder"
-                                                            ng-click="orderSelectedToAddDateActivated(testSummary)"></button>
+                                                            ng-click="selectOrderToAddDateActivatedReasonOrUrgency(testSummary)"></button>
                                                 </span>
                                                 </td>
                                                 <td>
@@ -602,7 +602,7 @@ th, td {
                                                     <button type="button" class="fa fa-warning fa-1x"
                                                             data-placement="top" title="Urgency | Reason"
                                                             data-toggle="modal" data-target="#orderUrgency"
-                                                            ng-click="orderSelectedToAddDateActivated(testSummary)"></button>
+                                                            ng-click="selectOrderToAddDateActivatedReasonOrUrgency(testSummary)"></button>
                                                 </span>
 
                                                 </td>
@@ -612,7 +612,7 @@ th, td {
                                                     <button type="button" class="fa fa-warning fa-1x"
                                                             data-placement="top" title="Urgency | Reason"
                                                             data-toggle="modal" data-target="#orderUrgency"
-                                                            ng-click="orderSelectedToAddDateActivated(testSummary)"></button>
+                                                            ng-click="selectOrderToAddDateActivatedReasonOrUrgency(testSummary)"></button>
                                                 </span>
 
                                                 </td>

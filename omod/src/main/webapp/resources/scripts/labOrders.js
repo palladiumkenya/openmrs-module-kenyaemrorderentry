@@ -45,6 +45,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                         return 1;
                     }
                 });
+                $scope.OrderReason = [];
 
                 $scope.cd4TestOrderReasons = [
                     {
@@ -98,7 +99,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 ];
 
                 $scope.labOrders = labs;
-                $scope.OrderReason = [
+                $scope.vlOrderReason = [
                     {
                         name:'Confirmation of treatment failure (repeat VL)',
                         uuid:'843AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
@@ -132,7 +133,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                         uuid: '160032AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
                     }
                 ];
-                $scope.OrderReason =  _.filter($scope.OrderReason, function(o) {
+                $scope.vlOrderReason =  _.filter($scope.vlOrderReason, function(o) {
                     if(config.patient.person.gender !== 'F') {
                         return o.uuid !== '1434AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' && o.uuid !== '159882AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
                     } else {
@@ -553,18 +554,35 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
         }
 
         function customizeOrderReasonsToDisplay(test) {
-            // Antibody test
-            if (test.concept === '163722AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'&& config.patient.person.age <= 5) {
-                $scope.OrderReason = $scope.heiAbTestOrderReasons;
-            }
-            // PCR test
-            if (test.concept === '1030AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'&& config.patient.person.age <= 5) {
-                $scope.OrderReason = $scope.heiPCRTestOrderReasons;
-            }
-            // cd4 count and cd4% order reasons
-            if (test.concept === '5497AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' || test.concept === '730AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                $scope.OrderReason = $scope.cd4TestOrderReasons
-
+            let testConcept = test.concept;
+            let age = config.patient.person.age;
+              
+            switch (testConcept) {
+                  case '163722AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA': // Antibody test
+                    if (age <= 5) {
+                      $scope.OrderReason = $scope.heiAbTestOrderReasons;
+                    }
+                    break;
+              
+                  case '1030AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA': // PCR test
+                    if (age <= 5) {
+                      $scope.OrderReason = $scope.heiPCRTestOrderReasons;
+                    }
+                    break;
+              
+                  case '5497AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA': // cd4 count
+                  case '730AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA': // cd4%
+                    $scope.OrderReason = $scope.cd4TestOrderReasons;
+                    break;
+              
+                  case '1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA': // VL order reasons
+                  case '856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA':
+                    $scope.OrderReason = $scope.vlOrderReason;
+                    break;
+              
+                  default:
+                    $scope.OrderReason = [];
+                    break;
             }
         }
         
@@ -641,7 +659,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 return o.concept === '856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' || o.concept === '1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
             });
             
-            var checkCd4OrderReason = _.find($scope.lOrdersPayload, function(o) {
+            var checkCd4PercentOrderReason = _.find($scope.lOrdersPayload, function(o) {
                 return o.concept === '730AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
             });
             
@@ -672,8 +690,8 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 }
             }
 
-            if (checkCd4OrderReason) {
-                if (!checkCd4CountOrderReason.orderReason) {
+            if (checkCd4PercentOrderReason) {
+                if (!checkCd4PercentOrderReason.orderReason) {
                     $scope.showErrorToast = 'Please select order  reason for CD4% is required';
                     $('#orderError').modal('show');
                     return;
@@ -690,7 +708,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
             if (checkRapidTestOrderReason) {
                 if (!checkRapidTestOrderReason.orderReason) {
-                    $scope.showErrorToast = 'Please select order  reason for Rapid Test is required';
+                    $scope.showErrorToast = 'Please select order  reason for Rapid Test is required and patient age should be 5yo and below.';
                     $('#orderError').modal('show');
                     return;
                 }
@@ -856,14 +874,14 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
         }
 
-        $scope.orderSelectedToAddDateActivated = function(order) {
+        $scope.selectOrderToAddDateActivatedReasonOrUrgency = function(order) {
             $scope.titleDate ='Enter Date Order was made';
             $scope.orderReasonNonCoded = '';
             $scope.orderReasonCoded = '';
             $scope.orderDate = '';
             $scope.orderSel = order;
             $scope.orderUrgency = order;
-
+            customizeOrderReasonsToDisplay(order);
 
         }
 
@@ -1269,6 +1287,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
         $scope.closeModal = function() {
             $scope.voidOrderReason = '';
+            $scope.OrderReason = []
 
             $('#orderUrgency').modal('hide');
             $('#generalMessage').modal('hide');
