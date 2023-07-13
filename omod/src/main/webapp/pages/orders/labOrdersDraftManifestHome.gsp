@@ -24,6 +24,10 @@
             [label: "Collect new sample", iconProvider: "kenyaui", icon: "", label: "Collect new sample", href: ui.pageLink("kenyaemrorderentry", "orders/manifestOrdersCollectSampleHome")],
             [label: "Missing samples", iconProvider: "kenyaui", icon: "", label: "Missing samples", href: ui.pageLink("kenyaemrorderentry", "orders/manifestOrdersMissingSamplesHome")],
     ]
+
+    def configuration = [
+            [label: "Settings", iconProvider: "kenyaui", icon: "", label: "Settings", href: ui.pageLink("kenyaemrorderentry", "orders/settings")],
+    ]
 %>
 <style>
 .simple-table {
@@ -125,6 +129,9 @@ tr:nth-child(even) {background-color: #f2f2f2;}
     ${ui.includeFragment("kenyaui", "widget/panelMenu", [heading: "Back", items: menuItems])}
     ${ui.includeFragment("kenyaui", "widget/panelMenu", [heading: "Manifest status", items: manifestCategories])}
     ${ui.includeFragment("kenyaui", "widget/panelMenu", [heading: "Action required", items: actionRequired])}
+    <% if(userHasSettingsEditRole) { %>
+        ${ui.includeFragment("kenyaui", "widget/panelMenu", [heading: "Configuration", items: configuration])}
+    <% } %>
 </div>
 
 <div class="ke-page-content">

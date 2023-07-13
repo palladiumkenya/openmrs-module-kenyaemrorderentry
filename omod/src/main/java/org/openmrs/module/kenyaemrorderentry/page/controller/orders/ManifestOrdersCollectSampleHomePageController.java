@@ -1,16 +1,18 @@
 package org.openmrs.module.kenyaemrorderentry.page.controller.orders;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.openmrs.Concept;
 import org.openmrs.Order;
 import org.openmrs.OrderType;
-import org.openmrs.Patient;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.api.OrderService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
-import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
+import org.openmrs.module.kenyaemrorderentry.metadata.KenyaemrorderentryAdminSecurityMetadata;
 import org.openmrs.module.kenyaemrorderentry.util.Utils;
 import org.openmrs.module.kenyaui.KenyaUiUtils;
 import org.openmrs.module.kenyaui.annotation.AppPage;
@@ -19,10 +21,6 @@ import org.openmrs.ui.framework.UiUtils;
 import org.openmrs.ui.framework.annotation.SpringBean;
 import org.openmrs.ui.framework.page.PageModel;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 @AppPage("kenyaemr.labmanifest")
 public class ManifestOrdersCollectSampleHomePageController {
@@ -59,6 +57,8 @@ public class ManifestOrdersCollectSampleHomePageController {
         model.put("sampleListSize", filteredOrders.size());
         model.put("cccNumberType", pat.getPatientIdentifierTypeId());
         model.put("heiNumberType", hei.getPatientIdentifierTypeId());
+
+        model.put("userHasSettingsEditRole", (Context.getAuthenticatedUser().containsRole(KenyaemrorderentryAdminSecurityMetadata._Role.API_ROLE_EDIT_SETTINGS) || Context.getAuthenticatedUser().isSuperUser()));
 
     }
 

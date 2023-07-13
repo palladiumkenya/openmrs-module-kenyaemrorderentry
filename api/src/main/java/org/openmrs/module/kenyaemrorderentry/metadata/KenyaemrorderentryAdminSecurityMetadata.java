@@ -20,6 +20,7 @@ public class KenyaemrorderentryAdminSecurityMetadata extends AbstractMetadataBun
     public static final class _Role {
         public static final String APPLICATION_ORDERS_ADMIN = "Lab Manifest Administration";
         public static final String API_PRIVILEGES_VIEW_AND_EDIT = "API Privileges (View and Edit)";
+        public static final String API_ROLE_EDIT_SETTINGS = "Edit Settings Role";
     }
 
     /**
@@ -29,10 +30,17 @@ public class KenyaemrorderentryAdminSecurityMetadata extends AbstractMetadataBun
     public void install() {
 
         install(privilege(_Privilege.APP_LAB_MANIFEST_ADMIN, "Able to access Lab Manifest"));
-        install(role(_Role.APPLICATION_ORDERS_ADMIN, "Can access Order Entry Admin app", idSet(
+        install(role(_Role.APPLICATION_ORDERS_ADMIN, "Can access Order Entry Admin app", 
+            idSet(
                 _Role.API_PRIVILEGES_VIEW_AND_EDIT
-        ), idSet(
+            ), idSet(
                 _Privilege.APP_LAB_MANIFEST_ADMIN
-        )));
+            )));
+        install(role(_Role.API_ROLE_EDIT_SETTINGS, "Can edit settings", 
+            idSet(
+                _Role.API_PRIVILEGES_VIEW_AND_EDIT
+            ), idSet(
+                _Privilege.APP_LAB_MANIFEST_ADMIN
+            )));
     }
 }
