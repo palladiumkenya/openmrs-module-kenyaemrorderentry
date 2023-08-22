@@ -1,6 +1,5 @@
 <%
     ui.decorateWith("kenyaemr", "standardPage", [layout: "sidebar"])
-    ui.includeJavascript("kenyaemrorderentry", "jquery.twbsPagination.min.js")
     ui.includeJavascript("kenyaemrorderentry", "ordersUtils.js")
 
     ui.includeJavascript("kenyaemrorderentry", "highcharts/highcharts.js")
@@ -32,102 +31,13 @@
             [label: "Collect new sample", iconProvider: "kenyaui", icon: "", label: "Collect new sample", href: ui.pageLink("kenyaemrorderentry", "orders/manifestOrdersCollectSampleHome")],
             [label: "Missing samples", iconProvider: "kenyaui", icon: "", label: "Missing samples", href: ui.pageLink("kenyaemrorderentry", "orders/manifestOrdersMissingSamplesHome")],
     ]
+
+    def configuration = [
+            [label: "Settings", iconProvider: "kenyaui", icon: "", label: "Settings", href: ui.pageLink("kenyaemrorderentry", "orders/settings")],
+    ]
 %>
+
 <style>
-.simple-table {
-    border: solid 1px #DDEEEE;
-    border-collapse: collapse;
-    border-spacing: 0;
-    font: normal 13px Arial, sans-serif;
-}
-.simple-table thead th {
-
-    border: solid 1px #DDEEEE;
-    color: #336B6B;
-    padding: 10px;
-    text-align: left;
-    text-shadow: 1px 1px 1px #fff;
-}
-.simple-table td {
-    border: solid 1px #DDEEEE;
-    color: #333;
-    padding: 5px;
-    text-shadow: 1px 1px 1px #fff;
-}
-table {
-    width: 95%;
-}
-th, td {
-    padding: 5px;
-    text-align: left;
-    height: 30px;
-    border-bottom: 1px solid #ddd;
-}
-tr:nth-child(even) {background-color: #f2f2f2;}
-#pager li{
-    display: inline-block;
-}
-
-.pagination-sm .page-link {
-    padding: .25rem .5rem;
-    font-size: .875rem;
-}
-.page-link {
-    position: relative;
-    display: block;
-    padding: .5rem .75rem;
-    margin-left: -1px;
-    line-height: 1.25;
-    color: #0275d8;
-    background-color: #fff;
-    border: 1px solid #ddd;
-}
-.manifest-status {
-    font-weight: bold;font-size: 14px;
-}
-.collect-new-sample {
-    color: darkred;
-    font-style: italic;
-}
-.missing-physical-sample {
-    color: firebrick;
-    font-style: italic;
-}
-.require-manual-updates {
-    color: orangered;
-    font-style: italic;
-}
-.result-not-ready {
-    font-style: italic;
-}
-.viewButton {
-    background-color: cadetblue;
-    color: white;
-    margin: 5px;
-    padding: 5px;
-}
-.editButton {
-    background-color: cadetblue;
-    color: white;
-    margin: 5px;
-    padding: 5px;
-}
-.viewButton:hover {
-    background-color: steelblue;
-    color: white;
-}
-.editButton:hover {
-    background-color: steelblue;
-    color: white;
-}
-.page-content{
-    background: #eee;
-    display: inline-block;
-    padding: 10px;
-    max-width: 660px;
-    font-weight: bold;
-}
-
 .highcharts-figure,
 .highcharts-data-table table {
     min-width: 310px;
@@ -173,13 +83,15 @@ tr:nth-child(even) {background-color: #f2f2f2;}
 .highcharts-data-table tr:hover {
     background: #f1f7ff;
 }
-
 </style>
 
 <div class="ke-page-sidebar">
     ${ui.includeFragment("kenyaui", "widget/panelMenu", [heading: "Back", items: menuItems])}
     ${ui.includeFragment("kenyaui", "widget/panelMenu", [heading: "Manifest status", items: manifestCategories])}
     ${ui.includeFragment("kenyaui", "widget/panelMenu", [heading: "Action required", items: actionRequired])}
+    <% if(userHasSettingsEditRole) { %>
+        ${ui.includeFragment("kenyaui", "widget/panelMenu", [heading: "Configuration", items: configuration])}
+    <% } %>
 </div>
 
 <div class="ke-page-content">
@@ -193,8 +105,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                 </div>
 
                 <div class="col" align="right" text-end>
-                    <button type="button"
-                            onclick="ui.navigate('${ ui.pageLink("kenyaemrorderentry", "manifest/createManifest", [ returnUrl: ui.thisUrl() ])}')">
+                    <button type="button" onclick="ui.navigate('${ ui.pageLink("kenyaemrorderentry", "manifest/createManifest", [ returnUrl: ui.thisUrl() ])}')">
                         <img src="${ui.resourceLink("kenyaui", "images/glyphs/add.png")}"/>
                         Add new Manifest
                     </button>
@@ -211,22 +122,30 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                         <div class="card-body">
                             <div class="row">
                                 <div class="col">
-                                    <a href="${ ui.pageLink("kenyaemrorderentry", "orders/labOrdersCompleteResultManifestHome") }" class="btn btn-white" style="font-size: larger; font-weight: bold;"> 
-                                        ${ manifestsComplete } 
-                                    </a>
+                                    <div class="container completeContainer" id="completeContainer" name="completeContainer">
+                                        <span class="bootstrap-iso completePopover d-inline-block" tabindex="0" data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-content="All Complete Manifests">
+                                            <a href="${ ui.pageLink("kenyaemrorderentry", "orders/labOrdersCompleteResultManifestHome") }" class="btn btn-white" style="font-size: larger; font-weight: bold;"> 
+                                                ${ manifestsComplete } 
+                                            </a>
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col">
                                     <h6 class="card-subtitle my-2 text-muted">Complete Manifests</h6>
                                 </div>
-                                <div class="col text-end">
-                                    <a href="${ ui.pageLink("kenyaemrorderentry", "orders/labOrdersCompleteWithErrorResultsManifestHome") }" class="btn btn-warning btn-sm">
-                                        <svg xmlns="http://www.w3.org/2000/svg" role="img" width="24" height="24" fill="Red" class="bi bi-exclamation-triangle-fill flex-shrink-0 me-2" viewBox="0 0 16 16" role="img" aria-label="Danger:">
-                                            <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
-                                        </svg>
-                                        ${ errorsOnComplete }
-                                    </a>
+                                <div class="bootstrap-iso col text-end">
+                                    <div class="container completeErrorsContainer" id="completeErrorsContainer" name="completeErrorsContainer">
+                                        <span class="bootstrap-iso completeErrorsPopover d-inline-block" tabindex="0" data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-content="Complete Manifests With Errors">
+                                            <a href="${ ui.pageLink("kenyaemrorderentry", "orders/labOrdersCompleteWithErrorResultsManifestHome") }" class="btn btn-warning btn-sm">
+                                                <svg xmlns="http://www.w3.org/2000/svg" role="img" width="24" height="24" fill="Red" class="bi bi-exclamation-triangle-fill flex-shrink-0 me-2" viewBox="0 0 16 16" role="img" aria-label="Danger:">
+                                                    <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                                                </svg>
+                                                ${ errorsOnComplete }
+                                            </a>
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -238,9 +157,13 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                         <div class="card-body">
                             <div class="row">
                                 <div class="col">
-                                    <a href="${ ui.pageLink("kenyaemrorderentry", "orders/labOrdersIncompleteResultManifestHome") }" class="btn btn-white" style="font-size: larger; font-weight: bold;"> 
-                                        ${ manifestsIncomplete } 
-                                    </a>
+                                    <div class="container incompleteContainer" id="incompleteContainer" name="incompleteContainer">
+                                        <span class="bootstrap-iso incompletePopover d-inline-block" tabindex="0" data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-content="All Incomplete Manifests">
+                                            <a href="${ ui.pageLink("kenyaemrorderentry", "orders/labOrdersIncompleteResultManifestHome") }" class="btn btn-white" style="font-size: larger; font-weight: bold;"> 
+                                                ${ manifestsIncomplete } 
+                                            </a>
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                             <div class="row">
@@ -248,12 +171,16 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                                     <h6 class="card-subtitle my-2 text-muted">Incomplete Manifests</h6>
                                 </div>
                                 <div class="col text-end">
-                                    <a href="${ ui.pageLink("kenyaemrorderentry", "orders/labOrdersIncompleteWithErrorResultsManifestHome") }" class="btn btn-warning btn-sm">
-                                        <svg xmlns="http://www.w3.org/2000/svg" role="img" width="24" height="24" fill="Red" class="bi bi-exclamation-triangle-fill flex-shrink-0 me-2" viewBox="0 0 16 16" role="img" aria-label="Danger:">
-                                            <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
-                                        </svg>
-                                        ${ errorsOnIncomplete }
-                                    </a>
+                                    <div class="container incompleteErrorsContainer" id="incompleteErrorsContainer" name="incompleteErrorsContainer">
+                                        <span class="bootstrap-iso incompleteErrorsPopover d-inline-block" tabindex="0" data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-content="Incomplete Manifests With Errors">
+                                            <a href="${ ui.pageLink("kenyaemrorderentry", "orders/labOrdersIncompleteWithErrorResultsManifestHome") }" class="btn btn-warning btn-sm">
+                                                <svg xmlns="http://www.w3.org/2000/svg" role="img" width="24" height="24" fill="Red" class="bi bi-exclamation-triangle-fill flex-shrink-0 me-2" viewBox="0 0 16 16" role="img" aria-label="Danger:">
+                                                    <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                                                </svg>
+                                                ${ errorsOnIncomplete }
+                                            </a>
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -269,7 +196,11 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                         <div class="card-body">
                             <div class="row">
                                 <div class="col text-center">
-                                    <a href="${ ui.pageLink("kenyaemrorderentry", "orders/labOrdersDraftManifestHome") }" class="btn btn-white" style="font-size: larger; font-weight: bold;"> ${ manifestsDraft } </a>
+                                    <div class="container manifestsDraftContainer" id="manifestsDraftContainer" name="manifestsDraftContainer">
+                                        <span class="bootstrap-iso manifestsDraftPopover d-inline-block" tabindex="0" data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-content="Draft Manifests">
+                                            <a href="${ ui.pageLink("kenyaemrorderentry", "orders/labOrdersDraftManifestHome") }" class="btn btn-white" style="font-size: larger; font-weight: bold;"> ${ manifestsDraft } </a>
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                             <div class="row">
@@ -286,7 +217,11 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                         <div class="card-body">
                             <div class="row">
                                 <div class="col text-center">
-                                    <a href="${ ui.pageLink("kenyaemrorderentry", "orders/labOrdersOnHoldManifestHome") }" class="btn btn-white" style="font-size: larger; font-weight: bold;"> ${ manifestsOnHold } </a>
+                                    <div class="container manifestsOnHoldContainer" id="manifestsOnHoldContainer" name="manifestsOnHoldContainer">
+                                        <span class="bootstrap-iso manifestsOnHoldPopover d-inline-block" tabindex="0" data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-content="Manifests On Hold">
+                                            <a href="${ ui.pageLink("kenyaemrorderentry", "orders/labOrdersOnHoldManifestHome") }" class="btn btn-white" style="font-size: larger; font-weight: bold;"> ${ manifestsOnHold } </a>
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                             <div class="row">
@@ -303,7 +238,11 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                         <div class="card-body">
                             <div class="row">
                                 <div class="col text-center">
-                                    <a href="${ ui.pageLink("kenyaemrorderentry", "orders/labOrdersReadyToSendManifestHome") }" class="btn btn-white" style="font-size: larger; font-weight: bold;"> ${ manifestsReadyToSend } </a>
+                                    <div class="container manifestsReadyToSendContainer" id="manifestsReadyToSendContainer" name="manifestsReadyToSendContainer">
+                                        <span class="bootstrap-iso manifestsReadyToSendPopover d-inline-block" tabindex="0" data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-content="Manifests Ready To Send">
+                                            <a href="${ ui.pageLink("kenyaemrorderentry", "orders/labOrdersReadyToSendManifestHome") }" class="btn btn-white" style="font-size: larger; font-weight: bold;"> ${ manifestsReadyToSend } </a>
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                             <div class="row">
@@ -320,7 +259,11 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                         <div class="card-body">
                             <div class="row">
                                 <div class="col text-center">
-                                    <a href="${ ui.pageLink("kenyaemrorderentry", "orders/labOrdersSendingManifestHome") }" class="btn btn-white" style="font-size: larger; font-weight: bold;"> ${ manifestsSending } </a>
+                                    <div class="container manifestsSendingContainer" id="manifestsSendingContainer" name="manifestsSendingContainer">
+                                        <span class="bootstrap-iso manifestsSendingPopover d-inline-block" tabindex="0" data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-content="Manifests In Sending Status">
+                                            <a href="${ ui.pageLink("kenyaemrorderentry", "orders/labOrdersSendingManifestHome") }" class="btn btn-white" style="font-size: larger; font-weight: bold;"> ${ manifestsSending } </a>
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                             <div class="row">
@@ -337,7 +280,11 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                         <div class="card-body">
                             <div class="row">
                                 <div class="col text-center">
-                                    <a href="${ ui.pageLink("kenyaemrorderentry", "orders/labOrdersSubmittedManifestHome") }" class="btn btn-white" style="font-size: larger; font-weight: bold;"> ${ manifestsSubmitted } </a>
+                                    <div class="container manifestsSubmittedContainer" id="manifestsSubmittedContainer" name="manifestsSubmittedContainer">
+                                        <span class="bootstrap-iso manifestsSubmittedPopover d-inline-block" tabindex="0" data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-content="Submitted Manifests">
+                                            <a href="${ ui.pageLink("kenyaemrorderentry", "orders/labOrdersSubmittedManifestHome") }" class="btn btn-white" style="font-size: larger; font-weight: bold;"> ${ manifestsSubmitted } </a>
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                             <div class="row">
@@ -370,15 +317,60 @@ tr:nth-child(even) {background-color: #f2f2f2;}
     jq(function () {
         showActivePageOnManifestNavigation('Summary');
 
-        jq('#generateManifest').click(function () {
-            jq.getJSON('${ ui.actionLink("kenyaemrorderentry", "patientdashboard/generalLabOrders", "generateViralLoadPayload") }')
-                .success(function (data) {
-                    jq('#msgBox').html("Successfully generated payload");
-                })
-                .error(function (xhr, status, err) {
-                    jq('#msgBox').html("Could not generate payload for lab");
-                })
-        });
+        // Enable popovers
+        var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+        var num = 1;
+        var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+            // console.log("Enabling popover: " + num);
+            num++;
+            return new bootstrap.Popover(popoverTriggerEl);
+        })
+
+        var completeErrorsContainer = jq('#completeErrorsContainer');
+        var completeErrorsPopover = new bootstrap.Popover(document.querySelector('.completeErrorsPopover'), {
+            container: completeErrorsContainer
+        })
+
+        var incompleteErrorsContainer = jq('#incompleteErrorsContainer');
+        var incompleteErrorsPopover = new bootstrap.Popover(document.querySelector('.incompleteErrorsPopover'), {
+            container: incompleteErrorsContainer
+        })
+
+        var completeContainer = jq('#completeContainer');
+        var completePopover = new bootstrap.Popover(document.querySelector('.completePopover'), {
+            container: completeContainer
+        })
+
+        var incompleteContainer = jq('#incompleteContainer');
+        var incompletePopover = new bootstrap.Popover(document.querySelector('.incompletePopover'), {
+            container: incompleteContainer
+        })
+
+        var manifestsDraftContainer = jq('#manifestsDraftContainer');
+        var manifestsDraftPopover = new bootstrap.Popover(document.querySelector('.manifestsDraftPopover'), {
+            container: manifestsDraftContainer
+        })
+
+        var manifestsOnHoldContainer = jq('#manifestsOnHoldContainer');
+        var manifestsOnHoldPopover = new bootstrap.Popover(document.querySelector('.manifestsOnHoldPopover'), {
+            container: manifestsOnHoldContainer
+        })
+
+        var manifestsReadyToSendContainer = jq('#manifestsReadyToSendContainer');
+        var manifestsReadyToSendPopover = new bootstrap.Popover(document.querySelector('.manifestsReadyToSendPopover'), {
+            container: manifestsReadyToSendContainer
+        })
+
+        var manifestsSendingContainer = jq('#manifestsSendingContainer');
+        var manifestsSendingPopover = new bootstrap.Popover(document.querySelector('.manifestsSendingPopover'), {
+            container: manifestsSendingContainer
+        })
+
+        var manifestsSubmittedContainer = jq('#manifestsSubmittedContainer');
+        var manifestsSubmittedPopover = new bootstrap.Popover(document.querySelector('.manifestsSubmittedPopover'), {
+            container: manifestsSubmittedContainer
+        })
+
     });
 
     function getChartData() {

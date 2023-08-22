@@ -9,6 +9,7 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
+import org.openmrs.module.kenyaemrorderentry.metadata.KenyaemrorderentryAdminSecurityMetadata;
 import org.openmrs.module.kenyaemrorderentry.util.Utils;
 import org.openmrs.module.kenyaui.KenyaUiUtils;
 import org.openmrs.module.kenyaui.annotation.AppPage;
@@ -56,6 +57,8 @@ public class ManifestOrdersMissingSamplesHomePageController {
         model.put("sampleListSize", filteredOrders.size());
         model.put("cccNumberType", pat.getPatientIdentifierTypeId());
         model.put("heiNumberType", hei.getPatientIdentifierTypeId());
+
+        model.put("userHasSettingsEditRole", (Context.getAuthenticatedUser().containsRole(KenyaemrorderentryAdminSecurityMetadata._Role.API_ROLE_EDIT_SETTINGS) || Context.getAuthenticatedUser().isSuperUser()));
 
     }
 

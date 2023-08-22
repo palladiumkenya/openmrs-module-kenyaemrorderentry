@@ -39,8 +39,8 @@ public class ManifestOrdersHomePageController {
             manifestType = "Viral load";
         }
         Set<Order> activeOrdersNotInManifest = new HashSet<Order>();
-        Set<Order> activeVlOrdersNotInManifest = new HashSet<Order>();
-        Set<Order> activeEidOrdersNotInManifest = new HashSet<Order>();
+        Set<SimpleObject> activeVlOrdersNotInManifest = new HashSet<SimpleObject>();
+        Set<SimpleObject> activeEidOrdersNotInManifest = new HashSet<SimpleObject>();
         activeOrdersNotInManifest = e.getActiveOrdersNotInManifest(null, manifest.getStartDate(),manifest.getEndDate());
 
        if(!activeOrdersNotInManifest.isEmpty()) {
@@ -70,18 +70,34 @@ public class ManifestOrdersHomePageController {
             }
         }
 
+        // For javascript processing
+
+        // VL orders
         List<SimpleObject> VLOrders = new ArrayList<SimpleObject>();
-        for(Order order : activeVlOrdersNotInManifest){
+        for(SimpleObject load : activeVlOrdersNotInManifest){
             SimpleObject so = new SimpleObject();
+            Order order = (Order) load.get("order");
             so.put("orderId", order.getId());
             VLOrders.add(so);
         }
+
+        // EID orders
         List<SimpleObject> EIDOrders = new ArrayList<SimpleObject>();
-        for(Order order : activeEidOrdersNotInManifest){
+        for(SimpleObject load : activeEidOrdersNotInManifest){
             SimpleObject so = new SimpleObject();
+            Order order = (Order) load.get("order");
             so.put("orderId", order.getId());
             EIDOrders.add(so);
         }
+
+        // Manifest orders
+        List<SimpleObject> manifestOrders = new ArrayList<SimpleObject>();
+        for(LabManifestOrder order : ordersForManifest){
+            SimpleObject so = new SimpleObject();
+            so.put("orderId", order.getId());
+            manifestOrders.add(so);
+        }
+
 
         model.put("eligibleVlOrders", activeVlOrdersNotInManifest );
         model.put("eligibleEidOrders", activeEidOrdersNotInManifest );
@@ -91,6 +107,7 @@ public class ManifestOrdersHomePageController {
         model.put("manifest", manifest);
         //model.put("manifestOrders", allOrdersForManifest);
         model.put("manifestOrders", ordersForManifest);
+        model.put("allManifestOrders", ui.toJson(manifestOrders));
         model.put("cccNumberType", pat.getPatientIdentifierTypeId());
         model.put("heiNumberType", hei.getPatientIdentifierTypeId());
 

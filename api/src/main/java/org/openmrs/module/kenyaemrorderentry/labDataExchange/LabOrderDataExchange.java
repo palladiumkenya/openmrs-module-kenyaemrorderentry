@@ -13,16 +13,20 @@ import org.openmrs.EncounterType;
 import org.openmrs.GlobalProperty;
 import org.openmrs.Obs;
 import org.openmrs.Order;
+import org.openmrs.Patient;
+import org.openmrs.PatientIdentifier;
 import org.openmrs.TestOrder;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.OrderService;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.kenyacore.RegimenMappingUtils;
 import org.openmrs.module.kenyaemrorderentry.ModuleConstants;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 import org.openmrs.module.kenyaemrorderentry.util.Utils;
+import org.openmrs.ui.framework.SimpleObject;
 import org.openmrs.util.PrivilegeConstants;
 
 import java.text.ParseException;
@@ -254,9 +258,9 @@ public class LabOrderDataExchange {
      * @param endDate
      * @return
      */
-    public Set<Order> getActiveViralLoadOrdersNotInManifest(Integer manifestId, Date startDate, Date endDate) {
+    public Set<SimpleObject> getActiveViralLoadOrdersNotInManifest(Integer manifestId, Date startDate, Date endDate) {
         Context.addProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
-        Set<Order> activeLabs = new HashSet<Order>();
+        Set<SimpleObject> activeLabs = new HashSet<SimpleObject>();
         String sql = "select o.order_id from orders o\n" +
                 "left join kenyaemr_order_entry_lab_manifest_order mo on mo.order_id = o.order_id\n" +
                 "where o.order_action='NEW' and o.concept_id = 856 and o.date_stopped is null and o.voided=0 and mo.order_id is null ";
@@ -276,7 +280,10 @@ public class LabOrderDataExchange {
                 Integer orderId = (Integer) res.get(0);
                 Order o = orderService.getOrder(orderId);
                 if (o != null) {
-                    activeLabs.add(o);
+                    SimpleObject ret = new SimpleObject();
+                    ret.put("hasProblem", checkIfOrderHasAProblem(o, LabManifest.VL_TYPE));
+                    ret.put("order", o);
+                    activeLabs.add(ret);
                 }
             }
         }
@@ -292,9 +299,9 @@ public class LabOrderDataExchange {
      * @param endDate
      * @return
      */
-    public Set<Order> getActiveEidOrdersNotInManifest(Integer manifestId, Date startDate, Date endDate) {
+    public Set<SimpleObject> getActiveEidOrdersNotInManifest(Integer manifestId, Date startDate, Date endDate) {
         Context.addProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
-        Set<Order> activeLabs = new HashSet<Order>();
+        Set<SimpleObject> activeLabs = new HashSet<SimpleObject>();
         String sql = "select o.order_id from orders o\n" +
                 "left join kenyaemr_order_entry_lab_manifest_order mo on mo.order_id = o.order_id left join patient_identifier k on o.patient_id = k.patient_id left join patient_identifier_type r on k.identifier_type = r.patient_identifier_type_id \n" +
                 "where o.order_action='NEW' and o.concept_id = 1030 and o.date_stopped is null and o.voided=0 and mo.order_id is null and r.uuid='0691f522-dd67-4eeb-92c8-af5083baf338' and k.identifier is not null ";
@@ -314,12 +321,71 @@ public class LabOrderDataExchange {
                 Integer orderId = (Integer) res.get(0);
                 Order o = orderService.getOrder(orderId);
                 if (o != null) {
-                    activeLabs.add(o);
+                    SimpleObject ret = new SimpleObject();
+                    ret.put("hasProblem", checkIfOrderHasAProblem(o, LabManifest.EID_TYPE));
+                    ret.put("order", o);
+                    activeLabs.add(ret);
                 }
             }
         }
         Context.removeProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
         return activeLabs;
+    }
+
+    /**
+     * Checks if an order has a problem that might prevent it from being added into a manifest
+     * @param order - The lab sample order
+     * @return true if there is a problem. false if there is no problem
+     */
+    public Boolean checkIfOrderHasAProblem(Order order, int orderType) {
+        Boolean ret = false;
+        Patient patient = order.getPatient();
+
+        // LAB SYSTEM TYPE MUST BE CONFIGURED
+        if (LabOrderDataExchange.getSystemType() == ModuleConstants.NO_SYSTEM_CONFIGURED) {
+            return(true);
+        }
+
+        if(orderType == LabManifest.VL_TYPE) {
+            PatientIdentifier cccNumber = patient.getPatientIdentifier(Utils.getUniquePatientNumberIdentifierType());
+            if (cccNumber == null || StringUtils.isBlank(cccNumber.getIdentifier())) {
+                // Patient must have a CCC number
+                return(true);
+            }
+            Encounter currentRegimenEncounter = RegimenMappingUtils.getLastEncounterForProgram(patient, "ARV");
+            if(currentRegimenEncounter == null) {
+                // Patient must be on a regimen
+                return(true);
+            }
+            SimpleObject regimenDetails = RegimenMappingUtils.buildRegimenChangeObject(currentRegimenEncounter.getObs(), currentRegimenEncounter);
+            String regimenName = (String) regimenDetails.get("regimenShortDisplay");
+            String regimenLine = (String) regimenDetails.get("regimenLine");
+            String nascopCode = "";
+            if (StringUtils.isNotBlank(regimenName )) {
+                nascopCode = RegimenMappingUtils.getDrugNascopCodeByDrugNameAndRegimenLine(regimenName, regimenLine);
+            }
+
+            if (StringUtils.isBlank(nascopCode) && StringUtils.isNotBlank(regimenLine)) {
+                nascopCode = RegimenMappingUtils.getNonStandardCodeFromRegimenLine(regimenLine);
+            }
+
+            if (StringUtils.isBlank(nascopCode)) {
+                // The current regimen must have a regimen line
+                return(true);
+            }
+        }
+
+        if(orderType == LabManifest.EID_TYPE) {
+            PatientIdentifier heiNumber = patient.getPatientIdentifier(Utils.getHeiNumberIdentifierType());
+            SimpleObject heiDetailsObject = Utils.getHeiDetailsForEidPostObject(patient, order);
+
+            if (heiNumber == null || StringUtils.isBlank(heiNumber.getIdentifier()) || heiDetailsObject == null) {
+                return(true);
+            }
+        }
+
+        // In this case, we are all ok
+        return(ret);
     }
 
 

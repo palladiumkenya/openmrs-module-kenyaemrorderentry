@@ -504,6 +504,19 @@ public class Utils {
     }
 
     /**
+     * Gets the long value of a string, otherwise returns zero
+     * @param val
+     * @return
+     */
+    public static long getLongValue(String val) {
+        long ret = 0;
+        try {
+            ret = (long) Math.ceil(Double.parseDouble(val));
+        } catch(Exception ex) {}
+        return(ret);
+    }
+
+    /**
      * Builds an SSL context for disabling/bypassing SSL verification
      *
      * @return

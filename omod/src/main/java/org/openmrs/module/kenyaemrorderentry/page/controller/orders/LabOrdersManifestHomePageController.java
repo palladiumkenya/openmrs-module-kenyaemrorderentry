@@ -1,19 +1,16 @@
 package org.openmrs.module.kenyaemrorderentry.page.controller.orders;
 
-import org.apache.commons.lang3.StringUtils;
+import java.util.List;
+
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
-import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
-import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
+import org.openmrs.module.kenyaemrorderentry.metadata.KenyaemrorderentryAdminSecurityMetadata;
 import org.openmrs.module.kenyaui.KenyaUiUtils;
 import org.openmrs.module.kenyaui.annotation.AppPage;
 import org.openmrs.ui.framework.SimpleObject;
 import org.openmrs.ui.framework.UiUtils;
 import org.openmrs.ui.framework.annotation.SpringBean;
 import org.openmrs.ui.framework.page.PageModel;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @AppPage("kenyaemr.labmanifest")
 public class LabOrdersManifestHomePageController {
@@ -66,9 +63,12 @@ public class LabOrdersManifestHomePageController {
         Long complete = kenyaemrOrdersService.countTotalCompleteManifests();
         model.put("manifestsComplete", ui.toJson(complete));
 
-        //Graph
+        // Graph
         List<SimpleObject> summaryGraph = kenyaemrOrdersService.getLabManifestSummaryGraphSQL();
         model.put("summaryGraph", ui.toJson(summaryGraph));
+
+        // Settings
+        model.put("userHasSettingsEditRole", (Context.getAuthenticatedUser().containsRole(KenyaemrorderentryAdminSecurityMetadata._Role.API_ROLE_EDIT_SETTINGS) || Context.getAuthenticatedUser().isSuperUser()));
     }
 
 }
