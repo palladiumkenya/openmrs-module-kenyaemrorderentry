@@ -10,6 +10,7 @@ import java.util.Date;
 import org.apache.commons.lang.WordUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.openmrs.Patient;
+import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange;
@@ -250,7 +251,7 @@ public class LabManifestLog {
 
         // NUPI / CCC Number
         Paragraph cccNumberCol = new Paragraph();
-        Text cccNoText = new Text("NUPI / CCC No \n").setBold();
+        Text cccNoText = new Text("CCC/KDOD No \n").setBold();
         cccNumberCol.add(cccNoText);
         table.addHeaderCell(cccNumberCol);
 
@@ -321,6 +322,10 @@ public class LabManifestLog {
 
     private void addManifestRow(LabManifestOrder sample, Table table) {
 
+        // Is DOD
+        AdministrationService administrationService = Context.getAdministrationService();
+        final String isKDoD = (administrationService.getGlobalProperty("kenyaemr.isKDoD"));
+
         // Patient Name
         Patient patient = sample.getOrder().getPatient();
         String fullName = patient.getGivenName().concat(" ").concat(
@@ -330,8 +335,14 @@ public class LabManifestLog {
         );
         table.addCell(new Paragraph(WordUtils.capitalizeFully(fullName))).setFontSize(10);
 
-        // CCC / NUPI number
-        table.addCell(new Paragraph(patient.getPatientIdentifier(Utils.getUniquePatientNumberIdentifierType()).getIdentifier())).setFontSize(10);
+        // CCC / KDOD number
+        if(isKDoD.trim().equalsIgnoreCase("true")) {
+            String uniqueNumber = patient.getPatientIdentifier(Utils.getKDODIdentifierType()) != null ? patient.getPatientIdentifier(Utils.getKDODIdentifierType()).getIdentifier() : "";
+            table.addCell(new Paragraph(uniqueNumber)).setFontSize(10);
+        } else {
+            String uniqueNumber = patient.getPatientIdentifier(Utils.getUniquePatientNumberIdentifierType()) != null ? patient.getPatientIdentifier(Utils.getKDODIdentifierType()).getIdentifier() : "";
+            table.addCell(new Paragraph(uniqueNumber)).setFontSize(10);
+        }
 
         //Age
         Integer age = patient.getAge();

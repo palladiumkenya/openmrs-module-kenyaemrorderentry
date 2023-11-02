@@ -9,13 +9,17 @@ import org.openmrs.Obs;
 import org.openmrs.Order;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
+import org.openmrs.PatientIdentifierType;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyacore.RegimenMappingUtils;
 import org.openmrs.module.kenyaemrorderentry.ModuleConstants;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 import org.openmrs.module.kenyaemrorderentry.util.Utils;
+import org.openmrs.module.metadatadeploy.MetadataUtils;
 import org.openmrs.ui.framework.SimpleObject;
+// import org.openmrs.module.kenyaemr.metadata.HivMetadata;
+import org.openmrs.api.AdministrationService;
 
 import java.io.IOException;
 import java.util.Date;
@@ -30,6 +34,8 @@ public abstract class LabWebRequest {
 
     protected static final Log log = LogFactory.getLog(LabWebRequest.class);
     private Integer manifestType; // i.e VL or EID
+    private AdministrationService administrationService = Context.getAdministrationService();
+    final String isKDoD = (administrationService.getGlobalProperty("kenyaemr.isKDoD"));
 
     public LabWebRequest() {
     }
@@ -55,9 +61,17 @@ public abstract class LabWebRequest {
     public ObjectNode baselinePostRequestPayload(Order o, Date dateSampleCollected, Date dateSampleSeparated, String sampleType, String manifestID) {
         Patient patient = o.getPatient();
         ObjectNode test = Utils.getJsonNodeFactory().objectNode();
+        String kdod = "";
 
         String dob = patient.getBirthdate() != null ? Utils.getSimpleDateFormat("yyyy-MM-dd").format(patient.getBirthdate()) : "";
         PatientIdentifier cccNumber = patient.getPatientIdentifier(Utils.getUniquePatientNumberIdentifierType());
+        if(isKDoD.trim().equalsIgnoreCase("true")) {
+            PatientIdentifierType pit = MetadataUtils.existing(PatientIdentifierType.class, "b51ffe55-3e76-44f8-89a2-14f5eaf11079");
+            PatientIdentifier kdodNumber = patient.getPatientIdentifier(pit);
+            if(kdodNumber != null || !StringUtils.isBlank(kdodNumber.getIdentifier())) {
+                kdod = kdodNumber.getIdentifier();
+            }
+        }
         String fullName = "";
 
         if (patient.getGivenName() != null) {
@@ -74,8 +88,14 @@ public abstract class LabWebRequest {
 
         if (manifestType == LabManifest.VL_TYPE) {
 
-            if (cccNumber == null || StringUtils.isBlank(cccNumber.getIdentifier())) {
-                return test;
+            if(isKDoD.trim().equalsIgnoreCase("true")) {
+                if(StringUtils.isBlank(kdod)) {
+                    return test;
+                }
+            } else {
+                if (cccNumber == null || StringUtils.isBlank(cccNumber.getIdentifier())) {
+                    return test;
+                }
             }
             Encounter originalRegimenEncounter = RegimenMappingUtils.getFirstEncounterForProgram(patient, "ARV");
             Encounter currentRegimenEncounter = RegimenMappingUtils.getLastEncounterForProgram(patient, "ARV");
@@ -102,7 +122,12 @@ public abstract class LabWebRequest {
             test.put("dob", dob);
             test.put("sex", patient.getGender().equals("M") ? "1" : patient.getGender().equals("F") ? "2" : "3");
             test.put("order_no", o.getOrderId().toString());
-            test.put("patient_identifier", cccNumber != null ? cccNumber.getIdentifier() : "");
+
+            if(isKDoD.trim().equalsIgnoreCase("true")) {
+                test.put("patient_identifier", kdod != null ? kdod : "");
+            } else {
+                test.put("patient_identifier", cccNumber != null ? cccNumber.getIdentifier() : "");
+            }
             test.put("sampletype", LabOrderDataExchange.getSampleTypeCode(sampleType));
             test.put("patient_name", fullName);
 
@@ -127,7 +152,11 @@ public abstract class LabWebRequest {
                 test.put("dob", dob);
                 test.put("sex", patient.getGender().equals("M") ? "1" : patient.getGender().equals("F") ? "2" : "3");
                 test.put("order_no", o.getOrderId().toString());
-                test.put("patient_identifier", heiNumber != null ? heiNumber.getIdentifier() : "");
+                if(isKDoD.trim().equalsIgnoreCase("true")) {
+                    test.put("patient_identifier", kdod != null ? kdod : "");
+                } else {
+                    test.put("patient_identifier", heiNumber != null ? heiNumber.getIdentifier() : "");
+                }
                 test.put("sampletype", LabOrderDataExchange.getSampleTypeCode(sampleType));
                 test.put("patient_name", fullName);
                 test.put("datecollected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
@@ -164,7 +193,11 @@ public abstract class LabWebRequest {
                 test.put("regimen", "1");
                 test.put("feeding", "yes");
                 test.put("sample_type", "DBS");
-                test.put("hei_id", heiNumber != null ? heiNumber.getIdentifier() : "");
+                if(isKDoD.trim().equalsIgnoreCase("true")) {
+                    test.put("hei_id", kdod != null ? kdod : "");
+                } else {
+                    test.put("hei_id", heiNumber != null ? heiNumber.getIdentifier() : "");
+                }
                 test.put("mother_age", heiMothersAgeObject != null ? heiMothersAgeObject.get("mothersAge").toString() : "" );
                 test.put("mother_ccc", Utils.getMothersUniquePatientNumber(patient) !=null ? Utils.getMothersUniquePatientNumber(patient) : "");
                 test.put("ccc_no",  cccNumber != null ? cccNumber.getIdentifier() : "");

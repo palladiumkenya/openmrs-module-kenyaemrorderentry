@@ -11,6 +11,8 @@ import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Text;
 import org.apache.commons.lang.WordUtils;
 import org.openmrs.Patient;
+import org.openmrs.api.AdministrationService;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 import org.openmrs.module.kenyaemrorderentry.util.Utils;
 
@@ -35,6 +37,8 @@ public class PrintSpecimenLabel {
         ).concat(" ").concat(
                 patient.getMiddleName() != null ? order.getOrder().getPatient().getMiddleName() : ""
         );
+        AdministrationService administrationService = Context.getAdministrationService();
+        final String isKDoD = (administrationService.getGlobalProperty("kenyaemr.isKDoD"));
 
         File returnFile = File.createTempFile("printSpecimenLabel", ".pdf");
         FileOutputStream fos = new FileOutputStream(returnFile);
@@ -52,15 +56,21 @@ public class PrintSpecimenLabel {
         PdfDocument pdfDoc = new PdfDocument(new PdfWriter(fos));
         Document doc = new Document(pdfDoc, new PageSize(72.0F, 110.0F).rotate());
         doc.setMargins(6,0,0,18);
-        String patientCCCNumber = patient.getPatientIdentifier(Utils.getUniquePatientNumberIdentifierType()).getIdentifier();
+        String patientCCCNumber = patient.getPatientIdentifier(Utils.getUniquePatientNumberIdentifierType()) != null ? patient.getPatientIdentifier(Utils.getUniquePatientNumberIdentifierType()).getIdentifier() : "";
+        String patientKDODNumber = patient.getPatientIdentifier(Utils.getKDODIdentifierType()) != null ? patient.getPatientIdentifier(Utils.getKDODIdentifierType()).getIdentifier() : "";
 
         Text nameLabel = new Text(WordUtils.capitalizeFully(fullName));
-        Text cccNoLabel = new Text(patientCCCNumber);
+        Text cccNoLabel = new Text("");
+        if(isKDoD.trim().equalsIgnoreCase("true")) {
+            cccNoLabel = new Text(patientKDODNumber);
+        } else {
+            cccNoLabel = new Text(patientCCCNumber);
+        }
         Text specimenDateLabel = new Text(Utils.getSimpleDateFormat("dd/MM/yyyy").format(order.getOrder().getDateActivated()));
 
         Paragraph paragraph = new Paragraph();
         paragraph.setFontSize(7);
-        paragraph.add(cccNoLabel).add("\n"); // patient ccc number
+        paragraph.add(cccNoLabel).add("\n"); // patient ccc/kdod number
         paragraph.add(nameLabel).add("\n"); // patient name
         paragraph.add(specimenDateLabel); // sample date
 

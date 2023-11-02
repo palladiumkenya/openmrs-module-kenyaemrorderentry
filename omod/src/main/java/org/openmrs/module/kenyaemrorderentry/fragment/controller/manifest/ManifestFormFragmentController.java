@@ -29,6 +29,8 @@ import org.openmrs.ui.framework.page.PageModel;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
+
 public class ManifestFormFragmentController {
     public void controller(@FragmentParam(value = "manifestId", required = false) LabManifest labManifest,
                            @RequestParam(value = "returnUrl") String returnUrl,
@@ -63,6 +65,35 @@ public class ManifestFormFragmentController {
         model.addAttribute("countyList", uniqueCountyList);
         model.addAttribute("isAnEdit", exists == null ? false : true);
         model.addAttribute("returnUrl", returnUrl);
+    }
+
+    /**
+     * Returns the payload of the manifest order
+     * @param orderId
+     * @param kenyaUi
+     * @param ui
+     * @return
+     */
+    public SimpleObject getManifestOrderPayload(@RequestParam("orderId") String orderId, @SpringBean KenyaUiUtils kenyaUi, UiUtils ui) {
+        SimpleObject ret = new SimpleObject();
+        ret.put("payload", "");
+
+        try {
+            if(orderId != null) {
+                String theOrder = orderId.trim();
+                LabManifestOrder manOrder = Context.getService(KenyaemrOrdersService.class).getLabManifestOrderById(Integer.valueOf(theOrder));
+                if(manOrder != null) {
+                    String payload = manOrder.getPayload();
+                    System.out.println("Got the manifest order payload: " + payload);
+                    ret.put("payload", payload);
+                }
+            }
+        } catch(Exception e) {
+            System.err.println("Error getting the manifest order payload: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return(ret);
     }
 
     /**

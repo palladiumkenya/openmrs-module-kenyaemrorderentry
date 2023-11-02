@@ -23,6 +23,7 @@ import org.apache.commons.lang.WordUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Encounter;
 import org.openmrs.Patient;
+import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyacore.RegimenMappingUtils;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
@@ -184,7 +185,7 @@ public class ViralLoadLabManifestReport {
         table.addHeaderCell(new Paragraph("Patient Name").setBold());
 
         Paragraph cccNumberCol = new Paragraph();
-        Text cccNoText = new Text("CCC No \n").setBold();
+        Text cccNoText = new Text("CCC/KDOD No \n").setBold();
         Text cccNoDetail1 = new Text("Indicate full ccc number of the\n").setItalic().setFontSize(8);
         Text cccNoDetail2 = new Text("clients as it appears in the patient\n").setItalic().setFontSize(8);
         Text cccNoDetail3 = new Text("file. (MFL-XXXXX)\n").setItalic().setFontSize(8);
@@ -243,6 +244,8 @@ public class ViralLoadLabManifestReport {
 
     private void addManifestRow(LabManifestOrder sample, Table table) {
 
+        AdministrationService administrationService = Context.getAdministrationService();
+        final String isKDoD = (administrationService.getGlobalProperty("kenyaemr.isKDoD"));
         Patient patient = sample.getOrder().getPatient();
         String fullName = patient.getGivenName().concat(" ").concat(
                 patient.getFamilyName() != null ? sample.getOrder().getPatient().getFamilyName() : ""
@@ -265,8 +268,15 @@ public class ViralLoadLabManifestReport {
         }
 
         table.addCell(new Paragraph(WordUtils.capitalizeFully(fullName))).setFontSize(10);
-        table.addCell(new Paragraph(patient.getPatientIdentifier(Utils.getUniquePatientNumberIdentifierType()).getIdentifier())).setFontSize(10);
-        
+
+        if(isKDoD.trim().equalsIgnoreCase("true")) {
+            String uniqueNumber = patient.getPatientIdentifier(Utils.getKDODIdentifierType()) != null ? patient.getPatientIdentifier(Utils.getKDODIdentifierType()).getIdentifier() : "";
+            table.addCell(new Paragraph(uniqueNumber)).setFontSize(10);
+        } else {
+            String uniqueNumber = patient.getPatientIdentifier(Utils.getUniquePatientNumberIdentifierType()) != null ? patient.getPatientIdentifier(Utils.getKDODIdentifierType()).getIdentifier() : "";
+            table.addCell(new Paragraph(uniqueNumber)).setFontSize(10);
+        }
+
         //Add Recency and Justification
         String recencyIdentifier = "";
         PatientIdentifier recencyPatientIdentifier = null;

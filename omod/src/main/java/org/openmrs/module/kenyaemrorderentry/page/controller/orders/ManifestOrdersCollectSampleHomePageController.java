@@ -7,6 +7,7 @@ import org.openmrs.Concept;
 import org.openmrs.Order;
 import org.openmrs.OrderType;
 import org.openmrs.PatientIdentifierType;
+import org.openmrs.api.AdministrationService;
 import org.openmrs.api.OrderService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
@@ -28,8 +29,13 @@ public class ManifestOrdersCollectSampleHomePageController {
     public void get(@RequestParam(value = "manifest", required = false) LabManifest manifest, @SpringBean KenyaUiUtils kenyaUi,
                     UiUtils ui, PageModel model) {
 
+        // Is DOD
+        AdministrationService administrationService = Context.getAdministrationService();
+        final String isKDoD = (administrationService.getGlobalProperty("kenyaemr.isKDoD"));
+
         List<LabManifestOrder> allOrders = Context.getService(KenyaemrOrdersService.class).getLabManifestOrderByStatus("Collect New Sample");
         PatientIdentifierType pat = Utils.getUniquePatientNumberIdentifierType();
+        PatientIdentifierType kat = Utils.getKDODIdentifierType();
         PatientIdentifierType hei = Utils.getHeiNumberIdentifierType();
         OrderService orderService = Context.getOrderService();
         List<LabManifestOrder> filteredOrders = new ArrayList<LabManifestOrder>();
@@ -55,11 +61,18 @@ public class ManifestOrdersCollectSampleHomePageController {
 
         model.put("sampleList", filteredOrders);
         model.put("sampleListSize", filteredOrders.size());
-        model.put("cccNumberType", pat.getPatientIdentifierTypeId());
-        model.put("heiNumberType", hei.getPatientIdentifierTypeId());
+        model.put("cccNumberType", "");
+        model.put("heiNumberType", "");
+
+        if(isKDoD.trim().equalsIgnoreCase("true")) {
+            model.put("cccNumberType", kat.getPatientIdentifierTypeId());
+            model.put("heiNumberType", kat.getPatientIdentifierTypeId());
+        } else {
+            model.put("cccNumberType", pat.getPatientIdentifierTypeId());
+            model.put("heiNumberType", hei.getPatientIdentifierTypeId());
+        }
 
         model.put("userHasSettingsEditRole", (Context.getAuthenticatedUser().containsRole(KenyaemrorderentryAdminSecurityMetadata._Role.API_ROLE_EDIT_SETTINGS) || Context.getAuthenticatedUser().isSuperUser()));
-
     }
 
 }
