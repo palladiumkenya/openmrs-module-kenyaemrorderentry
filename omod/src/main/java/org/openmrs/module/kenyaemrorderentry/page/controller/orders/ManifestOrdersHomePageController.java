@@ -2,6 +2,7 @@ package org.openmrs.module.kenyaemrorderentry.page.controller.orders;
 
 import org.openmrs.Order;
 import org.openmrs.PatientIdentifierType;
+import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange;
@@ -27,8 +28,13 @@ public class ManifestOrdersHomePageController {
     public void get(@RequestParam(value = "manifest") LabManifest manifest, @SpringBean KenyaUiUtils kenyaUi,
                     UiUtils ui, PageModel model) {
 
+        // Is DOD
+        AdministrationService administrationService = Context.getAdministrationService();
+        final String isKDoD = (administrationService.getGlobalProperty("kenyaemr.isKDoD"));
+
         List<LabManifestOrder> allOrdersForManifest = Context.getService(KenyaemrOrdersService.class).getLabManifestOrderByManifest(manifest);
         PatientIdentifierType pat = Utils.getUniquePatientNumberIdentifierType();
+        PatientIdentifierType kat = Utils.getKDODIdentifierType();
         PatientIdentifierType hei = Utils.getHeiNumberIdentifierType();
         LabOrderDataExchange e = new LabOrderDataExchange();
         Integer manifestTypeCode = manifest.getManifestType();
@@ -108,9 +114,16 @@ public class ManifestOrdersHomePageController {
         //model.put("manifestOrders", allOrdersForManifest);
         model.put("manifestOrders", ordersForManifest);
         model.put("allManifestOrders", ui.toJson(manifestOrders));
-        model.put("cccNumberType", pat.getPatientIdentifierTypeId());
-        model.put("heiNumberType", hei.getPatientIdentifierTypeId());
 
+        model.put("cccNumberType", "");
+        model.put("heiNumberType", "");
+        if(isKDoD.trim().equalsIgnoreCase("true")) {
+            model.put("cccNumberType", kat.getPatientIdentifierTypeId());
+            model.put("heiNumberType", kat.getPatientIdentifierTypeId());
+        } else {
+            model.put("cccNumberType", pat.getPatientIdentifierTypeId());
+            model.put("heiNumberType", hei.getPatientIdentifierTypeId());
+        }
     }
 
 }

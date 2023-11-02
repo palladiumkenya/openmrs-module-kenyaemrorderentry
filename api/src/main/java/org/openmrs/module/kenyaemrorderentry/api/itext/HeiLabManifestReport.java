@@ -14,6 +14,7 @@ import org.openmrs.Order;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
+import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
@@ -224,7 +225,7 @@ public class HeiLabManifestReport {
         
         table.addHeaderCell(new Paragraph("Infant Prophylaxis \n(code)").setBold().setTextAlignment(TextAlignment.CENTER));
         table.addHeaderCell(new Paragraph("Infant Feeding \n(code)").setBold().setTextAlignment(TextAlignment.CENTER));
-        table.addHeaderCell(new Paragraph("Infant CCC No").setBold().setTextAlignment(TextAlignment.CENTER));
+        table.addHeaderCell(new Paragraph("Infant HEI / KDOD No").setBold().setTextAlignment(TextAlignment.CENTER));
         
         // For the Mother
         table.addHeaderCell(new Paragraph("Mothers \nAge").setBold().setTextAlignment(TextAlignment.CENTER));
@@ -253,6 +254,10 @@ public class HeiLabManifestReport {
         SimpleObject heiDetailsObject = Utils.getHeiDetailsForEidPostObject(patient, order);
         String mothersCCC = Utils.getMothersUniquePatientNumber(patient);
         SimpleObject heiMothersAgeObject = Utils.getHeiMothersAge(patient);
+
+        // Is DOD
+        AdministrationService administrationService = Context.getAdministrationService();
+        final String isKDoD = (administrationService.getGlobalProperty("kenyaemr.isKDoD"));
 
         // Sample Collection Date
         table.addCell(new Paragraph(sample.getSampleCollectionDate() != null ? Utils.getSimpleDateFormat("dd/MM/yyyy").format(sample.getSampleCollectionDate()) : "")).setFontSize(10);
@@ -294,14 +299,20 @@ public class HeiLabManifestReport {
         infantFeedingCode = heiDetailsObject.get("feedingMethodAnswer") != null ? heiDetailsObject.get("feedingMethodAnswer").toString() : "";
         table.addCell(new Paragraph(infantFeedingCode)).setFontSize(10);
 
-        // Infant CCC
-        String infantCCC = "";
-        PatientIdentifierType pit = MetadataUtils.existing(PatientIdentifierType.class, Utils.getUniquePatientNumberIdentifierType().getUuid());
-        PatientIdentifier cccObject = patient.getPatientIdentifier(pit);
-        if (cccObject != null) {
-            infantCCC = cccObject.getIdentifier();
+        // Infant HEI / KDOD
+        String infantUniqueNo = "";
+
+        PatientIdentifierType pit;
+        if(isKDoD.trim().equalsIgnoreCase("true")) {
+            pit = MetadataUtils.existing(PatientIdentifierType.class, Utils.getKDODIdentifierType().getUuid());
+        } else {
+            pit = MetadataUtils.existing(PatientIdentifierType.class, Utils.getUniquePatientNumberIdentifierType().getUuid());
         }
-        table.addCell(new Paragraph(infantCCC)).setFontSize(10);
+        PatientIdentifier heiObject = patient.getPatientIdentifier(pit);
+        if (heiObject != null) {
+            infantUniqueNo= heiObject.getIdentifier();
+        }
+        table.addCell(new Paragraph(infantUniqueNo)).setFontSize(10);
 
         // Mothers Age
         String mothersAge = "";

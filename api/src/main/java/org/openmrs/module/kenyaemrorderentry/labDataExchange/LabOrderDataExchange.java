@@ -15,7 +15,9 @@ import org.openmrs.Obs;
 import org.openmrs.Order;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
+import org.openmrs.PatientIdentifierType;
 import org.openmrs.TestOrder;
+import org.openmrs.api.AdministrationService;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.OrderService;
@@ -26,6 +28,7 @@ import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 import org.openmrs.module.kenyaemrorderentry.util.Utils;
+import org.openmrs.module.metadatadeploy.MetadataUtils;
 import org.openmrs.ui.framework.SimpleObject;
 import org.openmrs.util.PrivilegeConstants;
 
@@ -340,6 +343,8 @@ public class LabOrderDataExchange {
     public Boolean checkIfOrderHasAProblem(Order order, int orderType) {
         Boolean ret = false;
         Patient patient = order.getPatient();
+        AdministrationService administrationService = Context.getAdministrationService();
+        final String isKDoD = (administrationService.getGlobalProperty("kenyaemr.isKDoD"));
 
         // LAB SYSTEM TYPE MUST BE CONFIGURED
         if (LabOrderDataExchange.getSystemType() == ModuleConstants.NO_SYSTEM_CONFIGURED) {
@@ -347,11 +352,22 @@ public class LabOrderDataExchange {
         }
 
         if(orderType == LabManifest.VL_TYPE) {
+
             PatientIdentifier cccNumber = patient.getPatientIdentifier(Utils.getUniquePatientNumberIdentifierType());
-            if (cccNumber == null || StringUtils.isBlank(cccNumber.getIdentifier())) {
-                // Patient must have a CCC number
-                return(true);
+            PatientIdentifierType pit = MetadataUtils.existing(PatientIdentifierType.class, "b51ffe55-3e76-44f8-89a2-14f5eaf11079");
+            PatientIdentifier kdodNumber = patient.getPatientIdentifier(pit);
+            if(isKDoD.trim().equalsIgnoreCase("true")) {
+                if (kdodNumber == null || StringUtils.isBlank(kdodNumber.getIdentifier())) {
+                    // Patient must have a CCC number or KDOD number
+                    return(true);
+                }
+            } else {
+                if (cccNumber == null || StringUtils.isBlank(cccNumber.getIdentifier())) {
+                    // Patient must have a CCC number or KDOD number
+                    return(true);
+                }
             }
+
             Encounter currentRegimenEncounter = RegimenMappingUtils.getLastEncounterForProgram(patient, "ARV");
             if(currentRegimenEncounter == null) {
                 // Patient must be on a regimen

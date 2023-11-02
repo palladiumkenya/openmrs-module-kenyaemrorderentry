@@ -9,6 +9,10 @@
 
     ui.includeJavascript("kenyaemrorderentry", "datatables/datatables.min.js")
     ui.includeCss("kenyaemrorderentry", "datatables/datatables.min.css")
+
+    ui.includeJavascript("kenyaemrorderentry", "jsonViewer/jquery.json-editor.min.js")
+    ui.includeCss("kenyaemrorderentry", "jsonViewer/jquery.json-viewer.css")
+
 %>
 <style>
 
@@ -99,7 +103,7 @@
                                 <th class="selectColumn"><input type="checkbox" class="selectManifestElement" id="selectManifestAll" value="selectManifestAll"></th>
                                 <th class="nameColumn">Patient Name</th>
                                 <% if (manifest.manifestType == 2) { %>
-                                    <th class="cccNumberColumn">CCC Number</th>
+                                    <th class="cccNumberColumn">CCC/KDOD Number</th>
                                 <% } else { %>
                                     <th class="cccNumberColumn">HEI Number</th>
                                 <% } %>
@@ -141,6 +145,7 @@
                                                 Print Label
                                             </button>
                                         </a>
+                                        <button class="viewManifestOrderPayload" style="background-color: cadetblue; color: white" value="${o.id}" data-target="#viewManifestOrderPayload">View Payload</button>
                                     </td>
                                 </tr>
                             <% } %>
@@ -165,7 +170,7 @@
                                 <th class="selectColumn"><input type="checkbox" class="selectGeneralElement" id="selectAll" value="selectAll"></th>
                                 <th class="nameColumn">Patient Name</th>
                                 <% if (manifest.manifestType == 2) { %>
-                                    <th class="cccNumberColumn">CCC Number</th>
+                                    <th class="cccNumberColumn">CCC/KDOD Number</th>
                                 <% } else { %>
                                     <th class="cccNumberColumn">HEI Number</th>
                                 <% } %>
@@ -188,7 +193,7 @@
                                                 <% if( load.hasProblem == false ) { %>
                                                     <button class="addOrderToManifest" style="background-color: cadetblue; color: white" value="od_${load.order.orderId}" data-target="#updateSampleDetails">Add to manifest</button>
                                                 <% } else { %>
-                                                    <span style="color: red" id="warning_${load.order.orderId}"> Warning: Patient requires CCC and Regimen Line. Check lab system configured (CHAI, LABWARE ..) </span>
+                                                    <span style="color: red" id="warning_${load.order.orderId}"> Warning: Patient requires CCC/KDOD No. and Regimen Line. Check lab system configured (CHAI, LABWARE ..) </span>
                                                 <% } %>
                                             </td>
                                             <td><span style="color: red" id="alert_${load.order.orderId}"></span></td>
@@ -206,7 +211,7 @@
                                         <% if( load.hasProblem == false ) { %>
                                             <button class="addOrderToManifest" style="background-color: cadetblue; color: white" value="od_${load.order.orderId}" data-target="#updateSampleDetails">Add to manifest</button>
                                         <% } else { %>
-                                            <span style="color: red" id="warning_${load.order.orderId}"> Warning: Patient requires HEI number. Check lab system configured (CHAI, LABWARE ..) </span>
+                                            <span style="color: red" id="warning_${load.order.orderId}"> Warning: Patient requires HEI/KDOD number. Check lab system configured (CHAI, LABWARE ..) </span>
                                         <% } %>
                                     </td>
                                     <td><span style="color: red" id="alert_${load.order.orderId}"></span></td>
@@ -358,6 +363,25 @@
             </div>
         </div>
 
+        <!-- Modal dialog popup for dsplay of manifest order payload -->
+        <div class="modal fade" id="showViewManifestOrderPayloadDialog" tabindex="-1" role="dialog" aria-labelledby="backdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+                <div class="modal-content">
+                    <div class="modal-header modal-header-primary">
+                        <h5 class="modal-title" id="viewPayloadTitle">View Order Payload</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <span style="color: firebrick" id="msgBox"></span>
+                        <pre id="order-payload-view-display"></pre>
+                    </div>
+                    <div class="modal-footer modal-footer-primary">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
 </div>
@@ -435,6 +459,32 @@
 
         jq('#eligibleList').on('click','.addAllOrders',function () {
             addAllOrders();
+        });
+
+        jq(document).on('click','.viewManifestOrderPayload',function () {
+            var orderId = jq(this).val();
+            console.log("Checking for manfest order with id: " + orderId);
+
+            ui.getFragmentActionAsJson('kenyaemrorderentry', 'manifest/manifestForm', 'getManifestOrderPayload', { orderId : orderId }, function (result) {
+                let payloadObject = [];
+                try {
+                    console.log("Success got the order payload: " + result.payload);
+                    payloadObject = JSON.parse(result.payload);
+                } catch(ex) {
+                    console.log("Failed to get the order payload");
+                    payloadObject = JSON.parse("{}")
+                }
+                
+                jq('#order-payload-view-display').empty();
+                jq('#order-payload-view-display').jsonViewer(payloadObject,{
+                    withQuotes:true,
+                    rootCollapsable:true
+                });
+                jq('#viewPayloadTitle').empty();
+                jq('#viewPayloadTitle').html("Payload For Manifest Order No.: " + orderId);
+            });
+
+            jq('#showViewManifestOrderPayloadDialog').modal('show');
         });
 
         // Button action to add an order to a manifest
