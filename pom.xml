@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.openmrs.module</groupId>
     <artifactId>kenyaemrorderentry</artifactId>
-    <version>1.4.0</version>
+    <version>1.6.2</version>
     <packaging>pom</packaging>
     <name>KenyaEMR Order Entry Module</name>
     <description>Drug Order Entry for OpenMRS 2.x</description>
@@ -50,7 +50,7 @@
         <htmlformentryVersion>3.9.2</htmlformentryVersion>
         <htmlformentryuiVersion>1.9.0</htmlformentryuiVersion>
         <coreappsVersion>1.23.0</coreappsVersion>
-        <kenyacoreVersion>2.4.2</kenyacoreVersion>
+        <kenyacoreVersion>3.0.1</kenyacoreVersion>
         <kenyauiVersion>3.0.0</kenyauiVersion>
         <webservices.restVersion>2.26.0</webservices.restVersion>
         <jacksonVersion>2.10.1</jacksonVersion>

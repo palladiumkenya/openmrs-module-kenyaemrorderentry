@@ -1,22 +1,5 @@
 package org.openmrs.module.kenyaemrorderentry.fragment.controller.manifest;
 
-import org.apache.commons.lang.StringUtils;
-import org.openmrs.Location;
-import org.openmrs.api.context.Context;
-import org.openmrs.module.kenyaemrorderentry.ModuleConstants;
-import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
-import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange;
-import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
-import org.openmrs.module.kenyaui.form.AbstractWebForm;
-import org.openmrs.ui.framework.SimpleObject;
-import org.openmrs.ui.framework.UiUtils;
-import org.openmrs.ui.framework.annotation.BindParams;
-import org.openmrs.ui.framework.annotation.FragmentParam;
-import org.openmrs.ui.framework.annotation.MethodParam;
-import org.openmrs.ui.framework.page.PageModel;
-import org.springframework.validation.Errors;
-import org.springframework.web.bind.annotation.RequestParam;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -25,6 +8,28 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.apache.commons.lang.StringUtils;
+import org.openmrs.GlobalProperty;
+import org.openmrs.Location;
+import org.openmrs.api.context.Context;
+import org.openmrs.module.kenyaemrorderentry.ModuleConstants;
+import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
+import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange;
+import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
+import org.openmrs.module.kenyaui.KenyaUiUtils;
+import org.openmrs.module.kenyaui.form.AbstractWebForm;
+import org.openmrs.ui.framework.SimpleObject;
+import org.openmrs.ui.framework.UiUtils;
+import org.openmrs.ui.framework.annotation.BindParams;
+import org.openmrs.ui.framework.annotation.FragmentParam;
+import org.openmrs.ui.framework.annotation.MethodParam;
+import org.openmrs.ui.framework.annotation.SpringBean;
+import org.openmrs.ui.framework.page.PageModel;
+import org.springframework.validation.Errors;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 
 public class ManifestFormFragmentController {
     public void controller(@FragmentParam(value = "manifestId", required = false) LabManifest labManifest,
@@ -62,6 +67,47 @@ public class ManifestFormFragmentController {
         model.addAttribute("returnUrl", returnUrl);
     }
 
+    /**
+     * Returns the payload of the manifest order
+     * @param orderId
+     * @param kenyaUi
+     * @param ui
+     * @return
+     */
+    public SimpleObject getManifestOrderPayload(@RequestParam("orderId") String orderId, @SpringBean KenyaUiUtils kenyaUi, UiUtils ui) {
+        SimpleObject ret = new SimpleObject();
+        ret.put("payload", "");
+
+        try {
+            if(orderId != null) {
+                String theOrder = orderId.trim();
+                LabManifestOrder manOrder = Context.getService(KenyaemrOrdersService.class).getLabManifestOrderById(Integer.valueOf(theOrder));
+                if(manOrder != null) {
+                    String payload = manOrder.getPayload();
+                    System.out.println("Got the manifest order payload: " + payload);
+                    ret.put("payload", payload);
+                }
+            }
+        } catch(Exception e) {
+            System.err.println("Error getting the manifest order payload: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return(ret);
+    }
+
+    /**
+     * Requeue a manifest that has errors
+     * @param manifestId
+     * @param kenyaUi
+     * @param ui
+     */
+    public void requeueManifest(@RequestParam("manifestId") Integer manifestId, @SpringBean KenyaUiUtils kenyaUi, UiUtils ui) {
+        // We requeue the manifest by changing its status to 'Submitted' and all order items to 'Sent'
+        KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
+        kenyaemrOrdersService.reprocessLabManifest(manifestId);
+    }
+
     private List<String> manifestStatus() {
         return Arrays.asList(
                 new String("Draft"),
@@ -79,8 +125,14 @@ public class ManifestFormFragmentController {
 
     private Map<Integer, String> createManifestTypeOptions() {
         Map<Integer, String> options = new HashMap<Integer, String>();
-        options.put(LabManifest.VL_TYPE, "Viral Load");
-        //options.put(LabManifest.EID_TYPE, "EID");//disabling EID for the first release
+        GlobalProperty gpEnableEIDFunction = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.ENABLE_EID_FUNCTION);
+        options.put(LabManifest.VL_TYPE, "Viral Load"); // comment this to disable VL
+        if (gpEnableEIDFunction != null) {
+            String enableEID = gpEnableEIDFunction.getPropertyValue();
+            if(enableEID.trim().equalsIgnoreCase("true")) {
+                options.put(LabManifest.EID_TYPE, "EID"); // comment this to disable EID
+            }
+        }
         return options;
     }
 

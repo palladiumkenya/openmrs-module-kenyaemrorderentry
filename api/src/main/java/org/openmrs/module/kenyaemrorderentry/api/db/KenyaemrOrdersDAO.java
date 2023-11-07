@@ -5,6 +5,7 @@ import org.openmrs.Order;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 import org.openmrs.module.reporting.common.DurationUnit;
+import org.openmrs.ui.framework.SimpleObject;
 
 import java.util.Date;
 import java.util.List;
@@ -17,6 +18,12 @@ public interface KenyaemrOrdersDAO {
     List<LabManifest> getLabOrderManifest();
 
     LabManifest getLabOrderManifestById(Integer id);
+
+    LabManifest getLabManifestById(Integer manID);
+
+    String getLabManifestStatusByIdSQL(Integer manID);
+
+    List<SimpleObject> getLabManifestSummaryGraphSQL();
 
     LabManifest getLabOrderManifestByManifestType(Integer manifestType);
 
@@ -78,5 +85,24 @@ public interface KenyaemrOrdersDAO {
 
     LabManifest getFirstLabManifestByOrderStatusCheckedBeforeDate(String status, Date lastStatusCheckDate);
 
+    Integer countTotalSamples(LabManifest labManifest);
+    Integer countSamplesSuppressed(LabManifest labManifest);
+    Integer countSamplesUnsuppressed(LabManifest labManifest);
+    Integer countSamplesRejected(LabManifest labManifest);
+
+    // Start cached data for summary form
+    Long countTotalDraftManifests();
+    Long countTotalManifestsOnHold();
+    Long countTotalReadyToSendManifests();
+    Long countTotalManifestsOnSending();
+    Long countTotalSubmittedManifests();
+    Long countTotalIncompleteManifests();
+    Long countTotalManifestsIncompleteWithErrors();
+    Long countTotalErrorsOnIncompleteManifests();
+    Long countTotalCompleteManifests();
+    Long countTotalManifestsCompleteWithErrors();
+    Long countTotalErrorsOnCompleteManifests();
+
+    void reprocessLabManifest(Integer manifestId);
     //End of Patient Contact dimensions methods
 }

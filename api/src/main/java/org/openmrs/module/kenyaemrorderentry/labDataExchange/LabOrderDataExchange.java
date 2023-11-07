@@ -13,16 +13,23 @@ import org.openmrs.EncounterType;
 import org.openmrs.GlobalProperty;
 import org.openmrs.Obs;
 import org.openmrs.Order;
+import org.openmrs.Patient;
+import org.openmrs.PatientIdentifier;
+import org.openmrs.PatientIdentifierType;
 import org.openmrs.TestOrder;
+import org.openmrs.api.AdministrationService;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.OrderService;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.kenyacore.RegimenMappingUtils;
 import org.openmrs.module.kenyaemrorderentry.ModuleConstants;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 import org.openmrs.module.kenyaemrorderentry.util.Utils;
+import org.openmrs.module.metadatadeploy.MetadataUtils;
+import org.openmrs.ui.framework.SimpleObject;
 import org.openmrs.util.PrivilegeConstants;
 
 import java.text.ParseException;
@@ -49,7 +56,7 @@ public class LabOrderDataExchange {
     /**
      * Give the kind of lab system configured i.e CHAI or LABWARE
      *
-     * @return int system type LABWARE_SYSTEM or CHAI_SYSTEM
+     * @return int system type LABWARE_SYSTEM, CHAI_SYSTEM, or EDARP
      */
     public static int getSystemType() {
         String systemType = "";
@@ -64,10 +71,12 @@ public class LabOrderDataExchange {
             return ModuleConstants.NO_SYSTEM_CONFIGURED;
         }
 
-        if (systemType.equalsIgnoreCase("CHAI")) {
+        if (systemType.trim().equalsIgnoreCase("CHAI")) {
             return ModuleConstants.CHAI_SYSTEM;
-        } else if (systemType.equalsIgnoreCase("LABWARE")) {
+        } else if (systemType.trim().equalsIgnoreCase("LABWARE")) {
             return ModuleConstants.LABWARE_SYSTEM;
+        } else if (systemType.trim().equalsIgnoreCase("EDARP")) {
+            return ModuleConstants.EDARP_SYSTEM;
         } else {
             return ModuleConstants.NO_SYSTEM_CONFIGURED; // The default if empty string or another string
         }
@@ -252,9 +261,9 @@ public class LabOrderDataExchange {
      * @param endDate
      * @return
      */
-    public Set<Order> getActiveViralLoadOrdersNotInManifest(Integer manifestId, Date startDate, Date endDate) {
+    public Set<SimpleObject> getActiveViralLoadOrdersNotInManifest(Integer manifestId, Date startDate, Date endDate) {
         Context.addProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
-        Set<Order> activeLabs = new HashSet<Order>();
+        Set<SimpleObject> activeLabs = new HashSet<SimpleObject>();
         String sql = "select o.order_id from orders o\n" +
                 "left join kenyaemr_order_entry_lab_manifest_order mo on mo.order_id = o.order_id\n" +
                 "where o.order_action='NEW' and o.concept_id = 856 and o.date_stopped is null and o.voided=0 and mo.order_id is null ";
@@ -274,7 +283,10 @@ public class LabOrderDataExchange {
                 Integer orderId = (Integer) res.get(0);
                 Order o = orderService.getOrder(orderId);
                 if (o != null) {
-                    activeLabs.add(o);
+                    SimpleObject ret = new SimpleObject();
+                    ret.put("hasProblem", checkIfOrderHasAProblem(o, LabManifest.VL_TYPE));
+                    ret.put("order", o);
+                    activeLabs.add(ret);
                 }
             }
         }
@@ -290,9 +302,9 @@ public class LabOrderDataExchange {
      * @param endDate
      * @return
      */
-    public Set<Order> getActiveEidOrdersNotInManifest(Integer manifestId, Date startDate, Date endDate) {
+    public Set<SimpleObject> getActiveEidOrdersNotInManifest(Integer manifestId, Date startDate, Date endDate) {
         Context.addProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
-        Set<Order> activeLabs = new HashSet<Order>();
+        Set<SimpleObject> activeLabs = new HashSet<SimpleObject>();
         String sql = "select o.order_id from orders o\n" +
                 "left join kenyaemr_order_entry_lab_manifest_order mo on mo.order_id = o.order_id left join patient_identifier k on o.patient_id = k.patient_id left join patient_identifier_type r on k.identifier_type = r.patient_identifier_type_id \n" +
                 "where o.order_action='NEW' and o.concept_id = 1030 and o.date_stopped is null and o.voided=0 and mo.order_id is null and r.uuid='0691f522-dd67-4eeb-92c8-af5083baf338' and k.identifier is not null ";
@@ -312,12 +324,84 @@ public class LabOrderDataExchange {
                 Integer orderId = (Integer) res.get(0);
                 Order o = orderService.getOrder(orderId);
                 if (o != null) {
-                    activeLabs.add(o);
+                    SimpleObject ret = new SimpleObject();
+                    ret.put("hasProblem", checkIfOrderHasAProblem(o, LabManifest.EID_TYPE));
+                    ret.put("order", o);
+                    activeLabs.add(ret);
                 }
             }
         }
         Context.removeProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
         return activeLabs;
+    }
+
+    /**
+     * Checks if an order has a problem that might prevent it from being added into a manifest
+     * @param order - The lab sample order
+     * @return true if there is a problem. false if there is no problem
+     */
+    public Boolean checkIfOrderHasAProblem(Order order, int orderType) {
+        Boolean ret = false;
+        Patient patient = order.getPatient();
+        AdministrationService administrationService = Context.getAdministrationService();
+        final String isKDoD = (administrationService.getGlobalProperty("kenyaemr.isKDoD"));
+
+        // LAB SYSTEM TYPE MUST BE CONFIGURED
+        if (LabOrderDataExchange.getSystemType() == ModuleConstants.NO_SYSTEM_CONFIGURED) {
+            return(true);
+        }
+
+        if(orderType == LabManifest.VL_TYPE) {
+
+            PatientIdentifier cccNumber = patient.getPatientIdentifier(Utils.getUniquePatientNumberIdentifierType());
+            PatientIdentifierType pit = MetadataUtils.existing(PatientIdentifierType.class, "b51ffe55-3e76-44f8-89a2-14f5eaf11079");
+            PatientIdentifier kdodNumber = patient.getPatientIdentifier(pit);
+            if(isKDoD.trim().equalsIgnoreCase("true")) {
+                if (kdodNumber == null || StringUtils.isBlank(kdodNumber.getIdentifier())) {
+                    // Patient must have a CCC number or KDOD number
+                    return(true);
+                }
+            } else {
+                if (cccNumber == null || StringUtils.isBlank(cccNumber.getIdentifier())) {
+                    // Patient must have a CCC number or KDOD number
+                    return(true);
+                }
+            }
+
+            Encounter currentRegimenEncounter = RegimenMappingUtils.getLastEncounterForProgram(patient, "ARV");
+            if(currentRegimenEncounter == null) {
+                // Patient must be on a regimen
+                return(true);
+            }
+            SimpleObject regimenDetails = RegimenMappingUtils.buildRegimenChangeObject(currentRegimenEncounter.getObs(), currentRegimenEncounter);
+            String regimenName = (String) regimenDetails.get("regimenShortDisplay");
+            String regimenLine = (String) regimenDetails.get("regimenLine");
+            String nascopCode = "";
+            if (StringUtils.isNotBlank(regimenName )) {
+                nascopCode = RegimenMappingUtils.getDrugNascopCodeByDrugNameAndRegimenLine(regimenName, regimenLine);
+            }
+
+            if (StringUtils.isBlank(nascopCode) && StringUtils.isNotBlank(regimenLine)) {
+                nascopCode = RegimenMappingUtils.getNonStandardCodeFromRegimenLine(regimenLine);
+            }
+
+            if (StringUtils.isBlank(nascopCode)) {
+                // The current regimen must have a regimen line
+                return(true);
+            }
+        }
+
+        if(orderType == LabManifest.EID_TYPE) {
+            PatientIdentifier heiNumber = patient.getPatientIdentifier(Utils.getHeiNumberIdentifierType());
+            SimpleObject heiDetailsObject = Utils.getHeiDetailsForEidPostObject(patient, order);
+
+            if (heiNumber == null || StringUtils.isBlank(heiNumber.getIdentifier()) || heiDetailsObject == null) {
+                return(true);
+            }
+        }
+
+        // In this case, we are all ok
+        return(ret);
     }
 
 
@@ -355,6 +439,7 @@ public class LabOrderDataExchange {
                     Date sampleTestedDate = null;
                     String dateSampleReceived = "";
                     String dateSampleTested = "";
+                    String batchNumber = "";
                     String specimenRejectedReason = "";
 
                     if (getSystemType() == ModuleConstants.LABWARE_SYSTEM) {
@@ -369,6 +454,15 @@ public class LabOrderDataExchange {
                         } catch (Exception ex) {
                         }
                     } else if (getSystemType() == ModuleConstants.CHAI_SYSTEM) {
+                        try {
+                            dateSampleReceived = o.get("date_received").getAsString().trim();
+                        } catch (Exception ex) {
+                        }
+                        try {
+                            dateSampleTested = o.get("date_tested").getAsString().trim();
+                        } catch (Exception ex) {
+                        }
+                    } else if (getSystemType() == ModuleConstants.EDARP_SYSTEM) {
                         try {
                             dateSampleReceived = o.get("date_received").getAsString().trim();
                         } catch (Exception ex) {
@@ -579,7 +673,22 @@ public class LabOrderDataExchange {
                                 o.setValueNumeric(vlVal);
                             }
                         }
-                    }
+                    } else if (getSystemType() == ModuleConstants.EDARP_SYSTEM) {
+                        // System.out.println("Got sample result as: " + result);
+                        if (result.equalsIgnoreCase(lDLResult) || result.equalsIgnoreCase(labwarelDLResult) || result.contains("LDL")) {
+                            conceptToRetain = vlTestConceptQualitative;
+                            o.setValueCoded(LDLConcept);
+                        } else if (result.equalsIgnoreCase(aboveMillionResult)) {
+                            conceptToRetain = vlTestConceptQuantitative;
+                            o.setValueNumeric(new Double(10000001));
+                        } else {
+                            conceptToRetain = vlTestConceptQuantitative;
+                            // System.out.println("Converting result to ensure it is an integer");
+                            Double vlVal = Math.floor(NumberUtils.toDouble(result));
+                            // System.out.println("Saving result as: " + vlVal);
+                            o.setValueNumeric(vlVal);
+                        }
+                    } 
 
                     // In order to record results both qualitative (LDL) and quantitative,
                     // every vl request saves two orders: one with 856(quantitative) for numeric values and another with 1305(quantitative) for LDL value
@@ -592,9 +701,12 @@ public class LabOrderDataExchange {
                     o.setConcept(conceptToRetain);
                     o.setDateCreated(new Date());
                     o.setCreator(Context.getUserService().getUser(1));
-                    o.setObsDatetime(orderToRetain.getDateActivated());
                     o.setPerson(od.getPatient());
-                    o.setOrder(orderToRetain);
+
+                    if (orderToRetain != null) {
+                        o.setObsDatetime(orderToRetain.getDateActivated());
+                        o.setOrder(orderToRetain);
+                    }
 
                     enc.addObs(o);
 
@@ -752,13 +864,21 @@ public class LabOrderDataExchange {
 
         Map<String, Order> listToProcess = new HashMap<String, Order>();
         Concept conceptToVoid = conceptToRetain.equals(vlTestConceptQualitative) ? vlTestConceptQuantitative : vlTestConceptQualitative;
-        List<Order> ordersOnSameDay = orderService.getActiveOrders(referenceOrder.getPatient(), referenceOrder.getOrderType(), referenceOrder.getCareSetting(), referenceOrder.getDateActivated());
+        List<Order> orders = orderService.getOrders(referenceOrder.getPatient(), referenceOrder.getCareSetting(), referenceOrder.getOrderType(), true);
+        Date refDate = referenceOrder.getDateActivated();
 
-        for (Order order : ordersOnSameDay) {
-            if (order.getConcept().equals(conceptToVoid)) {
-                listToProcess.put("orderToVoid", order);
-            } else if (order.getConcept().equals(conceptToRetain)) {
-                listToProcess.put("orderToRetain", order);
+        // We have all orders, we need to use the same day orders only
+        for (Order order : orders) {
+            if(DateUtils.isSameDay(order.getDateActivated(), refDate)) {
+                if (order.getConcept().equals(conceptToVoid)) {
+                    listToProcess.put("orderToVoid", order);
+                } else if (order.getConcept().equals(conceptToRetain)) {
+                    // Unvoid the order if it is already voided
+                    if(order.getVoided()) {
+                        orderService.unvoidOrder(order);
+                    }
+                    listToProcess.put("orderToRetain", order);
+                }
             }
         }
         return listToProcess;

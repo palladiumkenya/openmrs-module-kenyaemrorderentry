@@ -1,5 +1,4 @@
-angular.module('labOrders', ['orderService', 'encounterService', 'uicommons.filters', 'uicommons.widget.select-concept-from-list',
-    'uicommons.widget.select-order-frequency', 'uicommons.widget.select-drug', 'session', 'orderEntry']).
+angular.module('labOrders', ['orderService', 'encounterService', 'session', 'orderEntry']).
 
 config(function($locationProvider) {
     $locationProvider.html5Mode({
@@ -8,65 +7,14 @@ config(function($locationProvider) {
     });
 }).
 
-filter('dates', ['serverDateFilter', function(serverDateFilter) {
-    return function(order) {
-        if (!order || typeof order != 'object') {
-            return "";
-        }
-        if (order.action === 'DISCONTINUE' || !order.dateActivated) {
-            return "";
-        } else {
-            var text = serverDateFilter(order.dateActivated);
-            if (order.dateStopped) {
-                text += ' - ' + serverDateFilter(order.dateStopped);
-            }
-            else if (order.autoExpireDate) {
-                text += ' - ' + serverDateFilter(order.autoExpireDate);
-            }
-            return text;
-        }
-    }
-}]).
-
-filter('instructions', function() {
-    return function(order) {
-        if (!order || typeof order != 'object') {
-            return "";
-        }
-        if (order.action == 'DISCONTINUE') {
-            return "Discontinue " + (order.drug ? order.drug : order.concept ).display;
-        }
-        else {
-            var text = order.getDosingType().format(order);
-            if (order.quantity) {
-                text += ' (Dispense: ' + order.quantity + ' ' + order.quantityUnits.display + ')';
-            }
-            return text;
-        }
-    }
-}).
-
-filter('replacement', ['serverDateFilter', function(serverDateFilter) {
-    // given the order that replaced the one we are displaying, display the details of the replacement
-    return function(replacementOrder) {
-        if (!replacementOrder) {
-            return "";
-        }
-        return emr.message("kenyaemrorderentry.pastAction." + replacementOrder.action) + ", " + serverDateFilter(replacementOrder.dateActivated);
-    }
-}]).
-
-controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$timeout', 'OrderService', 'EncounterService', 'SessionInfo', 'OrderEntryService',
-    function($scope, $window,$rootScope, $location, $timeout, OrderService, EncounterService, SessionInfo, OrderEntryService) {
+controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$timeout', 'OrderService', 'SessionInfo', 'OrderEntryService',
+    function($scope, $window,$rootScope, $location, $timeout, OrderService, SessionInfo, OrderEntryService) {
 
         var orderContext = {};
         SessionInfo.get().$promise.then(function(info) {
             orderContext.provider = info.currentProvider;
-            $scope.newDraftDrugOrder = OpenMRS.createEmptyDraftOrder(orderContext);
         });
 
-
-        // TODO changing dosingType of a draft order should reset defaults (and discard non-defaulted properties)
 
         function loadExistingOrders() {
             $scope.activeTestOrders = { loading: true };
@@ -97,6 +45,27 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                         return 1;
                     }
                 });
+                $scope.OrderReason = [];
+
+                $scope.cd4TestOrderReasons = [
+                    {
+                        name:'Baseline',
+                        uuid:'167390AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+                    },
+                    {
+                        name:'Suspected treatment failure',
+                        uuid:'167387AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+                    },
+                    {
+                        name:'Return to care after Interrupting treatment for >3months',
+                        uuid:'160740AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+                    },
+                    {
+                        name:'Patient on fluconazole maintenance therapy',
+                        uuid:'167527AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+                    }
+
+                ];
 
                 $scope.heiPCRTestOrderReasons = [
                     {
@@ -130,7 +99,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 ];
 
                 $scope.labOrders = labs;
-                $scope.OrderReason = [
+                $scope.vlOrderReason = [
                     {
                         name:'Confirmation of treatment failure (repeat VL)',
                         uuid:'843AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
@@ -164,7 +133,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                         uuid: '160032AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
                     }
                 ];
-                $scope.OrderReason =  _.filter($scope.OrderReason, function(o) {
+                $scope.vlOrderReason =  _.filter($scope.vlOrderReason, function(o) {
                     if(config.patient.person.gender !== 'F') {
                         return o.uuid !== '1434AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' && o.uuid !== '159882AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
                     } else {
@@ -184,7 +153,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             }).then(function(results) {
                 $scope.pList = enterLabOrderResults;
                 if($scope.pList) {
-                    $scope.panelListResults = customiseHivViralLoadObj($scope.pList);
+                    $scope.panelListResults = customiseTestNameToDisplayForResultEntry($scope.pList);
                     $scope.labResultsRaw =$scope.panelListResults;
                     $scope.panelListResults = removeHivVl($scope.panelListResults);
                     $scope.panelListResults = removeHivLdl($scope.panelListResults);
@@ -205,7 +174,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 $scope.limit = 12;
                 $scope.pastLabOrders = pastOrders;
                 if($scope.pastLabOrders ) {
-                    $scope.pastLabOrders = filterDuplicates($scope.pastLabOrders);
+                    $scope.pastLabOrders = filterDuplicates(mapTestNameAndOrderReason($scope.pastLabOrders));
                     $scope.pastLabOrders = renameNotDetectedToLDL($scope.pastLabOrders);
                     $scope.pastLabOrders.sort(function (a, b) {
                         var key1 = a.dateActivated;
@@ -226,73 +195,29 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
         function renameNotDetectedToLDL(res) {
             var orders = [];
-            for (var i = 0; i < res.length; ++i) {
+            
+            for (var i = 0; i < res.length; i++) {
                 var data = res[i];
-
-                for (var r in data) {
-                    if (data.hasOwnProperty(r)) {
-
-                        if (data.valueCoded === 'NOT DETECTED') {
-                            data['valueCoded'] = "LDL";
-                        }
-
-                        if (data.resultDate ) {
-                            data['resultDate'] = new Date(data.resultDate );
-                        }
-                        if (data.dateActivated ) {
-                            data['dateActivated'] = new Date(data.dateActivated );
-                        }
-
-                        if (data.orderReasonCoded === '843AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                            data['orderReasonCoded'] = "Confirmation of treatment failure (repeat VL) ";
-                        }
-                        if (data.orderReasonCoded === '1434AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' ) {
-                            data['orderReasonCoded'] = "Pregnancy";
-                        }
-                        if (data.orderReasonCoded === '162080AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' ) {
-                            data['orderReasonCoded'] = "Baseline VL (for infants diagnosed through EID)";
-                        }
-                        if (data.orderReasonCoded === '1259AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' ) {
-                            data['orderReasonCoded'] = "Single Drug Substitution";
-                        }
-                        if (data.orderReasonCoded === '159882AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' ) {
-                            data['orderReasonCoded'] = "Breastfeeding";
-                        }
-                        if (data.orderReasonCoded === '163523AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                            data['orderReasonCoded'] = "Clinical failure";
-                        }
-                        if (data.orderReasonCoded === '161236AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' ) {
-                            data['orderReasonCoded'] = "Routine";
-                        }
-                        if (data.orderReasonCoded === '160032AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                            data['orderReasonCoded'] = "Confirmation of persistent low level Viremia (PLLV)";
-                        }
-
-                        if (data.orderReasonCoded === '1040AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                            data['orderReasonCoded'] = "Initial PCR (6week or first contact)";
-                        }
-                        if (data.orderReasonCoded === '1326AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                            data['orderReasonCoded'] = "2nd PCR (6 months)";
-                        }
-                        if (data.orderReasonCoded === '844AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                            data['orderReasonCoded'] = "3rd PCR (12months)";
-                        }
-                        if (data.orderReasonCoded === '162082AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                            data['orderReasonCoded'] = "Confirmatory PCR and Baseline VL";
-                        }
-                        if (data.orderReasonCoded === '164460AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                            data['orderReasonCoded'] = "Ab test 6 weeks after cessation of breastfeeding";
-                        }
-                        if (data.orderReasonCoded === '164860AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                            data['orderReasonCoded'] = "Ab test at 18 months (1.5 years)";
-                        }
-
-                    }
-
+                
+                if (data.valueCoded === 'NOT DETECTED') {
+                    data.valueCoded = "LDL";
                 }
+                
+                if (data.resultDate) {
+                    data.resultDate = new Date(data.resultDate);
+                }
+                
+                if (data.dateActivated) {
+                    data.dateActivated = new Date(data.dateActivated);
+                }
+                
+                if (data.orderReason) {
+                    data.orderReasonCoded = getTestOrderReason(data.orderReason);
+                }
+                
                 orders.push(data);
-
             }
+            
             return orders;
         }
         function filterDuplicates(arr){
@@ -321,75 +246,80 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
         }
 
         function mapTestNameAndOrderReason(result) {
-
             var orders = [];
             for (var i = 0; i < result.length; ++i) {
                 var data = result[i];
-
                 for (var r in data) {
                     if (data.hasOwnProperty(r)) {
-                        if (data.display ==='Tuberculosis polymerase chain reaction with rifampin resistance checking' ) {
-                            data['display'] =  'GeneXpert';
+                        switch (data.display) {
+                            case 'Tuberculosis polymerase chain reaction with rifampin resistance checking':
+                            case 'SERUM GLUCOSE':
+                            case 'Serum cryptococcal antigen status':
+                            case 'Mycobacterium tuberculosis lipoarabinomannan antigen, urine, rapid':
+                            case 'SPUTUM GRAM STAIN':
+                            case 'Resistance level of organism against antimicrobial':
+                            case 'Trichomonas vaginalis in microscopy of saline mount':
+                            case 'polymerase chain reaction, human papilloma virus, qualitative':
+                                data.display = getTestName(data.display);
+                                break;
                         }
-                        if (data.display ==='Serum cryptococcal antigen status' ) {
-                            data['display'] =  'Serum Cryptococcal Antigen (CRAG)';
-                        }
+                       
                         if(data.orderReason) {
-                            if (data.orderReason.uuid === '843AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                                data['orderReasonCoded'] = "Confirmation of treatment failure (repeat VL) ";
-                            }
-                            if (data.orderReason.uuid === '1434AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                                data['orderReasonCoded'] = "Pregnancy";
-                            }
-                            if (data.orderReason.uuid === '162080AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                                data['orderReasonCoded'] = "Baseline VL (for infants diagnosed through EID)";
-                            }
-                            if (data.orderReason.uuid === '1259AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                                data['orderReasonCoded'] = "Single Drug Substitution";
-                            }
-                            if (data.orderReason.uuid === '159882AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                                data['orderReasonCoded'] = "Breastfeeding";
-                            }
-                            if (data.orderReason.uuid === '163523AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                                data['orderReasonCoded'] = "Clinical failure";
-                            }
-                            if (data.orderReason.uuid === '161236AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                                data['orderReasonCoded'] = "Routine";
-                            }
-
-                            if (data.orderReason.uuid === '160032AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                                data['orderReasonCoded'] = "Confirmation of persistent low level Viremia (PLLV)";
-                            }
-                            if (data.orderReason.uuid === '1040AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                                data['orderReasonCoded'] = "Initial PCR (6week or first contact)";
-                            }
-                            if (data.orderReason.uuid === '1326AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                                data['orderReasonCoded'] = "2nd PCR (6 months)";
-                            }
-                            if (data.orderReason.uuid === '844AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                                data['orderReasonCoded'] = "3rd PCR (12months)";
-                            }
-                            if (data.orderReason.uuid === '162082AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                                data['orderReasonCoded'] = "Confirmatory PCR and Baseline VL";
-                            }
-                            if (data.orderReason.uuid === '164460AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                                data['orderReasonCoded'] = "Ab test 6 weeks after cessation of breastfeeding";
-                            }
-                            if (data.orderReason.uuid === '164860AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                                data['orderReasonCoded'] = "Ab test at 18 months (1.5 years)";
-                            }
+                            data['orderReasonCoded'] = getTestOrderReason(data.orderReason.uuid);
                         }
-
                     }
-
                 }
                 orders.push(data);
-
             }
             return orders;
         }
 
-        function customiseHivViralLoadObj(panelList) {
+        var testOrderReasonMap = new Map([
+            ['164860AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', 'Ab test at 18 months (1.5 years)'],
+            ['164460AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', 'Ab test 6 weeks after cessation of breastfeeding'],
+            ['162082AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', 'Confirmatory PCR and Baseline VL'],
+            ['844AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', '3rd PCR (12months)'],
+            ['1326AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', '2nd PCR (6 months)'],
+            ['1040AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', 'Initial PCR (6week or first contact)'],
+            ['160032AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', 'Confirmation of persistent low level Viremia (PLLV)'],
+            ['161236AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', 'Routine'],
+            ['163523AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', 'Clinical failure'], 
+            ['159882AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', 'Breastfeeding'],
+            ['1259AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', 'Single Drug Substitution'],
+            ['162080AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', 'Baseline VL (for infants diagnosed through EID)'],
+            ['1434AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', 'Pregnancy'],
+            ['843AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', 'Confirmation of treatment failure (repeat VL) '],
+            ['167390AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', 'Baseline '],
+            ['167387AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', 'Suspected treatment failure '],
+            ['160740AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', 'Return to care after Interrupting treatment for >3months'],
+            ['167527AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', 'Patient on fluconazole maintenance therapy'],
+          ]); 
+        
+        var testNameMap = new Map([
+            ['Tuberculosis polymerase chain reaction with rifampin resistance checking', 'GeneXpert'],
+            ['Serum cryptococcal antigen status', 'Serum Cryptococcal Antigen (CRAG)'],
+            ['SERUM GLUCOSE', 'Random blood sugar'],
+            ['Mycobacterium tuberculosis lipoarabinomannan antigen, urine, rapid', 'TB LAM'],
+            ['SPUTUM GRAM STAIN', 'Gram stain'],
+            ['Resistance level of organism against antimicrobial', 'Antiretroviral Drug Resistance'],
+            ['Trichomonas vaginalis in microscopy of saline mount', 'Wet preparation'],
+            ['polymerase chain reaction, human papilloma virus, qualitative','HPV Test']
+
+
+           
+          ]);
+
+        // function to get the test order reason name given order reason UUID
+        function getTestOrderReason(orderReasonUUID) {
+            return testOrderReasonMap.get(orderReasonUUID);
+        }
+
+         // function to get the custom test name given the test concept name
+         function getTestName(conceptName) {
+            return testNameMap.get(conceptName);
+        }
+
+        function customiseTestNameToDisplayForResultEntry(panelList) {
             var orders = [];
             var l = {};
             var ldl ={};
@@ -407,15 +337,22 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                         if (data.dateActivated ) {
                             data['dateActivated'] = new Date(data.dateActivated );
                         }
-                        if (data.label ==='Tuberculosis polymerase chain reaction with rifampin resistance checking' ) {
-                            data['label'] =  'GeneXpert';
+                        switch (data.display) {
+                            case 'Tuberculosis polymerase chain reaction with rifampin resistance checking':
+                            case 'SERUM GLUCOSE':
+                            case 'Serum cryptococcal antigen status':
+                            case 'Mycobacterium tuberculosis lipoarabinomannan antigen, urine, rapid':
+                            case 'SPUTUM GRAM STAIN':
+                            case 'Resistance level of organism against antimicrobial':
+                            case 'Trichomonas vaginalis in microscopy of saline mount':
+                            case 'polymerase chain reaction, human papilloma virus, qualitative':
+                                data.display = getTestName(data.display);
+                                break;
                         }
-                        if (data.label ==='Serum cryptococcal antigen status' ) {
-                            data['label'] =  'Serum Cryptococcal Antigen (CRAG)';
-                        }
+                        
 
                     if(data.concept ==='856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                        delete data.label;
+                        delete data.display;
                         delete data.rendering;
                          l =
                             {
@@ -429,7 +366,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                             }
                     }
                    else if(data.concept ==='1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                        delete data.label;
+                        delete data.display;
                         delete data.rendering;
                         ldl =
                             {
@@ -457,7 +394,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                             }
                     }
                     else if(data.concept ==='d0a3677f-3b3a-404c-9010-6ec766d7072e') {
-                        delete data.label;
+                        delete data.display;
                         delete data.rendering;
                         cd4Qualitative =
                             {
@@ -507,7 +444,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
             if(!_.isEmpty(vls)) {
                 finalVl['hvVl'] = vls;
-                finalVl['name'] ='HIV viral load';
+                finalVl['display'] ='HIV viral load';
                 orders.push(finalVl);
             }
             if(!_.isEmpty(cd4Res)) {
@@ -517,35 +454,20 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             return orders;
 
         }
-
-
-        function replaceWithUuids(obj, props) {
-            var replaced = angular.extend({}, obj);
-            _.each(props, function(prop) {
-                if (replaced[prop] && replaced[prop].uuid) {
-                    replaced[prop] = replaced[prop].uuid;
-                }
-            });
-            return replaced;
-        }
-
         $scope.loading = false;
 
         $scope.activeTestOrders = { loading: true };
         $scope.pastLabOrders = { loading: true };
-        $scope.draftDrugOrders = [];
-        $scope.dosingTypes = OpenMRS.dosingTypes;
         $scope.showFields = false;
         $scope.showTestFields = false;
 
-        var config = OpenMRS.drugOrdersConfig;
+        var config = OpenMRS.labOrdersConfig;
         var labs = OpenMRS.labTestJsonPayload;
         var enterLabOrderResults = OpenMRS.enterLabOrderResults;
         var pastOrders = OpenMRS.pastLabOrdersResults;
 
 
         $scope.init = function() {
-            $scope.routes = config.routes;
             $scope.careSettings = config.careSettings;
             $scope.careSetting = config.intialCareSetting ?
                 _.findWhere(config.careSettings, { uuid: config.intialCareSetting }) :
@@ -560,45 +482,11 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             });
         }
 
-
-        // functions that affect the overall state of the page
-
-        $scope.setCareSetting = function(careSetting) {
-            // TODO confirm dialog or undo functionality if this is going to discard things
-            $scope.careSetting = careSetting;
-            orderContext.careSetting = $scope.careSetting;
-            loadExistingOrders();
-            $scope.draftDrugOrders = [];
-            $scope.newDraftDrugOrder = OpenMRS.createEmptyDraftOrder(orderContext);
-            $location.search({ patient: config.patient.uuid, careSetting: careSetting.uuid });
-        }
-
-
-        // functions that affect the new order being written
-
-        $scope.addNewDraftOrder = function() {
-            if ($scope.newDraftDrugOrder.getDosingType().validate($scope.newDraftDrugOrder)) {
-                $scope.newDraftDrugOrder.asNeeded = $scope.newDraftDrugOrder.asNeededCondition ? true : false;
-                $scope.draftDrugOrders.push($scope.newDraftDrugOrder);
-                $scope.newDraftDrugOrder = OpenMRS.createEmptyDraftOrder(orderContext);
-                $scope.newOrderForm.$setPristine();
-                // TODO upgrade to angular 1.3 and work on form validation
-                $scope.newOrderForm.$setUntouched();
-            } else {
-                emr.errorMessage("Invalid");
-            }
-        }
-
-        $scope.cancelNewDraftOrder = function() {
-            $scope.newDraftDrugOrder = OpenMRS.createEmptyDraftOrder(orderContext);
-        }
-
-
         // The beginning of lab orders functionality
         $scope.selectedRow = null;
 
         $scope.loadLabPanels = function(panels) {
-            $scope.sampleTypeName =panels.name;
+            $scope.sampleTypeName =panels.display;
             $scope.showFields = true;
             $scope.panelTests = [];
             $scope.panelTypeName = '';
@@ -607,37 +495,13 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
         $scope.loadLabPanelTests = function(tests) {
             var test = filterTestWithDataTypeNA(tests.tests);
-            $scope.panelTypeName = tests.name;
+            $scope.panelTypeName = tests.display;
             $scope.showTestFields = true;
             $scope.panelTests = test;
-            $scope.panelTests = customTestName($scope.panelTests);
+            $scope.panelTests = mapTestNameAndOrderReason($scope.panelTests);
 
         }
 
-        function customTestName (res) {
-            var orders = [];
-            for (var i = 0; i < res.length; ++i) {
-                var data = res[i];
-
-                for (var r in data) {
-                    if (data.hasOwnProperty(r)) {
-
-                        if (data.name ==='Tuberculosis polymerase chain reaction with rifampin resistance checking' ) {
-                            data['name'] =  'GeneXpert';
-                        }
-                        if (data.name ==='Serum cryptococcal antigen status' ) {
-                            data['name'] =  'Serum Cryptococcal Antigen (CRAG)';
-                        }
-
-                    }
-
-                }
-                orders.push(data);
-
-            }
-            return orders;
-
-        }
         $scope.deselectedOrder = function(order) {
             order.selected = false;
             var unchecked = _.filter($scope.filteredOrders, function(o) {
@@ -690,13 +554,35 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
         }
 
         function customizeOrderReasonsToDisplay(test) {
-            // Antibody test
-            if (test.concept === '163722AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'&& config.patient.person.age <= 5) {
-                $scope.OrderReason = $scope.heiAbTestOrderReasons;
-            }
-            // PCR test
-            if (test.concept === '1030AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'&& config.patient.person.age <= 5) {
-                $scope.OrderReason = $scope.heiPCRTestOrderReasons;
+            let testConcept = test.concept;
+            let age = config.patient.person.age;
+              
+            switch (testConcept) {
+                  case '163722AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA': // Antibody test
+                    if (age <= 5) {
+                      $scope.OrderReason = $scope.heiAbTestOrderReasons;
+                    }
+                    break;
+              
+                  case '1030AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA': // PCR test
+                    if (age <= 5) {
+                      $scope.OrderReason = $scope.heiPCRTestOrderReasons;
+                    }
+                    break;
+              
+                  case '5497AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA': // cd4 count
+                  case '730AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA': // cd4%
+                    $scope.OrderReason = $scope.cd4TestOrderReasons;
+                    break;
+              
+                  case '1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA': // VL order reasons
+                  case '856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA':
+                    $scope.OrderReason = $scope.vlOrderReason;
+                    break;
+              
+                  default:
+                    $scope.OrderReason = [];
+                    break;
             }
         }
         
@@ -769,51 +655,60 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
                 encounterRole: config.encounterRole
             };
 
-            var checkVlOrderReason = _.filter($scope.lOrdersPayload, function(o) {
-                return o.concept ==='856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
-                    || o.concept ==='1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
+            var checkVlOrderReason = _.find($scope.lOrdersPayload, function(o) {
+                return o.concept === '856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' || o.concept === '1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
             });
-            var checkCd4OrderReason = _.filter($scope.lOrdersPayload, function(o) {
-                return o.concept ==='730AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
-
+            
+            var checkCd4PercentOrderReason = _.find($scope.lOrdersPayload, function(o) {
+                return o.concept === '730AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
             });
-
-            var checkCd4CountOrderReason = _.filter($scope.lOrdersPayload, function(o) {
-                return o.concept ==='5497AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
-
+            
+            var checkCd4CountOrderReason = _.find($scope.lOrdersPayload, function(o) {
+                return o.concept === '5497AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
             });
 
-
-            if(checkVlOrderReason && checkVlOrderReason[0]) {
-                if ((checkVlOrderReason[0].orderReasonNonCoded === '' || checkVlOrderReason[0].orderReasonNonCoded === null
-                    || checkVlOrderReason[0].orderReasonNonCoded === undefined) && (checkVlOrderReason[0].orderReason === ''
-                    || checkVlOrderReason[0].orderReason === null || checkVlOrderReason[0].orderReason === undefined)) {
-                    $scope.showErrorToast = 'Order reason for HIV viral load is required';
-
+            var checkPCROrderReason = _.find($scope.lOrdersPayload, function(o) {
+                return o.concept === '1030AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
+            });
+            var checkRapidTestOrderReason = _.find($scope.lOrdersPayload, function(o) {
+                return o.concept === '163722AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
+            });
+            
+            if (checkVlOrderReason) {
+                if (!checkVlOrderReason.orderReason) {
+                    $scope.showErrorToast = 'Please select order  reason for HIV viral load is required';
+                    $('#orderError').modal('show');
+                    return;
+                }
+            }
+            
+            if (checkCd4CountOrderReason) {
+                if (!checkCd4CountOrderReason.orderReason) {
+                    $scope.showErrorToast = 'Please select order  reason for CD4 Count is required';
                     $('#orderError').modal('show');
                     return;
                 }
             }
 
-            if(checkCd4CountOrderReason && checkCd4CountOrderReason[0]) {
-                if ((checkCd4CountOrderReason[0].orderReasonNonCoded === '' || checkCd4CountOrderReason[0].orderReasonNonCoded === null ||
-                    checkCd4CountOrderReason[0].orderReasonNonCoded === undefined) && (checkCd4CountOrderReason[0].orderReason === ''
-                    || checkCd4CountOrderReason[0].orderReason === null || checkCd4CountOrderReason[0].orderReason === undefined)) {
-
-                    $scope.showErrorToast = 'Order reason for CD4 Count is required';
-
+            if (checkCd4PercentOrderReason) {
+                if (!checkCd4PercentOrderReason.orderReason) {
+                    $scope.showErrorToast = 'Please select order  reason for CD4% is required';
+                    $('#orderError').modal('show');
+                    return;
+                }
+            }
+            
+            if (checkPCROrderReason) {
+                if (!checkPCROrderReason.orderReason) {
+                    $scope.showErrorToast = 'Please select order reason for PCR is required';
                     $('#orderError').modal('show');
                     return;
                 }
             }
 
-            if(checkCd4OrderReason && checkCd4OrderReason[0]) {
-                if ((checkCd4OrderReason[0].orderReasonNonCoded === '' || checkCd4OrderReason[0].orderReasonNonCoded === null
-                    || checkCd4OrderReason[0].orderReasonNonCoded === undefined) && (checkCd4OrderReason[0].orderReason === ''
-                    || checkCd4OrderReason[0].orderReason === null || checkCd4OrderReason[0].orderReason === undefined)) {
-
-                    $scope.showErrorToast = 'Order reason for CD4% is required';
-
+            if (checkRapidTestOrderReason) {
+                if (!checkRapidTestOrderReason.orderReason) {
+                    $scope.showErrorToast = 'Please select order  reason for Rapid Test is required and patient age should be 5yo and below.';
                     $('#orderError').modal('show');
                     return;
                 }
@@ -979,14 +874,14 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
         }
 
-        $scope.orderSelectedToAddDateActivated = function(order) {
+        $scope.selectOrderToAddDateActivatedReasonOrUrgency = function(order) {
             $scope.titleDate ='Enter Date Order was made';
             $scope.orderReasonNonCoded = '';
             $scope.orderReasonCoded = '';
             $scope.orderDate = '';
             $scope.orderSel = order;
             $scope.orderUrgency = order;
-
+            customizeOrderReasonsToDisplay(order);
 
         }
 
@@ -1137,7 +1032,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
         };
 
-         function cancelOrder () {
+         function cancelSimilarOrder (concept) {
              var reasonForVoidingOrder = document.getElementById("ddlvoidReason");
              $scope.voidOrderReason = reasonForVoidingOrder.options[reasonForVoidingOrder.selectedIndex].value;
 
@@ -1153,10 +1048,10 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
                 for (var r in data) {
                     if (data.hasOwnProperty(r)) {
-                        if(data.concept.uuid === '1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                        if(data.concept.uuid === '1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' && concept === '856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
                             $scope.OrderUuidHvl = data.uuid;
                         }
-                        if(data.concept.uuid === 'd0a3677f-3b3a-404c-9010-6ec766d7072e') {
+                        if(data.concept.uuid === 'd0a3677f-3b3a-404c-9010-6ec766d7072e' && concept == '5497AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
                             $scope.OrderUuidHvl = data.uuid;
                         }
 
@@ -1339,34 +1234,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             });
         }
 
-        /**
-         * Finds the replacement order for a given active order (e.g. the order that will DC or REVISE it)
-         */
-        $scope.replacementFor = function(activeOrder) {
-            var lookAt = $scope.newDraftDrugOrder ?
-                _.union($scope.draftDrugOrders, [$scope.newDraftDrugOrder]) :
-                $scope.draftDrugOrders;
-            return _.findWhere(lookAt, { previousOrder: activeOrder });
-        }
-
-        $scope.replacementForPastOrder = function(pastOrder) {
-            var candidates = _.union($scope.activeTestOrders, $scope.pastLabOrders);
-            return _.find(candidates, function(item) {
-                return item.previousOrder && item.previousOrder.uuid === pastOrder.uuid;
-            });
-        }
-
-        // functions that affect existing active orders
-
-        $scope.discontinueOrder = function(activeOrder) {
-            var dcOrder = activeOrder.createDiscontinueOrder(orderContext);
-            $scope.draftDrugOrders.push(dcOrder);
-            $scope.$broadcast('added-dc-order', dcOrder);
-        };
-
-        $scope.reviseOrder = function(activeOrder) {
-            $scope.newDraftDrugOrder = activeOrder.createRevisionOrder();
-        };
+    
         $scope.voidOrderReason = '';
         $scope.OrderUuid = '';
         $scope.getOrderUuid = function(order) {
@@ -1375,10 +1243,14 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
             $scope.orderConcept = order.concept.uuid;
 
         }
-        $scope.voidAllHivViralLoadOrders = function () {
+        $scope.voidAllSelectedLabOrders = function () {
             $scope.voidActiveLabOrders();
-            if($scope.orderConcept ==='856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' || $scope.orderConcept ==='5497AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
-                cancelOrder();
+            if($scope.orderConcept ==='856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                 // For Viral load, there are two orders created i.e qualitative and quantitave orders
+                cancelSimilarOrder($scope.orderConcept); 
+            } else if( $scope.orderConcept ==='5497AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA') {
+                // For cd4, there are two orders created i.e qualitative and quantitave orders
+                cancelSimilarOrder($scope.orderConcept);
             }
         }
 
@@ -1415,6 +1287,7 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
         $scope.closeModal = function() {
             $scope.voidOrderReason = '';
+            $scope.OrderReason = []
 
             $('#orderUrgency').modal('hide');
             $('#generalMessage').modal('hide');
@@ -1473,19 +1346,29 @@ controller('LabOrdersCtrl', ['$scope', '$window','$rootScope', '$location', '$ti
 
         $scope.orderReasonNonCoded = '';
         $scope.orderReasonCoded = '';
+        
 
         $scope.setOrderUrgency = function() {
             var e = document.getElementById("ddlOrderUrgency");
             $scope.orderUrgency['urgency'] =  e.options[e.selectedIndex].value;
             $scope.orderUrgency['orderReasonNonCoded'] =  $scope.orderReasonNonCoded;
             $scope.orderUrgency['orderReason'] =  $scope.orderReasonCoded;
+            $scope.name  = '';
 
             _.each($scope.OrderReason, function(o) {
                 if (o.uuid === $scope.orderReasonCoded) {
                     $scope.name = o.name;
-
                 }
-                $scope.orderUrgency['orderReasonCodedName'] = $scope.name + ',' + $scope.orderReasonNonCoded;
+
+                if ($scope.name || $scope.orderReasonNonCoded) {
+                    if ($scope.name && $scope.orderReasonNonCoded) {
+                        $scope.orderUrgency['orderReasonCodedName'] = $scope.name + ', ' + $scope.orderReasonNonCoded;
+                    } else if ($scope.name) {
+                        $scope.orderUrgency['orderReasonCodedName'] = $scope.name;
+                    } else {
+                        $scope.orderUrgency['orderReasonCodedName'] = $scope.orderReasonNonCoded;
+                    }
+                }
 
             });
             $scope.filteredOrders.push($scope.orderUrgency);

@@ -9,13 +9,17 @@ import org.openmrs.Obs;
 import org.openmrs.Order;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
+import org.openmrs.PatientIdentifierType;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyacore.RegimenMappingUtils;
 import org.openmrs.module.kenyaemrorderentry.ModuleConstants;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 import org.openmrs.module.kenyaemrorderentry.util.Utils;
+import org.openmrs.module.metadatadeploy.MetadataUtils;
 import org.openmrs.ui.framework.SimpleObject;
+// import org.openmrs.module.kenyaemr.metadata.HivMetadata;
+import org.openmrs.api.AdministrationService;
 
 import java.io.IOException;
 import java.util.Date;
@@ -30,6 +34,8 @@ public abstract class LabWebRequest {
 
     protected static final Log log = LogFactory.getLog(LabWebRequest.class);
     private Integer manifestType; // i.e VL or EID
+    private AdministrationService administrationService = Context.getAdministrationService();
+    final String isKDoD = (administrationService.getGlobalProperty("kenyaemr.isKDoD"));
 
     public LabWebRequest() {
     }
@@ -55,9 +61,17 @@ public abstract class LabWebRequest {
     public ObjectNode baselinePostRequestPayload(Order o, Date dateSampleCollected, Date dateSampleSeparated, String sampleType, String manifestID) {
         Patient patient = o.getPatient();
         ObjectNode test = Utils.getJsonNodeFactory().objectNode();
+        String kdod = "";
 
         String dob = patient.getBirthdate() != null ? Utils.getSimpleDateFormat("yyyy-MM-dd").format(patient.getBirthdate()) : "";
         PatientIdentifier cccNumber = patient.getPatientIdentifier(Utils.getUniquePatientNumberIdentifierType());
+        if(isKDoD.trim().equalsIgnoreCase("true")) {
+            PatientIdentifierType pit = MetadataUtils.existing(PatientIdentifierType.class, "b51ffe55-3e76-44f8-89a2-14f5eaf11079");
+            PatientIdentifier kdodNumber = patient.getPatientIdentifier(pit);
+            if(kdodNumber != null || !StringUtils.isBlank(kdodNumber.getIdentifier())) {
+                kdod = kdodNumber.getIdentifier();
+            }
+        }
         String fullName = "";
 
         if (patient.getGivenName() != null) {
@@ -74,8 +88,14 @@ public abstract class LabWebRequest {
 
         if (manifestType == LabManifest.VL_TYPE) {
 
-            if (cccNumber == null || StringUtils.isBlank(cccNumber.getIdentifier())) {
-                return test;
+            if(isKDoD.trim().equalsIgnoreCase("true")) {
+                if(StringUtils.isBlank(kdod)) {
+                    return test;
+                }
+            } else {
+                if (cccNumber == null || StringUtils.isBlank(cccNumber.getIdentifier())) {
+                    return test;
+                }
             }
             Encounter originalRegimenEncounter = RegimenMappingUtils.getFirstEncounterForProgram(patient, "ARV");
             Encounter currentRegimenEncounter = RegimenMappingUtils.getLastEncounterForProgram(patient, "ARV");
@@ -102,34 +122,42 @@ public abstract class LabWebRequest {
             test.put("dob", dob);
             test.put("sex", patient.getGender().equals("M") ? "1" : patient.getGender().equals("F") ? "2" : "3");
             test.put("order_no", o.getOrderId().toString());
-            test.put("patient_identifier", cccNumber != null ? cccNumber.getIdentifier() : "");
-            test.put("sampletype", sampleType);
+
+            if(isKDoD.trim().equalsIgnoreCase("true")) {
+                test.put("patient_identifier", kdod != null ? kdod : "");
+            } else {
+                test.put("patient_identifier", cccNumber != null ? cccNumber.getIdentifier() : "");
+            }
+            test.put("sampletype", LabOrderDataExchange.getSampleTypeCode(sampleType));
             test.put("patient_name", fullName);
 
             test.put("regimenline", regimenLine);
             test.put("justification", o.getOrderReason() != null ? getOrderReasonCode(o.getOrderReason().getUuid()) : "");
             test.put("datecollected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
-            test.put("sampletype", manifestType.toString());
             test.put("prophylaxis", nascopCode);
             test.put("initiation_date", originalRegimenEncounter != null ? Utils.getSimpleDateFormat("yyyy-MM-dd").format(originalRegimenEncounter.getEncounterDatetime()) : "");
             test.put("dateinitiatedonregimen", currentRegimenEncounter != null ? Utils.getSimpleDateFormat("yyyy-MM-dd").format(currentRegimenEncounter.getEncounterDatetime()) : "");
 
         } else if (manifestType == LabManifest.EID_TYPE) { // we are using 1 for EID and 2 for VL TODO: this block needs to be reviewed
             PatientIdentifier heiNumber = patient.getPatientIdentifier(Utils.getHeiNumberIdentifierType());
-            SimpleObject heiDetailsObject = getHeiDetailsForEidPostObject(patient,o);
+            SimpleObject heiDetailsObject = Utils.getHeiDetailsForEidPostObject(patient,o);
             SimpleObject heiMothersAgeObject = Utils.getHeiMothersAge(patient);
 
             if (heiNumber == null || StringUtils.isBlank(heiNumber.getIdentifier()) || heiDetailsObject == null) {
                 return test;
             }
 
-            if (LabOrderDataExchange.getSystemType() == ModuleConstants.CHAI_SYSTEM) {
-
+            if (LabOrderDataExchange.getSystemType() == ModuleConstants.CHAI_SYSTEM || LabOrderDataExchange.getSystemType() == ModuleConstants.EDARP_SYSTEM) {
+                System.out.println("Creating payload for CHAI or EDARP EID");
                 test.put("dob", dob);
                 test.put("sex", patient.getGender().equals("M") ? "1" : patient.getGender().equals("F") ? "2" : "3");
                 test.put("order_no", o.getOrderId().toString());
-                test.put("patient_identifier", heiNumber != null ? heiNumber.getIdentifier() : "");
-                test.put("sampletype", sampleType);
+                if(isKDoD.trim().equalsIgnoreCase("true")) {
+                    test.put("patient_identifier", kdod != null ? kdod : "");
+                } else {
+                    test.put("patient_identifier", heiNumber != null ? heiNumber.getIdentifier() : "");
+                }
+                test.put("sampletype", LabOrderDataExchange.getSampleTypeCode(sampleType));
                 test.put("patient_name", fullName);
                 test.put("datecollected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
                 test.put("feeding", "yes");
@@ -143,9 +171,13 @@ public abstract class LabWebRequest {
                 test.put("ccc_no", Utils.getMothersUniquePatientNumber(patient) !=null ? Utils.getMothersUniquePatientNumber(patient) : "");
 
             } else if (LabOrderDataExchange.getSystemType() == ModuleConstants.LABWARE_SYSTEM) {
+                System.out.println("Creating payload for labware EID");
                 test.put("sample_type", sampleType);
                 test.put("pat_name", fullName);
                 test.put("patient_name", fullName);
+                test.put("order_no", o.getOrderId().toString());
+                test.put("dob", dob);
+                test.put("sex", patient.getGender().equals("M") ? "1" : patient.getGender().equals("F") ? "2" : "3");
 
                 if(heiDetailsObject !=null) {
                     test.put("infant_prophylaxis", heiDetailsObject.get("prophylaxisAnswer") != null ? heiDetailsObject.get("prophylaxisAnswer").toString() : "");
@@ -161,7 +193,11 @@ public abstract class LabWebRequest {
                 test.put("regimen", "1");
                 test.put("feeding", "yes");
                 test.put("sample_type", "DBS");
-                test.put("hei_id", heiNumber != null ? heiNumber.getIdentifier() : "");
+                if(isKDoD.trim().equalsIgnoreCase("true")) {
+                    test.put("hei_id", kdod != null ? kdod : "");
+                } else {
+                    test.put("hei_id", heiNumber != null ? heiNumber.getIdentifier() : "");
+                }
                 test.put("mother_age", heiMothersAgeObject != null ? heiMothersAgeObject.get("mothersAge").toString() : "" );
                 test.put("mother_ccc", Utils.getMothersUniquePatientNumber(patient) !=null ? Utils.getMothersUniquePatientNumber(patient) : "");
                 test.put("ccc_no",  cccNumber != null ? cccNumber.getIdentifier() : "");
@@ -181,127 +217,4 @@ public abstract class LabWebRequest {
         this.manifestType = manifestType;
     }
 
-    /**
-     * Retrieve HEI details required for a successful post
-     * @param patient
-     * @return HEI details
-     */
-
-    public static SimpleObject getHeiDetailsForEidPostObject(Patient patient,Order o) {
-        SimpleObject object = null;
-        String entryPointAnswer = "";
-        Integer entryPointQuestion = 160540;
-        String prophylaxisAnswer = "";
-        Integer prophylaxisQuestion = 1282;
-        String mothersRegimenAnswer = "";
-        String pcrSampleCodeAnswer = "";
-        String feedingMethodAnswer = "";
-        Integer feedingMethodQuestion = 1151;
-
-        //pcr sample code from lab orders
-        Integer orderReason = o.getOrderReason().getConceptId();
-        if (orderReason.equals(1040)) {
-            pcrSampleCodeAnswer = "1";    //Initial PCR (6week or first contact)
-        }else if (orderReason.equals(1326)) {
-            pcrSampleCodeAnswer = "2";    //2nd PCR (6 months)
-        }else if (orderReason.equals(164860)) {
-            pcrSampleCodeAnswer = "3";    //3rd PCR (12months)
-        }else if (orderReason.equals(162082)) {
-            pcrSampleCodeAnswer = "3";    //Confirmatory PCR and Baseline VL
-        }
-        //Get encounter based variables from hei enrollment and followup
-        Encounter lastHeiEnrollmentEncounter = Utils.lastEncounter(Context.getPatientService().getPatient(o.getPatient().getPatientId()), Context.getEncounterService().getEncounterTypeByUuid("415f5136-ca4a-49a8-8db3-f994187c3af6"));   //last Hei Enrollement encounter
-        Encounter lastHeiCWCFollowupEncounter = Utils.lastEncounter(Context.getPatientService().getPatient(o.getPatient().getPatientId()), Context.getEncounterService().getEncounterTypeByUuid("bcc6da85-72f2-4291-b206-789b8186a021"));   //last Hei CWC Folowup encounter
-        if (lastHeiEnrollmentEncounter != null) {
-            //Entry point
-            for (Obs obs : lastHeiEnrollmentEncounter.getObs()) {
-                if (obs.getConcept().getConceptId().equals(entryPointQuestion)) {
-                    Integer heitEntryPointObsAnswer = obs.getValueCoded().getConceptId();
-                    if (heitEntryPointObsAnswer.equals(160542)) {
-                        entryPointAnswer = "2";    //OPD
-                    } else if (heitEntryPointObsAnswer.equals(160456)) {
-                        entryPointAnswer = "3";      //Maternity
-                    } else if (heitEntryPointObsAnswer.equals(162050)) {
-                        entryPointAnswer = "4";      //CCC
-                    } else if (heitEntryPointObsAnswer.equals(160538)) {
-                        entryPointAnswer = "5";      //MCH/PMTCT
-                    } else if (heitEntryPointObsAnswer.equals(5622)) {
-                        entryPointAnswer = "6";      //Other
-                    }
-                }
-                //Prophylaxis
-                if (obs.getConcept().getConceptId().equals(prophylaxisQuestion)) {
-                    Integer heiProphylaxisObsAnswer = obs.getValueCoded().getConceptId();
-                    if (heiProphylaxisObsAnswer.equals(80586)) {
-                        prophylaxisAnswer = "1";    //AZT for 6 weeks + NVP for 12 weeks
-                    } else if (heiProphylaxisObsAnswer.equals(1652)) {
-                        prophylaxisAnswer = "2";      //AZT for 6 weeks + NVP for >12 weeks
-                    } else if (heiProphylaxisObsAnswer.equals(1149)) {
-                        prophylaxisAnswer = "3";      //None
-                    } else if (heiProphylaxisObsAnswer.equals(1107)) {
-                        prophylaxisAnswer = "4";      //Other
-                    }
-                }
-
-            }
-        }
-
-        if (lastHeiCWCFollowupEncounter != null) {
-            for (Obs obs : lastHeiCWCFollowupEncounter.getObs()) {
-                // Baby feeding method
-                if (obs.getConcept().getConceptId().equals(feedingMethodQuestion)) {
-                    Integer heiBabyFeedingObsAnswer = obs.getValueCoded().getConceptId();
-                    if (heiBabyFeedingObsAnswer.equals(5526)) {
-                        feedingMethodAnswer = "EBF";    //Exclusive Breast Feeding
-                    } else if (heiBabyFeedingObsAnswer.equals(1595)) {
-                        feedingMethodAnswer = "ERF";      //Exclusive Replacement Feeding
-                    } else if (heiBabyFeedingObsAnswer.equals(6046)) {
-                        feedingMethodAnswer = "MF";      //MF= Mixed Feeding
-                    }
-                }
-            }
-        }
-
-        SimpleObject vlObject = Utils.getMothersLastViralLoad(o.getPatient());
-        String validMothersVL = "";
-        if(vlObject !=null){
-            Date lastVLResultDate = (Date) vlObject.get("lastVlDate");
-            if (Utils.daysBetween(lastVLResultDate, new Date()) <= 183) {
-                validMothersVL = vlObject.get("lastVl").toString();
-            }
-        }
-
-        //pmtct_regimen_of_mother
-        SimpleObject mothersRegimenObject = Utils.getHeiMothersCurrentRegimen(o.getPatient());
-        String currentMothersRegimen = "";
-        if(mothersRegimenObject !=null){
-            currentMothersRegimen = mothersRegimenObject.get("mothersCurrentRegimen").toString();
-            if (currentMothersRegimen.equals("AZT/3TC/NVP")) {
-                mothersRegimenAnswer = "PM3";    //PM3= AZT+3TC+NVP
-            } else if (currentMothersRegimen.equals("AZT/3TC/EFV")) {
-                mothersRegimenAnswer = "PM4";      //AZT+ 3TC+ EFV
-            } else if (currentMothersRegimen.equals("AZT/3TC/LPV/r")) {
-                mothersRegimenAnswer = "PM5";      //AZT+3TC+ LPV/r
-            } else if (currentMothersRegimen.equals("TDF/3TC/NVP")) {
-                mothersRegimenAnswer = "PM6";     //TDC+3TC+NVP
-            } else if (currentMothersRegimen.equals("TDF/3TC/EFV")) {
-                mothersRegimenAnswer = "PM9";     //TDF+3TC+EFV
-            } else if (currentMothersRegimen.equals("AZT/3TC/ATV/r")) {
-                mothersRegimenAnswer = "PM10";     //AZT+3TC+ATV/r
-            } else if (currentMothersRegimen.equals("TDF/3TC/ATV/r")) {
-                mothersRegimenAnswer = "PM11";     //TDF+3TC+ATV/r
-            } else if (currentMothersRegimen.equals("TDF/3TC/ATV/r")) {
-                mothersRegimenAnswer = "PM11";     //TDF+3TC+ATV/r
-            }
-        }
-
-        object = SimpleObject.create("entryPointAnswer", entryPointAnswer,
-                                      "prophylaxisAnswer", prophylaxisAnswer,
-                                      "mothersRegimenAnswer", mothersRegimenAnswer,
-                                      "pcrSampleCodeAnswer", pcrSampleCodeAnswer,
-                                      "feedingMethodAnswer", feedingMethodAnswer,
-                                      "validMothersVL", validMothersVL);
-        return object;
-       }
-
-    }
+}

@@ -23,6 +23,7 @@ import org.apache.commons.lang.WordUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Encounter;
 import org.openmrs.Patient;
+import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyacore.RegimenMappingUtils;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
@@ -31,6 +32,8 @@ import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 import org.openmrs.module.kenyaemrorderentry.util.Utils;
 import org.openmrs.ui.framework.SimpleObject;
+import org.openmrs.PatientIdentifier;
+import org.openmrs.PatientIdentifierType;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -92,9 +95,9 @@ public class ViralLoadLabManifestReport {
         document.add(new Paragraph("\n"));
         document.add(new Paragraph("MINISTRY OF HEALTH").setTextAlignment(TextAlignment.CENTER).setFontSize(12));
         document.add(new Paragraph("Viral Load Request Form").setTextAlignment(TextAlignment.CENTER).setBold().setFontSize(16));
-        document.add(new Paragraph("Manifest/Shipping ID: " + manifest.getIdentifier()).setTextAlignment(TextAlignment.LEFT).setBold().setFontSize(10).setFont(courier));
+        document.add(new Paragraph("Manifest/Shipping ID: " + (manifest.getIdentifier() != null ?  manifest.getIdentifier() : "")).setTextAlignment(TextAlignment.LEFT).setBold().setFontSize(10).setFont(courier));
 
-        Table manifestMetadata = new Table(4);
+        Table manifestMetadata = new Table(4); // The number of columns in the manifest form (with manifest HEADER)
         manifestMetadata.setWidth(UnitValue.createPercentValue(100));
         manifestMetadata.setFont(font);
 
@@ -162,7 +165,7 @@ public class ViralLoadLabManifestReport {
 
         document.add(manifestMetadata);
 
-        Table table = new Table(12);
+        Table table = new Table(14); // The number of columns in the manifest form (with manifest DATA)
         table.setWidth(UnitValue.createPercentValue(100));
         table.setFont(font);
 
@@ -182,7 +185,7 @@ public class ViralLoadLabManifestReport {
         table.addHeaderCell(new Paragraph("Patient Name").setBold());
 
         Paragraph cccNumberCol = new Paragraph();
-        Text cccNoText = new Text("CCC No \n").setBold();
+        Text cccNoText = new Text("CCC/KDOD No \n").setBold();
         Text cccNoDetail1 = new Text("Indicate full ccc number of the\n").setItalic().setFontSize(8);
         Text cccNoDetail2 = new Text("clients as it appears in the patient\n").setItalic().setFontSize(8);
         Text cccNoDetail3 = new Text("file. (MFL-XXXXX)\n").setItalic().setFontSize(8);
@@ -191,6 +194,15 @@ public class ViralLoadLabManifestReport {
         cccNumberCol.add(cccNoDetail2);
         cccNumberCol.add(cccNoDetail3);
         table.addHeaderCell(cccNumberCol);
+
+        Paragraph recencyNumberCol = new Paragraph();
+        Text recencyNoText = new Text("Recency No \n").setBold();
+        Text recencyNoDetail1 = new Text("RECMF#### \n").setItalic().setFontSize(8);
+        recencyNumberCol.add(recencyNoText);
+        recencyNumberCol.add(recencyNoDetail1);
+        table.addHeaderCell(recencyNumberCol);
+
+        table.addHeaderCell(new Paragraph("Justification \ncode").setBold().setTextAlignment(TextAlignment.CENTER));
 
         Paragraph dobCol = new Paragraph();
         Text dobText = new Text("DOB \n").setBold();
@@ -214,8 +226,8 @@ public class ViralLoadLabManifestReport {
         table.addHeaderCell(new Paragraph("Date & time \nof separation \n/centrifugation").setBold().setTextAlignment(TextAlignment.CENTER));
         table.addHeaderCell(new Paragraph("Date \nstarted \non ART").setBold().setTextAlignment(TextAlignment.CENTER));
         table.addHeaderCell(new Paragraph("Current \nART \nRegimen").setBold().setTextAlignment(TextAlignment.CENTER));
-        table.addHeaderCell(new Paragraph("Date \ninitiated \non \ncurrent \nRegimen").setBold().setTextAlignment(TextAlignment.CENTER));
-        table.addHeaderCell(new Paragraph("Justification \ncode").setBold().setTextAlignment(TextAlignment.CENTER));
+        table.addHeaderCell(new Paragraph("Date \ninitiated \non \ncurrent \nRegimen").setBold().setTextAlignment(TextAlignment.CENTER));        
+        table.addHeaderCell(new Paragraph("Rejection \n(for reason select from code below)").setBold().setTextAlignment(TextAlignment.CENTER));
         return table;
     }
 
@@ -232,6 +244,8 @@ public class ViralLoadLabManifestReport {
 
     private void addManifestRow(LabManifestOrder sample, Table table) {
 
+        AdministrationService administrationService = Context.getAdministrationService();
+        final String isKDoD = (administrationService.getGlobalProperty("kenyaemr.isKDoD"));
         Patient patient = sample.getOrder().getPatient();
         String fullName = patient.getGivenName().concat(" ").concat(
                 patient.getFamilyName() != null ? sample.getOrder().getPatient().getFamilyName() : ""
@@ -254,7 +268,28 @@ public class ViralLoadLabManifestReport {
         }
 
         table.addCell(new Paragraph(WordUtils.capitalizeFully(fullName))).setFontSize(10);
-        table.addCell(new Paragraph(patient.getPatientIdentifier(Utils.getUniquePatientNumberIdentifierType()).getIdentifier())).setFontSize(10);
+
+        if(isKDoD.trim().equalsIgnoreCase("true")) {
+            String uniqueNumber = patient.getPatientIdentifier(Utils.getKDODIdentifierType()) != null ? patient.getPatientIdentifier(Utils.getKDODIdentifierType()).getIdentifier() : "";
+            table.addCell(new Paragraph(uniqueNumber)).setFontSize(10);
+        } else {
+            String uniqueNumber = patient.getPatientIdentifier(Utils.getUniquePatientNumberIdentifierType()) != null ? patient.getPatientIdentifier(Utils.getKDODIdentifierType()).getIdentifier() : "";
+            table.addCell(new Paragraph(uniqueNumber)).setFontSize(10);
+        }
+
+        //Add Recency and Justification
+        String recencyIdentifier = "";
+        PatientIdentifier recencyPatientIdentifier = null;
+        PatientIdentifierType recencyIdentifierType = Utils.getRecencyIdentifierType();
+        if(recencyIdentifierType != null) {
+            recencyPatientIdentifier = patient.getPatientIdentifier(recencyIdentifierType);
+            if(recencyPatientIdentifier != null) {
+                recencyIdentifier = recencyPatientIdentifier.getIdentifier();
+            }
+        }
+        table.addCell(new Paragraph(recencyIdentifier)).setFontSize(10);
+        table.addCell(new Paragraph(sample.getOrder().getOrderReason() != null ? LabOrderDataExchange.getOrderReasonCode(sample.getOrder().getOrderReason().getUuid()) : "")).setFontSize(10);
+
         table.addCell(new Paragraph(Utils.getSimpleDateFormat("dd/MM/yyyy").format(sample.getOrder().getPatient().getBirthdate()))).setFontSize(10);
         table.addCell(new Paragraph(sample.getOrder().getPatient().getGender())).setFontSize(10);
         if (patient.getGender().equals("F")) {
@@ -268,8 +303,9 @@ public class ViralLoadLabManifestReport {
         table.addCell(new Paragraph(originalRegimenEncounter != null ? Utils.getSimpleDateFormat("dd/MM/yyyy").format(originalRegimenEncounter.getEncounterDatetime()) : "")).setFontSize(10);
         table.addCell(new Paragraph(nascopCode)).setFontSize(10);
         table.addCell(new Paragraph(currentRegimenEncounter != null ? Utils.getSimpleDateFormat("dd/MM/yyyy").format(currentRegimenEncounter.getEncounterDatetime()) : "")).setFontSize(10);
-        table.addCell(new Paragraph(sample.getOrder().getOrderReason() != null ? LabOrderDataExchange.getOrderReasonCode(sample.getOrder().getOrderReason().getUuid()) : "")).setFontSize(10);
-
+        
+        // Add Rejection
+        table.addCell(new Paragraph("")).setFontSize(10);
     }
 
     public LabManifest getManifest() {

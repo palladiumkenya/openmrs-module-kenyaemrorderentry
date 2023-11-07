@@ -11,9 +11,12 @@ import org.joda.time.Days;
 import org.openmrs.*;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyacore.RegimenMappingUtils;
+import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
+import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.metadatadeploy.MetadataUtils;
 import org.openmrs.ui.framework.SimpleObject;
 import org.openmrs.util.PrivilegeConstants;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLException;
@@ -35,8 +38,10 @@ public class Utils {
 
     public static String UNIQUE_PATIENT_NUMBER = "05ee9cf4-7242-4a17-b4d4-00f707265c8a";
     public static final String HEI_UNIQUE_NUMBER = "0691f522-dd67-4eeb-92c8-af5083baf338";
+    public static final String KDOD_NUMBER = "b51ffe55-3e76-44f8-89a2-14f5eaf11079";
     static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd-MMM-yyyy");
     public static final String MCH_MOTHER_SERVICE_PROGRAM = "b5d9e05f-f5ab-4612-98dd-adb75438ed34";
+    public static final String RECENCY_ID = "fd52829a-75d2-4732-8e43-4bff8e5b4f1a";
 
     /**
      * Gets the PatientIdentifierType for a patient UPN
@@ -45,7 +50,15 @@ public class Utils {
      */
     public static PatientIdentifierType getUniquePatientNumberIdentifierType() {
         return Context.getPatientService().getPatientIdentifierTypeByUuid(UNIQUE_PATIENT_NUMBER);
+    }
 
+    /**
+     * Gets the PatientIdentifierType for a patient RECENCY
+     *
+     * @return
+     */
+    public static PatientIdentifierType getRecencyIdentifierType() {
+        return Context.getPatientService().getPatientIdentifierTypeByUuid(RECENCY_ID);
     }
 
     /**
@@ -56,6 +69,44 @@ public class Utils {
     public static PatientIdentifierType getHeiNumberIdentifierType() {
         return Context.getPatientService().getPatientIdentifierTypeByUuid(HEI_UNIQUE_NUMBER);
 
+    }
+
+    /**
+     * Gets the PatientIdentifierType for a patient KDOD Number
+     *
+     * @return
+     */
+    public static PatientIdentifierType getKDODIdentifierType() {
+        return Context.getPatientService().getPatientIdentifierTypeByUuid(KDOD_NUMBER);
+
+    }
+
+    public static Integer getTotalSamplesInAManifest(LabManifest labManifest) {
+        Integer ret = 0;
+        KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
+        ret = kenyaemrOrdersService.countTotalSamples(labManifest);
+        return(ret);
+    }
+
+    public static Integer getSamplesSuppressedInAManifest(LabManifest labManifest) {
+        Integer ret = 0;
+        KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
+        ret = kenyaemrOrdersService.countSamplesSuppressed(labManifest);
+        return(ret);
+    }
+
+    public static Integer getSamplesUnsuppressedInAManifest(LabManifest labManifest) {
+        Integer ret = 0;
+        KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
+        ret = kenyaemrOrdersService.countSamplesUnsuppressed(labManifest);
+        return(ret);
+    }
+
+    public static Integer getSamplesRejectedInAManifest(LabManifest labManifest) {
+        Integer ret = 0;
+        KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
+        ret = kenyaemrOrdersService.countSamplesRejected(labManifest);
+        return(ret);
     }
 
     /**
@@ -438,10 +489,42 @@ public class Utils {
         return null;
     }
 
+    /**
+     * Get date difference between two dates (in days)
+     * @param date1
+     * @param date2
+     * @return
+     */
     public static int daysBetween(Date date1, Date date2) {
         DateTime d1 = new DateTime(date1.getTime());
         DateTime d2 = new DateTime(date2.getTime());
         return Days.daysBetween(d1, d2).getDays();
+    }
+
+    /**
+     * Gets the integer value of a string, otherwise returns zero
+     * @param val
+     * @return
+     */
+    public static int getIntegerValue(String val) {
+        int ret = 0;
+        try {
+            ret = (int) Math.ceil(Double.parseDouble(val));
+        } catch(Exception ex) {}
+        return(ret);
+    }
+
+    /**
+     * Gets the long value of a string, otherwise returns zero
+     * @param val
+     * @return
+     */
+    public static long getLongValue(String val) {
+        long ret = 0;
+        try {
+            ret = (long) Math.ceil(Double.parseDouble(val));
+        } catch(Exception ex) {}
+        return(ret);
     }
 
     /**
@@ -509,6 +592,129 @@ public class Utils {
                 null,
                 SSLConnectionSocketFactory.getDefaultHostnameVerifier());
         return sslsf;
+    }
+
+    /**
+     * Retrieve HEI details required for a successful post
+     * @param patient
+     * @return HEI details
+     */
+
+    public static SimpleObject getHeiDetailsForEidPostObject(Patient patient,Order order) {
+        SimpleObject object = null;
+        String entryPointAnswer = "";
+        Integer entryPointQuestion = 160540;
+        String prophylaxisAnswer = "";
+        Integer prophylaxisQuestion = 1282;
+        String mothersRegimenAnswer = "";
+        String pcrSampleCodeAnswer = "";
+        String feedingMethodAnswer = "";
+        Integer feedingMethodQuestion = 1151;
+
+        //pcr sample code from lab orders
+        Integer orderReason = order.getOrderReason().getConceptId();
+        if (orderReason.equals(1040)) {
+            pcrSampleCodeAnswer = "1";    //Initial PCR (6week or first contact)
+        }else if (orderReason.equals(1326)) {
+            pcrSampleCodeAnswer = "2";    //2nd PCR (6 months)
+        }else if (orderReason.equals(164860)) {
+            pcrSampleCodeAnswer = "3";    //3rd PCR (12months)
+        }else if (orderReason.equals(162082)) {
+            pcrSampleCodeAnswer = "3";    //Confirmatory PCR and Baseline VL
+        }
+        //Get encounter based variables from hei enrollment and followup
+        Encounter lastHeiEnrollmentEncounter = Utils.lastEncounter(Context.getPatientService().getPatient(order.getPatient().getPatientId()), Context.getEncounterService().getEncounterTypeByUuid("415f5136-ca4a-49a8-8db3-f994187c3af6"));   //last Hei Enrollement encounter
+        Encounter lastHeiCWCFollowupEncounter = Utils.lastEncounter(Context.getPatientService().getPatient(order.getPatient().getPatientId()), Context.getEncounterService().getEncounterTypeByUuid("bcc6da85-72f2-4291-b206-789b8186a021"));   //last Hei CWC Folowup encounter
+        if (lastHeiEnrollmentEncounter != null) {
+            //Entry point
+            for (Obs obs : lastHeiEnrollmentEncounter.getObs()) {
+                if (obs.getConcept().getConceptId().equals(entryPointQuestion)) {
+                    Integer heitEntryPointObsAnswer = obs.getValueCoded().getConceptId();
+                    if (heitEntryPointObsAnswer.equals(160542)) {
+                        entryPointAnswer = "2";    //OPD
+                    } else if (heitEntryPointObsAnswer.equals(160456)) {
+                        entryPointAnswer = "3";      //Maternity
+                    } else if (heitEntryPointObsAnswer.equals(162050)) {
+                        entryPointAnswer = "4";      //CCC
+                    } else if (heitEntryPointObsAnswer.equals(160538)) {
+                        entryPointAnswer = "5";      //MCH/PMTCT
+                    } else if (heitEntryPointObsAnswer.equals(5622)) {
+                        entryPointAnswer = "6";      //Other
+                    }
+                }
+                //Prophylaxis
+                if (obs.getConcept().getConceptId().equals(prophylaxisQuestion)) {
+                    Integer heiProphylaxisObsAnswer = obs.getValueCoded().getConceptId();
+                    if (heiProphylaxisObsAnswer.equals(80586)) {
+                        prophylaxisAnswer = "1";    //AZT for 6 weeks + NVP for 12 weeks
+                    } else if (heiProphylaxisObsAnswer.equals(1652)) {
+                        prophylaxisAnswer = "2";      //AZT for 6 weeks + NVP for >12 weeks
+                    } else if (heiProphylaxisObsAnswer.equals(1149)) {
+                        prophylaxisAnswer = "3";      //None
+                    } else if (heiProphylaxisObsAnswer.equals(1107)) {
+                        prophylaxisAnswer = "4";      //Other
+                    }
+                }
+
+            }
+        }
+
+        if (lastHeiCWCFollowupEncounter != null) {
+            for (Obs obs : lastHeiCWCFollowupEncounter.getObs()) {
+                // Baby feeding method
+                if (obs.getConcept().getConceptId().equals(feedingMethodQuestion)) {
+                    Integer heiBabyFeedingObsAnswer = obs.getValueCoded().getConceptId();
+                    if (heiBabyFeedingObsAnswer.equals(5526)) {
+                        feedingMethodAnswer = "EBF";    //Exclusive Breast Feeding
+                    } else if (heiBabyFeedingObsAnswer.equals(1595)) {
+                        feedingMethodAnswer = "ERF";      //Exclusive Replacement Feeding
+                    } else if (heiBabyFeedingObsAnswer.equals(6046)) {
+                        feedingMethodAnswer = "MF";      //MF= Mixed Feeding
+                    }
+                }
+            }
+        }
+
+        SimpleObject vlObject = Utils.getMothersLastViralLoad(order.getPatient());
+        String validMothersVL = "";
+        if(vlObject !=null){
+            Date lastVLResultDate = (Date) vlObject.get("lastVlDate");
+            if (Utils.daysBetween(lastVLResultDate, new Date()) <= 183) {
+                validMothersVL = vlObject.get("lastVl").toString();
+            }
+        }
+
+        //pmtct_regimen_of_mother
+        SimpleObject mothersRegimenObject = Utils.getHeiMothersCurrentRegimen(order.getPatient());
+        String currentMothersRegimen = "";
+        if(mothersRegimenObject !=null){
+            currentMothersRegimen = mothersRegimenObject.get("mothersCurrentRegimen").toString();
+            if (currentMothersRegimen.equals("AZT/3TC/NVP")) {
+                mothersRegimenAnswer = "PM3";    //PM3= AZT+3TC+NVP
+            } else if (currentMothersRegimen.equals("AZT/3TC/EFV")) {
+                mothersRegimenAnswer = "PM4";      //AZT+ 3TC+ EFV
+            } else if (currentMothersRegimen.equals("AZT/3TC/LPV/r")) {
+                mothersRegimenAnswer = "PM5";      //AZT+3TC+ LPV/r
+            } else if (currentMothersRegimen.equals("TDF/3TC/NVP")) {
+                mothersRegimenAnswer = "PM6";     //TDC+3TC+NVP
+            } else if (currentMothersRegimen.equals("TDF/3TC/EFV")) {
+                mothersRegimenAnswer = "PM9";     //TDF+3TC+EFV
+            } else if (currentMothersRegimen.equals("AZT/3TC/ATV/r")) {
+                mothersRegimenAnswer = "PM10";     //AZT+3TC+ATV/r
+            } else if (currentMothersRegimen.equals("TDF/3TC/ATV/r")) {
+                mothersRegimenAnswer = "PM11";     //TDF+3TC+ATV/r
+            } else if (currentMothersRegimen.equals("TDF/3TC/ATV/r")) {
+                mothersRegimenAnswer = "PM11";     //TDF+3TC+ATV/r
+            }
+        }
+
+        object = SimpleObject.create("entryPointAnswer", entryPointAnswer,
+                                      "prophylaxisAnswer", prophylaxisAnswer,
+                                      "mothersRegimenAnswer", mothersRegimenAnswer,
+                                      "pcrSampleCodeAnswer", pcrSampleCodeAnswer,
+                                      "feedingMethodAnswer", feedingMethodAnswer,
+                                      "validMothersVL", validMothersVL);
+        return object;
     }
 }
 

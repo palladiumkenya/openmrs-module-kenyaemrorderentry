@@ -9,17 +9,25 @@
     ]
 
     def manifestCategories = [
-            [label: "Draft", iconProvider: "kenyaui", icon: "", label: "Draft", href: ui.pageLink("kenyaemrorderentry", "orders/labOrdersManifestHome")],
+            [label: "Summary", iconProvider: "kenyaui", icon: "", label: "Summary", href: ui.pageLink("kenyaemrorderentry", "orders/labOrdersManifestHome")],
+            [label: "Draft", iconProvider: "kenyaui", icon: "", label: "Draft", href: ui.pageLink("kenyaemrorderentry", "orders/labOrdersDraftManifestHome")],
             [label: "Ready to send", iconProvider: "kenyaui", icon: "", label: "Ready to send", href: ""],
             [label: "On hold", iconProvider: "kenyaui", icon: "", label: "On hold", href: ui.pageLink("kenyaemrorderentry", "orders/labOrdersOnHoldManifestHome")],
+            [label: "Sending", iconProvider: "kenyaui", icon: "", label: "Sending", href: ui.pageLink("kenyaemrorderentry", "orders/labOrdersSendingManifestHome")],
             [label: "Submitted", iconProvider: "kenyaui", icon: "", label: "Submitted", href: ui.pageLink("kenyaemrorderentry", "orders/labOrdersSubmittedManifestHome")],
+            [label: "Incomplete With Errors", iconProvider: "kenyaui", icon: "", label: "Incomplete With Errors", href: ui.pageLink("kenyaemrorderentry", "orders/labOrdersIncompleteWithErrorResultsManifestHome")],
             [label: "Incomplete results", iconProvider: "kenyaui", icon: "", label: "Incomplete results", href: ui.pageLink("kenyaemrorderentry", "orders/labOrdersIncompleteResultManifestHome")],
+            [label: "Complete With Errors", iconProvider: "kenyaui", icon: "", label: "Complete With Errors", href: ui.pageLink("kenyaemrorderentry", "orders/labOrdersCompleteWithErrorResultsManifestHome")],
             [label: "Complete results", iconProvider: "kenyaui", icon: "", label: "Complete results", href: ""],
     ]
 
     def actionRequired = [
             [label: "Collect new sample", iconProvider: "kenyaui", icon: "", label: "Collect new sample", href: ui.pageLink("kenyaemrorderentry", "orders/manifestOrdersCollectSampleHome")],
             [label: "Missing samples", iconProvider: "kenyaui", icon: "", label: "Missing samples", href: ui.pageLink("kenyaemrorderentry", "orders/manifestOrdersMissingSamplesHome")],
+    ]
+
+    def configuration = [
+            [label: "Settings", iconProvider: "kenyaui", icon: "", label: "Settings", href: ui.pageLink("kenyaemrorderentry", "orders/settings")],
     ]
 %>
 <style>
@@ -92,10 +100,14 @@ tr:nth-child(even) {background-color: #f2f2f2;}
 .viewButton {
     background-color: cadetblue;
     color: white;
+    margin: 5px;
+    padding: 5px;
 }
 .editButton {
     background-color: cadetblue;
     color: white;
+    margin: 5px;
+    padding: 5px;
 }
 .viewButton:hover {
     background-color: steelblue;
@@ -118,6 +130,9 @@ tr:nth-child(even) {background-color: #f2f2f2;}
     ${ui.includeFragment("kenyaui", "widget/panelMenu", [heading: "Back", items: menuItems])}
     ${ui.includeFragment("kenyaui", "widget/panelMenu", [heading: "Manifest status", items: manifestCategories])}
     ${ui.includeFragment("kenyaui", "widget/panelMenu", [heading: "Action required", items: actionRequired])}
+    <% if(userHasSettingsEditRole) { %>
+        ${ui.includeFragment("kenyaui", "widget/panelMenu", [heading: "Configuration", items: configuration])}
+    <% } %>
 </div>
 
 <div class="ke-page-content">

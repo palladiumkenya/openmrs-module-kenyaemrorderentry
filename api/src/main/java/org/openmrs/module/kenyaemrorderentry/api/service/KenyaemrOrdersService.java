@@ -6,17 +6,24 @@ import org.openmrs.api.OpenmrsService;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 import org.openmrs.module.reporting.common.DurationUnit;
+import org.openmrs.ui.framework.SimpleObject;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
 
 public interface KenyaemrOrdersService extends OpenmrsService {
+    void reprocessLabManifest(Integer manifestId);
     LabManifest saveLabOrderManifest(LabManifest labManifest);
     Long getLastManifestID();
     List<LabManifest> getLabOrderManifest();
     List<LabManifest> getLabOrderManifest(String status);
     LabManifest getLabOrderManifestById(Integer id);
+    
+    LabManifest getLabManifestById(Integer manId);
+    String getLabManifestStatusByIdSQL(Integer manID);
+    List<SimpleObject> getLabManifestSummaryGraphSQL();
+
     LabManifest getLabOrderManifestByManifestType(Integer manifestType);
     LabManifest getLastLabOrderManifest();
     LabManifest getLabOrderManifestByStatus(String status);
@@ -46,11 +53,28 @@ public interface KenyaemrOrdersService extends OpenmrsService {
     Long countLabManifestOrdersToSend(LabManifest labManifestOrder);
     Cohort getPatientsWithCadre(boolean includeTroupes, boolean includeCivilians);
 
+    Integer countTotalSamples(LabManifest labManifest);
+    Integer countSamplesSuppressed(LabManifest labManifest);
+    Integer countSamplesUnsuppressed(LabManifest labManifest);
+    Integer countSamplesRejected(LabManifest labManifest);
+
+    // Start cached data for summary form
+    Long countTotalDraftManifests();
+    Long countTotalManifestsOnHold();
+    Long countTotalReadyToSendManifests();
+    Long countTotalManifestsOnSending();
+    Long countTotalSubmittedManifests();
+    Long countTotalIncompleteManifests();
+    Long countTotalManifestsIncompleteWithErrors();
+    Long countTotalErrorsOnIncompleteManifests();
+    Long countTotalCompleteManifests();
+    Long countTotalManifestsCompleteWithErrors();
+    Long countTotalErrorsOnCompleteManifests();
+
     //Patient contact dimensions service methods
 
-    public Cohort getPatientContactWithGender(boolean includeMales, boolean includeFemales, boolean includeUnknownGender);
-    public Cohort getPatientContactWithAgeRange(Integer minAge, DurationUnit minAgeUnit, Integer maxAge, DurationUnit maxAgeUnit, boolean unknownAgeIncluded, Date effectiveDate);
+    Cohort getPatientContactWithGender(boolean includeMales, boolean includeFemales, boolean includeUnknownGender);
+    Cohort getPatientContactWithAgeRange(Integer minAge, DurationUnit minAgeUnit, Integer maxAge, DurationUnit maxAgeUnit, boolean unknownAgeIncluded, Date effectiveDate);
 
     //End of Patient contact dimensions service methods
-
 }

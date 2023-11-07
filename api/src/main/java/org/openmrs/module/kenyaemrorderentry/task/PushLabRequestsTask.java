@@ -4,6 +4,7 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemrorderentry.ModuleConstants;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.ChaiSystemWebRequest;
+import org.openmrs.module.kenyaemrorderentry.labDataExchange.EdarpSystemWebRequest;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabWebRequest;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabwareSystemWebRequest;
@@ -47,9 +48,14 @@ public class PushLabRequestsTask extends AbstractTask {
                 LabWebRequest labSystemConnectionRequest;
 
                 if (LabOrderDataExchange.getSystemType() == ModuleConstants.CHAI_SYSTEM) {
+                    // System.out.println("Order Entry: Using CHAI System");
                     labSystemConnectionRequest = new ChaiSystemWebRequest();
                 } else if (LabOrderDataExchange.getSystemType() == ModuleConstants.LABWARE_SYSTEM){
+                    // System.out.println("Order Entry: Using LABWARE System");
                     labSystemConnectionRequest = new LabwareSystemWebRequest();
+                } else if (LabOrderDataExchange.getSystemType() == ModuleConstants.EDARP_SYSTEM){
+                    // System.out.println("Order Entry: Using EDARP System");
+                    labSystemConnectionRequest = new EdarpSystemWebRequest();
                 } else {
                     System.out.println("LAB POST: No lab system has been configured. Please configure the global properties");
                     return;

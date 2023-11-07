@@ -146,28 +146,32 @@ public class ChaiSystemWebRequest extends LabWebRequest {
 
             if (statusCode != 201 && statusCode != 200 && statusCode != 403 && statusCode != 500) { // skip for status code 422: unprocessable entity, and status code 403 for forbidden response
 
-                JSONParser parser = new JSONParser();
-                JSONObject responseObj = (JSONObject) parser.parse(message);
-                JSONObject errorObj = (JSONObject) responseObj.get("error");
+                try {
+                    JSONParser parser = new JSONParser();
+                    JSONObject responseObj = (JSONObject) parser.parse(message);
+                    JSONObject errorObj = (JSONObject) responseObj.get("error");
 
-                if (statusCode == 400 ) { // sample already exists in the database. Change status to sample already exist
-                    if (StringUtils.isNotBlank(message) && message.contains(duplicateEntryMessage)) {
-                        manifestOrder.setStatus("Duplicate entry");
+                    if (statusCode == 400 ) { // sample already exists in the database. Change status to sample already exist
+                        if (StringUtils.isNotBlank(message) && message.contains(duplicateEntryMessage)) {
+                            manifestOrder.setStatus("Duplicate entry");
+                            manifestOrder.setDateChanged(new Date());
+                            kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
+                            System.out.println("CHAI Lab Results POST: Error - duplicate entry. " + "Error - " + message);
+                            return(true);
+                        }
+                    } else if (statusCode == 422 ) { // General validation errors
+                        manifestOrder.setStatus("Error - " + statusCode + ". Msg" + errorObj.get("message"));
                         manifestOrder.setDateChanged(new Date());
                         kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
-                        System.out.println("CHAI Lab Results POST: Error - duplicate entry. " + "Error - " + message);
+                        System.out.println("CHAI Lab Results POST: Error - validation error. " + "Error - " + message);
                         return(true);
                     }
-                } else if (statusCode == 422 ) { // General validation errors
-                    manifestOrder.setStatus("Error - " + statusCode + ". Msg" + errorObj.get("message"));
-                    manifestOrder.setDateChanged(new Date());
-                    kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
-                    System.out.println("CHAI Lab Results POST: Error - validation error. " + "Error - " + message);
-                    return(true);
-                }
-                System.out.println("CHAI Lab Results POST: Error while sending manifest sample. " + "Error - " + statusCode + ". Msg" + errorObj.get("message"));
+                    System.out.println("CHAI Lab Results POST: Error while sending manifest sample. " + "Error - " + statusCode + ". Msg" + errorObj.get("message"));
 
-                manifestOrder.setStatus("Error - " + statusCode + ". Msg" + errorObj.get("message"));
+                    manifestOrder.setStatus("Error - " + statusCode + ". Msg" + errorObj.get("message"));
+                } catch(Exception ex) {
+                    manifestOrder.setStatus("Error - " + statusCode);
+                }
                 kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
                 return(false);
             } else if (statusCode == 403 || statusCode == 500) { // just skip for now. There should be a new attempt
@@ -178,6 +182,18 @@ public class ChaiSystemWebRequest extends LabWebRequest {
                 manifestOrder.setStatus("Sent");
                 manifestOrder.setDateSent(new Date());
                 System.out.println("CHAI Lab Results POST: Successfully pushed " + (toProcess.getManifestType() == LabManifest.EID_TYPE ? "an EID" : "a Viral load")  + " test");
+                
+                // Now we process the message to extract the batch number
+                try {
+                    JSONParser parser = new JSONParser();
+                    JSONObject responseObj = (JSONObject) parser.parse(message);
+                    String batchNumber = responseObj.get("batch_id").toString();
+                    System.out.println("CHAI Lab Results POST: Got the batch number: " + batchNumber);
+                    manifestOrder.setBatchNumber(batchNumber);
+                } catch(Exception ex) {
+                    System.out.println("CHAI Lab Results POST: ERROR: Failed to get the batch number");
+                }
+                
                 kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
 
                 if (toProcess != null && manifestStatus.equals("Ready to send")) {
@@ -380,7 +396,9 @@ public class ChaiSystemWebRequest extends LabWebRequest {
                 node.put("pmtct", "3");
             }
             node.put("lab", "");
+            // System.out.println("Order Entry: Using CHAI System payload: " + node.toPrettyString());
         }
+        
         return node;
     }
 

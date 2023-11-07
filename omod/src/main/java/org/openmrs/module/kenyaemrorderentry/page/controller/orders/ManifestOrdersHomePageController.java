@@ -2,6 +2,7 @@ package org.openmrs.module.kenyaemrorderentry.page.controller.orders;
 
 import org.openmrs.Order;
 import org.openmrs.PatientIdentifierType;
+import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange;
@@ -27,8 +28,13 @@ public class ManifestOrdersHomePageController {
     public void get(@RequestParam(value = "manifest") LabManifest manifest, @SpringBean KenyaUiUtils kenyaUi,
                     UiUtils ui, PageModel model) {
 
+        // Is DOD
+        AdministrationService administrationService = Context.getAdministrationService();
+        final String isKDoD = (administrationService.getGlobalProperty("kenyaemr.isKDoD"));
+
         List<LabManifestOrder> allOrdersForManifest = Context.getService(KenyaemrOrdersService.class).getLabManifestOrderByManifest(manifest);
         PatientIdentifierType pat = Utils.getUniquePatientNumberIdentifierType();
+        PatientIdentifierType kat = Utils.getKDODIdentifierType();
         PatientIdentifierType hei = Utils.getHeiNumberIdentifierType();
         LabOrderDataExchange e = new LabOrderDataExchange();
         Integer manifestTypeCode = manifest.getManifestType();
@@ -39,8 +45,8 @@ public class ManifestOrdersHomePageController {
             manifestType = "Viral load";
         }
         Set<Order> activeOrdersNotInManifest = new HashSet<Order>();
-        Set<Order> activeVlOrdersNotInManifest = new HashSet<Order>();
-        Set<Order> activeEidOrdersNotInManifest = new HashSet<Order>();
+        Set<SimpleObject> activeVlOrdersNotInManifest = new HashSet<SimpleObject>();
+        Set<SimpleObject> activeEidOrdersNotInManifest = new HashSet<SimpleObject>();
         activeOrdersNotInManifest = e.getActiveOrdersNotInManifest(null, manifest.getStartDate(),manifest.getEndDate());
 
        if(!activeOrdersNotInManifest.isEmpty()) {
@@ -70,18 +76,34 @@ public class ManifestOrdersHomePageController {
             }
         }
 
+        // For javascript processing
+
+        // VL orders
         List<SimpleObject> VLOrders = new ArrayList<SimpleObject>();
-        for(Order order : activeVlOrdersNotInManifest){
+        for(SimpleObject load : activeVlOrdersNotInManifest){
             SimpleObject so = new SimpleObject();
+            Order order = (Order) load.get("order");
             so.put("orderId", order.getId());
             VLOrders.add(so);
         }
+
+        // EID orders
         List<SimpleObject> EIDOrders = new ArrayList<SimpleObject>();
-        for(Order order : activeEidOrdersNotInManifest){
+        for(SimpleObject load : activeEidOrdersNotInManifest){
             SimpleObject so = new SimpleObject();
+            Order order = (Order) load.get("order");
             so.put("orderId", order.getId());
             EIDOrders.add(so);
         }
+
+        // Manifest orders
+        List<SimpleObject> manifestOrders = new ArrayList<SimpleObject>();
+        for(LabManifestOrder order : ordersForManifest){
+            SimpleObject so = new SimpleObject();
+            so.put("orderId", order.getId());
+            manifestOrders.add(so);
+        }
+
 
         model.put("eligibleVlOrders", activeVlOrdersNotInManifest );
         model.put("eligibleEidOrders", activeEidOrdersNotInManifest );
@@ -91,9 +113,17 @@ public class ManifestOrdersHomePageController {
         model.put("manifest", manifest);
         //model.put("manifestOrders", allOrdersForManifest);
         model.put("manifestOrders", ordersForManifest);
-        model.put("cccNumberType", pat.getPatientIdentifierTypeId());
-        model.put("heiNumberType", hei.getPatientIdentifierTypeId());
+        model.put("allManifestOrders", ui.toJson(manifestOrders));
 
+        model.put("cccNumberType", "");
+        model.put("heiNumberType", "");
+        if(isKDoD.trim().equalsIgnoreCase("true")) {
+            model.put("cccNumberType", kat.getPatientIdentifierTypeId());
+            model.put("heiNumberType", kat.getPatientIdentifierTypeId());
+        } else {
+            model.put("cccNumberType", pat.getPatientIdentifierTypeId());
+            model.put("heiNumberType", hei.getPatientIdentifierTypeId());
+        }
     }
 
 }

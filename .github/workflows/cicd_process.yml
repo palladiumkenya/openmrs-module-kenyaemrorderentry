@@ -25,7 +25,7 @@ jobs:
           git clone https://github.com/palladiumkenya/openmrs-module-kenyaemrorderentry.git
           cd /apps/github-workflows/kenyaemr-modules/openmrs-module-kenyaemrorderentry
           git status
-          mvn clean install -DskipTests
+          sudo mvn clean install -DskipTests
           sudo rm -rf /var/lib/OpenMRS/modules/kenyaemrorderentry-*.omod
           sudo cp /apps/github-workflows/kenyaemr-modules/openmrs-module-kenyaemrorderentry/omod/target/kenyaemrorderentry-*.omod /var/lib/OpenMRS/modules/
           sudo chown -R tomcat:tomcat /var/lib/OpenMRS/modules/

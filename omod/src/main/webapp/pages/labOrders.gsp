@@ -55,7 +55,7 @@ th, td {
 
 
     window.OpenMRS = window.OpenMRS || {};
-    window.OpenMRS.drugOrdersConfig = ${ jsonConfig };
+    window.OpenMRS.labOrdersConfig = ${ jsonConfig };
     window.OpenMRS.labTestJsonPayload = ${labTestJsonPayload}
     window.OpenMRS.enterLabOrderResults =${enterLabOrderResults}
     window.OpenMRS.pastLabOrdersResults =${pastLabOrdersResults}
@@ -70,11 +70,6 @@ th, td {
 
 
 </script>
-
-${ui.includeFragment("appui", "messages", [codes: [
-        "kenyaemrorderentry.pastAction.REVISE",
-        "kenyaemrorderentry.pastAction.DISCONTINUE"
-]])}
 
 <div class="ke-page-content">
     <div >
@@ -124,7 +119,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                              ng-click="loadLabPanels(lab)">
                                                             <div class="link-item">
                                                                 <a class="formLink">
-                                                                    {{lab.name}}
+                                                                    {{lab.display}}
                                                                 </a>
                                                             </div>
 
@@ -147,15 +142,15 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                                 <div class="list-group-item"
                                                                      ng-repeat="order in filteredOrders">
                                                                     <div class="link-item">
-                                                                        <div class="btn-group button-size " role="group" aria-label="Basic example">
-                                                                            <button type="button" class="text-left" style="width: 76%">{{order.name}}</button>
+                                                                        <div class="btn-group button-size " role="group">
+                                                                            <button type="button" class="text-left" style="width: 76%">{{order.display}}</button>
                                                                             <button type="button" class="fa fa-calendar fa-1x" style="width: 8%"
                                                                                     data-toggle="modal" data-target="#dateOrder"
-                                                                                    ng-click="orderSelectedToAddDateActivated(order)"></button>
+                                                                                    ng-click="selectOrderToAddDateActivatedReasonOrUrgency(order)"></button>
                                                                             <button type="button" class="fa fa-warning fa-1x" style="width: 8%"
                                                                                     data-placement="top" title="Urgency | Reason"
                                                                                     data-toggle="modal" data-target="#orderUrgency"
-                                                                                    ng-click="orderSelectedToAddDateActivated(order)"
+                                                                                    ng-click="selectOrderToAddDateActivatedReasonOrUrgency(order)"
                                                                             ></button>
                                                                             <button type="button" class="fa fa-remove fa-1x"
                                                                                     ng-click="deselectedOrder(order)" style="color:#9D0101;cursor: pointer; width: 8%"></button>
@@ -180,7 +175,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                                     <li ng-repeat="panel in labPanels"
                                                                         ng-click="loadLabPanelTests(panel)">
                                                                         <button type="button" class="column">
-                                                                            {{panel.name}}</button>
+                                                                            {{panel.display}}</button>
                                                                     </li>
                                                                 </ul>
                                                             </div>
@@ -205,7 +200,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                                                    name="feature"
                                                                                    ng-model='test.selected'
                                                                                    value="test.concept_id">
-                                                                            <label class="form-check-label">{{test.name}}</label>
+                                                                            <label class="form-check-label">{{test.display}}</label>
                                                                         </div>
                                                                     </div>
 
@@ -260,7 +255,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
 
                                                             <div ng-if="control.rendering === 'select' && control.concept !=='d0a3677f-3b3a-404c-9010-6ec766d7072e'">
                                                                 <div class="form-group row">
-                                                                    <label class="label label-md "><b>{{control.label}}:</b>
+                                                                    <label class="label label-md "><b>{{control.display}}:</b>
                                                                         <p>  <span >({{control.dateActivated | date:'dd-MM-yyyy'}})</span>
                                                                         </p></label>
 
@@ -268,7 +263,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                                         <select class="form-control set-width"
                                                                                 ng-model="typeValues[control.orderId]">
                                                                             <option ng-repeat=" o in control.answers"
-                                                                                    ng-value="o.concept">{{o.label}}
+                                                                                    ng-value="o.concept">{{o.display}}
                                                                             </option>
                                                                         </select>
                                                                     </div>
@@ -296,7 +291,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                                                 ng-disabled="cd4QuantitativeValue !=={} && cd4QualitativeValue === {}"
                                                                                 ng-change=syncCd4CountResults(cd4QualitativeValue)>
                                                                             <option ng-repeat=" o in vl.answers"
-                                                                                    ng-value="o.concept">{{o.label}}
+                                                                                    ng-value="o.concept">{{o.display}}
                                                                             </option>
                                                                         </select>
                                                                          <span class="btn-xl fa fa-calendar fa-1x" style="cursor: pointer;" ng-if="vl.rendering ==='select'"
@@ -313,7 +308,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
 
                                                             <div ng-if="control.rendering === 'inputtext'" class="label">
                                                                 <div class="form-group row">
-                                                                    <label class="label label-md" ><b>{{control.label}}:</b>
+                                                                    <label class="label label-md" ><b>{{control.display}}:</b>
                                                                         <p>  <span >({{control.dateActivated | date:'dd-MM-yyyy'}})</span>
                                                                         </p></label>
 
@@ -330,7 +325,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
 
                                                             <div ng-if="control.rendering === 'inputnumeric' && control.concept !=='5497AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'" class="label">
                                                                 <div class="form-group row">
-                                                                    <label class="label label-md" ><b>{{control.label}}:</b>
+                                                                    <label class="label label-md" ><b>{{control.display}}:</b>
                                                                         <p>  <span >({{control.dateActivated | date:'dd-MM-yyyy'}})</span>
                                                                         </p></label>
 
@@ -346,7 +341,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
 
                                                             <div ng-if="control.rendering === 'textarea'">
                                                                 <div class="form-group row">
-                                                                    <label class="label label-md"><b>{{control.label}}:</b>
+                                                                    <label class="label label-md"><b>{{control.display}}:</b>
                                                                         <p>  <span >({{control.dateActivated | date:'dd-MM-yyyy'}})</span>
                                                                         </p></label>
 
@@ -470,7 +465,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                             </div>
                         </form>
                         <!-- Modal void for lab orders -->
-                        <div class="modal fade" id="voidOrdersModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                        <div class="modal fade" id="voidOrdersModal" tabindex="-1" role="dialog" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered" role="document">
                                 <div class="modal-content">
                                     <div class="modal-header modal-header-primary">
@@ -495,7 +490,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button"  data-dismiss="modal2" ng-click="closeModal()">Close</button>
-                                        <button type="button"   ng-click="voidAllHivViralLoadOrders()">
+                                        <button type="button"   ng-click="voidAllSelectedLabOrders()">
                                             <img src="${ ui.resourceLink("kenyaui", "images/glyphs/ok.png") }" /> Save</button>
                                     </div>
                                 </div>
@@ -528,19 +523,19 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                     {{ past.dateActivated | date:'dd-MM-yyyy'}}
                                                 </td>
                                                 <td>
-                                                    {{past.name}}
+                                                    {{past.display}}
                                                 </td>
                                                 <td>
                                                     {{ past.resultDate | date:'dd-MM-yyyy' }}
                                                 </td>
                                                 <td>
-                                                    <span ng-if="past.valueNumeric !==null">
+                                                    <span ng-if="past.valueNumeric !== null">
                                                         {{past.valueNumeric}}
                                                     </span>
-                                                    <span ng-if="past.valueCoded !==null">
+                                                    <span ng-if="past.valueCoded !== null">
                                                         {{past.valueCoded}}
                                                     </span>
-                                                    <span ng-if="past.valueText !==null">
+                                                    <span ng-if="past.valueText !== null">
                                                         {{past.valueText}}
                                                     </span>
 
@@ -595,11 +590,11 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                     <span>
                                                     <button type="button" class="fa fa-calendar fa-1x"
                                                             data-toggle="modal" data-target="#dateOrder"
-                                                            ng-click="orderSelectedToAddDateActivated(testSummary)"></button>
+                                                            ng-click="selectOrderToAddDateActivatedReasonOrUrgency(testSummary)"></button>
                                                 </span>
                                                 </td>
                                                 <td>
-                                                    {{testSummary.name}}
+                                                    {{testSummary.display}}
                                                 </td>
                                                 <td>
                                                     {{testSummary.orderReasonCodedName}}
@@ -607,7 +602,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                     <button type="button" class="fa fa-warning fa-1x"
                                                             data-placement="top" title="Urgency | Reason"
                                                             data-toggle="modal" data-target="#orderUrgency"
-                                                            ng-click="orderSelectedToAddDateActivated(testSummary)"></button>
+                                                            ng-click="selectOrderToAddDateActivatedReasonOrUrgency(testSummary)"></button>
                                                 </span>
 
                                                 </td>
@@ -617,7 +612,7 @@ ${ui.includeFragment("appui", "messages", [codes: [
                                                     <button type="button" class="fa fa-warning fa-1x"
                                                             data-placement="top" title="Urgency | Reason"
                                                             data-toggle="modal" data-target="#orderUrgency"
-                                                            ng-click="orderSelectedToAddDateActivated(testSummary)"></button>
+                                                            ng-click="selectOrderToAddDateActivatedReasonOrUrgency(testSummary)"></button>
                                                 </span>
 
                                                 </td>
