@@ -273,7 +273,7 @@ public class ViralLoadLabManifestReport {
             String uniqueNumber = patient.getPatientIdentifier(Utils.getKDODIdentifierType()) != null ? patient.getPatientIdentifier(Utils.getKDODIdentifierType()).getIdentifier() : "";
             table.addCell(new Paragraph(uniqueNumber)).setFontSize(10);
         } else {
-            String uniqueNumber = patient.getPatientIdentifier(Utils.getUniquePatientNumberIdentifierType()) != null ? patient.getPatientIdentifier(Utils.getKDODIdentifierType()).getIdentifier() : "";
+            String uniqueNumber = patient.getPatientIdentifier(Utils.getUniquePatientNumberIdentifierType()) != null ? patient.getPatientIdentifier(Utils.getUniquePatientNumberIdentifierType()).getIdentifier() : "";
             table.addCell(new Paragraph(uniqueNumber)).setFontSize(10);
         }
 
