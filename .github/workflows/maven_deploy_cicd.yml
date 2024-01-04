@@ -7,7 +7,7 @@ on:
     branches: [ master ]
 
 jobs:
-  build&publish:
+  publish:
     runs-on: ubuntu-latest
 
    #set up the build enviroment
