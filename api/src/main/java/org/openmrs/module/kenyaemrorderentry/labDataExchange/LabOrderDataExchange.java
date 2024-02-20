@@ -630,7 +630,7 @@ public class LabOrderDataExchange {
                         e.printStackTrace();
                     }
                 } else if (manifestType == LabManifest.VL_TYPE) {
-                    Concept conceptToRetain = null;
+                    Concept viralLoadConcept = null;
                     String lDLResult = "< LDL copies/ml";
                     String labwarelDLResult = "<LDL";
                     String aboveMillionResult = "> 10,000,000 cp/ml";
@@ -638,27 +638,23 @@ public class LabOrderDataExchange {
 
                     if (getSystemType() == ModuleConstants.CHAI_SYSTEM) {
                         if (result.equalsIgnoreCase(lDLResult) || result.equalsIgnoreCase(labwarelDLResult) || result.contains("LDL")) {
-                            // conceptToRetain = vlTestConceptQualitative;
-                            // o.setValueCoded(LDLConcept);
-                            conceptToRetain = vlTestConceptQuantitative;
+                            viralLoadConcept = vlTestConceptQuantitative;
                             o.setValueNumeric(new Double(0));
                         } else if (result.equalsIgnoreCase(aboveMillionResult)) {
-                            conceptToRetain = vlTestConceptQuantitative;
+                            viralLoadConcept = vlTestConceptQuantitative;
                             o.setValueNumeric(new Double(10000001));
                         } else {
-                            conceptToRetain = vlTestConceptQuantitative;
+                            viralLoadConcept = vlTestConceptQuantitative;
                             Double vlVal = NumberUtils.toDouble(result);
                             o.setValueNumeric(vlVal);
                         }
                     } else if (getSystemType() == ModuleConstants.LABWARE_SYSTEM) {
                         result = result.toLowerCase().trim(); // convert to lowercase and trim
                         if (result.equalsIgnoreCase(lDLResult) || result.equalsIgnoreCase(labwarelDLResult) || result.contains("LDL")) {
-                            // conceptToRetain = vlTestConceptQualitative;
-                            // o.setValueCoded(LDLConcept);
-                            conceptToRetain = vlTestConceptQuantitative;
+                            viralLoadConcept = vlTestConceptQuantitative;
                             o.setValueNumeric(new Double(0));
                         } else if (result.equalsIgnoreCase(aboveMillionResult)) {
-                            conceptToRetain = vlTestConceptQuantitative;
+                            viralLoadConcept = vlTestConceptQuantitative;
                             o.setValueNumeric(new Double(10000001));
                         } else {
                             result = result.replaceAll("\\s", ""); //strip all white spaces
@@ -667,12 +663,12 @@ public class LabOrderDataExchange {
                                 if (index != -1) {
                                     String val = result.substring(0, index); // Get the 40 from (40 copies/ml)
                                     val = val.trim();
-                                    conceptToRetain = vlTestConceptQuantitative;
+                                    viralLoadConcept = vlTestConceptQuantitative;
                                     Double vlVal = NumberUtils.toDouble(val);
                                     o.setValueNumeric(vlVal);
                                 }
                             } else {
-                                conceptToRetain = vlTestConceptQuantitative;
+                                viralLoadConcept = vlTestConceptQuantitative;
                                 Double vlVal = NumberUtils.toDouble(result);
                                 o.setValueNumeric(vlVal);
                             }
@@ -680,15 +676,13 @@ public class LabOrderDataExchange {
                     } else if (getSystemType() == ModuleConstants.EDARP_SYSTEM) {
                         // System.out.println("Got sample result as: " + result);
                         if (result.equalsIgnoreCase(lDLResult) || result.equalsIgnoreCase(labwarelDLResult) || result.contains("LDL")) {
-                            // conceptToRetain = vlTestConceptQualitative;
-                            // o.setValueCoded(LDLConcept);
-                            conceptToRetain = vlTestConceptQuantitative;
+                            viralLoadConcept = vlTestConceptQuantitative;
                             o.setValueNumeric(new Double(0));
                         } else if (result.equalsIgnoreCase(aboveMillionResult)) {
-                            conceptToRetain = vlTestConceptQuantitative;
+                            viralLoadConcept = vlTestConceptQuantitative;
                             o.setValueNumeric(new Double(10000001));
                         } else {
-                            conceptToRetain = vlTestConceptQuantitative;
+                            viralLoadConcept = vlTestConceptQuantitative;
                             // System.out.println("Converting result to ensure it is an integer");
                             Double vlVal = Math.floor(NumberUtils.toDouble(result));
                             // System.out.println("Saving result as: " + vlVal);
@@ -699,12 +693,12 @@ public class LabOrderDataExchange {
                     // In order to record results both qualitative (LDL) and quantitative,
                     // every vl request saves two orders: one with 856(quantitative) for numeric values and another with 1305(quantitative) for LDL value
                     // When recording result, it is therefore prudent to set result for one order and void the other one
-                    Map<String, Order> ordersToProcess = getOrdersToProcess(od, conceptToRetain);
+                    Map<String, Order> ordersToProcess = getOrdersToProcess(od, viralLoadConcept);
                     Order orderToRetain = ordersToProcess.get("orderToRetain");
                     Order orderToVoid = ordersToProcess.get("orderToVoid");
 
                     // logic that picks the right concept id for the result obs
-                    o.setConcept(conceptToRetain);
+                    o.setConcept(viralLoadConcept);
                     o.setDateCreated(new Date());
                     o.setCreator(Context.getUserService().getUser(1));
                     o.setPerson(od.getPatient());
