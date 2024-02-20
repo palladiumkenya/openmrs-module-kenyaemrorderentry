@@ -1,5 +1,3 @@
-DROP PROCEDURE IF EXISTS sp_vl_LDL_to_Zero;
-$$
 CREATE PROCEDURE `sp_vl_LDL_to_Zero`()
 BEGIN
     DECLARE done INT DEFAULT 0;
@@ -109,5 +107,5 @@ BEGIN
     CLOSE cur;
 
 	SELECT CONCAT("Processed Records: ", record_count) as finish_status;
+
 END
-$$
