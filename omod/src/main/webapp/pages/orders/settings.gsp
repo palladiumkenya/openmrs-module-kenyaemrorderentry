@@ -30,6 +30,7 @@
 
     def configuration = [
             [label: "Settings", iconProvider: "kenyaui", icon: "", label: "Settings", href: ""],
+            [label: "Maintenance", iconProvider: "kenyaui", icon: "", label: "Maintenance", href: ui.pageLink("kenyaemrorderentry", "orders/maintenance")],
     ]
 %>
 

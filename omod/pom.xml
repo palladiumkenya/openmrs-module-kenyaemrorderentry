@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.openmrs.module</groupId>
 		<artifactId>kenyaemrorderentry</artifactId>
-		<version>1.6.2</version>
+		<version>1.6.3</version>
 	</parent>
 
 	<artifactId>kenyaemrorderentry-omod</artifactId>
@@ -83,6 +83,13 @@
 			<resource>
 				<directory>src/main/resources</directory>
 				<filtering>true</filtering>
+			</resource>
+			<resource>
+				<directory>src/main/unfiltered-resources</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+				<filtering>false</filtering>
 			</resource>
 			<resource>
 				<directory>src/main/webapp</directory>

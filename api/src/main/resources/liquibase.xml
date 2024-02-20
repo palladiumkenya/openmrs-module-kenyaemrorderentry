@@ -384,4 +384,17 @@
         </addColumn>
     </changeSet>
 
+    <!-- Add Order Entry stored procedures - VL to Zero -->
+    <changeSet author="pwaweru" id="kenyaemr_order_entry-sp_vl_LDL_to_Zero-20240215-153630" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*)
+                FROM information_schema.routines
+                WHERE routine_name = 'sp_vl_LDL_to_Zero'
+                AND routine_type = 'PROCEDURE'
+            </sqlCheck>
+        </preConditions>
+        <sqlFile path="sql/sp_vl_LDL_to_Zero.sql" splitStatements="true" endDelimiter="\$\$" stripComments="true"/>
+    </changeSet>
+
 </databaseChangeLog>

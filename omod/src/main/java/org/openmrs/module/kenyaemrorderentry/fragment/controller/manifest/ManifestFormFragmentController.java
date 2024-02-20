@@ -1,5 +1,8 @@
 package org.openmrs.module.kenyaemrorderentry.fragment.controller.manifest;
 
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -10,9 +13,12 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.Transaction;
+import org.hibernate.jdbc.Work;
 import org.openmrs.GlobalProperty;
 import org.openmrs.Location;
 import org.openmrs.api.context.Context;
+import org.openmrs.api.db.hibernate.DbSessionFactory;
 import org.openmrs.module.kenyaemrorderentry.ModuleConstants;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange;
@@ -154,6 +160,42 @@ public class ManifestFormFragmentController {
         else {
             return new EditManifestForm();
         }
+    }
+
+    public SimpleObject callLdlToZero() {
+        final SimpleObject ret = new SimpleObject();
+
+        DbSessionFactory sf = Context.getRegisteredComponents(DbSessionFactory.class).get(0);
+        Transaction tx = null;
+        try {
+            Context.openSession();
+            tx = sf.getHibernateSessionFactory().getCurrentSession().beginTransaction();
+            final Transaction finalTx = tx;
+            sf.getCurrentSession().doWork(new Work() {
+
+                @Override
+                public void execute(Connection connection) throws SQLException {
+
+                    StringBuilder sb = null;
+                    sb = new StringBuilder();
+                    sb.append("{call `openmrs`.`vl_LDL_to_Zero`()}");
+                    System.out.println("Order Entry LDL to Zero: currently executing: " + sb);
+                    CallableStatement sp = connection.prepareCall(sb.toString());
+                    sp.execute();
+
+                    finalTx.commit();
+
+                    System.out.println("Order Entry LDL to Zero: Successfully completed LDL to Zero task ... ");                   
+                }
+            });
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Order Entry LDL to Zero: Unable to execute query", e);
+        } finally {
+            Context.closeSession();
+        }
+        ret.put("data", SimpleObject.create("status", true));
+
+        return ret;
     }
 
     public class EditManifestForm extends AbstractWebForm {

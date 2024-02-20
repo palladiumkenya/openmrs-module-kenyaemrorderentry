@@ -638,8 +638,10 @@ public class LabOrderDataExchange {
 
                     if (getSystemType() == ModuleConstants.CHAI_SYSTEM) {
                         if (result.equalsIgnoreCase(lDLResult) || result.equalsIgnoreCase(labwarelDLResult) || result.contains("LDL")) {
-                            conceptToRetain = vlTestConceptQualitative;
-                            o.setValueCoded(LDLConcept);
+                            // conceptToRetain = vlTestConceptQualitative;
+                            // o.setValueCoded(LDLConcept);
+                            conceptToRetain = vlTestConceptQuantitative;
+                            o.setValueNumeric(new Double(0));
                         } else if (result.equalsIgnoreCase(aboveMillionResult)) {
                             conceptToRetain = vlTestConceptQuantitative;
                             o.setValueNumeric(new Double(10000001));
@@ -651,8 +653,10 @@ public class LabOrderDataExchange {
                     } else if (getSystemType() == ModuleConstants.LABWARE_SYSTEM) {
                         result = result.toLowerCase().trim(); // convert to lowercase and trim
                         if (result.equalsIgnoreCase(lDLResult) || result.equalsIgnoreCase(labwarelDLResult) || result.contains("LDL")) {
-                            conceptToRetain = vlTestConceptQualitative;
-                            o.setValueCoded(LDLConcept);
+                            // conceptToRetain = vlTestConceptQualitative;
+                            // o.setValueCoded(LDLConcept);
+                            conceptToRetain = vlTestConceptQuantitative;
+                            o.setValueNumeric(new Double(0));
                         } else if (result.equalsIgnoreCase(aboveMillionResult)) {
                             conceptToRetain = vlTestConceptQuantitative;
                             o.setValueNumeric(new Double(10000001));
@@ -676,8 +680,10 @@ public class LabOrderDataExchange {
                     } else if (getSystemType() == ModuleConstants.EDARP_SYSTEM) {
                         // System.out.println("Got sample result as: " + result);
                         if (result.equalsIgnoreCase(lDLResult) || result.equalsIgnoreCase(labwarelDLResult) || result.contains("LDL")) {
-                            conceptToRetain = vlTestConceptQualitative;
-                            o.setValueCoded(LDLConcept);
+                            // conceptToRetain = vlTestConceptQualitative;
+                            // o.setValueCoded(LDLConcept);
+                            conceptToRetain = vlTestConceptQuantitative;
+                            o.setValueNumeric(new Double(0));
                         } else if (result.equalsIgnoreCase(aboveMillionResult)) {
                             conceptToRetain = vlTestConceptQuantitative;
                             o.setValueNumeric(new Double(10000001));
