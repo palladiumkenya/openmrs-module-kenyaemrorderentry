@@ -48,7 +48,7 @@ public class ConvertAllLDLlabResultsIntoZero extends AbstractChore {
             Context.getAdministrationService().executeSQL(updateProcedureSql, false);
 
             // Execute the stored procedure
-            callLdlToZero();
+            callLdlToZero(output);
 
             // Destroy the stored procedure
             String finishTaskSQL = "drop procedure sp_vl_LDL_to_Zero";
@@ -63,8 +63,9 @@ public class ConvertAllLDLlabResultsIntoZero extends AbstractChore {
         }
     }
 
-    private SimpleObject callLdlToZero() {
+    private SimpleObject callLdlToZero(PrintWriter output) {
         final SimpleObject ret = new SimpleObject();
+        final PrintWriter display = output;
 
         DbSessionFactory sf = Context.getRegisteredComponents(DbSessionFactory.class).get(0);
         Transaction tx = null;
@@ -79,14 +80,16 @@ public class ConvertAllLDLlabResultsIntoZero extends AbstractChore {
 
                     StringBuilder sb = null;
                     sb = new StringBuilder();
-                    sb.append("{call `vl_LDL_to_Zero`()}");
+                    sb.append("{call `sp_vl_LDL_to_Zero`()}");
                     System.out.println("Order Entry LDL to Zero: currently executing: " + sb);
+                    display.println("Order Entry LDL to Zero: currently executing: " + sb);
                     CallableStatement sp = connection.prepareCall(sb.toString());
                     sp.execute();
 
                     finalTx.commit();
 
-                    System.out.println("Order Entry LDL to Zero: Successfully completed LDL to Zero task ... ");                   
+                    System.out.println("Order Entry LDL to Zero: Successfully completed LDL to Zero task ... ");
+                    display.println("Order Entry LDL to Zero: Successfully completed LDL to Zero task ... ");
                 }
             });
         } catch (Exception e) {
