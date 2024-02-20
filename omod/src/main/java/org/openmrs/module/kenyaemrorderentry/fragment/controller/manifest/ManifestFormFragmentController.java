@@ -162,42 +162,6 @@ public class ManifestFormFragmentController {
         }
     }
 
-    public SimpleObject callLdlToZero() {
-        final SimpleObject ret = new SimpleObject();
-
-        DbSessionFactory sf = Context.getRegisteredComponents(DbSessionFactory.class).get(0);
-        Transaction tx = null;
-        try {
-            Context.openSession();
-            tx = sf.getHibernateSessionFactory().getCurrentSession().beginTransaction();
-            final Transaction finalTx = tx;
-            sf.getCurrentSession().doWork(new Work() {
-
-                @Override
-                public void execute(Connection connection) throws SQLException {
-
-                    StringBuilder sb = null;
-                    sb = new StringBuilder();
-                    sb.append("{call `openmrs`.`vl_LDL_to_Zero`()}");
-                    System.out.println("Order Entry LDL to Zero: currently executing: " + sb);
-                    CallableStatement sp = connection.prepareCall(sb.toString());
-                    sp.execute();
-
-                    finalTx.commit();
-
-                    System.out.println("Order Entry LDL to Zero: Successfully completed LDL to Zero task ... ");                   
-                }
-            });
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Order Entry LDL to Zero: Unable to execute query", e);
-        } finally {
-            Context.closeSession();
-        }
-        ret.put("data", SimpleObject.create("status", true));
-
-        return ret;
-    }
-
     public class EditManifestForm extends AbstractWebForm {
         private LabManifest original;
         private String identifier;

@@ -24,7 +24,6 @@
 
     def configuration = [
             [label: "Settings", iconProvider: "kenyaui", icon: "", label: "Settings", href: ui.pageLink("kenyaemrorderentry", "orders/settings")],
-            [label: "Maintenance", iconProvider: "kenyaui", icon: "", label: "Maintenance", href: ui.pageLink("kenyaemrorderentry", "orders/maintenance")],
     ]
 
     ui.includeJavascript("kenyaemrorderentry", "bootstrap.min.js")
