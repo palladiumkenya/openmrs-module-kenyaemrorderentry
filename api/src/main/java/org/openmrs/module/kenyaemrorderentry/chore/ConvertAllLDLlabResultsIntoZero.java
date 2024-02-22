@@ -37,32 +37,9 @@ public class ConvertAllLDLlabResultsIntoZero extends AbstractChore {
 
     @Override
     public void perform(PrintWriter output) {
-        System.out.println("Order Entry: Starting the ConvertAllLDLlabResultsIntoZero chore");
-        output.println("Order Entry: Starting the ConvertAllLDLlabResultsIntoZero chore");
-        InputStream is = null;
-
-        try {
-            // Load the stored procedure sql script from resources
-            is = OpenmrsClassLoader.getInstance().getResourceAsStream("sql/sp_vl_LDL_to_Zero.sql");
-			String updateProcedureSql = IOUtils.toString(is, "UTF-8");
-            
-            // Refresh or Drop the stored procedure
-            String refreshTaskSQL = "DROP PROCEDURE IF EXISTS sp_vl_LDL_to_Zero";
-            Context.getAdministrationService().executeSQL(refreshTaskSQL, false);
-
-            // Execute the stored procedure
-            callLdlToZero(output, updateProcedureSql);
-
-            // Destroy the stored procedure
-            Context.getAdministrationService().executeSQL(refreshTaskSQL, false);
-
-            System.out.println("Completed migrating VL LDL results to zero quantitative");
-            output.println("Completed migrating VL LDL results to zero quantitative");
-        } catch(Exception ex) {
-            System.err.println("Order Entry: ERROR: ConvertAllLDLlabResultsIntoZero chore: " + ex.getMessage());
-            output.println("Order Entry: ERROR: ConvertAllLDLlabResultsIntoZero chore: " + ex.getMessage());
-            ex.printStackTrace();
-        }
+        runTask runners = new runTask(output);
+        Thread thread = new Thread(runners);
+        thread.start();
     }
 
     private SimpleObject callLdlToZero(PrintWriter output, String procedure) {
@@ -70,30 +47,37 @@ public class ConvertAllLDLlabResultsIntoZero extends AbstractChore {
         final PrintWriter display = output;
         final String storedProcedure = procedure;
 
-        DbSessionFactory sf = Context.getRegisteredComponents(DbSessionFactory.class).get(0);
+        DbSessionFactory dbSessionFactory = Context.getRegisteredComponents(DbSessionFactory.class).get(0);
         
         try {
             Context.openSession();
-            sf.getCurrentSession().doWork(new Work() {
+            dbSessionFactory.getCurrentSession().doWork(new Work() {
 
                 @Override
                 public void execute(Connection connection) throws SQLException {
 
-                    // Create the stored procedure
-                    // CallableStatement createSP = connection.prepareCall(storedProcedure);
-                    // createSP.execute();
+                    String refreshTaskSQL = "DROP PROCEDURE IF EXISTS sp_vl_LDL_to_Zero";
                     Statement statement = connection.createStatement();
-                    statement.executeUpdate(storedProcedure);
-                    statement.close();
 
+                    // Remove Stored Procedure
+                    statement.executeUpdate(refreshTaskSQL);
+
+                    // Create Stored Procedure
+                    statement.executeUpdate(storedProcedure);
+                    
+                    // Execute Stored Procedure
                     String sb = "{call `sp_vl_LDL_to_Zero`()}";
                     System.out.println("Order Entry LDL to Zero: currently executing: " + sb);
                     display.println("Order Entry LDL to Zero: currently executing: " + sb);
                     CallableStatement sp = connection.prepareCall(sb);
                     sp.execute();
 
+                    // Remove Stored Procedure
+                    statement.executeUpdate(refreshTaskSQL);
+
                     System.out.println("Order Entry LDL to Zero: Successfully completed LDL to Zero task ... ");
                     display.println("Order Entry LDL to Zero: Successfully completed LDL to Zero task ... ");
+                    statement.close();
                 }
             });
         } catch (Exception ex) {
@@ -108,5 +92,39 @@ public class ConvertAllLDLlabResultsIntoZero extends AbstractChore {
 
         return ret;
     }
+
+    private class runTask implements Runnable {
+
+        PrintWriter output = new PrintWriter(System.out);
+
+        public runTask(PrintWriter output) {
+            this.output = output;
+        }
+
+        @Override
+        public void run() {
+            // Run the task
+            System.out.println("Order Entry: Starting the ConvertAllLDLlabResultsIntoZero chore");
+            output.println("Order Entry: Starting the ConvertAllLDLlabResultsIntoZero chore");
+            InputStream is = null;
+
+            try {
+                // Load the stored procedure sql script from resources
+                is = OpenmrsClassLoader.getInstance().getResourceAsStream("sql/sp_vl_LDL_to_Zero.sql");
+                String updateProcedureSql = IOUtils.toString(is, "UTF-8");
+
+                // Execute the stored procedure
+                callLdlToZero(output, updateProcedureSql);
+
+                System.out.println("Order Entry: Completed migrating VL LDL results to zero quantitative");
+                output.println("Order Entry: Completed migrating VL LDL results to zero quantitative");
+            } catch(Exception ex) {
+                System.err.println("Order Entry: ERROR: ConvertAllLDLlabResultsIntoZero chore: " + ex.getMessage());
+                output.println("Order Entry: ERROR: ConvertAllLDLlabResultsIntoZero chore: " + ex.getMessage());
+                ex.printStackTrace();
+            }
+        }
+    }
+
 
 }

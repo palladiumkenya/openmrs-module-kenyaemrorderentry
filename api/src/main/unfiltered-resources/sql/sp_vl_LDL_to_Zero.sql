@@ -96,8 +96,8 @@ BEGIN
             SELECT CONCAT("Finished Record: ID: ", var_obs_id, " count ", record_count, " of ", total_records) as record_status;
             
 			-- commit the transaction or rollback
-			ROLLBACK;
-			-- COMMIT;
+			-- ROLLBACK;
+			COMMIT;
 	    set updated_counter = updated_counter + 1;
             
 	END LOOP;
