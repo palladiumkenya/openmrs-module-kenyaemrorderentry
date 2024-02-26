@@ -396,8 +396,15 @@ public class LabOrderDataExchange {
             SimpleObject heiDetailsObject = Utils.getHeiDetailsForEidPostObject(patient, order);
 
             if (heiNumber == null || StringUtils.isBlank(heiNumber.getIdentifier()) || heiDetailsObject == null) {
+                // Patient must have HEI number
                 return(true);
             }
+        }
+
+        Concept cOrderReason = order.getOrderReason();
+        if(cOrderReason == null) {
+            // Order must have order reason
+            return(true);
         }
 
         // In this case, we are all ok
