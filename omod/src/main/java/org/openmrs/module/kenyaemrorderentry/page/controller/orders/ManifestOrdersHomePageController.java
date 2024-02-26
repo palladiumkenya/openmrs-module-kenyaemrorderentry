@@ -39,25 +39,30 @@ public class ManifestOrdersHomePageController {
         LabOrderDataExchange e = new LabOrderDataExchange();
         Integer manifestTypeCode = manifest.getManifestType();
         String manifestType = "";
-        if (manifestTypeCode.intValue() == 1) {
+        if (manifestTypeCode == LabManifest.EID_TYPE) {
             manifestType = "EID";
-        } else if (manifestTypeCode.intValue() == 2) {
+        } else if (manifestTypeCode == LabManifest.VL_TYPE) {
             manifestType = "Viral load";
         }
-        Set<Order> activeOrdersNotInManifest = new HashSet<Order>();
+        // Set<Order> activeOrdersNotInManifest = new HashSet<Order>();
         Set<SimpleObject> activeVlOrdersNotInManifest = new HashSet<SimpleObject>();
         Set<SimpleObject> activeEidOrdersNotInManifest = new HashSet<SimpleObject>();
-        activeOrdersNotInManifest = e.getActiveOrdersNotInManifest(null, manifest.getStartDate(),manifest.getEndDate());
+        // activeOrdersNotInManifest = e.getActiveOrdersNotInManifest(null, manifest.getStartDate(),manifest.getEndDate());
 
-       if(!activeOrdersNotInManifest.isEmpty()) {
-           for (Order o : activeOrdersNotInManifest) {
-               if (o.getPatient().getAge() >= 2) {   // this is a vl order
-                   activeVlOrdersNotInManifest = e.getActiveViralLoadOrdersNotInManifest(null, manifest.getStartDate(), manifest.getEndDate());
-               }
-               else if(o.getPatient().getAge() < 2){  // this is a eid order
-                   activeEidOrdersNotInManifest = e.getActiveEidOrdersNotInManifest(null, manifest.getStartDate(), manifest.getEndDate());
-               }
-           }
+    //    if(!activeOrdersNotInManifest.isEmpty()) {
+    //        for (Order o : activeOrdersNotInManifest) {
+    //            if (o.getPatient().getAge() >= 2) {   // this is a vl order
+    //                activeVlOrdersNotInManifest = e.getActiveViralLoadOrdersNotInManifest(null, manifest.getStartDate(), manifest.getEndDate());
+    //            }
+    //            else if(o.getPatient().getAge() < 2){  // this is a eid order
+    //                activeEidOrdersNotInManifest = e.getActiveEidOrdersNotInManifest(null, manifest.getStartDate(), manifest.getEndDate());
+    //            }
+    //        }
+    //     }
+        if(manifestTypeCode == LabManifest.VL_TYPE) {
+            activeVlOrdersNotInManifest = e.getActiveViralLoadOrdersNotInManifest(null, manifest.getStartDate(), manifest.getEndDate());
+        } else if(manifestTypeCode == LabManifest.EID_TYPE) {
+            activeEidOrdersNotInManifest = e.getActiveEidOrdersNotInManifest(null, manifest.getStartDate(), manifest.getEndDate());
         }
 
         //Temporary fix to remove special chars from lab results
