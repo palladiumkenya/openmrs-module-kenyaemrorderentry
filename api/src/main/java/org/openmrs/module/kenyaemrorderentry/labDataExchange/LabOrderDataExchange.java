@@ -403,7 +403,7 @@ public class LabOrderDataExchange {
 
             // Check Mothers Age 
             SimpleObject heiMothersAge = Utils.getHeiMothersAge(patient);
-            if(heiMothersAge != null && heiMothersAge.get("mothersAge") != null && heiMothersAge.get("mothersAge") == null) {
+            if(heiMothersAge != null && heiMothersAge.get("mothersAge") == null) {
                 // Child must have a valid mother
                 return(true);
             }
