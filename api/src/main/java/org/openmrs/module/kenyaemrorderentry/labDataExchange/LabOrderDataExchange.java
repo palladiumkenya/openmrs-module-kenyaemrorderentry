@@ -395,10 +395,19 @@ public class LabOrderDataExchange {
             PatientIdentifier heiNumber = patient.getPatientIdentifier(Utils.getHeiNumberIdentifierType());
             SimpleObject heiDetailsObject = Utils.getHeiDetailsForEidPostObject(patient, order);
 
+            // Check HEI number
             if (heiNumber == null || StringUtils.isBlank(heiNumber.getIdentifier()) || heiDetailsObject == null) {
                 // Patient must have HEI number
                 return(true);
             }
+
+            // Check Mothers Age 
+            SimpleObject heiMothersAge = Utils.getHeiMothersAge(patient);
+            if(heiMothersAge != null && heiMothersAge.get("mothersAge") != null && heiMothersAge.get("mothersAge") == null) {
+                // Child must have a valid mother
+                return(true);
+            }
+
         }
 
         Concept cOrderReason = order.getOrderReason();

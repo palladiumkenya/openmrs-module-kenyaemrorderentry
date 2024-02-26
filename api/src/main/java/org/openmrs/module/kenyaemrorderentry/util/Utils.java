@@ -289,7 +289,7 @@ public class Utils {
 
     public static SimpleObject getHeiMothersAge(Patient patient) {
 
-        Integer mothersAge = 0;
+        Integer mothersAge = null;
         SimpleObject mothersAgeObject = null;
 
         for (Relationship relationship : Context.getPersonService().getRelationshipsByPerson(patient)) {
