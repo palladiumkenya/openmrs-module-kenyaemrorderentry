@@ -204,7 +204,7 @@
                                 <% eligibleEidOrders.each { load -> %>
                                 <tr>
                                     <td class="selectColumn"><input type="checkbox" class="selectGeneralElement" value=${load.order.id}></td>
-                                    <td class="nameColumn">${load.order.patient.givenName} ${load.order.patient.familyName} </td>
+                                    <td class="nameColumn"> <a href="${ ui.pageLink("kenyaemr", "clinician/clinicianViewPatient", [ patientId: load.order.patient.id ]) }"> ${load.order.patient.givenName} ${load.order.patient.familyName} ${load.order.patient.middleName ?: ""} </a></td>
                                     <td class="cccNumberColumn">${load.order.patient.getPatientIdentifier(heiNumberType)}</td>
                                     <td class="dateRequestColumn">${kenyaui.formatDate(load.order.dateActivated)}</td>
                                     <td class="actionColumn">
