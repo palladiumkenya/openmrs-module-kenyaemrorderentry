@@ -167,7 +167,7 @@ public abstract class LabWebRequest {
                 test.put("mother_prophylaxis", heiDetailsObject.get("mothersRegimenAnswer") != null ? heiDetailsObject.get("mothersRegimenAnswer").toString() : "");
                 test.put("mother_last_result", heiDetailsObject.get("validMothersVL") != null ? heiDetailsObject.get("validMothersVL").toString() : ""); // vl within last 6 months
                 test.put("spots", "");
-                test.put("mother_age", heiMothersAgeObject != null ? heiMothersAgeObject.get("mothersAge").toString() : "" );
+                test.put("mother_age", (heiMothersAgeObject != null && heiMothersAgeObject.get("mothersAge") != null) ? heiMothersAgeObject.get("mothersAge").toString() : "" );
                 test.put("ccc_no", Utils.getMothersUniquePatientNumber(patient) !=null ? Utils.getMothersUniquePatientNumber(patient) : "");
 
             } else if (LabOrderDataExchange.getSystemType() == ModuleConstants.LABWARE_SYSTEM) {
@@ -198,7 +198,7 @@ public abstract class LabWebRequest {
                 } else {
                     test.put("hei_id", heiNumber != null ? heiNumber.getIdentifier() : "");
                 }
-                test.put("mother_age", heiMothersAgeObject != null ? heiMothersAgeObject.get("mothersAge").toString() : "" );
+                test.put("mother_age", (heiMothersAgeObject != null && heiMothersAgeObject.get("mothersAge") != null) ? heiMothersAgeObject.get("mothersAge").toString() : "" );
                 test.put("mother_ccc", Utils.getMothersUniquePatientNumber(patient) !=null ? Utils.getMothersUniquePatientNumber(patient) : "");
                 test.put("ccc_no",  cccNumber != null ? cccNumber.getIdentifier() : "");
             }
