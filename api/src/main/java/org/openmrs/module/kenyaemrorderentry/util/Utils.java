@@ -612,15 +612,19 @@ public class Utils {
         Integer feedingMethodQuestion = 1151;
 
         //pcr sample code from lab orders
-        Integer orderReason = order.getOrderReason().getConceptId();
-        if (orderReason.equals(1040)) {
-            pcrSampleCodeAnswer = "1";    //Initial PCR (6week or first contact)
-        }else if (orderReason.equals(1326)) {
-            pcrSampleCodeAnswer = "2";    //2nd PCR (6 months)
-        }else if (orderReason.equals(164860)) {
-            pcrSampleCodeAnswer = "3";    //3rd PCR (12months)
-        }else if (orderReason.equals(162082)) {
-            pcrSampleCodeAnswer = "3";    //Confirmatory PCR and Baseline VL
+        Integer orderReason = 0;
+        Concept cOrderReason = order.getOrderReason();
+        if(cOrderReason != null) {
+            orderReason = cOrderReason.getConceptId();
+            if (orderReason.equals(1040)) {
+                pcrSampleCodeAnswer = "1";    //Initial PCR (6week or first contact)
+            }else if (orderReason.equals(1326)) {
+                pcrSampleCodeAnswer = "2";    //2nd PCR (6 months)
+            }else if (orderReason.equals(164860)) {
+                pcrSampleCodeAnswer = "3";    //3rd PCR (12months)
+            }else if (orderReason.equals(162082)) {
+                pcrSampleCodeAnswer = "3";    //Confirmatory PCR and Baseline VL
+            }
         }
         //Get encounter based variables from hei enrollment and followup
         Encounter lastHeiEnrollmentEncounter = Utils.lastEncounter(Context.getPatientService().getPatient(order.getPatient().getPatientId()), Context.getEncounterService().getEncounterTypeByUuid("415f5136-ca4a-49a8-8db3-f994187c3af6"));   //last Hei Enrollement encounter
