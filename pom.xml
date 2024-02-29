@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.openmrs.module</groupId>
     <artifactId>kenyaemrorderentry</artifactId>
-    <version>1.6.2</version>
+    <version>1.6.3-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>KenyaEMR Order Entry Module</name>
     <description>Drug Order Entry for OpenMRS 2.x</description>
@@ -654,14 +654,28 @@
         </dependencies>
     </dependencyManagement>
 	<build>
+        <resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+			<resource>
+				<directory>src/main/unfiltered-resources</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+				<filtering>false</filtering>
+			</resource>
+		</resources>
+
 		<pluginManagement>
 			<plugins>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
 					<configuration>
-						<target>1.6</target>
-						<source>1.6</source>
+						<target>1.8</target>
+						<source>1.8</source>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -710,17 +724,17 @@
         </pluginRepository>
     </pluginRepositories>
 
-    <distributionManagement>
-        <repository>
-            <id>openmrs-repo-modules</id>
-            <name>OpenMRS Modules</name>
-            <url>https://mavenrepo.openmrs.org/nexus/content/repositories/modules</url>
-        </repository>
-        <snapshotRepository>
-            <id>openmrs-repo-snapshots</id>
-            <name>OpenMRS Snapshots</name>
-            <url>https://mavenrepo.openmrs.org/nexus/content/repositories/snapshots</url>
-        </snapshotRepository>
-    </distributionManagement>
+	<distributionManagement>
+		<repository>
+			<id>mks-repo</id>
+			<name>Mekom Solutions Nexus Releases</name>
+			<url>https://nexus.mekomsolutions.net/repository/maven-releases</url>
+		</repository>
+		<snapshotRepository>
+			<id>mks-repo-snapshots</id>
+			<name>Mekom Solutions Nexus Snapshots</name>
+			<url>https://nexus.mekomsolutions.net/repository/maven-snapshots</url>
+		</snapshotRepository>
+	</distributionManagement>
 
 </project>

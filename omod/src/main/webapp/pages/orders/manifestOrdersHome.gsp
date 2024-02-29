@@ -193,7 +193,7 @@
                                                 <% if( load.hasProblem == false ) { %>
                                                     <button class="addOrderToManifest" style="background-color: cadetblue; color: white" value="od_${load.order.orderId}" data-target="#updateSampleDetails">Add to manifest</button>
                                                 <% } else { %>
-                                                    <span style="color: red" id="warning_${load.order.orderId}"> Warning: Patient requires CCC/KDOD No. and Regimen Line. Check lab system configured (CHAI, LABWARE ..) </span>
+                                                    <span style="color: red" id="warning_${load.order.orderId}"> Warning: Patient requires CCC/KDOD No. and Regimen Line. Check Order reason. Check lab system configured (CHAI, LABWARE ..) </span>
                                                 <% } %>
                                             </td>
                                             <td><span style="color: red" id="alert_${load.order.orderId}"></span></td>
@@ -204,14 +204,14 @@
                                 <% eligibleEidOrders.each { load -> %>
                                 <tr>
                                     <td class="selectColumn"><input type="checkbox" class="selectGeneralElement" value=${load.order.id}></td>
-                                    <td class="nameColumn">${load.order.patient.givenName} ${load.order.patient.familyName} </td>
+                                    <td class="nameColumn"> <a href="${ ui.pageLink("kenyaemr", "clinician/clinicianViewPatient", [ patientId: load.order.patient.id ]) }"> ${load.order.patient.givenName} ${load.order.patient.familyName} ${load.order.patient.middleName ?: ""} </a></td>
                                     <td class="cccNumberColumn">${load.order.patient.getPatientIdentifier(heiNumberType)}</td>
                                     <td class="dateRequestColumn">${kenyaui.formatDate(load.order.dateActivated)}</td>
                                     <td class="actionColumn">
                                         <% if( load.hasProblem == false ) { %>
                                             <button class="addOrderToManifest" style="background-color: cadetblue; color: white" value="od_${load.order.orderId}" data-target="#updateSampleDetails">Add to manifest</button>
                                         <% } else { %>
-                                            <span style="color: red" id="warning_${load.order.orderId}"> Warning: Patient requires HEI/KDOD number. Check lab system configured (CHAI, LABWARE ..) </span>
+                                            <span style="color: red" id="warning_${load.order.orderId}"> Warning: Patient requires HEI/KDOD number. Check Mother Exists. Check order reason. Check lab system configured (CHAI, LABWARE ..) </span>
                                         <% } %>
                                     </td>
                                     <td><span style="color: red" id="alert_${load.order.orderId}"></span></td>
