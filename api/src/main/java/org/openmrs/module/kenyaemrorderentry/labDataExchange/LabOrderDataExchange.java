@@ -336,6 +336,47 @@ public class LabOrderDataExchange {
     }
 
     /**
+     * Returns active vl orders which have not been added to any manifest
+     *
+     * @param manifestId
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    public Set<SimpleObject> getActiveFluOrdersNotInManifest(Integer manifestId, Date startDate, Date endDate) {
+        Context.addProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
+        Set<SimpleObject> activeLabs = new HashSet<SimpleObject>();
+        String sql = "select o.order_id from orders o\n" +
+                "left join kenyaemr_order_entry_lab_manifest_order mo on mo.order_id = o.order_id\n" +
+                "where o.order_action='NEW' and o.concept_id = 1019 and o.date_stopped is null and o.voided=0 and mo.order_id is null ";
+
+        if (startDate != null && endDate != null) {
+            sql = sql + " and date(o.date_activated) between ':startDate' and ':endDate' ";
+            String pStartDate = Utils.getSimpleDateFormat("yyyy-MM-dd").format(startDate);
+            String pEndDate = Utils.getSimpleDateFormat("yyyy-MM-dd").format(endDate);
+
+            sql = sql.replace(":startDate", pStartDate);
+            sql = sql.replace(":endDate", pEndDate);
+        }
+
+        List<List<Object>> activeOrders = Context.getAdministrationService().executeSQL(sql, true);
+        if (!activeOrders.isEmpty()) {
+            for (List<Object> res : activeOrders) {
+                Integer orderId = (Integer) res.get(0);
+                Order o = orderService.getOrder(orderId);
+                if (o != null) {
+                    SimpleObject ret = new SimpleObject();
+                    ret.put("hasProblem", checkIfOrderHasAProblem(o, LabManifest.FLU_TYPE));
+                    ret.put("order", o);
+                    activeLabs.add(ret);
+                }
+            }
+        }
+        Context.removeProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
+        return activeLabs;
+    }
+
+    /**
      * Checks if an order has a problem that might prevent it from being added into a manifest
      * @param order - The lab sample order
      * @return true if there is a problem. false if there is no problem
@@ -407,7 +448,46 @@ public class LabOrderDataExchange {
                 // Child must have a valid mother
                 return(true);
             }
+        }
 
+        if(orderType == LabManifest.FLU_TYPE) {
+
+            PatientIdentifier cccNumber = patient.getPatientIdentifier(Utils.getUniquePatientNumberIdentifierType());
+            PatientIdentifierType pit = MetadataUtils.existing(PatientIdentifierType.class, "b51ffe55-3e76-44f8-89a2-14f5eaf11079");
+            PatientIdentifier kdodNumber = patient.getPatientIdentifier(pit);
+            if(isKDoD.trim().equalsIgnoreCase("true")) {
+                if (kdodNumber == null || StringUtils.isBlank(kdodNumber.getIdentifier())) {
+                    // Patient must have a CCC number or KDOD number
+                    return(true);
+                }
+            } else {
+                if (cccNumber == null || StringUtils.isBlank(cccNumber.getIdentifier())) {
+                    // Patient must have a CCC number or KDOD number
+                    return(true);
+                }
+            }
+
+            Encounter currentRegimenEncounter = RegimenMappingUtils.getLastEncounterForProgram(patient, "ARV");
+            if(currentRegimenEncounter == null) {
+                // Patient must be on a regimen
+                return(true);
+            }
+            SimpleObject regimenDetails = RegimenMappingUtils.buildRegimenChangeObject(currentRegimenEncounter.getObs(), currentRegimenEncounter);
+            String regimenName = (String) regimenDetails.get("regimenShortDisplay");
+            String regimenLine = (String) regimenDetails.get("regimenLine");
+            String nascopCode = "";
+            if (StringUtils.isNotBlank(regimenName )) {
+                nascopCode = RegimenMappingUtils.getDrugNascopCodeByDrugNameAndRegimenLine(regimenName, regimenLine);
+            }
+
+            if (StringUtils.isBlank(nascopCode) && StringUtils.isNotBlank(regimenLine)) {
+                nascopCode = RegimenMappingUtils.getNonStandardCodeFromRegimenLine(regimenLine);
+            }
+
+            if (StringUtils.isBlank(nascopCode)) {
+                // The current regimen must have a regimen line
+                return(true);
+            }
         }
 
         Concept cOrderReason = order.getOrderReason();

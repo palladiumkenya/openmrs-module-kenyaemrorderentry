@@ -36,34 +36,29 @@ public class ManifestOrdersHomePageController {
         PatientIdentifierType pat = Utils.getUniquePatientNumberIdentifierType();
         PatientIdentifierType kat = Utils.getKDODIdentifierType();
         PatientIdentifierType hei = Utils.getHeiNumberIdentifierType();
-        LabOrderDataExchange e = new LabOrderDataExchange();
+        LabOrderDataExchange labOrderDataExchange = new LabOrderDataExchange();
         Integer manifestTypeCode = manifest.getManifestType();
         String manifestType = "";
         if (manifestTypeCode == LabManifest.EID_TYPE) {
             manifestType = "EID";
         } else if (manifestTypeCode == LabManifest.VL_TYPE) {
             manifestType = "Viral load";
+        } else if (manifestTypeCode == LabManifest.FLU_TYPE) {
+            manifestType = "FLU";
         }
-        // Set<Order> activeOrdersNotInManifest = new HashSet<Order>();
+
         Set<SimpleObject> activeVlOrdersNotInManifest = new HashSet<SimpleObject>();
         Set<SimpleObject> activeEidOrdersNotInManifest = new HashSet<SimpleObject>();
-        // activeOrdersNotInManifest = e.getActiveOrdersNotInManifest(null, manifest.getStartDate(),manifest.getEndDate());
+        Set<SimpleObject> activeFluOrdersNotInManifest = new HashSet<SimpleObject>();
 
-    //    if(!activeOrdersNotInManifest.isEmpty()) {
-    //        for (Order o : activeOrdersNotInManifest) {
-    //            if (o.getPatient().getAge() >= 2) {   // this is a vl order
-    //                activeVlOrdersNotInManifest = e.getActiveViralLoadOrdersNotInManifest(null, manifest.getStartDate(), manifest.getEndDate());
-    //            }
-    //            else if(o.getPatient().getAge() < 2){  // this is a eid order
-    //                activeEidOrdersNotInManifest = e.getActiveEidOrdersNotInManifest(null, manifest.getStartDate(), manifest.getEndDate());
-    //            }
-    //        }
-    //     }
         if(manifestTypeCode == LabManifest.VL_TYPE) {
-            activeVlOrdersNotInManifest = e.getActiveViralLoadOrdersNotInManifest(null, manifest.getStartDate(), manifest.getEndDate());
+            activeVlOrdersNotInManifest = labOrderDataExchange.getActiveViralLoadOrdersNotInManifest(null, manifest.getStartDate(), manifest.getEndDate());
         } else if(manifestTypeCode == LabManifest.EID_TYPE) {
-            activeEidOrdersNotInManifest = e.getActiveEidOrdersNotInManifest(null, manifest.getStartDate(), manifest.getEndDate());
+            activeEidOrdersNotInManifest = labOrderDataExchange.getActiveEidOrdersNotInManifest(null, manifest.getStartDate(), manifest.getEndDate());
+        } else if(manifestTypeCode == LabManifest.FLU_TYPE) {
+            activeFluOrdersNotInManifest = labOrderDataExchange.getActiveFluOrdersNotInManifest(null, manifest.getStartDate(), manifest.getEndDate());
         }
+
 
         //Temporary fix to remove special chars from lab results
         List<LabManifestOrder> ordersForManifest = new ArrayList<LabManifestOrder>();
@@ -101,6 +96,15 @@ public class ManifestOrdersHomePageController {
             EIDOrders.add(so);
         }
 
+        // FLU orders
+        List<SimpleObject> FLUOrders = new ArrayList<SimpleObject>();
+        for(SimpleObject load : activeFluOrdersNotInManifest){
+            SimpleObject so = new SimpleObject();
+            Order order = (Order) load.get("order");
+            so.put("orderId", order.getId());
+            FLUOrders.add(so);
+        }
+
         // Manifest orders
         List<SimpleObject> manifestOrders = new ArrayList<SimpleObject>();
         for(LabManifestOrder order : ordersForManifest){
@@ -114,9 +118,9 @@ public class ManifestOrdersHomePageController {
         model.put("eligibleEidOrders", activeEidOrdersNotInManifest );
         model.put("VLOrders", ui.toJson(VLOrders) );
         model.put("EIDOrders", ui.toJson(EIDOrders) );
+        model.put("FLUOrders", ui.toJson(FLUOrders) );
         model.put("manifestType", manifestType);
         model.put("manifest", manifest);
-        //model.put("manifestOrders", allOrdersForManifest);
         model.put("manifestOrders", ordersForManifest);
         model.put("allManifestOrders", ui.toJson(manifestOrders));
 

@@ -132,11 +132,18 @@ public class ManifestFormFragmentController {
     private Map<Integer, String> createManifestTypeOptions() {
         Map<Integer, String> options = new HashMap<Integer, String>();
         GlobalProperty gpEnableEIDFunction = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.ENABLE_EID_FUNCTION);
+        GlobalProperty gpEnableFLUFunction = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.ENABLE_FLU_FUNCTION);
         options.put(LabManifest.VL_TYPE, "Viral Load"); // comment this to disable VL
         if (gpEnableEIDFunction != null) {
             String enableEID = gpEnableEIDFunction.getPropertyValue();
             if(enableEID.trim().equalsIgnoreCase("true")) {
                 options.put(LabManifest.EID_TYPE, "EID"); // comment this to disable EID
+            }
+        }
+        if (gpEnableFLUFunction != null) {
+            String enableFLU = gpEnableFLUFunction.getPropertyValue();
+            if(enableFLU.trim().equalsIgnoreCase("true")) {
+                options.put(LabManifest.FLU_TYPE, "FLU"); // comment this to disable FLU
             }
         }
         return options;
@@ -217,6 +224,8 @@ public class ManifestFormFragmentController {
                         mType = "E";
                     } else if(manifestType == LabManifest.VL_TYPE) {
                         mType = "V";
+                    } else if(manifestType == LabManifest.FLU_TYPE) {
+                        mType = "F";
                     }
                     toSave.setIdentifier(labOrderDataExchange.generateUniqueManifestID(mType));
                 }

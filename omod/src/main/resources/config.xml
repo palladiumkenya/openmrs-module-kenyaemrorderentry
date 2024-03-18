@@ -68,6 +68,14 @@
 	</globalProperty>
 
 	<globalProperty>
+		<property>enable_orderentry_manifest_flu_function</property>
+		<defaultValue>false</defaultValue>
+		<description>
+			Enable (true) or Disable (false) Order Entry Manifest FLU functionality
+		</description>
+	</globalProperty>
+
+	<globalProperty>
 		<property>kenyaemrorderentry.drugsMappingDirectory</property>
 		<defaultValue>kenyaemrorderentry</defaultValue>
 		<description>
@@ -124,6 +132,30 @@
 	</globalProperty>
 
 	<globalProperty>
+		<property>chai_flu_server_url</property>
+		<defaultValue></defaultValue>
+		<description>
+			The URL for pushing requests to the CHAI FLU server
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>chai_flu_server_result_url</property>
+		<defaultValue></defaultValue>
+		<description>
+			The URL for fetching CHAI FLU result
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>chai_flu_server_api_token</property>
+		<defaultValue></defaultValue>
+		<description>
+			API token to authenticate communication to the CHAI FLU lab system API
+		</description>
+	</globalProperty>
+
+	<globalProperty>
 		<property>labware_eid_server_url</property>
 		<defaultValue></defaultValue>
 		<description>
@@ -172,6 +204,30 @@
 	</globalProperty>
 
 	<globalProperty>
+		<property>labware_flu_server_url</property>
+		<defaultValue></defaultValue>
+		<description>
+			The URL for pushing requests to the LABWARE FLU server
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>labware_flu_server_result_url</property>
+		<defaultValue></defaultValue>
+		<description>
+			The URL for fetching LABWARE FLU result
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>labware_flu_server_api_token</property>
+		<defaultValue></defaultValue>
+		<description>
+			API token to authenticate communication to the LABWARE FLU lab system API
+		</description>
+	</globalProperty>
+
+	<globalProperty>
 		<property>edarp_eid_server_url</property>
 		<defaultValue></defaultValue>
 		<description>
@@ -216,6 +272,30 @@
 		<defaultValue></defaultValue>
 		<description>
 			API token to authenticate communication to the EDARP VL lab system API
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>edarp_flu_server_url</property>
+		<defaultValue></defaultValue>
+		<description>
+			The URL for pushing requests to the EDARP FLU server
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>edarp_flu_server_result_url</property>
+		<defaultValue></defaultValue>
+		<description>
+			The URL for fetching EDARP FLU result
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>edarp_flu_server_api_token</property>
+		<defaultValue></defaultValue>
+		<description>
+			API token to authenticate communication to the EDARP FLU lab system API
 		</description>
 	</globalProperty>
 
