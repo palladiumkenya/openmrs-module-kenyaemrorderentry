@@ -31,6 +31,7 @@ public class LabManifest extends BaseOpenmrsData implements Serializable {
     //Manifest Type and Order Type
     public static final int EID_TYPE = 1;
     public static final int VL_TYPE = 2;
+    public static final int FLU_TYPE = 3;
 
     public LabManifest() {
         prePersist();
