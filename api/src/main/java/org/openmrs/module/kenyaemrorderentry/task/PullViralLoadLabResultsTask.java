@@ -62,10 +62,10 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
                     return;
                 }
 
-                if (!labSystemConnectionRequest.checkRequirements()) {
-                    System.out.println("LAB GET: Failed to satisfy requirements for pushing samples. Please configure appropriate global properties for your facility");
-                    return;
-                }
+//                if (!labSystemConnectionRequest.checkRequirements()) {
+//                    System.out.println("LAB GET: Failed to satisfy requirements for pulling samples. Please configure appropriate global properties for your facility");
+//                    return;
+//                }
 
                 GlobalProperty gpLastProcessedManifest = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_MANIFEST_LAST_PROCESSED);
                 GlobalProperty gpRetryPeriodForIncompleteResults = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_RETRY_PERIOD_FOR_ORDERS_WITH_INCOMPLETE_RESULTS);

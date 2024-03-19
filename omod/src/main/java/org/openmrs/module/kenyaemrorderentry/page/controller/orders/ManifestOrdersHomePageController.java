@@ -116,6 +116,7 @@ public class ManifestOrdersHomePageController {
 
         model.put("eligibleVlOrders", activeVlOrdersNotInManifest );
         model.put("eligibleEidOrders", activeEidOrdersNotInManifest );
+        model.put("eligibleFLUOrders", activeFluOrdersNotInManifest );
         model.put("VLOrders", ui.toJson(VLOrders) );
         model.put("EIDOrders", ui.toJson(EIDOrders) );
         model.put("FLUOrders", ui.toJson(FLUOrders) );

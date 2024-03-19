@@ -48,7 +48,7 @@ public class ChaiSystemWebRequest extends LabWebRequest {
     }
 
     @Override
-    public boolean checkRequirements() {
+    public boolean checkRequirements(LabManifest toProcess) {
         // EID settings
         GlobalProperty gpEIDServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_EID_LAB_SERVER_REQUEST_URL);
         GlobalProperty gpEIDServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_EID_LAB_SERVER_RESULT_URL);
@@ -59,6 +59,11 @@ public class ChaiSystemWebRequest extends LabWebRequest {
         GlobalProperty gpVLServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_VL_LAB_SERVER_RESULT_URL);
         GlobalProperty gpVLApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_VL_LAB_SERVER_API_TOKEN);
 
+        // FLU Settings
+        GlobalProperty gpFLUServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_FLU_LAB_SERVER_REQUEST_URL);
+        GlobalProperty gpFLUServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_FLU_LAB_SERVER_RESULT_URL);
+        GlobalProperty gpFLUApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_FLU_LAB_SERVER_API_TOKEN);
+
         String EIDServerPushUrl = gpEIDServerPushUrl.getPropertyValue();
         String EIDServerPullUrl = gpEIDServerPullUrl.getPropertyValue();
         String EIDApiToken = gpEIDApiToken.getPropertyValue();
@@ -67,8 +72,16 @@ public class ChaiSystemWebRequest extends LabWebRequest {
         String VLServerPullUrl = gpVLServerPullUrl.getPropertyValue();
         String VLApiToken = gpVLApiToken.getPropertyValue();
 
-        if (StringUtils.isBlank(VLServerPushUrl) || StringUtils.isBlank(VLServerPullUrl) || StringUtils.isBlank(VLApiToken) || LabOrderDataExchange.getSystemType() == 0) {
-            System.out.println("CHAI Lab Results: Please set credentials for posting lab requests to the CHAI system");
+        String FLUServerPushUrl = gpFLUServerPushUrl.getPropertyValue();
+        String FLUServerPullUrl = gpFLUServerPullUrl.getPropertyValue();
+        String FLUApiToken = gpFLUApiToken.getPropertyValue();
+
+        if ((toProcess.getManifestType() == LabManifest.VL_TYPE && (StringUtils.isBlank(VLServerPushUrl) || StringUtils.isBlank(VLServerPullUrl) || StringUtils.isBlank(VLApiToken)))
+                || (toProcess.getManifestType() == LabManifest.EID_TYPE && (StringUtils.isBlank(EIDServerPushUrl) || StringUtils.isBlank(EIDServerPullUrl) || StringUtils.isBlank(EIDApiToken)))
+                || (toProcess.getManifestType() == LabManifest.FLU_TYPE && (StringUtils.isBlank(FLUServerPushUrl) || StringUtils.isBlank(FLUServerPullUrl) || StringUtils.isBlank(FLUApiToken)))
+                || LabOrderDataExchange.getSystemType() == ModuleConstants.NO_SYSTEM_CONFIGURED
+        ) {
+            System.err.println("CHAI Lab Results: Please set credentials for posting lab requests to the CHAI system");
             return false;
         }
         return true;
@@ -76,11 +89,12 @@ public class ChaiSystemWebRequest extends LabWebRequest {
 
     public boolean postSamples(LabManifestOrder manifestOrder, String manifestStatus) throws IOException {
 
-        if (!checkRequirements()) {
+        LabManifest toProcess = manifestOrder.getLabManifest();
+        if (!checkRequirements(toProcess)) {
+            System.err.println("CHAI Lab Results POST: Failed to satisfy requirements");
             return(false);
         }
 
-        LabManifest toProcess = manifestOrder.getLabManifest();
         KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
 
         String serverUrl = "";
@@ -224,6 +238,11 @@ public class ChaiSystemWebRequest extends LabWebRequest {
         if (StringUtils.isNotBlank(lastExecutionTime)) {
 
         }*/
+
+        if (!checkRequirements(manifestToUpdateResults)) {
+            System.err.println("CHAI Lab Results GET: Failed to satisfy requirements");
+            return;
+        }
 
         KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
 

@@ -348,7 +348,7 @@ public class LabOrderDataExchange {
         Set<SimpleObject> activeLabs = new HashSet<SimpleObject>();
         String sql = "select o.order_id from orders o\n" +
                 "left join kenyaemr_order_entry_lab_manifest_order mo on mo.order_id = o.order_id\n" +
-                "where o.order_action='NEW' and o.concept_id = 1019 and o.date_stopped is null and o.voided=0 and mo.order_id is null ";
+                "where o.order_action='NEW' and o.concept_id in (1015,21,1017,1018,851,729,679,1016,678,1336,1338,163426) and o.date_stopped is null and o.voided=0 and mo.order_id is null ";
 
         if (startDate != null && endDate != null) {
             sql = sql + " and date(o.date_activated) between ':startDate' and ':endDate' ";
@@ -358,9 +358,10 @@ public class LabOrderDataExchange {
             sql = sql.replace(":startDate", pStartDate);
             sql = sql.replace(":endDate", pEndDate);
         }
-
+        System.out.println("FLU Manifest: Now executing SQL: " + sql);
         List<List<Object>> activeOrders = Context.getAdministrationService().executeSQL(sql, true);
         if (!activeOrders.isEmpty()) {
+            System.out.println("FLU Manifest: We found FLU orders: " + activeOrders.size());
             for (List<Object> res : activeOrders) {
                 Integer orderId = (Integer) res.get(0);
                 Order o = orderService.getOrder(orderId);
@@ -371,8 +372,11 @@ public class LabOrderDataExchange {
                     activeLabs.add(ret);
                 }
             }
+        } else {
+            System.out.println("FLU Manifest: We found no FLU orders");
         }
         Context.removeProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
+        System.out.println("FLU Manifest: Active Labs: " + activeLabs.size());
         return activeLabs;
     }
 
@@ -430,6 +434,13 @@ public class LabOrderDataExchange {
                 // The current regimen must have a regimen line
                 return(true);
             }
+
+            // Check order reason
+            Concept cOrderReason = order.getOrderReason();
+            if(cOrderReason == null) {
+                // Order must have order reason
+                return(true);
+            }
         }
 
         if(orderType == LabManifest.EID_TYPE) {
@@ -446,6 +457,13 @@ public class LabOrderDataExchange {
             SimpleObject heiMothersAge = Utils.getHeiMothersAge(patient);
             if(heiMothersAge != null && heiMothersAge.get("mothersAge") == null) {
                 // Child must have a valid mother
+                return(true);
+            }
+
+            // Check order reason
+            Concept cOrderReason = order.getOrderReason();
+            if(cOrderReason == null) {
+                // Order must have order reason
                 return(true);
             }
         }
@@ -466,34 +484,6 @@ public class LabOrderDataExchange {
                     return(true);
                 }
             }
-
-            Encounter currentRegimenEncounter = RegimenMappingUtils.getLastEncounterForProgram(patient, "ARV");
-            if(currentRegimenEncounter == null) {
-                // Patient must be on a regimen
-                return(true);
-            }
-            SimpleObject regimenDetails = RegimenMappingUtils.buildRegimenChangeObject(currentRegimenEncounter.getObs(), currentRegimenEncounter);
-            String regimenName = (String) regimenDetails.get("regimenShortDisplay");
-            String regimenLine = (String) regimenDetails.get("regimenLine");
-            String nascopCode = "";
-            if (StringUtils.isNotBlank(regimenName )) {
-                nascopCode = RegimenMappingUtils.getDrugNascopCodeByDrugNameAndRegimenLine(regimenName, regimenLine);
-            }
-
-            if (StringUtils.isBlank(nascopCode) && StringUtils.isNotBlank(regimenLine)) {
-                nascopCode = RegimenMappingUtils.getNonStandardCodeFromRegimenLine(regimenLine);
-            }
-
-            if (StringUtils.isBlank(nascopCode)) {
-                // The current regimen must have a regimen line
-                return(true);
-            }
-        }
-
-        Concept cOrderReason = order.getOrderReason();
-        if(cOrderReason == null) {
-            // Order must have order reason
-            return(true);
         }
 
         // In this case, we are all ok

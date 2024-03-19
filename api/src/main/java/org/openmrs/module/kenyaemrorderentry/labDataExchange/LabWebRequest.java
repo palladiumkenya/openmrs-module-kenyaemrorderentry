@@ -43,7 +43,7 @@ public abstract class LabWebRequest {
     public LabWebRequest(Integer orderType) {
         this.manifestType = orderType;
     }
-    public abstract boolean checkRequirements();
+    public abstract boolean checkRequirements(LabManifest toProcess);
 
     public abstract boolean postSamples(LabManifestOrder manifestOrder, String manifestStatus) throws IOException;
 

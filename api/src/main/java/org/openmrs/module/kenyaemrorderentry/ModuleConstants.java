@@ -51,7 +51,6 @@ public class ModuleConstants {
     public static final int NO_SYSTEM_CONFIGURED = 0;
     public static final int CHAI_SYSTEM = 1;
     public static final int LABWARE_SYSTEM = 2;
-
     public static final int EDARP_SYSTEM = 3;
 
     public static final Integer DEFAULT_APHL_LAB_CODE = 7;
