@@ -270,11 +270,9 @@
                                         <% } else if(manifest.manifestType == 1) {%>
                                             <option value="DBS">DBS</option>
                                         <% } else if(manifest.manifestType == 3) {%>
-                                            <option value="PCR_FLU_A">PCR_FLU_A</option>
-                                            <option value="PCR_FLU_B">PCR_FLU_B</option>
-                                            <option value="PCR_RSV">PCR_RSV</option>
-                                            <option value="RNP">RNP</option>
-                                            <option value="SARS_COV_2_M">SARS_COV_2_M</option>
+                                            <option value="Nasal Swab">Nasal Swab</option>
+                                            <option value="NP">NP</option>
+                                            <option value="OP">OP</option>
                                         <% } %>
                                     </select>
                                 </td>
@@ -320,11 +318,9 @@
                                         <% } else if(manifest.manifestType == 1) {%>
                                             <option value="DBS">DBS</option>
                                         <% } else if(manifest.manifestType == 3) {%>
-                                            <option value="PCR_FLU_A">PCR_FLU_A</option>
-                                            <option value="PCR_FLU_B">PCR_FLU_B</option>
-                                            <option value="PCR_RSV">PCR_RSV</option>
-                                            <option value="RNP">RNP</option>
-                                            <option value="SARS_COV_2_M">SARS_COV_2_M</option>
+                                            <option value="Nasal Swab">Nasal Swab</option>
+                                            <option value="NP">NP</option>
+                                            <option value="OP">OP</option>
                                         <% } %>
                                     </select>
                                 </td>
@@ -466,7 +462,7 @@
             } else if(manifestType == 1) {
                 sampleType = "DBS";
             } else if(manifestType == 3) {
-                sampleType = "PCR_FLU_A";
+                sampleType = "Nasal Swab";
             }
             //loop through the orders
             for (var i = 0; i < eligibleOrdersToInsert.length; i++) {
