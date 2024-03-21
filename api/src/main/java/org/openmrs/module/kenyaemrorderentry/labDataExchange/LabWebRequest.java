@@ -206,11 +206,13 @@ public abstract class LabWebRequest {
         } else if (manifestType == LabManifest.FLU_TYPE) {
             PersonAddress personAddress = patient.getPersonAddress();
             Obs patientCountry = Utils.getLatestObs(patient, "165657AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+            String mfl = Utils.getDefaultLocationMflCode(Utils.getDefaultLocation());
 
-            test.put("PID_NUMBER", o.getOrderId().toString());
-            test.put("KEMRI_BARCODE", o.getOrderId().toString());
+            test.put("PID_NUMBER", mfl + "-" + o.getOrderId().toString());
+            test.put("KEMRI_BARCODE", mfl + "-" + o.getOrderId().toString());
             test.put("DATE_COLLECTED", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
             test.put("SPECIMEN_TYPE", sampleType);
+            test.put("DOB", dob);
             // test.put("NATIONALITY", personAddress.getCountry() != null ? personAddress.getCountry() : "");
             test.put("NATIONALITY", (patientCountry != null && patientCountry.getValueCoded() != null) ? patientCountry.getValueCoded().getName().getName() : "");
             test.put("COUNTY", personAddress.getCountyDistrict() != null ? personAddress.getCountyDistrict() : "");
@@ -218,7 +220,7 @@ public abstract class LabWebRequest {
             test.put("VILLAGE_ESTATE",personAddress.getCityVillage() != null ? personAddress.getCityVillage() : "");
             test.put("SEX", patient.getGender());
             test.put("CASE_TYPE","SARI");
-            test.put("FACILITY_CODE", Utils.getDefaultLocationMflCode(Utils.getDefaultLocation()));
+            test.put("FACILITY_CODE", mfl);
             test.put("ILI_SARI","SARI");
             //patient ID
             test.put("OP_IP", patient.getPatientId().toString());

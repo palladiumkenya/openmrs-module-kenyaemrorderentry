@@ -54,6 +54,10 @@ public class SettingsFragmentController {
                 GlobalProperty gpChaiVLServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_VL_LAB_SERVER_REQUEST_URL);
                 GlobalProperty gpChaiVLServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_VL_LAB_SERVER_RESULT_URL);
                 GlobalProperty gpChaiVLApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_VL_LAB_SERVER_API_TOKEN);
+                GlobalProperty gpChaiFLUServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_FLU_LAB_SERVER_REQUEST_URL);
+                GlobalProperty gpChaiFLUServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_FLU_LAB_SERVER_RESULT_URL);
+                GlobalProperty gpChaiFLUApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_FLU_LAB_SERVER_API_TOKEN);
+        
 
                 // LABWARE SYSTEM
                 GlobalProperty gpLabwareEIDServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_EID_LAB_SERVER_REQUEST_URL);
@@ -62,7 +66,10 @@ public class SettingsFragmentController {
                 GlobalProperty gpLabwareVLServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_VL_LAB_SERVER_REQUEST_URL);
                 GlobalProperty gpLabwareVLServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_VL_LAB_SERVER_RESULT_URL);
                 GlobalProperty gpLabwareVLApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_VL_LAB_SERVER_API_TOKEN);
-
+                GlobalProperty gpLabwareFLUServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_FLU_LAB_SERVER_REQUEST_URL);
+                GlobalProperty gpLabwareFLUServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_FLU_LAB_SERVER_RESULT_URL);
+                GlobalProperty gpLabwareFLUApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_FLU_LAB_SERVER_API_TOKEN);
+        
                 // EDARP SYSTEM
                 GlobalProperty gpEdarpEIDServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_EDARP_EID_LAB_SERVER_REQUEST_URL);
                 GlobalProperty gpEdarpEIDServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_EDARP_EID_LAB_SERVER_RESULT_URL);
@@ -70,9 +77,13 @@ public class SettingsFragmentController {
                 GlobalProperty gpEdarpVLServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_EDARP_VL_LAB_SERVER_REQUEST_URL);
                 GlobalProperty gpEdarpVLServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_EDARP_VL_LAB_SERVER_RESULT_URL);
                 GlobalProperty gpEdarpVLApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_EDARP_VL_LAB_SERVER_API_TOKEN);
-
+                GlobalProperty gpEdarpFLUServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_EDARP_FLU_LAB_SERVER_REQUEST_URL);
+                GlobalProperty gpEdarpFLUServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_EDARP_FLU_LAB_SERVER_RESULT_URL);
+                GlobalProperty gpEdarpFLUApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_EDARP_FLU_LAB_SERVER_API_TOKEN);
+        
                 GlobalProperty gpSslVerification = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_SSL_VERIFICATION_ENABLED);
                 GlobalProperty gpEnableEIDFunction = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.ENABLE_EID_FUNCTION);
+                GlobalProperty gpEnableFLUFunction = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.ENABLE_FLU_FUNCTION);
                 GlobalProperty gpLocalResultEndpoint = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LOCAL_RESULT_ENDPOINT);
                 GlobalProperty gpSchedulerUsername = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_SCHEDULER_USERNAME);
                 GlobalProperty gpSchedulerPassword = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_SCHEDULER_PASSWORD);
@@ -102,6 +113,18 @@ public class SettingsFragmentController {
                 } else if(chkEIDEnabled.equalsIgnoreCase("off")) {
                     gpEnableEIDFunction.setPropertyValue("false");
                     Context.getAdministrationService().saveGlobalProperty(gpEnableEIDFunction);
+                }
+
+                // FLU Enabled
+                String chkFLUEnabled = (String) responseObj.get("chkFLUEnabled");
+                chkFLUEnabled = chkFLUEnabled == null ? "" : chkFLUEnabled.trim();
+                System.out.println("chkFLUEnabled: " + chkFLUEnabled);
+                if(chkFLUEnabled.equalsIgnoreCase("on")) {
+                    gpEnableFLUFunction.setPropertyValue("true");
+                    Context.getAdministrationService().saveGlobalProperty(gpEnableFLUFunction);
+                } else if(chkFLUEnabled.equalsIgnoreCase("off")) {
+                    gpEnableFLUFunction.setPropertyValue("false");
+                    Context.getAdministrationService().saveGlobalProperty(gpEnableFLUFunction);
                 }
 
                 // EID Token
@@ -147,6 +170,51 @@ public class SettingsFragmentController {
                 } else if(selSystemType.equalsIgnoreCase("EDARP")) {
                     gpEdarpEIDServerPushUrl.setPropertyValue(txtEIDPushURL);
                     Context.getAdministrationService().saveGlobalProperty(gpEdarpEIDServerPushUrl);
+                }
+
+                // FLU Token
+                String txtFLUToken = (String) responseObj.get("txtFLUToken");
+                txtFLUToken = txtFLUToken == null ? "" : txtFLUToken.trim();
+                System.out.println("txtFLUToken: " + txtFLUToken);
+                if(selSystemType.equalsIgnoreCase("CHAI")) {
+                    gpChaiFLUApiToken.setPropertyValue(txtFLUToken);
+                    Context.getAdministrationService().saveGlobalProperty(gpChaiFLUApiToken);
+                } else if(selSystemType.equalsIgnoreCase("LABWARE")) {
+                    gpLabwareFLUApiToken.setPropertyValue(txtFLUToken);
+                    Context.getAdministrationService().saveGlobalProperty(gpLabwareFLUApiToken);
+                } else if(selSystemType.equalsIgnoreCase("EDARP")) {
+                    gpEdarpFLUApiToken.setPropertyValue(txtFLUToken);
+                    Context.getAdministrationService().saveGlobalProperty(gpEdarpFLUApiToken);
+                }
+
+                // FLU Pull URL
+                String txtFLUPullURL = (String) responseObj.get("txtFLUPullURL");
+                txtFLUPullURL = txtFLUPullURL == null ? "" : txtFLUPullURL.trim();
+                System.out.println("txtFLUPullURL: " + txtFLUPullURL);
+                if(selSystemType.equalsIgnoreCase("CHAI")) {
+                    gpChaiFLUServerPullUrl.setPropertyValue(txtFLUPullURL);
+                    Context.getAdministrationService().saveGlobalProperty(gpChaiFLUServerPullUrl);
+                } else if(selSystemType.equalsIgnoreCase("LABWARE")) {
+                    gpLabwareFLUServerPullUrl.setPropertyValue(txtFLUPullURL);
+                    Context.getAdministrationService().saveGlobalProperty(gpLabwareFLUServerPullUrl);
+                } else if(selSystemType.equalsIgnoreCase("EDARP")) {
+                    gpEdarpFLUServerPullUrl.setPropertyValue(txtFLUPullURL);
+                    Context.getAdministrationService().saveGlobalProperty(gpEdarpFLUServerPullUrl);
+                }
+
+                // FLU Push URL
+                String txtFLUPushURL = (String) responseObj.get("txtFLUPushURL");
+                txtFLUPushURL = txtFLUPushURL == null ? "" : txtFLUPushURL.trim();
+                System.out.println("txtFLUPushURL: " + txtFLUPushURL);
+                if(selSystemType.equalsIgnoreCase("CHAI")) {
+                    gpChaiFLUServerPushUrl.setPropertyValue(txtFLUPushURL);
+                    Context.getAdministrationService().saveGlobalProperty(gpChaiFLUServerPushUrl);
+                } else if(selSystemType.equalsIgnoreCase("LABWARE")) {
+                    gpLabwareFLUServerPushUrl.setPropertyValue(txtFLUPushURL);
+                    Context.getAdministrationService().saveGlobalProperty(gpLabwareFLUServerPushUrl);
+                } else if(selSystemType.equalsIgnoreCase("EDARP")) {
+                    gpEdarpFLUServerPushUrl.setPropertyValue(txtFLUPushURL);
+                    Context.getAdministrationService().saveGlobalProperty(gpEdarpFLUServerPushUrl);
                 }
 
                 // VL Token

@@ -63,9 +63,9 @@ public class EdarpSystemWebRequest extends LabWebRequest {
         GlobalProperty gpVLApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_EDARP_VL_LAB_SERVER_API_TOKEN);
 
         // FLU Settings
-        GlobalProperty gpFLUServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_FLU_LAB_SERVER_REQUEST_URL);
-        GlobalProperty gpFLUServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_FLU_LAB_SERVER_RESULT_URL);
-        GlobalProperty gpFLUApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_FLU_LAB_SERVER_API_TOKEN);
+        GlobalProperty gpFLUServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_EDARP_FLU_LAB_SERVER_REQUEST_URL);
+        GlobalProperty gpFLUServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_EDARP_FLU_LAB_SERVER_RESULT_URL);
+        GlobalProperty gpFLUApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_EDARP_FLU_LAB_SERVER_API_TOKEN);
 
         String EIDServerPushUrl = gpEIDServerPushUrl.getPropertyValue();
         String EIDServerPullUrl = gpEIDServerPullUrl.getPropertyValue();
@@ -114,8 +114,8 @@ public class EdarpSystemWebRequest extends LabWebRequest {
             serverUrl = gpVLServerPushUrl.getPropertyValue().trim();
             API_KEY = gpVLApiToken.getPropertyValue().trim();
         } else if(toProcess.getManifestType() == LabManifest.FLU_TYPE) {
-            GlobalProperty gpFLUServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_FLU_LAB_SERVER_REQUEST_URL);
-            GlobalProperty gpFLUApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_FLU_LAB_SERVER_API_TOKEN);
+            GlobalProperty gpFLUServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_EDARP_FLU_LAB_SERVER_REQUEST_URL);
+            GlobalProperty gpFLUApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_EDARP_FLU_LAB_SERVER_API_TOKEN);
             serverUrl = gpFLUServerPushUrl.getPropertyValue().trim();
             API_KEY = gpFLUApiToken.getPropertyValue().trim();
         }
@@ -252,8 +252,8 @@ public class EdarpSystemWebRequest extends LabWebRequest {
             serverUrl = gpVLServerPullUrl.getPropertyValue().trim();
             API_KEY = gpVLApiToken.getPropertyValue().trim();
         } else if(manifestToUpdateResults.getManifestType() == LabManifest.FLU_TYPE) {
-            GlobalProperty gpFLUServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_FLU_LAB_SERVER_RESULT_URL);
-            GlobalProperty gpFLUApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_FLU_LAB_SERVER_API_TOKEN);
+            GlobalProperty gpFLUServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_EDARP_FLU_LAB_SERVER_RESULT_URL);
+            GlobalProperty gpFLUApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_EDARP_FLU_LAB_SERVER_API_TOKEN);
             serverUrl = gpFLUServerPullUrl.getPropertyValue().trim();
             API_KEY = gpFLUApiToken.getPropertyValue().trim();
         }
@@ -405,12 +405,17 @@ public class EdarpSystemWebRequest extends LabWebRequest {
     public ObjectNode completePostPayload(Order o, Date dateSampleCollected, Date dateSampleSeparated, String sampleType, String manifestID) {
         ObjectNode node = baselinePostRequestPayload(o, dateSampleCollected, dateSampleSeparated, sampleType, manifestID);
         if (!node.isEmpty()) {
-            node.put("mflCode", Utils.getDefaultLocationMflCode(null));
 
-            if (o.getPatient().getGender().equals("F")) {
-                node.put("pmtct", "3");
+            if (getManifestType() == LabManifest.FLU_TYPE) {
+                // Any custom payload for EDARP FLU
+            } else {
+                node.put("mflCode", Utils.getDefaultLocationMflCode(Utils.getDefaultLocation()));
+
+                if (o.getPatient().getGender().equals("F")) {
+                    node.put("pmtct", "3");
+                }
+                node.put("lab", "");
             }
-            node.put("lab", "");
             // System.out.println("Order Entry: Using EDARP System payload: " + node.toPrettyString());
         }
         return node;

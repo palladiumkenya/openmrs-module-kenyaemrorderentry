@@ -110,6 +110,11 @@ public class ChaiSystemWebRequest extends LabWebRequest {
             GlobalProperty gpVLApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_VL_LAB_SERVER_API_TOKEN);
             serverUrl = gpVLServerPushUrl.getPropertyValue().trim();
             API_KEY = gpVLApiToken.getPropertyValue().trim();
+        } else if(toProcess.getManifestType() == LabManifest.FLU_TYPE) {
+            GlobalProperty gpFLUServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_FLU_LAB_SERVER_REQUEST_URL);
+            GlobalProperty gpFLUApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_FLU_LAB_SERVER_API_TOKEN);
+            serverUrl = gpFLUServerPushUrl.getPropertyValue().trim();
+            API_KEY = gpFLUApiToken.getPropertyValue().trim();
         }
 
 
@@ -259,6 +264,11 @@ public class ChaiSystemWebRequest extends LabWebRequest {
             GlobalProperty gpVLApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_VL_LAB_SERVER_API_TOKEN);
             serverUrl = gpVLServerPullUrl.getPropertyValue().trim();
             API_KEY = gpVLApiToken.getPropertyValue().trim();
+        } else if(manifestToUpdateResults.getManifestType() == LabManifest.FLU_TYPE) {
+            GlobalProperty gpFLUServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_FLU_LAB_SERVER_RESULT_URL);
+            GlobalProperty gpFLUApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_FLU_LAB_SERVER_API_TOKEN);
+            serverUrl = gpFLUServerPullUrl.getPropertyValue().trim();
+            API_KEY = gpFLUApiToken.getPropertyValue().trim();
         }
 
         GlobalProperty gpLastProcessedManifest = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_MANIFEST_LAST_PROCESSED);
@@ -409,12 +419,17 @@ public class ChaiSystemWebRequest extends LabWebRequest {
     public ObjectNode completePostPayload(Order o, Date dateSampleCollected, Date dateSampleSeparated, String sampleType, String manifestID) {
         ObjectNode node = baselinePostRequestPayload(o, dateSampleCollected, dateSampleSeparated, sampleType, manifestID);
         if (!node.isEmpty()) {
-            node.put("mflCode", Utils.getDefaultLocationMflCode(null));
 
-            if (o.getPatient().getGender().equals("F")) {
-                node.put("pmtct", "3");
+            if (getManifestType() == LabManifest.FLU_TYPE) {
+                // Any custom payload for CHAI FLU
+            } else {
+                node.put("mflCode", Utils.getDefaultLocationMflCode(Utils.getDefaultLocation()));
+
+                if (o.getPatient().getGender().equals("F")) {
+                    node.put("pmtct", "3");
+                }
+                node.put("lab", "");
             }
-            node.put("lab", "");
             // System.out.println("Order Entry: Using CHAI System payload: " + node.toPrettyString());
         }
         
