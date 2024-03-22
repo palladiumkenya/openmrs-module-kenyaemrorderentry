@@ -16,6 +16,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.openmrs.GlobalProperty;
 import org.openmrs.Order;
@@ -431,95 +432,104 @@ public class LabwareSystemWebRequest extends LabWebRequest {
                 CloseableHttpResponse response = httpClient.execute(httpget);
 
                 final int statusCode = response.getStatusLine().getStatusCode();
-                if (statusCode != 200) {
-                    throw new RuntimeException("Get Labware Lab Results Failed with HTTP error code : " + statusCode);
-                } else {
-                    System.out.println("Get Labware Lab Results: REST Call Success");
-                }
+                if (statusCode == 200 || statusCode == 201) {                   
+                    System.out.println("Get Labware Lab FLU Results: REST Call Success");               
 
-            String jsonString = null;
-            HttpEntity entity = response.getEntity();
-            if (entity != null) {
-                BufferedReader rd = new BufferedReader(new InputStreamReader(entity.getContent()));
+                    String jsonString = null;
+                    HttpEntity entity = response.getEntity();
+                    if (entity != null) {
+                        BufferedReader rd = new BufferedReader(new InputStreamReader(entity.getContent()));
 
-                try {
-                    jsonString = rd.lines().collect(Collectors.joining()).toString();
-                    System.out.println("Labware Lab Results Get: Request JSON -> " + jsonString);
-                } finally {
-                    rd.close();
-                }
-            }
-
-                JSONParser parser = new JSONParser();
-                JSONArray responseArray = (JSONArray) parser.parse(jsonString);
-
-                if (responseArray != null && !responseArray.isEmpty()) {
-                    // update orders
-                    ProcessViralLoadResults.processFLUPayload(jsonString);
-
-                    // update manifest details appropriately for the next execution
-                    String [] incompleteStatuses = new String []{"Incomplete", "Pending", "Sending"};
-
-                    if (manifestToUpdateResults != null) {
-                        System.out.println("Labware Lab Results Get: Updating manifest with status");
-                        List<LabManifestOrder> pendingResultsForNextIteration = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifestToUpdateResults, "Sent");
-                        List<LabManifestOrder> incompleteResults = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifestToUpdateResults, incompleteStatuses);
-
-                        System.out.println("Size of pending results: " + pendingResultsForNextIteration.size() + " Size of incomplete results: " + incompleteResults.size());
-
-                        if (pendingResultsForNextIteration.size() < 1 && incompleteResults.size() < 1) {
-                            manifestToUpdateResults.setStatus("Complete results");
-                            manifestToUpdateResults.setDateChanged(new Date());
-                            kenyaemrOrdersService.saveLabOrderManifest(manifestToUpdateResults);
-
-                            gpLastProcessedManifest.setPropertyValue(""); // set value to null so that the execution gets to the next manifest
-                            Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifest);
-                            System.out.println("Labware Lab Results Get: Updating manifest with status: Complete Results");
-                        } else if (pendingResultsForNextIteration.size() < 1 && incompleteResults.size() > 0) {
-                            manifestToUpdateResults.setStatus("Incomplete results");
-                            manifestToUpdateResults.setDateChanged(new Date());
-                            kenyaemrOrdersService.saveLabOrderManifest(manifestToUpdateResults);
-
-                            gpLastProcessedManifest.setPropertyValue(""); // set value to null so that the execution gets to the next manifest
-                            Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifest);
-                            System.out.println("Labware Lab Results Get: Updating manifest with status: Incomplete Results");
-                        }
-
-                        // update manifest global property
-                        if (pendingResultsForNextIteration.size() > 0) {
-                            System.out.println("Labware Lab Results Get: Updating manifest global property");
-                            gpLastProcessedManifest.setPropertyValue(manifestToUpdateResults.getId().toString());
-                            gpLastProcessedManifestUpdatetime.setPropertyValue(Utils.getSimpleDateFormat(ModuleConstants.MANIFEST_LAST_UPDATE_PATTERN).format(new Date()));
-                            Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifest);
-                            Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifestUpdatetime);
+                        try {
+                            jsonString = rd.lines().collect(Collectors.joining()).toString();
+                            System.out.println("Labware Lab Results Get: Request JSON -> " + jsonString);
+                        } finally {
+                            rd.close();
                         }
                     }
 
+                    JSONParser parser = new JSONParser();
+                    JSONObject responseObject = (JSONObject) parser.parse(jsonString);
+
+                    if (responseObject != null && !responseObject.isEmpty()) {
+                        // update FLU order
+                        ProcessViralLoadResults.processFLUPayload(jsonString);
+
+                        // update manifest details appropriately for the next execution
+                        String [] incompleteStatuses = new String []{"Incomplete", "Pending", "Sending"};
+
+                        if (manifestToUpdateResults != null) {
+                            System.out.println("Labware Lab Results Get: Updating manifest with status");
+                            List<LabManifestOrder> pendingResultsForNextIteration = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifestToUpdateResults, "Sent");
+                            List<LabManifestOrder> incompleteResults = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifestToUpdateResults, incompleteStatuses);
+
+                            System.out.println("Size of pending results: " + pendingResultsForNextIteration.size() + " Size of incomplete results: " + incompleteResults.size());
+
+                            if (pendingResultsForNextIteration.size() < 1 && incompleteResults.size() < 1) {
+                                manifestToUpdateResults.setStatus("Complete results");
+                                manifestToUpdateResults.setDateChanged(new Date());
+                                kenyaemrOrdersService.saveLabOrderManifest(manifestToUpdateResults);
+
+                                gpLastProcessedManifest.setPropertyValue(""); // set value to null so that the execution gets to the next manifest
+                                Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifest);
+                                System.out.println("Labware Lab Results Get: Updating manifest with status: Complete Results");
+                            } else if (pendingResultsForNextIteration.size() < 1 && incompleteResults.size() > 0) {
+                                manifestToUpdateResults.setStatus("Incomplete results");
+                                manifestToUpdateResults.setDateChanged(new Date());
+                                kenyaemrOrdersService.saveLabOrderManifest(manifestToUpdateResults);
+
+                                gpLastProcessedManifest.setPropertyValue(""); // set value to null so that the execution gets to the next manifest
+                                Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifest);
+                                System.out.println("Labware Lab Results Get: Updating manifest with status: Incomplete Results");
+                            }
+
+                            // update manifest global property
+                            if (pendingResultsForNextIteration.size() > 0) {
+                                System.out.println("Labware Lab Results Get: Updating manifest global property");
+                                gpLastProcessedManifest.setPropertyValue(manifestToUpdateResults.getId().toString());
+                                gpLastProcessedManifestUpdatetime.setPropertyValue(Utils.getSimpleDateFormat(ModuleConstants.MANIFEST_LAST_UPDATE_PATTERN).format(new Date()));
+                                Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifest);
+                                Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifestUpdatetime);
+                            }
+                        }
+
+                    }
+
+                    // check and mark status for all orders that may have not been found in the lab system. It is still not clear how this happens since the records are marked as sent in the manifest
+
+                    Integer[] intArray = new Integer[manifestOrderIds.size()];
+                    intArray = manifestOrderIds.toArray(intArray);
+
+                    List<LabManifestOrder> ordersNotInLabSystem = kenyaemrOrdersService.getLabManifestOrderByNotFoundInLabSystem(intArray);
+
+                    for (LabManifestOrder o : ordersNotInLabSystem) {
+                        o.setStatus("Record not found");
+                        o.setDateChanged(new Date());
+                        kenyaemrOrdersService.saveLabManifestOrder(o);
+                    }
+
+                    System.out.println("Labware Lab Results Get: Successfully executed the task that pulls lab requests");
+                    log.info("Labware Lab Results Get: Successfully executed the task that pulls lab requests");
+
+                    System.out.println("Labware Lab Results Get: Successfully Done");
+                } else {
+                    System.err.println("Get Labware FLU Lab Results Failed with HTTP error code : " + statusCode);
                 }
-
-                // check and mark status for all orders that may have not been found in the lab system. It is still not clear how this happens since the records are marked as sent in the manifest
-
-                Integer[] intArray = new Integer[manifestOrderIds.size()];
-                intArray = manifestOrderIds.toArray(intArray);
-
-                List<LabManifestOrder> ordersNotInLabSystem = kenyaemrOrdersService.getLabManifestOrderByNotFoundInLabSystem(intArray);
-
-                for (LabManifestOrder o : ordersNotInLabSystem) {
-                    o.setStatus("Record not found");
-                    o.setDateChanged(new Date());
-                    kenyaemrOrdersService.saveLabManifestOrder(o);
-                }
-
-                System.out.println("Labware Lab Results Get: Successfully executed the task that pulls lab requests");
-                log.info("Labware Lab Results Get: Successfully executed the task that pulls lab requests");
-
-                System.out.println("Labware Lab Results Get: Successfully Done");
             } catch (Exception e) {
                 System.err.println("Get Labware Lab Results Error: " + e.getMessage());
                 e.printStackTrace();
             } finally {
                 httpClient.close();
             }
+
+            // Delay loop
+            try {
+				//Delay for 5 seconds
+				Thread.sleep(5000);
+			}
+			catch (Exception ie) {
+				Thread.currentThread().interrupt();
+			}
         }
     }
 

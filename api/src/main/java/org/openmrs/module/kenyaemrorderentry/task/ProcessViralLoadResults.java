@@ -99,9 +99,10 @@ public class ProcessViralLoadResults {
 
             GlobalProperty gpPwd = Context.getAdministrationService().getGlobalPropertyObject("scheduler.password");
             GlobalProperty gpUsername = Context.getAdministrationService().getGlobalPropertyObject("scheduler.username");
-            GlobalProperty gpServerUrl = Context.getAdministrationService().getGlobalPropertyObject("http://localhost:8080/openmrs/ws/rest/v1/kemrorder/flulabresults");
+            // GlobalProperty gpServerUrl = Context.getAdministrationService().getGlobalPropertyObject("local.flu_result_end_point");
 
-            String serverUrl = gpServerUrl.getPropertyValue();
+            // String serverUrl = gpServerUrl.getPropertyValue();
+            String serverUrl = "http://127.0.0.1:8080/openmrs/ws/rest/v1/kemrorder/flulabresults";
             String username = gpUsername.getPropertyValue();
             String pwd = gpPwd.getPropertyValue();
 
@@ -141,21 +142,23 @@ public class ProcessViralLoadResults {
                         JSONObject errorObj = (JSONObject) responseObj.get("error");
                         if (statusCode == 400) {// bad request
                         }
-                        System.err.println("Failed with HTTP error code : " + statusCode + ". Error msg: " + errorObj.get("message"));
-                        throw new RuntimeException("Failed with HTTP error code : " + statusCode + ". Error msg: " + errorObj.get("message"));
+                        System.err.println("FLU Manifest Error: Failed with HTTP error code : " + statusCode + ". Error msg: " + errorObj.get("message"));
+                        // throw new RuntimeException("FLU Manifest Error: Failed with HTTP error code : " + statusCode + ". Error msg: " + errorObj.get("message"));
                     } catch (Exception e) {}
-                    System.err.println("Failed with HTTP error code : " + statusCode);
+                    System.err.println("FLU Manifest Error: Failed with HTTP error code : " + statusCode);
                 } else {
-                    //System.out.println("Successfully updated VL result"); -- remain mute
+                    System.out.println("FLU Manifest Error: unable to update FLU result: " + statusCode);
                 }
             }
             finally {
-                //Important: Close the connect
+                //Important: Close the connection
                 httpClient.close();
             }
         }
-        catch (Exception e) {
-            throw new IllegalArgumentException("Unable to update lab results through REST", e);
+        catch (Exception ex) {
+            System.out.println("Unable to update lab results through REST" + ex);
+            ex.printStackTrace();
+            // throw new IllegalArgumentException("Unable to update lab results through REST", e);
         }
     }
 
