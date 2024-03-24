@@ -93,6 +93,75 @@ public class ProcessViralLoadResults {
         }
     }
 
+    public static void processFLUPayload(String payload) {
+        Context.openSession();
+        try {
+
+            GlobalProperty gpPwd = Context.getAdministrationService().getGlobalPropertyObject("scheduler.password");
+            GlobalProperty gpUsername = Context.getAdministrationService().getGlobalPropertyObject("scheduler.username");
+            GlobalProperty gpServerUrl = Context.getAdministrationService().getGlobalPropertyObject("local.flu_result_end_point");
+
+            String serverUrl = gpServerUrl.getPropertyValue();
+            // String serverUrl = "http://127.0.0.1:8080/openmrs/ws/rest/v1/kemrorder/flulabresults";
+            String username = gpUsername.getPropertyValue();
+            String pwd = gpPwd.getPropertyValue();
+
+            if (StringUtils.isBlank(serverUrl) || StringUtils.isBlank(username) || StringUtils.isBlank(pwd)) {
+                System.out.println("Please set credentials for the openmrs scheduler");
+                return;
+            }
+
+            CloseableHttpClient httpClient = HttpClients.createDefault();
+
+            try {
+                //Define a postRequest request
+                HttpPost postRequest = new HttpPost(serverUrl);
+
+                //Set the API media type in http content-type header
+                postRequest.addHeader("content-type", "application/json");
+
+                String auth = username.trim() + ":" + pwd.trim();
+                byte[] encodedAuth = Base64.encodeBase64(
+                        auth.getBytes("UTF-8"));
+                String authHeader = "Basic " + new String(encodedAuth);
+                postRequest.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
+                //Set the request post body
+                StringEntity userEntity = new StringEntity(payload);
+                postRequest.setEntity(userEntity);
+
+                //Send the request; It will immediately return the response in HttpResponse object if any
+                HttpResponse response = httpClient.execute(postRequest);
+
+                //verify the valid error code first
+                int statusCode = response.getStatusLine().getStatusCode();
+
+                if (statusCode != 200 && statusCode != 201) {
+                    try {
+                        JSONParser parser = new JSONParser();
+                        JSONObject responseObj = (JSONObject) parser.parse(EntityUtils.toString(response.getEntity()));
+                        JSONObject errorObj = (JSONObject) responseObj.get("error");
+                        if (statusCode == 400) {// bad request
+                        }
+                        System.err.println("FLU Manifest Error: Failed with HTTP error code : " + statusCode + ". Error msg: " + errorObj.get("message"));
+                        // throw new RuntimeException("FLU Manifest Error: Failed with HTTP error code : " + statusCode + ". Error msg: " + errorObj.get("message"));
+                    } catch (Exception e) {}
+                    System.err.println("FLU Manifest Error: Failed with HTTP error code : " + statusCode);
+                } else {
+                    System.out.println("FLU Manifest Success: Got FLU POST result: " + statusCode);
+                }
+            }
+            finally {
+                //Important: Close the connection
+                httpClient.close();
+            }
+        }
+        catch (Exception ex) {
+            System.out.println("Unable to update lab results through REST" + ex);
+            ex.printStackTrace();
+            // throw new IllegalArgumentException("Unable to update lab results through REST", e);
+        }
+    }
+
     /**
      * Util method for extracting order ids from lab system response
      * The list is used with what was used in querying for results to determine which samples aren't in the lab

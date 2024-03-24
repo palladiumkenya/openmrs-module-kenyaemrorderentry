@@ -38,6 +38,8 @@ public class LabOrdersSendingManifestHomePageController {
                 manifestType = "EID";
             } else if (manifest.getManifestType() != null && manifest.getManifestType().intValue() == LabManifest.VL_TYPE) {
                 manifestType = "VL";
+            } else if (manifest.getManifestType() != null && manifest.getManifestType().intValue() == LabManifest.FLU_TYPE) {
+                manifestType = "FLU";
             }
             SimpleObject m = SimpleObject.create(
                     "id", manifest.getId(),
