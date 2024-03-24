@@ -54,11 +54,11 @@ public class LabOrderDataExchange {
     Concept vlTestConceptQuantitative = conceptService.getConcept(856);
     EncounterType labEncounterType = encounterService.getEncounterTypeByUuid(LAB_ENCOUNTER_TYPE_UUID);
 
-    Concept concept_PCR_FLU_A  = conceptService.getConcept(1015);
-    Concept concept_PCR_FLU_B = conceptService.getConcept(21);
-    Concept concept_RSV = conceptService.getConcept(1017);
-    Concept concept_RNP = conceptService.getConcept(1018);
-    Concept concept_SARS_COV_2_M = conceptService.getConcept(851);
+    Concept concept_PCR_FLU_A  = conceptService.getConcept(1000613);
+    Concept concept_PCR_FLU_B = conceptService.getConcept(1000614);
+    Concept concept_RSV = conceptService.getConcept(1000616);
+    Concept concept_RNP = conceptService.getConcept(1000617);
+    Concept concept_SARS_COV_2_M = conceptService.getConcept(1000615);
 
 
     /**
@@ -356,7 +356,7 @@ public class LabOrderDataExchange {
         Set<SimpleObject> activeLabs = new HashSet<SimpleObject>();
         String sql = "select o.order_id from orders o\n" +
                 "left join kenyaemr_order_entry_lab_manifest_order mo on mo.order_id = o.order_id\n" +
-                "where o.order_action='NEW' and o.concept_id = 1019 and o.date_stopped is null and o.voided=0 and mo.order_id is null ";
+                "where o.order_action='NEW' and o.concept_id = 1000612 and o.date_stopped is null and o.voided=0 and mo.order_id is null ";
 
         if (startDate != null && endDate != null) {
             sql = sql + " and date(o.date_activated) between ':startDate' and ':endDate' ";
