@@ -581,6 +581,9 @@ public class LabOrderDataExchange {
         enc.setCreator(Context.getUserService().getUser(1));
         enc.setLocation(Utils.getDefaultLocation());
 
+        enc.setEncounterDatetime(aMomentBefore(new Date()));
+        encounterService.saveEncounter(enc);
+
         // New Observation (Obs)
         Obs mainObs = new Obs();
         mainObs.setDateCreated(new Date());
@@ -592,8 +595,10 @@ public class LabOrderDataExchange {
         mainObs.setLocation(Utils.getDefaultLocation());
         mainObs.setEncounter(enc);
         mainObs.setValueText("test");
-        // Context.getObsService().saveObs(mainObs, null);
+        Context.getObsService().saveObs(mainObs, null);
         enc.addObs(mainObs);
+        Set<Obs> allObs = enc.getAllObs();
+        System.out.println("All Obs in the encounter 1: " + allObs.size());
 
         Integer orderId = -1;
         Date sampleTestedDate = new Date();
@@ -643,10 +648,10 @@ public class LabOrderDataExchange {
                 }
 
                 // Save encounter
-                enc.setEncounterDatetime(orderDiscontinuationDate);
-                Set<Obs> allObs = enc.getAllObs();
-                System.out.println("All Obs in the encounter: " + allObs.size());
-                encounterService.saveEncounter(enc);
+                // enc.setEncounterDatetime(orderDiscontinuationDate);
+                // Set<Obs> allObs2 = enc.getAllObs();
+                // System.out.println("All Obs in the encounter 3: " + allObs2.size());
+                // encounterService.saveEncounter(enc);
 
                 orderService.discontinueOrder(mainOrder, "Results received", orderDiscontinuationDate, mainOrder.getOrderer(), mainOrder.getEncounter());
 
@@ -743,8 +748,11 @@ public class LabOrderDataExchange {
                 obs.setObsGroup(mainObs);
                 obs.setLocation(Utils.getDefaultLocation());
                 obs.setEncounter(enc);
+                Context.getObsService().saveObs(obs, null);
 
                 enc.addObs(obs);
+                Set<Obs> allObs = enc.getAllObs();
+                System.out.println("All Obs in the encounter 2: " + allObs.size());
 
             } catch (Exception e) {
                 System.out.println("Lab Results Get Results: An error was encountered while updating orders for FLU");
