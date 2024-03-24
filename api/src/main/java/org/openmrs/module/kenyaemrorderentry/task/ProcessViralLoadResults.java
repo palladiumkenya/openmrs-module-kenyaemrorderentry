@@ -99,10 +99,10 @@ public class ProcessViralLoadResults {
 
             GlobalProperty gpPwd = Context.getAdministrationService().getGlobalPropertyObject("scheduler.password");
             GlobalProperty gpUsername = Context.getAdministrationService().getGlobalPropertyObject("scheduler.username");
-            // GlobalProperty gpServerUrl = Context.getAdministrationService().getGlobalPropertyObject("local.flu_result_end_point");
+            GlobalProperty gpServerUrl = Context.getAdministrationService().getGlobalPropertyObject("local.flu_result_end_point");
 
-            // String serverUrl = gpServerUrl.getPropertyValue();
-            String serverUrl = "http://127.0.0.1:8080/openmrs/ws/rest/v1/kemrorder/flulabresults";
+            String serverUrl = gpServerUrl.getPropertyValue();
+            // String serverUrl = "http://127.0.0.1:8080/openmrs/ws/rest/v1/kemrorder/flulabresults";
             String username = gpUsername.getPropertyValue();
             String pwd = gpPwd.getPropertyValue();
 
@@ -147,7 +147,7 @@ public class ProcessViralLoadResults {
                     } catch (Exception e) {}
                     System.err.println("FLU Manifest Error: Failed with HTTP error code : " + statusCode);
                 } else {
-                    System.out.println("FLU Manifest Error: unable to update FLU result: " + statusCode);
+                    System.out.println("FLU Manifest Success: Got FLU POST result: " + statusCode);
                 }
             }
             finally {

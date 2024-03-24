@@ -58,6 +58,8 @@ public class ModuleConstants {
 
     public static final String GP_LOCAL_RESULT_ENDPOINT = "local.viral_load_result_end_point";
 
+    public static final String GP_LOCAL_FLU_RESULT_ENDPOINT = "local.flu_result_end_point";
+
     public static final String GP_SCHEDULER_USERNAME = "scheduler.username";
 
     public static final String GP_SCHEDULER_PASSWORD = "scheduler.password";

@@ -127,6 +127,10 @@
                         <td>${ LocalResultEndpoint }</td>
                     </tr>
                     <tr>
+                        <td>Local FLU Endpoint (${ gpLocalFLUResultEndpoint }):</td>
+                        <td>${ LocalFLUResultEndpoint }</td>
+                    </tr>
+                    <tr>
                         <td>Endpoint User Name (${ gpSchedulerUsername }):</td>
                         <td>${ SchedulerUsername }</td>
                     </tr>
@@ -309,6 +313,14 @@
                             </div>
 
                             <div class="mb-3 row">
+                                <label for="txtLocalFLUResultEndpoint" class="col-sm-2 col-form-label">Local FLU Result Endpoint</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" id="txtLocalFLUResultEndpoint" aria-describedby="LocalFLUResultEndpointHelp" value="${ LocalFLUResultEndpoint }">
+                                    <div id="LocalFLUResultEndpointHelp" class="form-text">The Local FLU Result Endpoint</div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3 row">
                                 <label for="txtSchedulerUsername" class="col-sm-2 col-form-label">Scheduler Username</label>
                                 <div class="col-sm-10">
                                     <input type="text" class="form-control" id="txtSchedulerUsername" aria-describedby="SchedulerUsernameHelp" value="${ SchedulerUsername }">
@@ -472,6 +484,13 @@
                 jq("#systemTypeError").addClass('isinvalid');
                 return(false);
             }
+            var txtLocalFLUResultEndpoint = jq("#txtLocalFLUResultEndpoint").val();
+            if( checkVarIfEmptyOrNull(txtLocalFLUResultEndpoint) == false ) { 
+                console.log("Local FLU Result Endpoint cannot be empty");
+                jq("#systemTypeError").text('Local FLU result endpoint cannot be empty.');
+                jq("#systemTypeError").addClass('isinvalid');
+                return(false);
+            }
             var txtSchedulerUsername = jq("#txtSchedulerUsername").val();
             if( checkVarIfEmptyOrNull(txtSchedulerUsername) == false ) { 
                 console.log("Scheduler Username cannot be empty");
@@ -568,6 +587,7 @@
                     txtFLUPullURL : jq("#txtFLUPullURL").val().trim(),
                     txtFLUPushURL : jq("#txtFLUPushURL").val().trim(),
                     txtLocalResultEndpoint : jq("#txtLocalResultEndpoint").val().trim(),
+                    txtLocalFLUResultEndpoint : jq("#txtLocalFLUResultEndpoint").val().trim(),
                     txtSchedulerUsername : jq("#txtSchedulerUsername").val().trim(),
                     txtSchedulerPassword : jq("#txtSchedulerPassword").val().trim(),
                     chkSSLVerificationEnabled : jq("#chkSSLVerificationEnabled").val().trim(),

@@ -478,20 +478,7 @@ public class LabOrderDataExchange {
 
         if(orderType == LabManifest.FLU_TYPE) {
 
-            PatientIdentifier cccNumber = patient.getPatientIdentifier(Utils.getUniquePatientNumberIdentifierType());
-            PatientIdentifierType pit = MetadataUtils.existing(PatientIdentifierType.class, "b51ffe55-3e76-44f8-89a2-14f5eaf11079");
-            PatientIdentifier kdodNumber = patient.getPatientIdentifier(pit);
-            if(isKDoD.trim().equalsIgnoreCase("true")) {
-                if (kdodNumber == null || StringUtils.isBlank(kdodNumber.getIdentifier())) {
-                    // Patient must have a CCC number or KDOD number
-                    return(true);
-                }
-            } else {
-                if (cccNumber == null || StringUtils.isBlank(cccNumber.getIdentifier())) {
-                    // Patient must have a CCC number or KDOD number
-                    return(true);
-                }
-            }
+            // Nothing to check here for now
         }
 
         // In this case, we are all ok
@@ -529,12 +516,13 @@ public class LabOrderDataExchange {
 
         // Create a map to store ANALYSIS strings and corresponding RESULT_VALUE strings
         Map<String, SimpleObject> analysisMap = new HashMap<>();
+        String PID = "";
 
         // Extract ANALYSIS strings and store them in the map
         for (JsonElement dataElement : dataArray) {
             try {
                 JsonObject dataObject = dataElement.getAsJsonObject();
-                String PID = dataObject.get("PID_NUMBER").getAsString();
+                PID = dataObject.get("PID_NUMBER").getAsString();
                 String analysis = dataObject.get("ANALYSIS").getAsString();
                 String resultValue = dataObject.get("RESULT_VALUE").getAsString();
                 String resultName = dataObject.get("RESULT_NAME").getAsString();
@@ -578,6 +566,39 @@ public class LabOrderDataExchange {
             }
         }
 
+        // Working with PID
+        System.out.println("Lab Results Get FLU Results: Working with PID: " + PID);
+
+        // Extract order id
+        Integer mainOrderId = extractFLUOrderNumber(PID);
+        System.out.println("Lab Results Get FLU Results: Got order id as: " + mainOrderId);
+        Order mainOrder = orderService.getOrder(mainOrderId);
+
+        // New Encounter
+        Encounter enc = new Encounter();
+        enc.setEncounterType(labEncounterType);
+        enc.setPatient(mainOrder.getPatient());
+        enc.setCreator(Context.getUserService().getUser(1));
+        enc.setLocation(Utils.getDefaultLocation());
+
+        // New Observation (Obs)
+        Obs mainObs = new Obs();
+        mainObs.setDateCreated(new Date());
+        mainObs.setCreator(Context.getUserService().getUser(1));
+        mainObs.setObsDatetime(mainOrder.getDateActivated());
+        mainObs.setPerson(mainOrder.getPatient());
+        mainObs.setOrder(mainOrder);
+        mainObs.setConcept(mainOrder.getConcept());
+        mainObs.setLocation(Utils.getDefaultLocation());
+        mainObs.setEncounter(enc);
+        mainObs.setValueText("test");
+        // Context.getObsService().saveObs(mainObs, null);
+        enc.addObs(mainObs);
+
+        Integer orderId = -1;
+        Date sampleTestedDate = new Date();
+        String fullResult = "";
+
         // Extract the data
         for (Map.Entry<String, SimpleObject> entry : analysisMap.entrySet()) {
             String analysis = entry.getKey();
@@ -585,9 +606,9 @@ public class LabOrderDataExchange {
 
             if (resultValues.size() > 1) {
                 try {
-                    Integer orderId = extractFLUOrderNumber((String)resultValues.get("PID"));
+                    orderId = extractFLUOrderNumber((String)resultValues.get("pid"));
                     Date sampleReceivedDate = (Date) resultValues.get("datetested");
-                    Date sampleTestedDate = (Date) resultValues.get("datetested");
+                    sampleTestedDate = (Date) resultValues.get("datetested");
                     String dateSampleReceived = "";
                     String dateSampleTested = "";
                     String batchNumber = "";
@@ -597,15 +618,54 @@ public class LabOrderDataExchange {
 
                     String specimenReceivedStatus = "OK";
                     String result = (String) resultValues.get("result");
+                    fullResult = fullResult + " | " + result;
 
-                    System.out.println("Lab Results Get FLU Results: Order ID: " + orderId + ": result: " + result);
+                    System.out.println("Lab Results Get FLU Results: Order ID: " + orderId + ": result: " + result + " analysis: " + analysisType + " diagnosis: " + diagnosisType);
 
-                    updateFLUOrder(orderId, result, specimenReceivedStatus, specimenRejectedReason, sampleReceivedDate, sampleTestedDate, analysisType, diagnosisType);
+                    updateFLUOrder(orderId, result, specimenReceivedStatus, specimenRejectedReason, sampleReceivedDate, sampleTestedDate, analysisType, diagnosisType, enc, mainObs);
                 } catch (Exception ex) {
                     System.err.println("Lab Results Get FLU Results: Unable to update order with results : Updating Orders: " + ex.getMessage());
                     ex.printStackTrace();
                 }
             }
+        }
+
+        try {
+            if(orderId != -1) {
+                System.out.println("Lab Results Get FLU Results: Saving into DB");
+                
+                LabManifestOrder manifestOrder = kenyaemrOrdersService.getLabManifestOrderByOrderId(mainOrder);
+                Date orderDiscontinuationDate = null;
+                if (sampleTestedDate != null) {
+                    orderDiscontinuationDate = sampleTestedDate;
+                } else {
+                    orderDiscontinuationDate = aMomentBefore(new Date());
+                }
+
+                // Save encounter
+                enc.setEncounterDatetime(orderDiscontinuationDate);
+                Set<Obs> allObs = enc.getAllObs();
+                System.out.println("All Obs in the encounter: " + allObs.size());
+                encounterService.saveEncounter(enc);
+
+                orderService.discontinueOrder(mainOrder, "Results received", orderDiscontinuationDate, mainOrder.getOrderer(), mainOrder.getEncounter());
+
+                manifestOrder.setStatus("Complete");
+                manifestOrder.setResult(fullResult);
+                manifestOrder.setResultDate(orderDiscontinuationDate);
+                if (sampleTestedDate != null) {
+                    manifestOrder.setSampleReceivedDate(sampleTestedDate);
+                }
+
+                if (sampleTestedDate != null) {
+                    manifestOrder.setSampleTestedDate(sampleTestedDate);
+                }
+                kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
+            }
+
+        } catch (Exception ex) {
+            System.err.println("Lab Results Get FLU Results: Unable to update order with results : Updating Orders: " + ex.getMessage());
+            ex.printStackTrace();
         }
 
         System.out.println("Lab Results Get Results: FLU results pulled and updated successfully in the database");
@@ -620,7 +680,7 @@ public class LabOrderDataExchange {
      * @param specimenStatus
      * @param specimenRejectedReason
      */
-    private void updateFLUOrder(Integer orderId, String result, String specimenStatus, String specimenRejectedReason, Date dateSampleReceived, Date dateSampleTested, String analysisType, String diagnosisType) {
+    private void updateFLUOrder(Integer orderId, String result, String specimenStatus, String specimenRejectedReason, Date dateSampleReceived, Date dateSampleTested, String analysisType, String diagnosisType, Encounter enc, Obs mainObs) {
         Order od = orderService.getOrder(orderId);
         LabManifestOrder manifestOrder = kenyaemrOrdersService.getLabManifestOrderByOrderId(od);
 
@@ -635,90 +695,57 @@ public class LabOrderDataExchange {
 
         if (od != null && od.isActive()) {
 
-            // Encounter
-            Encounter enc = new Encounter();
-            enc.setEncounterType(labEncounterType);
-            enc.setEncounterDatetime(orderDiscontinuationDate);
-            enc.setPatient(od.getPatient());
-            enc.setCreator(Context.getUserService().getUser(1));
+            try {
+                enc.setEncounterDatetime(orderDiscontinuationDate);
+                enc.setPatient(od.getPatient());
 
-            // New order
-            TestOrder order = new TestOrder();
-            order.setAction(Order.Action.NEW);
-            CareSetting careSetting = orderService.getCareSetting(1);
-            order.setCareSetting(careSetting);
-            if(analysisType.trim().equalsIgnoreCase("PCR_FLU_A")) {
-                order.setConcept(concept_PCR_FLU_A);
-            } else if(analysisType.trim().equalsIgnoreCase("PCR_FLU_B")) {
-                order.setConcept(concept_PCR_FLU_B);
-            } else if(analysisType.trim().equalsIgnoreCase("RNP")) {
-                order.setConcept(concept_RNP);
-            } else if(analysisType.trim().equalsIgnoreCase("RSV")) {
-                order.setConcept(concept_RSV);
-            } else if(analysisType.trim().equalsIgnoreCase("SARS_COV_2_M")) {
-                order.setConcept(concept_SARS_COV_2_M);
-            }
-            order.setPatient(od.getPatient());
-            order.setOrderType(Context.getOrderService().getOrderTypeByUuid(OrderType.TEST_ORDER_TYPE_UUID));
-            List<Provider> provider = (List<Provider>) Context.getProviderService().getProvidersByPerson(Context.getUserService().getUser(1).getPerson());
-            order.setOrderer(provider.get(0));
-            // order.setInstructions(orderToVoid.getInstructions());
-            // order.setUrgency(orderToVoid.getUrgency());
-            // order.setCommentToFulfiller(orderToVoid.getCommentToFulfiller());
-            // order.setOrderReason(orderToVoid.getOrderReason());
-            // order.setOrderReasonNonCoded(orderToVoid.getOrderReasonNonCoded());
-            order.setDateActivated(dateSampleTested);
-            order.setCreator(Context.getUserService().getUser(1));
-            order.setEncounter(enc);
-            order.setPreviousOrder(od);
-            Order savedOrder = orderService.saveOrder(order, null);
 
-            Obs obs = new Obs();
-                
+                Obs obs = new Obs();
+
+                if(analysisType.trim().equalsIgnoreCase("PCR_FLU_A")) {
+                    obs.setConcept(concept_PCR_FLU_A);
+                } else if(analysisType.trim().equalsIgnoreCase("PCR_FLU_B")) {
+                    obs.setConcept(concept_PCR_FLU_B);
+                } else if(analysisType.trim().equalsIgnoreCase("RNP")) {
+                    obs.setConcept(concept_RNP);
+                } else if(analysisType.trim().equalsIgnoreCase("RSV")) {
+                    obs.setConcept(concept_RSV);
+                } else if(analysisType.trim().equalsIgnoreCase("SARS_COV_2_M")) {
+                    obs.setConcept(concept_SARS_COV_2_M);
+                }
+                    
                 String stNegative = "negative";
                 String stPositive = "positive";
 
                 // If we get coded concepts, we set these
-                // Concept negativeConcept = conceptService.getConcept(664);
-                // Concept positiveConcept = conceptService.getConcept(703);
+                Concept negativeConcept = conceptService.getConcept(664);
+                Concept positiveConcept = conceptService.getConcept(703);
 
+                if (diagnosisType.equalsIgnoreCase(stNegative)) {
+                    obs.setValueCoded(negativeConcept);
+                } else if (diagnosisType.equalsIgnoreCase(stPositive)) {
+                    obs.setValueCoded(positiveConcept);
+                }
+
+                //If we have numeric concepts
                 // if (diagnosisType.equalsIgnoreCase(stNegative)) {
-                //     obs.setValueCoded(negativeConcept);
+                //     obs.setValueNumeric(0.0);
                 // } else if (diagnosisType.equalsIgnoreCase(stPositive)) {
-                //     obs.setValueCoded(positiveConcept);
+                //     obs.setValueNumeric(1.0);
                 // }
 
-                //For now we have numeric concepts
-                if (diagnosisType.equalsIgnoreCase(stNegative)) {
-                    obs.setValueNumeric(0.0);
-                } else if (diagnosisType.equalsIgnoreCase(stPositive)) {
-                    obs.setValueNumeric(1.0);
-                }
+                obs.setValueText(result);        
+                obs.setDateCreated(orderDiscontinuationDate);
+                obs.setCreator(Context.getUserService().getUser(1));
+                obs.setObsDatetime(od.getDateActivated());
+                obs.setPerson(od.getPatient());
+                obs.setOrder(od);
+                obs.setObsGroup(mainObs);
+                obs.setLocation(Utils.getDefaultLocation());
+                obs.setEncounter(enc);
 
-            obs.setValueText(result);        
-            obs.setDateCreated(orderDiscontinuationDate);
-            obs.setCreator(Context.getUserService().getUser(1));
-            obs.setObsDatetime(od.getDateActivated());
-            obs.setPerson(od.getPatient());
-            obs.setOrder(savedOrder);
-
-            try {
                 enc.addObs(obs);
-                encounterService.saveEncounter(enc);
 
-                orderService.discontinueOrder(savedOrder, "Results received", orderDiscontinuationDate, od.getOrderer(), od.getEncounter());
-
-                manifestOrder.setStatus("Complete");
-                manifestOrder.setResult(manifestOrder.getResult() + " | " + result);
-                manifestOrder.setResultDate(orderDiscontinuationDate);
-                if (dateSampleReceived != null) {
-                    manifestOrder.setSampleReceivedDate(dateSampleReceived);
-                }
-
-                if (dateSampleTested != null) {
-                    manifestOrder.setSampleTestedDate(dateSampleTested);
-                }
-                kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
             } catch (Exception e) {
                 System.out.println("Lab Results Get Results: An error was encountered while updating orders for FLU");
                 e.printStackTrace();

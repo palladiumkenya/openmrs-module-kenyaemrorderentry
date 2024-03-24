@@ -518,8 +518,6 @@ public class LabwareSystemWebRequest extends LabWebRequest {
             } catch (Exception e) {
                 System.err.println("Get Labware Lab Results Error: " + e.getMessage());
                 e.printStackTrace();
-            } finally {
-                httpClient.close();
             }
 
             // Delay loop
@@ -531,6 +529,9 @@ public class LabwareSystemWebRequest extends LabWebRequest {
 				Thread.currentThread().interrupt();
 			}
         }
+
+        // finally
+        httpClient.close();
     }
 
     @Override

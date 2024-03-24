@@ -355,6 +355,14 @@
 		</description>
 	</globalProperty>
 
+	<globalProperty>
+		<property>local.flu_result_end_point</property>
+		<defaultValue>http://localhost:8080/openmrs/ws/rest/v1/kemrorder/flulabresults</defaultValue>
+		<description>
+			Internal API endpoint for processing FLU lab results from the lab. Please note this is a local endpoint
+		</description>
+	</globalProperty>
+
 	<!--<globalProperty>
 		<property>kemrorder.vl_server_last_execution_time</property>
 		<defaultValue></defaultValue>

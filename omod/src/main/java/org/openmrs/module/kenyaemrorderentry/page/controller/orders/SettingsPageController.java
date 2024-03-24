@@ -188,9 +188,13 @@ public class SettingsPageController {
         model.put("gpEnableFLUFunction", ModuleConstants.ENABLE_FLU_FUNCTION);
 
         GlobalProperty gpLocalResultEndpoint = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LOCAL_RESULT_ENDPOINT);
+        GlobalProperty gpLocalFLUResultEndpoint = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LOCAL_FLU_RESULT_ENDPOINT);
 
         model.put("LocalResultEndpoint", gpLocalResultEndpoint != null ? gpLocalResultEndpoint.getPropertyValue() : "");
         model.put("gpLocalResultEndpoint", ModuleConstants.GP_LOCAL_RESULT_ENDPOINT);
+
+        model.put("LocalFLUResultEndpoint", gpLocalFLUResultEndpoint != null ? gpLocalFLUResultEndpoint.getPropertyValue() : "");
+        model.put("gpLocalFLUResultEndpoint", ModuleConstants.GP_LOCAL_FLU_RESULT_ENDPOINT);
 
         GlobalProperty gpSchedulerUsername = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_SCHEDULER_USERNAME);
 

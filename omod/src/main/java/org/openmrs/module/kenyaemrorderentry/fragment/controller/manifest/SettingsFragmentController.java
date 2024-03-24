@@ -85,6 +85,7 @@ public class SettingsFragmentController {
                 GlobalProperty gpEnableEIDFunction = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.ENABLE_EID_FUNCTION);
                 GlobalProperty gpEnableFLUFunction = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.ENABLE_FLU_FUNCTION);
                 GlobalProperty gpLocalResultEndpoint = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LOCAL_RESULT_ENDPOINT);
+                GlobalProperty gpLocalFLUResultEndpoint = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LOCAL_FLU_RESULT_ENDPOINT);
                 GlobalProperty gpSchedulerUsername = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_SCHEDULER_USERNAME);
                 GlobalProperty gpSchedulerPassword = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_SCHEDULER_PASSWORD);
                 GlobalProperty gpLabTATForVLResults = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LAB_TAT_FOR_VL_RESULTS);
@@ -268,6 +269,13 @@ public class SettingsFragmentController {
                 System.out.println("txtLocalResultEndpoint: " + txtLocalResultEndpoint);
                 gpLocalResultEndpoint.setPropertyValue(txtLocalResultEndpoint);
                 Context.getAdministrationService().saveGlobalProperty(gpLocalResultEndpoint);
+
+                // Local FLU Result Endpoint
+                String txtLocalFLUResultEndpoint = (String) responseObj.get("txtLocalFLUResultEndpoint");
+                txtLocalFLUResultEndpoint = txtLocalFLUResultEndpoint == null ? "" : txtLocalFLUResultEndpoint.trim();
+                System.out.println("txtLocalResultEndpoint: " + txtLocalFLUResultEndpoint);
+                gpLocalFLUResultEndpoint.setPropertyValue(txtLocalFLUResultEndpoint);
+                Context.getAdministrationService().saveGlobalProperty(gpLocalFLUResultEndpoint);
 
                 // Scheduler Username
                 String txtSchedulerUsername = (String) responseObj.get("txtSchedulerUsername");
