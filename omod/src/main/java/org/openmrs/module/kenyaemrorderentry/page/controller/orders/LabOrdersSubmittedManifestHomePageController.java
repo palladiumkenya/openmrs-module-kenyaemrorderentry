@@ -35,11 +35,14 @@ public class LabOrdersSubmittedManifestHomePageController {
             List<LabManifestOrder> allSamples = kenyaemrOrdersService.getLabManifestOrderByManifest(manifest);
 
             String manifestType = "";
-            if (manifest.getManifestType() != null && manifest.getManifestType().intValue() == 1) {
+            if (manifest.getManifestType() != null && manifest.getManifestType().intValue() == LabManifest.EID_TYPE) {
                 manifestType = "EID";
-            } else if (manifest.getManifestType() != null && manifest.getManifestType().intValue() == 2) {
+            } else if (manifest.getManifestType() != null && manifest.getManifestType().intValue() == LabManifest.VL_TYPE) {
                 manifestType = "VL";
+            } else if (manifest.getManifestType() != null && manifest.getManifestType().intValue() == LabManifest.FLU_TYPE) {
+                manifestType = "FLU";
             }
+
             SimpleObject m = SimpleObject.create(
                     "id", manifest.getId(),
                     "startDate", manifest.getStartDate() != null ? ui.formatDatePretty(manifest.getStartDate()) : "",

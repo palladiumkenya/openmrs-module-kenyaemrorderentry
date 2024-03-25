@@ -61,10 +61,10 @@ public class PushLabRequestsTask extends AbstractTask {
                     return;
                 }
 
-                if (!labSystemConnectionRequest.checkRequirements()) {
-                    System.out.println("LAB POST: Failed to satisfy requirements for pushing samples. Please configure appropriate global properties for your facility");
-                    return;
-                }
+//                if (!labSystemConnectionRequest.checkRequirements()) {
+//                    System.out.println("LAB POST: Failed to satisfy requirements for pushing samples. Please configure appropriate global properties for your facility");
+//                    return;
+//                }
 
                 // Get a manifest ready to be sent
                 LabManifest toProcess = null;

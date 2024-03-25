@@ -38,8 +38,31 @@ public class KenyaemrOrderRestController extends BaseRestController {
         }
 
         if (requestBody != null) {
-            LabOrderDataExchange shr = new LabOrderDataExchange();
-            return shr.processIncomingViralLoadLabResults(requestBody);
+            LabOrderDataExchange labOrderDataExchange = new LabOrderDataExchange();
+            return labOrderDataExchange.processIncomingViralLoadLabResults(requestBody);
+
+        }
+        return  "The request could not be interpreted by the internal vl result end point";
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/flulabresults") // end point for processing individual lab results e,g http://localhost:8080/kenyaemr/ws/rest/v1/kemrorder/labresults
+    @ResponseBody
+    public Object processIncomingFLUResults(HttpServletRequest request) {
+        String requestBody = null;
+        try {
+
+            requestBody = Utils.fetchRequestBody(request.getReader());
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            String msg = e.getMessage();
+
+            return "Error extracting request body" + msg;
+        }
+
+        if (requestBody != null) {
+            LabOrderDataExchange labOrderDataExchange = new LabOrderDataExchange();
+            return labOrderDataExchange.processIncomingFLULabResults(requestBody);
 
         }
         return  "The request could not be interpreted by the internal vl result end point";

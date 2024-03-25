@@ -37,7 +37,10 @@ public class SettingsPageController {
         GlobalProperty gpChaiVLServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_VL_LAB_SERVER_REQUEST_URL);
         GlobalProperty gpChaiVLServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_VL_LAB_SERVER_RESULT_URL);
         GlobalProperty gpChaiVLApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_VL_LAB_SERVER_API_TOKEN);
-
+        GlobalProperty gpChaiFLUServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_FLU_LAB_SERVER_REQUEST_URL);
+        GlobalProperty gpChaiFLUServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_FLU_LAB_SERVER_RESULT_URL);
+        GlobalProperty gpChaiFLUApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_CHAI_FLU_LAB_SERVER_API_TOKEN);
+        
         // LABWARE SYSTEM
         GlobalProperty gpLabwareEIDServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_EID_LAB_SERVER_REQUEST_URL);
         GlobalProperty gpLabwareEIDServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_EID_LAB_SERVER_RESULT_URL);
@@ -45,7 +48,10 @@ public class SettingsPageController {
         GlobalProperty gpLabwareVLServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_VL_LAB_SERVER_REQUEST_URL);
         GlobalProperty gpLabwareVLServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_VL_LAB_SERVER_RESULT_URL);
         GlobalProperty gpLabwareVLApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_VL_LAB_SERVER_API_TOKEN);
-
+        GlobalProperty gpLabwareFLUServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_FLU_LAB_SERVER_REQUEST_URL);
+        GlobalProperty gpLabwareFLUServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_FLU_LAB_SERVER_RESULT_URL);
+        GlobalProperty gpLabwareFLUApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_FLU_LAB_SERVER_API_TOKEN);
+        
         // EDARP SYSTEM
         GlobalProperty gpEdarpEIDServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_EDARP_EID_LAB_SERVER_REQUEST_URL);
         GlobalProperty gpEdarpEIDServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_EDARP_EID_LAB_SERVER_RESULT_URL);
@@ -53,7 +59,10 @@ public class SettingsPageController {
         GlobalProperty gpEdarpVLServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_EDARP_VL_LAB_SERVER_REQUEST_URL);
         GlobalProperty gpEdarpVLServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_EDARP_VL_LAB_SERVER_RESULT_URL);
         GlobalProperty gpEdarpVLApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_EDARP_VL_LAB_SERVER_API_TOKEN);
-
+        GlobalProperty gpEdarpFLUServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_EDARP_FLU_LAB_SERVER_REQUEST_URL);
+        GlobalProperty gpEdarpFLUServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_EDARP_FLU_LAB_SERVER_RESULT_URL);
+        GlobalProperty gpEdarpFLUApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_EDARP_FLU_LAB_SERVER_API_TOKEN);
+        
         GlobalProperty gpSslVerification = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_SSL_VERIFICATION_ENABLED);
 
         model.put("SSLVerification", gpSslVerification != null ? gpSslVerification.getPropertyValue() : "");
@@ -64,12 +73,15 @@ public class SettingsPageController {
             model.put("SystemType", systemType);
             
             if (systemType.trim().equalsIgnoreCase("CHAI")) {
-                model.put("EIDPushURL", gpChaiEIDServerPushUrl != null ? gpChaiEIDServerPushUrl.getPropertyValue() : "");
-                model.put("EIDPullURL", gpChaiEIDServerPullUrl != null ? gpChaiEIDServerPullUrl.getPropertyValue() : "");
-                model.put("EIDToken", gpChaiEIDApiToken != null ? gpChaiEIDApiToken.getPropertyValue() : "");
-                model.put("VLPushURL", gpChaiVLServerPushUrl != null ? gpChaiVLServerPushUrl.getPropertyValue() : "");
-                model.put("VLPullURL", gpChaiVLServerPullUrl != null ? gpChaiVLServerPullUrl.getPropertyValue() : "");
-                model.put("VLToken", gpChaiVLApiToken != null ? gpChaiVLApiToken.getPropertyValue() : "");
+                model.put("EIDPushURL", (gpChaiEIDServerPushUrl != null && gpChaiEIDServerPushUrl.getPropertyValue() != null) ? gpChaiEIDServerPushUrl.getPropertyValue() : "");
+                model.put("EIDPullURL", (gpChaiEIDServerPullUrl != null && gpChaiEIDServerPullUrl.getPropertyValue() != null) ? gpChaiEIDServerPullUrl.getPropertyValue() : "");
+                model.put("EIDToken", (gpChaiEIDApiToken != null && gpChaiEIDApiToken.getPropertyValue() != null) ? gpChaiEIDApiToken.getPropertyValue() : "");
+                model.put("VLPushURL", (gpChaiVLServerPushUrl != null && gpChaiVLServerPushUrl.getPropertyValue() != null) ? gpChaiVLServerPushUrl.getPropertyValue() : "");
+                model.put("VLPullURL", (gpChaiVLServerPullUrl != null && gpChaiVLServerPullUrl.getPropertyValue() != null) ? gpChaiVLServerPullUrl.getPropertyValue() : "");
+                model.put("VLToken", (gpChaiVLApiToken != null && gpChaiVLApiToken.getPropertyValue() != null) ? gpChaiVLApiToken.getPropertyValue() : "");
+                model.put("FLUPushURL", (gpChaiFLUServerPushUrl != null && gpChaiFLUServerPushUrl.getPropertyValue() != null) ? gpChaiFLUServerPushUrl.getPropertyValue() : "");
+                model.put("FLUPullURL", (gpChaiFLUServerPullUrl != null && gpChaiFLUServerPullUrl.getPropertyValue() != null) ? gpChaiFLUServerPullUrl.getPropertyValue() : "");
+                model.put("FLUToken", (gpChaiFLUApiToken != null && gpChaiFLUApiToken.getPropertyValue() != null) ? gpChaiFLUApiToken.getPropertyValue() : "");
 
                 model.put("gpEIDPushURL", ModuleConstants.GP_CHAI_EID_LAB_SERVER_REQUEST_URL);
                 model.put("gpEIDPullURL", ModuleConstants.GP_CHAI_EID_LAB_SERVER_RESULT_URL);
@@ -77,13 +89,19 @@ public class SettingsPageController {
                 model.put("gpVLPushURL", ModuleConstants.GP_CHAI_VL_LAB_SERVER_REQUEST_URL);
                 model.put("gpVLPullURL", ModuleConstants.GP_CHAI_VL_LAB_SERVER_RESULT_URL);
                 model.put("gpVLToken", ModuleConstants.GP_CHAI_VL_LAB_SERVER_API_TOKEN);
+                model.put("gpFLUPushURL", ModuleConstants.GP_CHAI_FLU_LAB_SERVER_REQUEST_URL);
+                model.put("gpFLUPullURL", ModuleConstants.GP_CHAI_FLU_LAB_SERVER_RESULT_URL);
+                model.put("gpFLUToken", ModuleConstants.GP_CHAI_FLU_LAB_SERVER_API_TOKEN);
             } else if (systemType.trim().equalsIgnoreCase("LABWARE")) {
-                model.put("EIDPushURL", gpLabwareEIDServerPushUrl != null ? gpLabwareEIDServerPushUrl.getPropertyValue() : "");
-                model.put("EIDPullURL", gpLabwareEIDServerPullUrl != null ? gpLabwareEIDServerPullUrl.getPropertyValue() : "");
-                model.put("EIDToken", gpLabwareEIDApiToken != null ? gpLabwareEIDApiToken.getPropertyValue() : "");
-                model.put("VLPushURL", gpLabwareVLServerPushUrl != null ? gpLabwareVLServerPushUrl.getPropertyValue() : "");
-                model.put("VLPullURL", gpLabwareVLServerPullUrl != null ? gpLabwareVLServerPullUrl.getPropertyValue() : "");
-                model.put("VLToken", gpLabwareVLApiToken != null ? gpLabwareVLApiToken.getPropertyValue() : "");
+                model.put("EIDPushURL", (gpLabwareEIDServerPushUrl != null && gpLabwareEIDServerPushUrl.getPropertyValue() != null) ? gpLabwareEIDServerPushUrl.getPropertyValue() : "");
+                model.put("EIDPullURL", (gpLabwareEIDServerPullUrl != null && gpLabwareEIDServerPullUrl.getPropertyValue() != null) ? gpLabwareEIDServerPullUrl.getPropertyValue() : "");
+                model.put("EIDToken", (gpLabwareEIDApiToken != null && gpLabwareEIDApiToken.getPropertyValue() != null) ? gpLabwareEIDApiToken.getPropertyValue() : "");
+                model.put("VLPushURL", (gpLabwareVLServerPushUrl != null && gpLabwareVLServerPushUrl.getPropertyValue() != null) ? gpLabwareVLServerPushUrl.getPropertyValue() : "");
+                model.put("VLPullURL", (gpLabwareVLServerPullUrl != null && gpLabwareVLServerPullUrl.getPropertyValue() != null) ? gpLabwareVLServerPullUrl.getPropertyValue() : "");
+                model.put("VLToken", (gpLabwareVLApiToken != null && gpLabwareVLApiToken.getPropertyValue() != null) ? gpLabwareVLApiToken.getPropertyValue() : "");
+                model.put("FLUPushURL", (gpLabwareFLUServerPushUrl != null && gpLabwareFLUServerPushUrl.getPropertyValue() != null) ? gpLabwareFLUServerPushUrl.getPropertyValue() : "");
+                model.put("FLUPullURL", (gpLabwareFLUServerPullUrl != null && gpLabwareFLUServerPullUrl.getPropertyValue() != null) ? gpLabwareFLUServerPullUrl.getPropertyValue() : "");
+                model.put("FLUToken", (gpLabwareFLUApiToken != null && gpLabwareFLUApiToken.getPropertyValue() != null) ? gpLabwareFLUApiToken.getPropertyValue() : "");
 
                 model.put("gpEIDPushURL", ModuleConstants.GP_LABWARE_EID_LAB_SERVER_REQUEST_URL);
                 model.put("gpEIDPullURL", ModuleConstants.GP_LABWARE_EID_LAB_SERVER_RESULT_URL);
@@ -91,13 +109,19 @@ public class SettingsPageController {
                 model.put("gpVLPushURL", ModuleConstants.GP_LABWARE_VL_LAB_SERVER_REQUEST_URL);
                 model.put("gpVLPullURL", ModuleConstants.GP_LABWARE_VL_LAB_SERVER_RESULT_URL);
                 model.put("gpVLToken", ModuleConstants.GP_LABWARE_VL_LAB_SERVER_API_TOKEN);
+                model.put("gpFLUPushURL", ModuleConstants.GP_LABWARE_FLU_LAB_SERVER_REQUEST_URL);
+                model.put("gpFLUPullURL", ModuleConstants.GP_LABWARE_FLU_LAB_SERVER_RESULT_URL);
+                model.put("gpFLUToken", ModuleConstants.GP_LABWARE_FLU_LAB_SERVER_API_TOKEN);
             } else if (systemType.trim().equalsIgnoreCase("EDARP")) {
-                model.put("EIDPushURL", gpEdarpEIDServerPushUrl != null ? gpEdarpEIDServerPushUrl.getPropertyValue() : "");
-                model.put("EIDPullURL", gpEdarpEIDServerPullUrl != null ? gpEdarpEIDServerPullUrl.getPropertyValue() : "");
-                model.put("EIDToken", gpEdarpEIDApiToken != null ? gpEdarpEIDApiToken.getPropertyValue() : "");
-                model.put("VLPushURL", gpEdarpVLServerPushUrl != null ? gpEdarpVLServerPushUrl.getPropertyValue() : "");
-                model.put("VLPullURL", gpEdarpVLServerPullUrl != null ? gpEdarpVLServerPullUrl.getPropertyValue() : "");
-                model.put("VLToken", gpEdarpVLApiToken != null ? gpEdarpVLApiToken.getPropertyValue() : "");
+                model.put("EIDPushURL", (gpEdarpEIDServerPushUrl != null && gpEdarpEIDServerPushUrl.getPropertyValue() != null) ? gpEdarpEIDServerPushUrl.getPropertyValue() : "");
+                model.put("EIDPullURL", (gpEdarpEIDServerPullUrl != null && gpEdarpEIDServerPullUrl.getPropertyValue() != null) ? gpEdarpEIDServerPullUrl.getPropertyValue() : "");
+                model.put("EIDToken", (gpEdarpEIDApiToken != null && gpEdarpEIDApiToken.getPropertyValue() != null) ? gpEdarpEIDApiToken.getPropertyValue() : "");
+                model.put("VLPushURL", (gpEdarpVLServerPushUrl != null && gpEdarpVLServerPushUrl.getPropertyValue() != null) ? gpEdarpVLServerPushUrl.getPropertyValue() : "");
+                model.put("VLPullURL", (gpEdarpVLServerPullUrl != null && gpEdarpVLServerPullUrl.getPropertyValue() != null) ? gpEdarpVLServerPullUrl.getPropertyValue() : "");
+                model.put("VLToken", (gpEdarpVLApiToken != null && gpEdarpVLApiToken.getPropertyValue() != null) ? gpEdarpVLApiToken.getPropertyValue() : "");
+                model.put("FLUPushURL", (gpEdarpFLUServerPushUrl != null && gpEdarpFLUServerPushUrl.getPropertyValue() != null) ? gpEdarpFLUServerPushUrl.getPropertyValue() : "");
+                model.put("FLUPullURL", (gpEdarpFLUServerPullUrl != null && gpEdarpFLUServerPullUrl.getPropertyValue() != null) ? gpEdarpFLUServerPullUrl.getPropertyValue() : "");
+                model.put("FLUToken", (gpEdarpFLUApiToken != null && gpEdarpFLUApiToken.getPropertyValue() != null) ? gpEdarpFLUApiToken.getPropertyValue() : "");
 
                 model.put("gpEIDPushURL", ModuleConstants.GP_EDARP_EID_LAB_SERVER_REQUEST_URL);
                 model.put("gpEIDPullURL", ModuleConstants.GP_EDARP_EID_LAB_SERVER_RESULT_URL);
@@ -105,6 +129,9 @@ public class SettingsPageController {
                 model.put("gpVLPushURL", ModuleConstants.GP_EDARP_VL_LAB_SERVER_REQUEST_URL);
                 model.put("gpVLPullURL", ModuleConstants.GP_EDARP_VL_LAB_SERVER_RESULT_URL);
                 model.put("gpVLToken", ModuleConstants.GP_EDARP_VL_LAB_SERVER_API_TOKEN);
+                model.put("gpFLUPushURL", ModuleConstants.GP_EDARP_FLU_LAB_SERVER_REQUEST_URL);
+                model.put("gpFLUPullURL", ModuleConstants.GP_EDARP_FLU_LAB_SERVER_RESULT_URL);
+                model.put("gpFLUToken", ModuleConstants.GP_EDARP_FLU_LAB_SERVER_API_TOKEN);
             } else {
                 model.put("SystemType", "");
                 model.put("EIDPushURL", "");
@@ -113,6 +140,9 @@ public class SettingsPageController {
                 model.put("VLPushURL", "");
                 model.put("VLPullURL", "");
                 model.put("VLToken", "");
+                model.put("FLUPushURL", "");
+                model.put("FLUPullURL", "");
+                model.put("FLUToken", "");
 
                 model.put("gpEIDPushURL", "");
                 model.put("gpEIDPullURL", "");
@@ -120,6 +150,9 @@ public class SettingsPageController {
                 model.put("gpVLPushURL", "");
                 model.put("gpVLPullURL", "");
                 model.put("gpVLToken", "");
+                model.put("gpFLUPushURL", "");
+                model.put("gpFLUPullURL", "");
+                model.put("gpFLUToken", "");
             }
         } else {
             model.put("SystemType", "");
@@ -129,6 +162,9 @@ public class SettingsPageController {
             model.put("VLPushURL", "");
             model.put("VLPullURL", "");
             model.put("VLToken", "");
+            model.put("FLUPushURL", "");
+            model.put("FLUPullURL", "");
+            model.put("FLUToken", "");
 
             model.put("gpEIDPushURL", "");
             model.put("gpEIDPullURL", "");
@@ -136,6 +172,9 @@ public class SettingsPageController {
             model.put("gpVLPushURL", "");
             model.put("gpVLPullURL", "");
             model.put("gpVLToken", "");
+            model.put("gpFLUPushURL", "");
+            model.put("gpFLUPullURL", "");
+            model.put("gpFLUToken", "");
         }
 
         GlobalProperty gpEnableEIDFunction = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.ENABLE_EID_FUNCTION);
@@ -143,10 +182,19 @@ public class SettingsPageController {
         model.put("EnableEIDFunction", gpEnableEIDFunction != null ? gpEnableEIDFunction.getPropertyValue() : "");
         model.put("gpEnableEIDFunction", ModuleConstants.ENABLE_EID_FUNCTION);
 
+        GlobalProperty gpEnableFLUFunction = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.ENABLE_FLU_FUNCTION);
+
+        model.put("EnableFLUFunction", gpEnableFLUFunction != null ? gpEnableFLUFunction.getPropertyValue() : "");
+        model.put("gpEnableFLUFunction", ModuleConstants.ENABLE_FLU_FUNCTION);
+
         GlobalProperty gpLocalResultEndpoint = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LOCAL_RESULT_ENDPOINT);
+        GlobalProperty gpLocalFLUResultEndpoint = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LOCAL_FLU_RESULT_ENDPOINT);
 
         model.put("LocalResultEndpoint", gpLocalResultEndpoint != null ? gpLocalResultEndpoint.getPropertyValue() : "");
         model.put("gpLocalResultEndpoint", ModuleConstants.GP_LOCAL_RESULT_ENDPOINT);
+
+        model.put("LocalFLUResultEndpoint", gpLocalFLUResultEndpoint != null ? gpLocalFLUResultEndpoint.getPropertyValue() : "");
+        model.put("gpLocalFLUResultEndpoint", ModuleConstants.GP_LOCAL_FLU_RESULT_ENDPOINT);
 
         GlobalProperty gpSchedulerUsername = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_SCHEDULER_USERNAME);
 

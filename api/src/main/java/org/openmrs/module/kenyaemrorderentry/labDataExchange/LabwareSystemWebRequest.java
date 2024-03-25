@@ -1,6 +1,8 @@
 package org.openmrs.module.kenyaemrorderentry.labDataExchange;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
@@ -14,6 +16,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.openmrs.GlobalProperty;
 import org.openmrs.Order;
@@ -49,7 +52,7 @@ public class LabwareSystemWebRequest extends LabWebRequest {
     }
 
     @Override
-    public boolean checkRequirements() {
+    public boolean checkRequirements(LabManifest toProcess) {
         // EID settings
         GlobalProperty gpEIDServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_EID_LAB_SERVER_REQUEST_URL);
         GlobalProperty gpEIDServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_EID_LAB_SERVER_RESULT_URL);
@@ -60,6 +63,11 @@ public class LabwareSystemWebRequest extends LabWebRequest {
         GlobalProperty gpVLServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_VL_LAB_SERVER_RESULT_URL);
         GlobalProperty gpVLApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_VL_LAB_SERVER_API_TOKEN);
 
+        // FLU Settings
+        GlobalProperty gpFLUServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_FLU_LAB_SERVER_REQUEST_URL);
+        GlobalProperty gpFLUServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_FLU_LAB_SERVER_RESULT_URL);
+        GlobalProperty gpFLUApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_FLU_LAB_SERVER_API_TOKEN);
+
         String EIDServerPushUrl = gpEIDServerPushUrl.getPropertyValue();
         String EIDServerPullUrl = gpEIDServerPullUrl.getPropertyValue();
         String EIDApiToken = gpEIDApiToken.getPropertyValue();
@@ -68,8 +76,16 @@ public class LabwareSystemWebRequest extends LabWebRequest {
         String VLServerPullUrl = gpVLServerPullUrl.getPropertyValue();
         String VLApiToken = gpVLApiToken.getPropertyValue();
 
-        if (StringUtils.isBlank(EIDServerPushUrl) || StringUtils.isBlank(EIDServerPullUrl) || StringUtils.isBlank(EIDApiToken) || StringUtils.isBlank(VLServerPushUrl) || StringUtils.isBlank(VLServerPullUrl) || StringUtils.isBlank(VLApiToken)) {
-            System.out.println("Labware Lab Results: Please set credentials for posting lab requests to the labware system");
+        String FLUServerPushUrl = gpFLUServerPushUrl.getPropertyValue();
+        String FLUServerPullUrl = gpFLUServerPullUrl.getPropertyValue();
+        String FLUApiToken = gpFLUApiToken.getPropertyValue();
+
+        if ((toProcess.getManifestType() == LabManifest.VL_TYPE && (StringUtils.isBlank(VLServerPushUrl) || StringUtils.isBlank(VLServerPullUrl) || StringUtils.isBlank(VLApiToken)))
+                || (toProcess.getManifestType() == LabManifest.EID_TYPE && (StringUtils.isBlank(EIDServerPushUrl) || StringUtils.isBlank(EIDServerPullUrl) || StringUtils.isBlank(EIDApiToken)))
+                || (toProcess.getManifestType() == LabManifest.FLU_TYPE && (StringUtils.isBlank(FLUServerPushUrl) || StringUtils.isBlank(FLUServerPullUrl) || StringUtils.isBlank(FLUApiToken)))
+                || LabOrderDataExchange.getSystemType() == ModuleConstants.NO_SYSTEM_CONFIGURED
+        ) {
+            System.err.println("Labware Lab Results: Please set credentials for posting lab requests to the labware system");
             return false;
         }
         return true;
@@ -77,12 +93,12 @@ public class LabwareSystemWebRequest extends LabWebRequest {
 
     public boolean postSamples(LabManifestOrder manifestOrder, String manifestStatus) throws IOException {
 
-        if (!checkRequirements()) {
-            System.out.println("Labware Lab Results POST: Failed to satisfy requirements");
+        LabManifest toProcess = manifestOrder.getLabManifest();
+        if (!checkRequirements(toProcess)) {
+            System.err.println("Labware Lab Results POST: Failed to satisfy requirements");
             return(false);
         }
 
-        LabManifest toProcess = manifestOrder.getLabManifest();
         KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
 
         String serverUrl = "";
@@ -98,6 +114,11 @@ public class LabwareSystemWebRequest extends LabWebRequest {
             GlobalProperty gpVLApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_VL_LAB_SERVER_API_TOKEN);
             serverUrl = gpVLServerPushUrl.getPropertyValue().trim();
             API_KEY = gpVLApiToken.getPropertyValue().trim();
+        } else if(toProcess.getManifestType() == LabManifest.FLU_TYPE) {
+            GlobalProperty gpFLUServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_FLU_LAB_SERVER_REQUEST_URL);
+            GlobalProperty gpFLUApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_FLU_LAB_SERVER_API_TOKEN);
+            serverUrl = gpFLUServerPushUrl.getPropertyValue().trim();
+            API_KEY = gpFLUApiToken.getPropertyValue().trim();
         }
 
         SSLConnectionSocketFactory sslsf = null;
@@ -122,9 +143,23 @@ public class LabwareSystemWebRequest extends LabWebRequest {
             System.out.println("Labware Lab Results POST: Server URL: " + serverUrl);
             HttpPost postRequest = new HttpPost(serverUrl);
 
+            Integer manifestType = toProcess.getManifestType();
+
             //Set the API media type in http content-type header
             postRequest.addHeader("content-type", "application/json");
-            postRequest.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + API_KEY);
+
+            if(manifestType == LabManifest.FLU_TYPE) {
+                // If using basic auth (username and pass)
+                String username = "FLUTEST";
+                String password = "e2a1f19ea8ab3b8300b82144ea52dee8ce23";
+                String auth = username.trim() + ":" + password.trim();
+                byte[] encodedAuth = Base64.encodeBase64(auth.getBytes("UTF-8"));
+                String authHeader = "Basic " + new String(encodedAuth);
+                postRequest.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
+            } else {
+                // If using Bearer Key
+                postRequest.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + API_KEY);
+            }
 
             //Set the request post body
             String payload = manifestOrder.getPayload();
@@ -184,26 +219,175 @@ public class LabwareSystemWebRequest extends LabWebRequest {
 
     public void pullResult(List<Integer> orderIds, List<Integer> manifestOrderIds, LabManifest manifestToUpdateResults) throws IOException {
 
+        if(manifestToUpdateResults.getManifestType() == LabManifest.FLU_TYPE) {
+            pullFLUResult(orderIds, manifestOrderIds, manifestToUpdateResults);
+        } else {
+            KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
+
+            String serverUrl = "";
+            String API_KEY = "";
+
+            if(manifestToUpdateResults.getManifestType() == LabManifest.EID_TYPE) {
+                GlobalProperty gpEIDServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_EID_LAB_SERVER_RESULT_URL);
+                GlobalProperty gpEIDApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_EID_LAB_SERVER_API_TOKEN);
+                serverUrl = gpEIDServerPullUrl.getPropertyValue().trim();
+                API_KEY = gpEIDApiToken.getPropertyValue().trim();
+            } else if(manifestToUpdateResults.getManifestType() == LabManifest.VL_TYPE) {
+                GlobalProperty gpVLServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_VL_LAB_SERVER_RESULT_URL);
+                GlobalProperty gpVLApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_VL_LAB_SERVER_API_TOKEN);
+                serverUrl = gpVLServerPullUrl.getPropertyValue().trim();
+                API_KEY = gpVLApiToken.getPropertyValue().trim();
+            }
+
+            GlobalProperty gpLastProcessedManifest = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_MANIFEST_LAST_PROCESSED);
+            GlobalProperty gpLastProcessedManifestUpdatetime = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_MANIFEST_LAST_UPDATETIME);
+
+
+            //Using SSL
+            SSLConnectionSocketFactory sslsf = null;
+            GlobalProperty gpSslVerification = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_SSL_VERIFICATION_ENABLED);
+
+            if (gpSslVerification != null) {
+                String sslVerificationEnabled = gpSslVerification.getPropertyValue();
+                if (StringUtils.isNotBlank(sslVerificationEnabled)) {
+                    if (sslVerificationEnabled.equals("true")) {
+                        sslsf = Utils.sslConnectionSocketFactoryDefault();
+                    } else {
+                        sslsf = Utils.sslConnectionSocketFactoryWithDisabledSSLVerification();
+                    }
+                }
+            }
+
+            CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
+
+            try {
+                String facilityCode = Utils.getDefaultLocationMflCode(Utils.getDefaultLocation());
+                String orderNumbers = StringUtils.join(orderIds, ",");
+                URIBuilder builder = new URIBuilder(serverUrl);
+                builder.addParameter("mfl_code", facilityCode);
+                builder.addParameter("order_no", orderNumbers);
+                URI uri = builder.build();
+                System.out.println("Get Labware Lab Results URL: " + uri);
+
+                HttpGet httpget = new HttpGet(uri);
+                httpget.addHeader("content-type", "application/x-www-form-urlencoded");
+                httpget.addHeader("Authorization", "Bearer " +API_KEY);
+                httpget.addHeader("Accept", "application/json");
+
+                CloseableHttpResponse response = httpClient.execute(httpget);
+
+                final int statusCode = response.getStatusLine().getStatusCode();
+                if (statusCode != 200) {
+                    throw new RuntimeException("Get Labware Lab Results Failed with HTTP error code : " + statusCode);
+                } else {
+                    System.out.println("Get Labware Lab Results: REST Call Success");
+                }
+
+            String jsonString = null;
+            HttpEntity entity = response.getEntity();
+            if (entity != null) {
+                BufferedReader rd = new BufferedReader(new InputStreamReader(entity.getContent()));
+
+                try {
+                    jsonString = rd.lines().collect(Collectors.joining()).toString();
+                    System.out.println("Labware Lab Results Get: Request JSON -> " + jsonString);
+                } finally {
+                    rd.close();
+                }
+            }
+
+                JSONParser parser = new JSONParser();
+                JSONArray responseArray = (JSONArray) parser.parse(jsonString);
+
+                if (responseArray != null && !responseArray.isEmpty()) {
+                    // update orders
+                    ProcessViralLoadResults.processPayload(jsonString);
+
+                    // update manifest details appropriately for the next execution
+                    String [] incompleteStatuses = new String []{"Incomplete", "Pending", "Sending"};
+
+                    if (manifestToUpdateResults != null) {
+                        System.out.println("Labware Lab Results Get: Updating manifest with status");
+                        List<LabManifestOrder> pendingResultsForNextIteration = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifestToUpdateResults, "Sent");
+                        List<LabManifestOrder> incompleteResults = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifestToUpdateResults, incompleteStatuses);
+
+                        System.out.println("Size of pending results: " + pendingResultsForNextIteration.size() + " Size of incomplete results: " + incompleteResults.size());
+
+                        if (pendingResultsForNextIteration.size() < 1 && incompleteResults.size() < 1) {
+                            manifestToUpdateResults.setStatus("Complete results");
+                            manifestToUpdateResults.setDateChanged(new Date());
+                            kenyaemrOrdersService.saveLabOrderManifest(manifestToUpdateResults);
+
+                            gpLastProcessedManifest.setPropertyValue(""); // set value to null so that the execution gets to the next manifest
+                            Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifest);
+                            System.out.println("Labware Lab Results Get: Updating manifest with status: Complete Results");
+                        } else if (pendingResultsForNextIteration.size() < 1 && incompleteResults.size() > 0) {
+                            manifestToUpdateResults.setStatus("Incomplete results");
+                            manifestToUpdateResults.setDateChanged(new Date());
+                            kenyaemrOrdersService.saveLabOrderManifest(manifestToUpdateResults);
+
+                            gpLastProcessedManifest.setPropertyValue(""); // set value to null so that the execution gets to the next manifest
+                            Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifest);
+                            System.out.println("Labware Lab Results Get: Updating manifest with status: Incomplete Results");
+                        }
+
+                        // update manifest global property
+                        if (pendingResultsForNextIteration.size() > 0) {
+                            System.out.println("Labware Lab Results Get: Updating manifest global property");
+                            gpLastProcessedManifest.setPropertyValue(manifestToUpdateResults.getId().toString());
+                            gpLastProcessedManifestUpdatetime.setPropertyValue(Utils.getSimpleDateFormat(ModuleConstants.MANIFEST_LAST_UPDATE_PATTERN).format(new Date()));
+                            Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifest);
+                            Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifestUpdatetime);
+                        }
+                    }
+
+                }
+
+                // check and mark status for all orders that may have not been found in the lab system. It is still not clear how this happens since the records are marked as sent in the manifest
+
+                Integer[] intArray = new Integer[manifestOrderIds.size()];
+                intArray = manifestOrderIds.toArray(intArray);
+
+                List<LabManifestOrder> ordersNotInLabSystem = kenyaemrOrdersService.getLabManifestOrderByNotFoundInLabSystem(intArray);
+
+                for (LabManifestOrder o : ordersNotInLabSystem) {
+                    o.setStatus("Record not found");
+                    o.setDateChanged(new Date());
+                    kenyaemrOrdersService.saveLabManifestOrder(o);
+                }
+
+                System.out.println("Labware Lab Results Get: Successfully executed the task that pulls lab requests");
+                log.info("Labware Lab Results Get: Successfully executed the task that pulls lab requests");
+
+                System.out.println("Labware Lab Results Get: Successfully Done");
+            } catch (Exception e) {
+                System.err.println("Get Labware Lab Results Error: " + e.getMessage());
+                e.printStackTrace();
+            } finally {
+                httpClient.close();
+            }
+        }
+    }
+
+    public void pullFLUResult(List<Integer> orderIds, List<Integer> manifestOrderIds, LabManifest manifestToUpdateResults) throws IOException {
+
+        if (!checkRequirements(manifestToUpdateResults)) {
+            System.err.println("Labware Lab Results GET: Failed to satisfy requirements");
+            return;
+        }
+
         KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
 
         String serverUrl = "";
         String API_KEY = "";
 
-        if(manifestToUpdateResults.getManifestType() == LabManifest.EID_TYPE) {
-            GlobalProperty gpEIDServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_EID_LAB_SERVER_RESULT_URL);
-            GlobalProperty gpEIDApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_EID_LAB_SERVER_API_TOKEN);
-            serverUrl = gpEIDServerPullUrl.getPropertyValue().trim();
-            API_KEY = gpEIDApiToken.getPropertyValue().trim();
-        } else if(manifestToUpdateResults.getManifestType() == LabManifest.VL_TYPE) {
-            GlobalProperty gpVLServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_VL_LAB_SERVER_RESULT_URL);
-            GlobalProperty gpVLApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_VL_LAB_SERVER_API_TOKEN);
-            serverUrl = gpVLServerPullUrl.getPropertyValue().trim();
-            API_KEY = gpVLApiToken.getPropertyValue().trim();
-        }
+        GlobalProperty gpFLUServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_FLU_LAB_SERVER_RESULT_URL);
+        GlobalProperty gpFLUApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_FLU_LAB_SERVER_API_TOKEN);
+        serverUrl = gpFLUServerPullUrl.getPropertyValue().trim();
+        API_KEY = gpFLUApiToken.getPropertyValue().trim();
 
         GlobalProperty gpLastProcessedManifest = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_MANIFEST_LAST_PROCESSED);
         GlobalProperty gpLastProcessedManifestUpdatetime = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_MANIFEST_LAST_UPDATETIME);
-
 
         //Using SSL
         SSLConnectionSocketFactory sslsf = null;
@@ -222,112 +406,132 @@ public class LabwareSystemWebRequest extends LabWebRequest {
 
         CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
 
-        try {
-            String facilityCode = Utils.getDefaultLocationMflCode(Utils.getDefaultLocation());
-            String orderNumbers = StringUtils.join(orderIds, ",");
-            URIBuilder builder = new URIBuilder(serverUrl);
-            builder.addParameter("mfl_code", facilityCode);
-            builder.addParameter("order_no", orderNumbers);
-            URI uri = builder.build();
-            System.out.println("Get Labware Lab Results URL: " + uri);
+        for(Integer order : orderIds) {
+            try {
+                String facilityCode = Utils.getDefaultLocationMflCode(Utils.getDefaultLocation());           
+                URIBuilder builder = new URIBuilder(serverUrl);
+                String currentOrder = order.toString();           
 
-            HttpGet httpget = new HttpGet(uri);
-            httpget.addHeader("content-type", "application/x-www-form-urlencoded");
-            httpget.addHeader("Authorization", "Bearer " +API_KEY);
-            httpget.addHeader("Accept", "application/json");
+                builder.addParameter("pid", facilityCode + "-" + currentOrder);
+                URI uri = builder.build();
+                System.out.println("Get Labware Lab Results URL: " + uri);
+                
+                HttpGet httpget = new HttpGet(uri);
 
-            CloseableHttpResponse response = httpClient.execute(httpget);
+                // If using basic auth (username and pass)
+                String username = "FLUTEST";
+                String password = "e2a1f19ea8ab3b8300b82144ea52dee8ce23";
+                String auth = username.trim() + ":" + password.trim();
+                byte[] encodedAuth = Base64.encodeBase64(auth.getBytes("UTF-8"));
+                String authHeader = "Basic " + new String(encodedAuth);
+                httpget.setHeader(HttpHeaders.AUTHORIZATION, authHeader);               
 
-            final int statusCode = response.getStatusLine().getStatusCode();
-            if (statusCode != 200) {
-                throw new RuntimeException("Get Labware Lab Results Failed with HTTP error code : " + statusCode);
-            } else {
-                System.out.println("Get Labware Lab Results: REST Call Success");
-            }
+                httpget.addHeader("content-type", "application/x-www-form-urlencoded");
+                httpget.addHeader("Accept", "application/json");
 
-           String jsonString = null;
-           HttpEntity entity = response.getEntity();
-           if (entity != null) {
-               BufferedReader rd = new BufferedReader(new InputStreamReader(entity.getContent()));
+                CloseableHttpResponse response = httpClient.execute(httpget);
 
-               try {
-                   jsonString = rd.lines().collect(Collectors.joining()).toString();
-                   System.out.println("Labware Lab Results Get: Request JSON -> " + jsonString);
-               } finally {
-                   rd.close();
-               }
-           }
+                final int statusCode = response.getStatusLine().getStatusCode();
+                if (statusCode == 200 || statusCode == 201) {                   
+                    System.out.println("Get Labware Lab FLU Results: REST Call Success");               
 
-            JSONParser parser = new JSONParser();
-            JSONArray responseArray = (JSONArray) parser.parse(jsonString);
+                    String jsonString = null;
+                    HttpEntity entity = response.getEntity();
+                    if (entity != null) {
+                        BufferedReader rd = new BufferedReader(new InputStreamReader(entity.getContent()));
 
-            if (responseArray != null && !responseArray.isEmpty()) {
-                // update orders
-                ProcessViralLoadResults.processPayload(jsonString);
-
-                // update manifest details appropriately for the next execution
-                String [] incompleteStatuses = new String []{"Incomplete", "Pending", "Sending"};
-
-                if (manifestToUpdateResults != null) {
-                    System.out.println("Labware Lab Results Get: Updating manifest with status");
-                    List<LabManifestOrder> pendingResultsForNextIteration = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifestToUpdateResults, "Sent");
-                    List<LabManifestOrder> incompleteResults = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifestToUpdateResults, incompleteStatuses);
-
-                    System.out.println("Size of pending results: " + pendingResultsForNextIteration.size() + " Size of incomplete results: " + incompleteResults.size());
-
-                    if (pendingResultsForNextIteration.size() < 1 && incompleteResults.size() < 1) {
-                        manifestToUpdateResults.setStatus("Complete results");
-                        manifestToUpdateResults.setDateChanged(new Date());
-                        kenyaemrOrdersService.saveLabOrderManifest(manifestToUpdateResults);
-
-                        gpLastProcessedManifest.setPropertyValue(""); // set value to null so that the execution gets to the next manifest
-                        Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifest);
-                        System.out.println("Labware Lab Results Get: Updating manifest with status: Complete Results");
-                    } else if (pendingResultsForNextIteration.size() < 1 && incompleteResults.size() > 0) {
-                        manifestToUpdateResults.setStatus("Incomplete results");
-                        manifestToUpdateResults.setDateChanged(new Date());
-                        kenyaemrOrdersService.saveLabOrderManifest(manifestToUpdateResults);
-
-                        gpLastProcessedManifest.setPropertyValue(""); // set value to null so that the execution gets to the next manifest
-                        Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifest);
-                        System.out.println("Labware Lab Results Get: Updating manifest with status: Incomplete Results");
+                        try {
+                            jsonString = rd.lines().collect(Collectors.joining()).toString();
+                            System.out.println("Labware Lab Results Get: Request JSON -> " + jsonString);
+                        } finally {
+                            rd.close();
+                        }
                     }
 
-                    // update manifest global property
-                    if (pendingResultsForNextIteration.size() > 0) {
-                        System.out.println("Labware Lab Results Get: Updating manifest global property");
-                        gpLastProcessedManifest.setPropertyValue(manifestToUpdateResults.getId().toString());
-                        gpLastProcessedManifestUpdatetime.setPropertyValue(Utils.getSimpleDateFormat(ModuleConstants.MANIFEST_LAST_UPDATE_PATTERN).format(new Date()));
-                        Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifest);
-                        Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifestUpdatetime);
+                    JSONParser parser = new JSONParser();
+                    JSONObject responseObject = (JSONObject) parser.parse(jsonString);
+
+                    if (responseObject != null && !responseObject.isEmpty()) {
+                        // update FLU order
+                        ProcessViralLoadResults.processFLUPayload(jsonString);
+
+                        // update manifest details appropriately for the next execution
+                        String [] incompleteStatuses = new String []{"Incomplete", "Pending", "Sending"};
+
+                        if (manifestToUpdateResults != null) {
+                            System.out.println("Labware Lab Results Get: Updating manifest with status");
+                            List<LabManifestOrder> pendingResultsForNextIteration = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifestToUpdateResults, "Sent");
+                            List<LabManifestOrder> incompleteResults = kenyaemrOrdersService.getLabManifestOrderByManifestAndStatus(manifestToUpdateResults, incompleteStatuses);
+
+                            System.out.println("Size of pending results: " + pendingResultsForNextIteration.size() + " Size of incomplete results: " + incompleteResults.size());
+
+                            if (pendingResultsForNextIteration.size() < 1 && incompleteResults.size() < 1) {
+                                manifestToUpdateResults.setStatus("Complete results");
+                                manifestToUpdateResults.setDateChanged(new Date());
+                                kenyaemrOrdersService.saveLabOrderManifest(manifestToUpdateResults);
+
+                                gpLastProcessedManifest.setPropertyValue(""); // set value to null so that the execution gets to the next manifest
+                                Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifest);
+                                System.out.println("Labware Lab Results Get: Updating manifest with status: Complete Results");
+                            } else if (pendingResultsForNextIteration.size() < 1 && incompleteResults.size() > 0) {
+                                manifestToUpdateResults.setStatus("Incomplete results");
+                                manifestToUpdateResults.setDateChanged(new Date());
+                                kenyaemrOrdersService.saveLabOrderManifest(manifestToUpdateResults);
+
+                                gpLastProcessedManifest.setPropertyValue(""); // set value to null so that the execution gets to the next manifest
+                                Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifest);
+                                System.out.println("Labware Lab Results Get: Updating manifest with status: Incomplete Results");
+                            }
+
+                            // update manifest global property
+                            if (pendingResultsForNextIteration.size() > 0) {
+                                System.out.println("Labware Lab Results Get: Updating manifest global property");
+                                gpLastProcessedManifest.setPropertyValue(manifestToUpdateResults.getId().toString());
+                                gpLastProcessedManifestUpdatetime.setPropertyValue(Utils.getSimpleDateFormat(ModuleConstants.MANIFEST_LAST_UPDATE_PATTERN).format(new Date()));
+                                Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifest);
+                                Context.getAdministrationService().saveGlobalProperty(gpLastProcessedManifestUpdatetime);
+                            }
+                        }
+
                     }
+
+                    // check and mark status for all orders that may have not been found in the lab system. It is still not clear how this happens since the records are marked as sent in the manifest
+
+                    Integer[] intArray = new Integer[manifestOrderIds.size()];
+                    intArray = manifestOrderIds.toArray(intArray);
+
+                    List<LabManifestOrder> ordersNotInLabSystem = kenyaemrOrdersService.getLabManifestOrderByNotFoundInLabSystem(intArray);
+
+                    for (LabManifestOrder o : ordersNotInLabSystem) {
+                        o.setStatus("Record not found");
+                        o.setDateChanged(new Date());
+                        kenyaemrOrdersService.saveLabManifestOrder(o);
+                    }
+
+                    System.out.println("Labware Lab Results Get: Successfully executed the task that pulls lab requests");
+                    log.info("Labware Lab Results Get: Successfully executed the task that pulls lab requests");
+
+                    System.out.println("Labware Lab Results Get: Successfully Done");
+                } else {
+                    System.err.println("Get Labware FLU Lab Results Failed with HTTP error code : " + statusCode);
                 }
-
+            } catch (Exception e) {
+                System.err.println("Get Labware Lab Results Error: " + e.getMessage());
+                e.printStackTrace();
             }
 
-            // check and mark status for all orders that may have not been found in the lab system. It is still not clear how this happens since the records are marked as sent in the manifest
-
-            Integer[] intArray = new Integer[manifestOrderIds.size()];
-            intArray = manifestOrderIds.toArray(intArray);
-
-            List<LabManifestOrder> ordersNotInLabSystem = kenyaemrOrdersService.getLabManifestOrderByNotFoundInLabSystem(intArray);
-
-            for (LabManifestOrder o : ordersNotInLabSystem) {
-                o.setStatus("Record not found");
-                o.setDateChanged(new Date());
-                kenyaemrOrdersService.saveLabManifestOrder(o);
-            }
-
-            System.out.println("Labware Lab Results Get: Successfully executed the task that pulls lab requests");
-            log.info("Labware Lab Results Get: Successfully executed the task that pulls lab requests");
-
-            System.out.println("Labware Lab Results Get: Successfully Done");
-        } catch (Exception e) {
-            System.err.println("Get Labware Lab Results Error: " + e.getMessage());
-            e.printStackTrace();
-        } finally {
-            httpClient.close();
+            // Delay loop
+            try {
+				//Delay for 5 seconds
+				Thread.sleep(5000);
+			}
+			catch (Exception ie) {
+				Thread.currentThread().interrupt();
+			}
         }
+
+        // finally
+        httpClient.close();
     }
 
     @Override
@@ -336,20 +540,24 @@ public class LabwareSystemWebRequest extends LabWebRequest {
 
         if (!node.isEmpty()) {
 
-            node.put("mfl_code", Utils.getDefaultLocationMflCode(Utils.getDefaultLocation()));
-            if (order.getPatient().getGender().equals("F")) {
-                node.put("female_status", "none");
-            }
-            node.put("lab", ModuleConstants.DEFAULT_APHL_LAB_CODE.toString());
-            node.put("facility_email", "none");
-            node.put("recency_id", "");
-            node.put("emr_shipment", StringUtils.isNotBlank(manifestID) ? manifestID : "");
-            node.put("date_separated", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleSeparated));
+            if (getManifestType() == LabManifest.FLU_TYPE) {
+                // Any custom payload for LABWARE FLU
+            } else {
+                node.put("mfl_code", Utils.getDefaultLocationMflCode(Utils.getDefaultLocation()));
+                if (order.getPatient().getGender().equals("F")) {
+                    node.put("female_status", "none");
+                }
+                node.put("lab", ModuleConstants.DEFAULT_APHL_LAB_CODE.toString());
+                node.put("facility_email", "none");
+                node.put("recency_id", "");
+                node.put("emr_shipment", StringUtils.isNotBlank(manifestID) ? manifestID : "");
+                node.put("date_separated", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleSeparated));
 
 
-            node.put("mfl_code", Utils.getDefaultLocationMflCode(Utils.getDefaultLocation()));
-            if (order.getPatient().getGender().equals("F")) {
-                node.put("female_status", "none");
+                // node.put("mfl_code", Utils.getDefaultLocationMflCode(Utils.getDefaultLocation()));
+                if (order.getPatient().getGender().equals("F")) {
+                    node.put("female_status", "none");
+                }
             }
 
             // System.out.println("Order Entry: Using LABWARE System payload: " + node.toPrettyString());

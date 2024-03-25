@@ -7,15 +7,18 @@ import com.google.gson.JsonParser;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.time.DateUtils;
+import org.openmrs.CareSetting;
 import org.openmrs.Concept;
 import org.openmrs.Encounter;
 import org.openmrs.EncounterType;
 import org.openmrs.GlobalProperty;
 import org.openmrs.Obs;
 import org.openmrs.Order;
+import org.openmrs.OrderType;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
+import org.openmrs.Provider;
 import org.openmrs.TestOrder;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.ConceptService;
@@ -31,6 +34,7 @@ import org.openmrs.module.kenyaemrorderentry.util.Utils;
 import org.openmrs.module.metadatadeploy.MetadataUtils;
 import org.openmrs.ui.framework.SimpleObject;
 import org.openmrs.util.PrivilegeConstants;
+import java.util.regex.*;
 
 import java.text.ParseException;
 import java.util.*;
@@ -50,7 +54,11 @@ public class LabOrderDataExchange {
     Concept vlTestConceptQuantitative = conceptService.getConcept(856);
     EncounterType labEncounterType = encounterService.getEncounterTypeByUuid(LAB_ENCOUNTER_TYPE_UUID);
 
-
+    Concept concept_PCR_FLU_A  = conceptService.getConcept(1000613);
+    Concept concept_PCR_FLU_B = conceptService.getConcept(1000614);
+    Concept concept_RSV = conceptService.getConcept(1000616);
+    Concept concept_RNP = conceptService.getConcept(1000617);
+    Concept concept_SARS_COV_2_M = conceptService.getConcept(1000615);
 
 
     /**
@@ -336,6 +344,51 @@ public class LabOrderDataExchange {
     }
 
     /**
+     * Returns active vl orders which have not been added to any manifest
+     *
+     * @param manifestId
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    public Set<SimpleObject> getActiveFluOrdersNotInManifest(Integer manifestId, Date startDate, Date endDate) {
+        Context.addProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
+        Set<SimpleObject> activeLabs = new HashSet<SimpleObject>();
+        String sql = "select o.order_id from orders o\n" +
+                "left join kenyaemr_order_entry_lab_manifest_order mo on mo.order_id = o.order_id\n" +
+                "where o.order_action='NEW' and o.concept_id = 1000612 and o.date_stopped is null and o.voided=0 and mo.order_id is null ";
+
+        if (startDate != null && endDate != null) {
+            sql = sql + " and date(o.date_activated) between ':startDate' and ':endDate' ";
+            String pStartDate = Utils.getSimpleDateFormat("yyyy-MM-dd").format(startDate);
+            String pEndDate = Utils.getSimpleDateFormat("yyyy-MM-dd").format(endDate);
+
+            sql = sql.replace(":startDate", pStartDate);
+            sql = sql.replace(":endDate", pEndDate);
+        }
+        System.out.println("FLU Manifest: Now executing SQL: " + sql);
+        List<List<Object>> activeOrders = Context.getAdministrationService().executeSQL(sql, true);
+        if (!activeOrders.isEmpty()) {
+            System.out.println("FLU Manifest: We found FLU orders: " + activeOrders.size());
+            for (List<Object> res : activeOrders) {
+                Integer orderId = (Integer) res.get(0);
+                Order o = orderService.getOrder(orderId);
+                if (o != null) {
+                    SimpleObject ret = new SimpleObject();
+                    ret.put("hasProblem", checkIfOrderHasAProblem(o, LabManifest.FLU_TYPE));
+                    ret.put("order", o);
+                    activeLabs.add(ret);
+                }
+            }
+        } else {
+            System.out.println("FLU Manifest: We found no FLU orders");
+        }
+        Context.removeProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
+        System.out.println("FLU Manifest: Active Labs: " + activeLabs.size());
+        return activeLabs;
+    }
+
+    /**
      * Checks if an order has a problem that might prevent it from being added into a manifest
      * @param order - The lab sample order
      * @return true if there is a problem. false if there is no problem
@@ -389,6 +442,13 @@ public class LabOrderDataExchange {
                 // The current regimen must have a regimen line
                 return(true);
             }
+
+            // Check order reason
+            Concept cOrderReason = order.getOrderReason();
+            if(cOrderReason == null) {
+                // Order must have order reason
+                return(true);
+            }
         }
 
         if(orderType == LabManifest.EID_TYPE) {
@@ -408,18 +468,304 @@ public class LabOrderDataExchange {
                 return(true);
             }
 
+            // Check order reason
+            Concept cOrderReason = order.getOrderReason();
+            if(cOrderReason == null) {
+                // Order must have order reason
+                return(true);
+            }
         }
 
-        Concept cOrderReason = order.getOrderReason();
-        if(cOrderReason == null) {
-            // Order must have order reason
-            return(true);
+        if(orderType == LabManifest.FLU_TYPE) {
+
+            // Nothing to check here for now
         }
 
         // In this case, we are all ok
         return(ret);
     }
 
+    public Integer extractFLUOrderNumber(String fluPID) {
+        Integer ret = 0;
+        try {
+            Pattern pattern = Pattern.compile("\\d+$");
+            Matcher matcher = pattern.matcher(fluPID);
+            
+            if (matcher.find()) {
+                return Integer.parseInt(matcher.group());
+            } else {
+                System.err.println("FLU order manifest: No order number found in the input PID string");
+            }
+        } catch(Exception e) {}
+        return(ret);
+    }
+
+    /**
+     * processes FLU results from lab     *
+     *
+     * @param resultPayload this should be an object
+     * @return
+     */
+    public String processIncomingFLULabResults(String resultPayload) {
+
+        // Parse JSON string
+        JsonElement rootNode = JsonParser.parseString(resultPayload);
+
+        // Get the "data" array
+        JsonArray dataArray = rootNode.getAsJsonObject().getAsJsonArray("data");
+
+        // Create a map to store ANALYSIS strings and corresponding RESULT_VALUE strings
+        Map<String, SimpleObject> analysisMap = new HashMap<>();
+        String PID = "";
+
+        // Extract ANALYSIS strings and store them in the map
+        for (JsonElement dataElement : dataArray) {
+            try {
+                JsonObject dataObject = dataElement.getAsJsonObject();
+                PID = dataObject.get("PID_NUMBER").getAsString();
+                String analysis = dataObject.get("ANALYSIS").getAsString();
+                String resultValue = dataObject.get("RESULT_VALUE").getAsString();
+                String resultName = dataObject.get("RESULT_NAME").getAsString();
+                JsonObject dateTestedObject = dataObject.get("DATE_TESTED").getAsJsonObject();
+                Date dateTested = Utils.getSimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSSSS").parse(dateTestedObject.get("date").getAsString());
+
+                // If the analysis is already in the map, add the resultValue to its list
+                if (analysisMap.containsKey(analysis)) {
+                    SimpleObject load = analysisMap.get(analysis);
+                    String results = (String) load.get("result");
+                    if(resultName.toLowerCase().contains("ct")) {
+                        results = results + " | " + resultValue;
+                    } else {
+                        if(resultValue.trim().equalsIgnoreCase("POS")) {
+                            analysisMap.get(analysis).put("diagnosis", "positive");
+                        } else if(resultValue.trim().equalsIgnoreCase("NEG")) {
+                            analysisMap.get(analysis).put("diagnosis", "negative");
+                        }
+                        results = resultValue + " | " + results;
+                    }
+                    analysisMap.get(analysis).put("result", results);
+                } else {
+                    // Otherwise, create a new list for the analysis and add the resultValue
+                    SimpleObject resultList = new SimpleObject();
+                    resultList.put("pid", PID);
+                    resultList.put("datetested", dateTested);
+                    resultList.put("analysis", analysis);
+                    resultList.put("result", resultValue);
+                    if(!resultName.toLowerCase().contains("ct")) {
+                        if(resultValue.trim().equalsIgnoreCase("POS")) {
+                            resultList.put("diagnosis", "positive");
+                        } else if(resultValue.trim().equalsIgnoreCase("NEG")) {
+                            resultList.put("diagnosis", "negative");
+                        }
+                    }
+                    analysisMap.put(analysis, resultList);
+                }
+            } catch (Exception ex) {
+                System.err.println("Lab Results Get FLU Results: Unable to update order with results: Building results: " + ex.getMessage());
+                ex.printStackTrace();
+            }
+        }
+
+        // Working with PID
+        System.out.println("Lab Results Get FLU Results: Working with PID: " + PID);
+
+        // Extract order id
+        Integer mainOrderId = extractFLUOrderNumber(PID);
+        System.out.println("Lab Results Get FLU Results: Got order id as: " + mainOrderId);
+        Order mainOrder = orderService.getOrder(mainOrderId);
+
+        // New Encounter
+        Encounter enc = new Encounter();
+        enc.setEncounterType(labEncounterType);
+        enc.setPatient(mainOrder.getPatient());
+        enc.setCreator(Context.getUserService().getUser(1));
+        enc.setLocation(Utils.getDefaultLocation());
+
+        enc.setEncounterDatetime(aMomentBefore(new Date()));
+        encounterService.saveEncounter(enc);
+
+        // New Observation (Obs)
+        Obs mainObs = new Obs();
+        mainObs.setDateCreated(new Date());
+        mainObs.setCreator(Context.getUserService().getUser(1));
+        mainObs.setObsDatetime(mainOrder.getDateActivated());
+        mainObs.setPerson(mainOrder.getPatient());
+        mainObs.setOrder(mainOrder);
+        mainObs.setConcept(mainOrder.getConcept());
+        mainObs.setLocation(Utils.getDefaultLocation());
+        mainObs.setEncounter(enc);
+        mainObs.setValueText("test");
+        Context.getObsService().saveObs(mainObs, null);
+        enc.addObs(mainObs);
+        Set<Obs> allObs = enc.getAllObs();
+        System.out.println("All Obs in the encounter 1: " + allObs.size());
+
+        Integer orderId = -1;
+        Date sampleTestedDate = new Date();
+        String fullResult = "";
+
+        // Extract the data
+        for (Map.Entry<String, SimpleObject> entry : analysisMap.entrySet()) {
+            String analysis = entry.getKey();
+            SimpleObject resultValues = entry.getValue();
+
+            if (resultValues.size() > 1) {
+                try {
+                    orderId = extractFLUOrderNumber((String)resultValues.get("pid"));
+                    Date sampleReceivedDate = (Date) resultValues.get("datetested");
+                    sampleTestedDate = (Date) resultValues.get("datetested");
+                    String dateSampleReceived = "";
+                    String dateSampleTested = "";
+                    String batchNumber = "";
+                    String specimenRejectedReason = "";
+                    String analysisType = (String) resultValues.get("analysis");
+                    String diagnosisType = (String) resultValues.get("diagnosis");
+
+                    String specimenReceivedStatus = "OK";
+                    String result = (String) resultValues.get("result");
+                    fullResult = fullResult + " | " + result;
+
+                    System.out.println("Lab Results Get FLU Results: Order ID: " + orderId + ": result: " + result + " analysis: " + analysisType + " diagnosis: " + diagnosisType);
+
+                    updateFLUOrder(orderId, result, specimenReceivedStatus, specimenRejectedReason, sampleReceivedDate, sampleTestedDate, analysisType, diagnosisType, enc, mainObs);
+                } catch (Exception ex) {
+                    System.err.println("Lab Results Get FLU Results: Unable to update order with results : Updating Orders: " + ex.getMessage());
+                    ex.printStackTrace();
+                }
+            }
+        }
+
+        try {
+            if(orderId != -1) {
+                System.out.println("Lab Results Get FLU Results: Saving into DB");
+                
+                LabManifestOrder manifestOrder = kenyaemrOrdersService.getLabManifestOrderByOrderId(mainOrder);
+                Date orderDiscontinuationDate = null;
+                if (sampleTestedDate != null) {
+                    orderDiscontinuationDate = sampleTestedDate;
+                } else {
+                    orderDiscontinuationDate = aMomentBefore(new Date());
+                }
+
+                // Save encounter
+                // enc.setEncounterDatetime(orderDiscontinuationDate);
+                // Set<Obs> allObs2 = enc.getAllObs();
+                // System.out.println("All Obs in the encounter 3: " + allObs2.size());
+                // encounterService.saveEncounter(enc);
+
+                orderService.discontinueOrder(mainOrder, "Results received", orderDiscontinuationDate, mainOrder.getOrderer(), mainOrder.getEncounter());
+
+                manifestOrder.setStatus("Complete");
+                manifestOrder.setResult(fullResult);
+                manifestOrder.setResultDate(orderDiscontinuationDate);
+                if (sampleTestedDate != null) {
+                    manifestOrder.setSampleReceivedDate(sampleTestedDate);
+                }
+
+                if (sampleTestedDate != null) {
+                    manifestOrder.setSampleTestedDate(sampleTestedDate);
+                }
+                kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
+            }
+
+        } catch (Exception ex) {
+            System.err.println("Lab Results Get FLU Results: Unable to update order with results : Updating Orders: " + ex.getMessage());
+            ex.printStackTrace();
+        }
+
+        System.out.println("Lab Results Get Results: FLU results pulled and updated successfully in the database");
+        return "FLU results pulled and updated successfully in the database";
+    }
+
+    /**
+     * Updates an active order and sets results if provided
+     *
+     * @param orderId
+     * @param result
+     * @param specimenStatus
+     * @param specimenRejectedReason
+     */
+    private void updateFLUOrder(Integer orderId, String result, String specimenStatus, String specimenRejectedReason, Date dateSampleReceived, Date dateSampleTested, String analysisType, String diagnosisType, Encounter enc, Obs mainObs) {
+        Order od = orderService.getOrder(orderId);
+        LabManifestOrder manifestOrder = kenyaemrOrdersService.getLabManifestOrderByOrderId(od);
+
+        System.out.println("Order ID: " + od.getOrderId() + ", manifest order: " + manifestOrder.getId() + ", manifest id: " + manifestOrder.getLabManifest().getId() + ", isActive: " + od.isActive());
+
+        Date orderDiscontinuationDate = null;
+        if (dateSampleTested != null) {
+            orderDiscontinuationDate = dateSampleTested;
+        } else {
+            orderDiscontinuationDate = aMomentBefore(new Date());
+        }
+
+        if (od != null && od.isActive()) {
+
+            try {
+                enc.setEncounterDatetime(orderDiscontinuationDate);
+                enc.setPatient(od.getPatient());
+
+
+                Obs obs = new Obs();
+
+                if(analysisType.trim().equalsIgnoreCase("PCR_FLU_A")) {
+                    obs.setConcept(concept_PCR_FLU_A);
+                } else if(analysisType.trim().equalsIgnoreCase("PCR_FLU_B")) {
+                    obs.setConcept(concept_PCR_FLU_B);
+                } else if(analysisType.trim().equalsIgnoreCase("RNP")) {
+                    obs.setConcept(concept_RNP);
+                } else if(analysisType.trim().equalsIgnoreCase("RSV")) {
+                    obs.setConcept(concept_RSV);
+                } else if(analysisType.trim().equalsIgnoreCase("SARS_COV_2_M")) {
+                    obs.setConcept(concept_SARS_COV_2_M);
+                }
+                    
+                String stNegative = "negative";
+                String stPositive = "positive";
+
+                // If we get coded concepts, we set these
+                Concept negativeConcept = conceptService.getConcept(664);
+                Concept positiveConcept = conceptService.getConcept(703);
+
+                if (diagnosisType.equalsIgnoreCase(stNegative)) {
+                    obs.setValueCoded(negativeConcept);
+                } else if (diagnosisType.equalsIgnoreCase(stPositive)) {
+                    obs.setValueCoded(positiveConcept);
+                }
+
+                //If we have numeric concepts
+                // if (diagnosisType.equalsIgnoreCase(stNegative)) {
+                //     obs.setValueNumeric(0.0);
+                // } else if (diagnosisType.equalsIgnoreCase(stPositive)) {
+                //     obs.setValueNumeric(1.0);
+                // }
+
+                obs.setValueText(result);        
+                obs.setDateCreated(orderDiscontinuationDate);
+                obs.setCreator(Context.getUserService().getUser(1));
+                obs.setObsDatetime(od.getDateActivated());
+                obs.setPerson(od.getPatient());
+                obs.setOrder(od);
+                obs.setObsGroup(mainObs);
+                obs.setLocation(Utils.getDefaultLocation());
+                obs.setEncounter(enc);
+                Context.getObsService().saveObs(obs, null);
+
+                enc.addObs(obs);
+                Set<Obs> allObs = enc.getAllObs();
+                System.out.println("All Obs in the encounter 2: " + allObs.size());
+
+            } catch (Exception e) {
+                System.out.println("Lab Results Get Results: An error was encountered while updating orders for FLU");
+                e.printStackTrace();
+            }
+        } else /*if (!od.isActive() || od.getVoided())*/ {
+            manifestOrder.setStatus("Inactive");
+            manifestOrder.setResult(result);
+            manifestOrder.setResultDate(new Date());
+            kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
+        }
+
+    }
 
     /**
      * processes results from lab     *
