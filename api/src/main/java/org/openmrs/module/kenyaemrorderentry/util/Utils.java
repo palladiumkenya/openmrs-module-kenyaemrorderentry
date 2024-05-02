@@ -154,6 +154,9 @@ public class Utils {
                     return attr.getValueReference();
                 }
             }
+        } catch (Exception ex) {
+            System.err.println("Lab System getting location mfl code error: " + ex.getMessage());
+            ex.printStackTrace();
         } finally {
             Context.removeProxyPrivilege(PrivilegeConstants.GET_LOCATIONS);
             Context.removeProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
