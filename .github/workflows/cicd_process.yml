@@ -54,7 +54,7 @@ jobs:
           sudo rm -rf openmrs-module-kenyaemrorderentry
           sudo mkdir openmrs-module-kenyaemrorderentry
           sudo chown -R cicd:cicd openmrs-module-kenyaemrorderentry
-          git config --global --add safe.directory /apps/githubworkflows/kenyaemr-modules/openmrs-module-kenyaemrorderentr
+          git config --global --add safe.directory /apps/githubworkflows/kenyaemr-modules/openmrs-module-kenyaemrorderentry
           git clone -b master https://github.com/palladiumkenya/openmrs-module-kenyaemrorderentry.git .
           cd /apps/githubworkflows/kenyaemr-modules/openmrs-module-kenyaemrorderentry
           git status
