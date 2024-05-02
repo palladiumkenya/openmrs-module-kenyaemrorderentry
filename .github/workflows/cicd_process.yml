@@ -23,7 +23,7 @@ jobs:
           sudo chown -R cicd2:cicd2 openmrs-module-kenyaemrorderentry
           git config --global --add safe.directory /apps/github-workflows/kenyaemr-modules/openmrs-module-kenyaemrorderentry
           git clone -b 2.x https://github.com/palladiumkenya/openmrs-module-kenyaemr.git /apps/github-workflows/kenyaemr-modules/openmrs-module-kenyaemrorderentry
-           cd /apps/github-workflows/kenyaemr-modules/openmrs-module-kenyaemrorderentry
+          cd /apps/github-workflows/kenyaemr-modules/openmrs-module-kenyaemrorderentry
           sudo chown -R cicd2:cicd2 /apps/github-workflows/kenyaemr-modules/openmrs-module-kenyaemrorderentry
           git status
           mvn license:format
@@ -54,14 +54,14 @@ jobs:
           sudo rm -rf openmrs-module-kenyaemrorderentry
           sudo mkdir openmrs-module-kenyaemrorderentry
           sudo chown -R cicd:cicd openmrs-module-kenyaemrorderentry
-          git config --global --add safe.directory /apps/githubworkflows/kenyaemr-modules/openmrs-module-kenyaemrorderentry
-          cd /apps/githubworkflows/kenyaemr-modules/openmrs-module-kenyaemrorderentry
+          git config --global --add safe.directory /apps/githubworkflows/kenyaemr-modules/openmrs-module-kenyaemrorderentr
           git clone -b master https://github.com/palladiumkenya/openmrs-module-kenyaemrorderentry.git .
+          cd /apps/githubworkflows/kenyaemr-modules/openmrs-module-kenyaemrorderentry
           git status
           mvn license:format
           sudo mvn clean install -DskipTests
           sudo rm -rf /var/lib/OpenMRS/modules/kenyaemrorderentry-*.omod
-          sudo cp -r /apps/githubworkflows/kenyaemr-modules/openmrs-module-kenyaemrorderentry/omod/target/kenyaemrorderentry-*.omod/var/lib/OpenMRS/modules/
+          sudo cp -r /apps/githubworkflows/kenyaemr-modules/openmrs-module-kenyaemrorderentry/omod/target/kenyaemrorderentry-*.omod /var/lib/OpenMRS/modules/
           sudo chown -R tomcat:tomcat /var/lib/OpenMRS/modules/
           sudo chmod +r /var/lib/OpenMRS/modules/*.omod
           sudo chmod 755 /var/lib/OpenMRS/modules/*.omod
