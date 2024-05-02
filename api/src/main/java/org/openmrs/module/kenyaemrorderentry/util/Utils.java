@@ -115,17 +115,22 @@ public class Utils {
      * @return
      */
     public static Location getDefaultLocation() {
+        Location ret = null;
         try {
             Context.addProxyPrivilege(PrivilegeConstants.GET_LOCATIONS);
             Context.addProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
             String GP_DEFAULT_LOCATION = "kenyaemr.defaultLocation";
             GlobalProperty gp = Context.getAdministrationService().getGlobalPropertyObject(GP_DEFAULT_LOCATION);
-            return gp != null ? ((Location) gp.getValue()) : null;
+            Location location = Context.getLocationService().getLocation(Integer.valueOf((String)gp.getValue()));
+            return gp != null ? location : null;
+        } catch (Exception ex) {
+            System.err.println("Lab System getting location error: " + ex.getMessage());
+            ex.printStackTrace();
         } finally {
             Context.removeProxyPrivilege(PrivilegeConstants.GET_LOCATIONS);
             Context.removeProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
         }
-
+        return(ret);
     }
 
     /**
