@@ -1,6 +1,11 @@
 package org.openmrs.module.kenyaemrorderentry.labDataExchange;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import static org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange.getOrderReasonCode;
+
+import java.io.IOException;
+import java.util.Date;
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -10,6 +15,8 @@ import org.openmrs.Order;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
+import org.openmrs.PersonAddress;
+import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyacore.RegimenMappingUtils;
 import org.openmrs.module.kenyaemrorderentry.ModuleConstants;
@@ -18,14 +25,8 @@ import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 import org.openmrs.module.kenyaemrorderentry.util.Utils;
 import org.openmrs.module.metadatadeploy.MetadataUtils;
 import org.openmrs.ui.framework.SimpleObject;
-// import org.openmrs.module.kenyaemr.metadata.HivMetadata;
-import org.openmrs.api.AdministrationService;
 
-import java.io.IOException;
-import java.util.Date;
-import java.util.List;
-
-import static org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange.getOrderReasonCode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
  * A generic class for implementing system specific web requests
@@ -33,7 +34,7 @@ import static org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderData
 public abstract class LabWebRequest {
 
     protected static final Log log = LogFactory.getLog(LabWebRequest.class);
-    private Integer manifestType; // i.e VL or EID
+    private Integer manifestType; // i.e VL or EID or FLU
     private AdministrationService administrationService = Context.getAdministrationService();
     final String isKDoD = (administrationService.getGlobalProperty("kenyaemr.isKDoD"));
 
@@ -43,7 +44,7 @@ public abstract class LabWebRequest {
     public LabWebRequest(Integer orderType) {
         this.manifestType = orderType;
     }
-    public abstract boolean checkRequirements();
+    public abstract boolean checkRequirements(LabManifest toProcess);
 
     public abstract boolean postSamples(LabManifestOrder manifestOrder, String manifestStatus) throws IOException;
 
@@ -202,6 +203,27 @@ public abstract class LabWebRequest {
                 test.put("mother_ccc", Utils.getMothersUniquePatientNumber(patient) !=null ? Utils.getMothersUniquePatientNumber(patient) : "");
                 test.put("ccc_no",  cccNumber != null ? cccNumber.getIdentifier() : "");
             }
+        } else if (manifestType == LabManifest.FLU_TYPE) {
+            PersonAddress personAddress = patient.getPersonAddress();
+            Obs patientCountry = Utils.getLatestObs(patient, "165657AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+            String mfl = Utils.getDefaultLocationMflCode(Utils.getDefaultLocation());
+
+            test.put("PID_NUMBER", mfl + "-" + o.getOrderId().toString());
+            test.put("KEMRI_BARCODE", mfl + "-" + o.getOrderId().toString());
+            test.put("DATE_COLLECTED", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
+            test.put("SPECIMEN_TYPE", sampleType);
+            test.put("DOB", dob);
+            // test.put("NATIONALITY", personAddress.getCountry() != null ? personAddress.getCountry() : "");
+            test.put("NATIONALITY", (patientCountry != null && patientCountry.getValueCoded() != null) ? patientCountry.getValueCoded().getName().getName() : "");
+            test.put("COUNTY", personAddress.getCountyDistrict() != null ? personAddress.getCountyDistrict() : "");
+            test.put("LOCATION", personAddress.getStateProvince() != null ? personAddress.getStateProvince() : "");
+            test.put("VILLAGE_ESTATE",personAddress.getCityVillage() != null ? personAddress.getCityVillage() : "");
+            test.put("SEX", patient.getGender());
+            test.put("CASE_TYPE","SARI");
+            test.put("FACILITY_CODE", mfl);
+            test.put("ILI_SARI","SARI");
+            //patient ID
+            test.put("OP_IP", patient.getPatientId().toString());
         }
 
         return test;

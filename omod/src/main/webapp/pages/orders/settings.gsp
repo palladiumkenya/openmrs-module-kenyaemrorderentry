@@ -101,11 +101,34 @@
                         <td>${ VLPushURL }</td>
                     </tr>
                     <tr>
+                        <td class="table-primary" colspan="2"><p class="fw-bold">FLU:</p></td>
+                    </tr>
+                    <tr>
+                        <td>FLU Enabled (${ gpEnableFLUFunction }):</td>
+                        <td>${ EnableFLUFunction }</td>
+                    </tr>
+                    <tr>
+                        <td>TOKEN (${ gpFLUToken }):</td>
+                        <td>${ FLUToken }</td>
+                    </tr>
+                    <tr>
+                        <td>PULL URL (${ gpFLUPullURL }):</td>
+                        <td>${ FLUPullURL }</td>
+                    </tr>
+                    <tr>
+                        <td>PUSH URL (${ gpFLUPushURL }):</td>
+                        <td>${ FLUPushURL }</td>
+                    </tr>
+                    <tr>
                         <td class="table-primary" colspan="2"><p class="fw-bold">COMMS:</p></td>
                     </tr>
                     <tr>
                         <td>Local Endpoint (${ gpLocalResultEndpoint }):</td>
                         <td>${ LocalResultEndpoint }</td>
+                    </tr>
+                    <tr>
+                        <td>Local FLU Endpoint (${ gpLocalFLUResultEndpoint }):</td>
+                        <td>${ LocalFLUResultEndpoint }</td>
                     </tr>
                     <tr>
                         <td>Endpoint User Name (${ gpSchedulerUsername }):</td>
@@ -251,11 +274,49 @@
                                 </div>
                             </div>
 
+                            <div class="mb-3 form-check">
+                                    <label class="form-check-label" for="chkFLUEnabled">FLU Enabled</label>
+                                    <input type="checkbox" class="form-check-input" id="chkFLUEnabled" aria-describedby="chkFLUEnabledHelp" <% if (EnableFLUFunction == 'true') {%> checked <% } %> >
+                                    <div id="chkFLUEnabledHelp" class="form-text">Enable/Disable FLU</div>
+                            </div>
+
+                            <div class="mb-3 row">
+                                <label for="txtFLUToken" class="col-sm-2 col-form-label">FLU TOKEN</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" id="txtFLUToken" aria-describedby="fluTokenHelp" value="${ FLUToken }">
+                                    <div id="fluTokenHelp" class="form-text">The FLU Token</div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3 row">
+                                <label for="txtFLUPullURL" class="col-sm-2 col-form-label">FLU Pull URL</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" id="txtFLUPullURL" aria-describedby="fluPullURLHelp" value="${ FLUPullURL }">
+                                    <div id="fluPullURLHelp" class="form-text">The FLU Pull URL</div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3 row">
+                                <label for="txtFLUPushURL" class="col-sm-2 col-form-label">FLU Push URL</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" id="txtFLUPushURL" aria-describedby="fluPushURLHelp" value="${ FLUPushURL }">
+                                    <div id="fluPushURLHelp" class="form-text">The FLU Push URL</div>
+                                </div>
+                            </div>
+
                             <div class="mb-3 row">
                                 <label for="txtLocalResultEndpoint" class="col-sm-2 col-form-label">Local Result Endpoint</label>
                                 <div class="col-sm-10">
                                     <input type="text" class="form-control" id="txtLocalResultEndpoint" aria-describedby="LocalResultEndpointHelp" value="${ LocalResultEndpoint }">
                                     <div id="LocalResultEndpointHelp" class="form-text">The Local Result Endpoint</div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3 row">
+                                <label for="txtLocalFLUResultEndpoint" class="col-sm-2 col-form-label">Local FLU Result Endpoint</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" id="txtLocalFLUResultEndpoint" aria-describedby="LocalFLUResultEndpointHelp" value="${ LocalFLUResultEndpoint }">
+                                    <div id="LocalFLUResultEndpointHelp" class="form-text">The Local FLU Result Endpoint</div>
                                 </div>
                             </div>
 
@@ -380,18 +441,33 @@
                 return(false);
             }
 
-            // EID Enabled
+            // EID/FLU Enabled
             var chkEIDEnabled = jq("#chkEIDEnabled").val();
+            var chkFLUEnabled = jq("#chkFLUEnabled").val();
             console.log("EID enabled? : " + chkEIDEnabled);
+            console.log("FLU enabled? : " + chkFLUEnabled);
 
             var txtEIDToken = jq("#txtEIDToken").val();
             var txtEIDPullURL = jq("#txtEIDPullURL").val();
             var txtEIDPushURL = jq("#txtEIDPushURL").val();
 
+            var txtFLUToken = jq("#txtFLUToken").val();
+            var txtFLUPullURL = jq("#txtFLUPullURL").val();
+            var txtFLUPushURL = jq("#txtFLUPushURL").val();
+
             if(chkEIDEnabled == "on") {
                 if( checkVarIfEmptyOrNull(txtEIDToken) == false || checkVarIfEmptyOrNull(txtEIDPullURL) == false || checkVarIfEmptyOrNull(txtEIDPushURL) == false ) { 
                     console.log("EID is selected but no EID token and URLs given : " + chkEIDEnabled);
-                    jq("#systemTypeError").text('Please select the system type.');
+                    jq("#systemTypeError").text('EID is selected but no EID token and URLs given');
+                    jq("#systemTypeError").addClass('isinvalid');
+                    return(false);
+                }
+            }
+
+            if(chkFLUEnabled == "on") {
+                if( checkVarIfEmptyOrNull(txtFLUToken) == false || checkVarIfEmptyOrNull(txtFLUPullURL) == false || checkVarIfEmptyOrNull(txtFLUPushURL) == false ) { 
+                    console.log("FLU is selected but no FLU token and URLs given : " + chkFLUEnabled);
+                    jq("#systemTypeError").text('FLU is selected but no FLU token and URLs given');
                     jq("#systemTypeError").addClass('isinvalid');
                     return(false);
                 }
@@ -405,6 +481,13 @@
             if( checkVarIfEmptyOrNull(txtLocalResultEndpoint) == false ) { 
                 console.log("Local Result Endpoint cannot be empty");
                 jq("#systemTypeError").text('Local result endpoint cannot be empty.');
+                jq("#systemTypeError").addClass('isinvalid');
+                return(false);
+            }
+            var txtLocalFLUResultEndpoint = jq("#txtLocalFLUResultEndpoint").val();
+            if( checkVarIfEmptyOrNull(txtLocalFLUResultEndpoint) == false ) { 
+                console.log("Local FLU Result Endpoint cannot be empty");
+                jq("#systemTypeError").text('Local FLU result endpoint cannot be empty.');
                 jq("#systemTypeError").addClass('isinvalid');
                 return(false);
             }
@@ -499,7 +582,12 @@
                     txtVLToken : jq("#txtVLToken").val().trim(),
                     txtVLPullURL : jq("#txtVLPullURL").val().trim(),
                     txtVLPushURL : jq("#txtVLPushURL").val().trim(),
+                    chkFLUEnabled : jq("#chkFLUEnabled").val().trim(),
+                    txtFLUToken : jq("#txtFLUToken").val().trim(),
+                    txtFLUPullURL : jq("#txtFLUPullURL").val().trim(),
+                    txtFLUPushURL : jq("#txtFLUPushURL").val().trim(),
                     txtLocalResultEndpoint : jq("#txtLocalResultEndpoint").val().trim(),
+                    txtLocalFLUResultEndpoint : jq("#txtLocalFLUResultEndpoint").val().trim(),
                     txtSchedulerUsername : jq("#txtSchedulerUsername").val().trim(),
                     txtSchedulerPassword : jq("#txtSchedulerPassword").val().trim(),
                     chkSSLVerificationEnabled : jq("#chkSSLVerificationEnabled").val().trim(),
