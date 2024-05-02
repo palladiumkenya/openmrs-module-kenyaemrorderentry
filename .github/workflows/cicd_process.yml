@@ -22,8 +22,8 @@ jobs:
           sudo mkdir openmrs-module-kenyaemrorderentry
           sudo chown -R cicd2:cicd2 openmrs-module-kenyaemrorderentry
           git config --global --add safe.directory /apps/github-workflows/kenyaemr-modules/openmrs-module-kenyaemrorderentry
-          git clone -b 2.x https://github.com/palladiumkenya/openmrs-module-kenyaemr.git /apps/github-workflows/kenyaemr-modules/openmrs-module-kenyaemrorderentry
           cd /apps/github-workflows/kenyaemr-modules/openmrs-module-kenyaemrorderentry
+          git clone -b 2.x https://github.com/palladiumkenya/openmrs-module-kenyaemr.git /apps/github-workflows/kenyaemr-modules/openmrs-module-kenyaemrorderentry
           sudo chown -R cicd2:cicd2 /apps/github-workflows/kenyaemr-modules/openmrs-module-kenyaemrorderentry
           git status
           mvn license:format
