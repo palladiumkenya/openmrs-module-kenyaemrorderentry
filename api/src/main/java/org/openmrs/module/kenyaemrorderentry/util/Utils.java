@@ -152,7 +152,7 @@ public class Utils {
             Context.addProxyPrivilege(PrivilegeConstants.GET_LOCATIONS);
             Context.addProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
             for (LocationAttribute attr : location.getAttributes()) {
-                if (attr.getAttributeType().getUuid().equals(MASTER_FACILITY_CODE) && !attr.isVoided()) {
+                if (attr.getAttributeType().getUuid().equals(MASTER_FACILITY_CODE) && !attr.getVoided()) {
                     return attr.getValueReference();
                 }
             }
