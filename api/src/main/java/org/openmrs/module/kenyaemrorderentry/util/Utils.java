@@ -121,8 +121,10 @@ public class Utils {
             Context.addProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
             String GP_DEFAULT_LOCATION = "kenyaemr.defaultLocation";
             GlobalProperty gp = Context.getAdministrationService().getGlobalPropertyObject(GP_DEFAULT_LOCATION);
-            Location location = Context.getLocationService().getLocation(Integer.valueOf((String)gp.getValue()));
-            return gp != null ? location : null;
+            if(gp != null) {
+                Location location = (Location) gp.getValue();
+                ret = location;
+            }
         } catch (Exception ex) {
             System.err.println("Lab System getting location error: " + ex.getMessage());
             ex.printStackTrace();
@@ -150,10 +152,13 @@ public class Utils {
             Context.addProxyPrivilege(PrivilegeConstants.GET_LOCATIONS);
             Context.addProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
             for (LocationAttribute attr : location.getAttributes()) {
-                if (attr.getAttributeType().getUuid().equals(MASTER_FACILITY_CODE) && !attr.isVoided()) {
+                if (attr.getAttributeType().getUuid().equals(MASTER_FACILITY_CODE) && !attr.getVoided()) {
                     return attr.getValueReference();
                 }
             }
+        } catch (Exception ex) {
+            System.err.println("Lab System getting location mfl code error: " + ex.getMessage());
+            ex.printStackTrace();
         } finally {
             Context.removeProxyPrivilege(PrivilegeConstants.GET_LOCATIONS);
             Context.removeProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
