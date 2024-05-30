@@ -102,7 +102,7 @@
                             <tr>
                                 <th class="selectColumn"><input type="checkbox" class="selectManifestElement" id="selectManifestAll" value="selectManifestAll"></th>
                                 <th class="nameColumn">Patient Name</th>
-                                <% if (manifest.manifestType == 2) { %>
+                                <% if (manifest.manifestType == 2 || manifest.manifestType == 3) { %>
                                     <th class="cccNumberColumn">CCC/KDOD Number</th>
                                 <% } else { %>
                                     <th class="cccNumberColumn">HEI Number</th>
@@ -125,7 +125,7 @@
                                 <tr>
                                     <td class="selectManifestColumn"><input type="checkbox" class="selectManifestElement" value="${o.id}"></td>
                                     <td class="nameColumn"><a href="${ ui.pageLink("kenyaemr", "chart/chartViewPatient", [ patientId: o.order.patient.id ]) }">${o.order.patient.givenName} ${o.order.patient.familyName} ${o.order.patient.middleName ?: ""}</a></td>
-                                    <% if (manifest.manifestType == 2) { %>
+                                    <% if (manifest.manifestType == 2 || manifest.manifestType == 3) { %>
                                         <td class="cccNumberColumn">${o.order.patient.getPatientIdentifier(cccNumberType)}</td>
                                     <% } else { %>
                                         <td class="cccNumberColumn">${o.order.patient.getPatientIdentifier(heiNumberType)}</td>
@@ -169,7 +169,7 @@
                             <tr>
                                 <th class="selectColumn"><input type="checkbox" class="selectGeneralElement" id="selectAll" value="selectAll"></th>
                                 <th class="nameColumn">Patient Name</th>
-                                <% if (manifest.manifestType == 2) { %>
+                                <% if (manifest.manifestType == 2 || manifest.manifestType == 3) { %>
                                     <th class="cccNumberColumn">CCC/KDOD Number</th>
                                 <% } else { %>
                                     <th class="cccNumberColumn">HEI Number</th>
@@ -218,6 +218,24 @@
                                 </tr>
                                 <% } %>
                             <% } %>
+                            <% if (manifest.manifestType == 3) { %>
+                                    <% eligibleFLUOrders.each { load -> %>
+                                        <tr>
+                                            <td class="selectColumn"><input type="checkbox" class="selectGeneralElement" value=${load.order.id}></td>
+                                            <td class="nameColumn"> <a href="${ ui.pageLink("kenyaemr", "clinician/clinicianViewPatient", [ patientId: load.order.patient.id ]) }"> ${load.order.patient.givenName} ${load.order.patient.familyName} ${load.order.patient.middleName ?: ""} </a></td>
+                                            <td class="cccNumberColumn">${load.order.patient.getPatientIdentifier(cccNumberType)}</td>
+                                            <td class="dateRequestColumn">${kenyaui.formatDate(load.order.dateActivated)}</td>
+                                            <td class="actionColumn">
+                                                <% if( load.hasProblem == false ) { %>
+                                                    <button class="addOrderToManifest" style="background-color: cadetblue; color: white" value="od_${load.order.orderId}" data-target="#updateSampleDetails">Add to manifest</button>
+                                                <% } else { %>
+                                                    <span style="color: red" id="warning_${load.order.orderId}"> Warning: Patient requires CCC/KDOD No. and Regimen Line. Check Order reason. Check lab system configured (CHAI, LABWARE ..) </span>
+                                                <% } %>
+                                            </td>
+                                            <td><span style="color: red" id="alert_${load.order.orderId}"></span></td>
+                                        </tr>
+                                    <% } %>
+                            <% } %>
                         </tbody>
                     </table>
 
@@ -251,6 +269,10 @@
                                             <option value="Whole Blood">Whole Blood</option>
                                         <% } else if(manifest.manifestType == 1) {%>
                                             <option value="DBS">DBS</option>
+                                        <% } else if(manifest.manifestType == 3) {%>
+                                            <option value="Nasal Swab">Nasal Swab</option>
+                                            <option value="NP">NP</option>
+                                            <option value="OP">OP</option>
                                         <% } %>
                                     </select>
                                 </td>
@@ -295,6 +317,10 @@
                                             <option value="Whole Blood">Whole Blood</option>
                                         <% } else if(manifest.manifestType == 1) {%>
                                             <option value="DBS">DBS</option>
+                                        <% } else if(manifest.manifestType == 3) {%>
+                                            <option value="Nasal Swab">Nasal Swab</option>
+                                            <option value="NP">NP</option>
+                                            <option value="OP">OP</option>
                                         <% } %>
                                     </select>
                                 </td>
@@ -399,6 +425,9 @@
     } else if(manifestType == 2) {
         // VL manifest
         generalOrderRecords = ${ VLOrders };
+    } else if(manifestType == 3) {
+        // FLU manifest
+        generalOrderRecords = ${ FLUOrders };
     }
 
     //On ready
@@ -417,6 +446,8 @@
             eligibleOrdersToInsert = ${ EIDOrders };
         } else if(manifestType == 2) {
             eligibleOrdersToInsert = ${ VLOrders };
+        } else if(manifestType == 3) {
+            eligibleOrdersToInsert = ${ FLUOrders };
         }
 
         //Bulk add all orders
@@ -430,6 +461,8 @@
                 sampleType = "Whole Blood";
             } else if(manifestType == 1) {
                 sampleType = "DBS";
+            } else if(manifestType == 3) {
+                sampleType = "Nasal Swab";
             }
             //loop through the orders
             for (var i = 0; i < eligibleOrdersToInsert.length; i++) {
