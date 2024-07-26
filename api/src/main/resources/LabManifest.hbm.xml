@@ -29,6 +29,11 @@
         <property name="labPocPhoneNumber" type="java.lang.String" column="lab_poc_phone_number" length="255"/>
         <property name="manifestType" type="java.lang.Integer" column="manifest_type"/>
 
+        <set name="labManifestOrders" table="kenyaemr_order_entry_lab_manifest_order" lazy="false" inverse="true" cascade="all-delete-orphan">
+			<key column="manifest_id" />
+			<one-to-many class="org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder" />
+		</set>
+
         <!-- bi-directional many-to-one association to User -->
         <many-to-one name="creator" class="org.openmrs.User" not-null="true">
         <column name="creator" />

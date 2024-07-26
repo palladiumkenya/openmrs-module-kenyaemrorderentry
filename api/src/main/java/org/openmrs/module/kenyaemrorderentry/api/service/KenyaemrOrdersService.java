@@ -3,6 +3,8 @@ package org.openmrs.module.kenyaemrorderentry.api.service;
 import org.openmrs.Cohort;
 import org.openmrs.Order;
 import org.openmrs.api.OpenmrsService;
+import org.openmrs.module.kenyaemrorderentry.api.search.ManifestSearch;
+import org.openmrs.module.kenyaemrorderentry.api.search.PagingInfo;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 import org.openmrs.module.reporting.common.DurationUnit;
@@ -21,6 +23,7 @@ public interface KenyaemrOrdersService extends OpenmrsService {
     LabManifest getLabOrderManifestById(Integer id);
     
     LabManifest getLabManifestById(Integer manId);
+    LabManifest getLabManifestByUUID(String manUUID);
     String getLabManifestStatusByIdSQL(Integer manID);
     List<SimpleObject> getLabManifestSummaryGraphSQL();
 
@@ -31,10 +34,13 @@ public interface KenyaemrOrdersService extends OpenmrsService {
     List<LabManifest> getLabOrderManifestBetweenDates(Date startDate, Date endDate);
     void voidLabOrderManifest(Integer id);
 
+    List<LabManifest> getLabManifests(String uuid, String status, String type, Date createdOnOrAfterDate, Date createdOnOrBeforeDate);
+
     //Methods for manifest orders
     LabManifestOrder saveLabManifestOrder(LabManifestOrder labManifestOrder);
     List<LabManifestOrder> getLabManifestOrders();
     LabManifestOrder getLabManifestOrderById(Integer id);
+    LabManifestOrder getLabManifestOrderByUUID(String UUID);
     LabManifestOrder getLabManifestOrderByOrderType(Integer orderType);
     List<LabManifestOrder> getLabManifestOrderByManifest(LabManifest labManifestOrder);
     void voidLabManifestOrder(Integer manifestOrder);

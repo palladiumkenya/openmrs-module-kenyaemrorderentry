@@ -7,6 +7,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.ParameterExpression;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+
 import java.util.ArrayList;
 import java.math.BigInteger;
 
@@ -16,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.CacheMode;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
@@ -25,6 +34,7 @@ import org.openmrs.Order;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.db.DAOException;
 import org.openmrs.module.kenyaemrorderentry.api.db.KenyaemrOrdersDAO;
+import org.openmrs.module.kenyaemrorderentry.api.search.ManifestSearch;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 import org.openmrs.module.reporting.common.DurationUnit;
@@ -85,6 +95,28 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
         Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifest.class);
         criteria.add(Restrictions.eq("id", manID));
         return (LabManifest) criteria.uniqueResult();
+    }
+
+    @Override
+    public LabManifest getLabManifestByUUID(String manUUID) throws DataException {
+        Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LabManifest.class);
+        criteria.add(Restrictions.eq("uuid", manUUID));
+        return (LabManifest) criteria.uniqueResult();
+    }
+
+    @Override
+    public LabManifestOrder getLabManifestOrderByUUID(String UUID) throws DataException {
+        Session session = this.sessionFactory.getCurrentSession();
+        CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
+        CriteriaQuery<LabManifestOrder> criteriaQuery = criteriaBuilder.createQuery(LabManifestOrder.class);
+        Root<LabManifestOrder> root = criteriaQuery.from(LabManifestOrder.class);
+
+        // Create a predicate for the restriction
+        Predicate uuidRestriction = criteriaBuilder.equal(root.get("uuid"), UUID);
+        criteriaQuery.where(uuidRestriction);
+
+        LabManifestOrder result = session.createQuery(criteriaQuery).getSingleResult();
+        return(result);
     }
 
     @Override
@@ -808,5 +840,54 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
 
         return(count);
     }
+
+    @Override
+	public List<LabManifest> getLabManifests(String uuid, String status, String type, Date createdOnOrAfterDate, Date createdOnOrBeforeDate) {
+		System.err.println("Searching for manifests using: " + uuid + " : " + status + " : " + type + " : " + createdOnOrAfterDate + " : " + createdOnOrBeforeDate + " : ");
+
+        Session session = this.sessionFactory.getCurrentSession();
+        CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
+        CriteriaQuery<LabManifest> criteriaQuery = criteriaBuilder.createQuery(LabManifest.class);
+        Root<LabManifest> root = criteriaQuery.from(LabManifest.class);
+
+        // Create predicates for the restrictions
+        Predicate predicate = criteriaBuilder.conjunction();
+
+        // uuid
+        if(uuid != null && !uuid.isEmpty()) {
+            predicate = criteriaBuilder.and(predicate, criteriaBuilder.equal(root.get("uuid"), uuid));
+            
+        }
+
+        // status
+        if(status != null && !status.isEmpty()) {
+            predicate = criteriaBuilder.and(predicate, criteriaBuilder.equal(root.get("status"), status));
+        }
+
+        // type
+        if(type != null && !type.isEmpty()) {
+            predicate = criteriaBuilder.and(predicate, criteriaBuilder.equal(root.get("type"), type));
+        }
+
+        // createdOnOrAfterDate
+        if(createdOnOrAfterDate != null) {
+            Path<Date> datePath = root.get("dateCreated");
+
+            predicate = criteriaBuilder.and(predicate, criteriaBuilder.greaterThanOrEqualTo(datePath, createdOnOrAfterDate));
+        }
+
+        // createdOnOrBeforeDate
+        if(createdOnOrBeforeDate != null) {
+            Path<Date> datePath = root.get("dateCreated");
+
+            predicate = criteriaBuilder.and(predicate, criteriaBuilder.lessThanOrEqualTo(datePath, createdOnOrBeforeDate));
+        }
+
+        criteriaQuery.where(predicate);
+
+        List<LabManifest> results = session.createQuery(criteriaQuery).getResultList();
+
+        return(results);
+	}
 
 }
