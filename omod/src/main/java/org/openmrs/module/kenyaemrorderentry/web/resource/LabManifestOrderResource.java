@@ -41,6 +41,7 @@ public class LabManifestOrderResource extends DataDelegatingCrudResource<LabMani
 
     @Override
     public LabManifestOrder save(LabManifestOrder labManifestOrder) {
+        System.out.println("Saving a new manifest order: " + labManifestOrder.toString());
         return Context.getService(KenyaemrOrdersService.class).saveLabManifestOrder(labManifestOrder);
     }
 
@@ -81,8 +82,8 @@ public class LabManifestOrderResource extends DataDelegatingCrudResource<LabMani
             DelegatingResourceDescription description = new DelegatingResourceDescription();
             description.addProperty("uuid");
             description.addProperty("id");
-            description.addProperty("labManifest", Representation.FULL);
-            description.addProperty("order", Representation.FULL);
+            description.addProperty("labManifest", Representation.REF);
+            description.addProperty("order", Representation.REF);
             description.addProperty("sampleType");
             description.addProperty("payload");
             description.addProperty("dateSent");
@@ -119,6 +120,19 @@ public class LabManifestOrderResource extends DataDelegatingCrudResource<LabMani
     @Override
     protected PageableResult doGetAll(RequestContext context) {
         return new NeedsPaging<LabManifestOrder>(Context.getService(KenyaemrOrdersService.class).getLabManifestOrders(), context);
+    }
+
+    @Override
+    public DelegatingResourceDescription getCreatableProperties() {
+        DelegatingResourceDescription description = new DelegatingResourceDescription();
+        description.addProperty("sampleType");
+        description.addProperty("sampleCollectionDate");
+        description.addProperty("sampleSeparationDate");
+        description.addProperty("order");
+        description.addProperty("labManifest");
+        description.addProperty("payload");
+        description.addProperty("status");
+        return description;
     }
 
 }

@@ -1,24 +1,18 @@
 package org.openmrs.module.kenyaemrorderentry.api.db.hibernate;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.ParameterExpression;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-import java.util.ArrayList;
-import java.math.BigInteger;
-
-import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.CacheMode;
@@ -34,15 +28,12 @@ import org.openmrs.Order;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.db.DAOException;
 import org.openmrs.module.kenyaemrorderentry.api.db.KenyaemrOrdersDAO;
-import org.openmrs.module.kenyaemrorderentry.api.search.ManifestSearch;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
+import org.openmrs.module.kenyaemrorderentry.util.Utils;
 import org.openmrs.module.reporting.common.DurationUnit;
 import org.openmrs.ui.framework.SimpleObject;
 import org.openmrs.util.PrivilegeConstants;
-import org.springframework.transaction.annotation.Transactional;
-
-import org.openmrs.module.kenyaemrorderentry.util.Utils;
 
 public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
     protected final Log log = LogFactory.getLog(this.getClass());
