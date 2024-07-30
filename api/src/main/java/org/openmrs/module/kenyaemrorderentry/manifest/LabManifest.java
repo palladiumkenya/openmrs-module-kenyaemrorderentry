@@ -4,6 +4,8 @@ import org.openmrs.BaseOpenmrsData;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -27,6 +29,7 @@ public class LabManifest extends BaseOpenmrsData implements Serializable {
     private String labPocPhoneNumber;
     private Integer manifestType;
     private String uuid;
+    private Set<LabManifestOrder> labManifestOrders;
 
     //Manifest Type and Order Type
     public static final int EID_TYPE = 1;
@@ -83,6 +86,14 @@ public class LabManifest extends BaseOpenmrsData implements Serializable {
 
     public Date getDispatchDate() {
         return dispatchDate;
+    }
+
+    public Set<LabManifestOrder> getLabManifestOrders() {
+        return labManifestOrders;
+    }
+
+    public void setLabManifestOrders(Set<LabManifestOrder> labManifestOrders) {
+        this.labManifestOrders = labManifestOrders;
     }
 
     public void setDispatchDate(Date dispatchDate) {

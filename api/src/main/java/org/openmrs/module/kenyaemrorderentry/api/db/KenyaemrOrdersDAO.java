@@ -2,6 +2,7 @@ package org.openmrs.module.kenyaemrorderentry.api.db;
 
 import org.openmrs.Cohort;
 import org.openmrs.Order;
+import org.openmrs.module.kenyaemrorderentry.api.search.ManifestSearch;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 import org.openmrs.module.reporting.common.DurationUnit;
@@ -20,6 +21,10 @@ public interface KenyaemrOrdersDAO {
     LabManifest getLabOrderManifestById(Integer id);
 
     LabManifest getLabManifestById(Integer manID);
+
+    LabManifest getLabManifestByUUID(String manUUID);
+
+    LabManifestOrder getLabManifestOrderByUUID(String UUID);
 
     String getLabManifestStatusByIdSQL(Integer manID);
 
@@ -104,5 +109,7 @@ public interface KenyaemrOrdersDAO {
     Long countTotalErrorsOnCompleteManifests();
 
     void reprocessLabManifest(Integer manifestId);
+
+    List<LabManifest> getLabManifests(String uuid, String status, String type, Date createdOnOrAfterDate, Date createdOnOrBeforeDate);
     //End of Patient Contact dimensions methods
 }

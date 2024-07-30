@@ -2,10 +2,15 @@ package org.openmrs.module.kenyaemrorderentry.api.service.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.Criteria;
 import org.openmrs.Cohort;
+import org.openmrs.OpenmrsObject;
 import org.openmrs.Order;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.kenyaemrorderentry.api.db.hibernate.HibernateKenyaemrOrdersDAO;
+import org.openmrs.module.kenyaemrorderentry.api.search.Action;
+import org.openmrs.module.kenyaemrorderentry.api.search.ManifestSearch;
+import org.openmrs.module.kenyaemrorderentry.api.search.PagingInfo;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
@@ -120,6 +125,12 @@ public class KenyaemrOrdersServiceImpl extends BaseOpenmrsService implements Ken
 
     @Override
     @Transactional(readOnly = true)
+    public LabManifest getLabManifestByUUID(String manUUID) {
+        return dao.getLabManifestByUUID(manUUID);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public String getLabManifestStatusByIdSQL(Integer manID) {
         return dao.getLabManifestStatusByIdSQL(manID);
     }
@@ -180,6 +191,12 @@ public class KenyaemrOrdersServiceImpl extends BaseOpenmrsService implements Ken
     @Transactional(readOnly = true)
     public LabManifestOrder getLabManifestOrderById(Integer id) {
         return dao.getLabManifestOrderById(id);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public LabManifestOrder getLabManifestOrderByUUID(String UUID) {
+        return dao.getLabManifestOrderByUUID(UUID);
     }
 
     @Override
@@ -437,4 +454,10 @@ public class KenyaemrOrdersServiceImpl extends BaseOpenmrsService implements Ken
     public List<SimpleObject> getLabManifestSummaryGraphSQL() {
         return dao.getLabManifestSummaryGraphSQL();
     }
+
+	@Override
+	public List<LabManifest> getLabManifests(String uuid, String status, String type, Date createdOnOrAfterDate, Date createdOnOrBeforeDate) {
+        return dao.getLabManifests(uuid, status, type, createdOnOrAfterDate, createdOnOrBeforeDate);
+	}
+
 }
