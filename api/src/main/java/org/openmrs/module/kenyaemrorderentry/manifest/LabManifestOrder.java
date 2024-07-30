@@ -210,12 +210,13 @@ public class LabManifestOrder extends BaseOpenmrsData implements Serializable {
 
     @Override
     public String toString() {
-        return "LabManifestOrder{" +
-                "id=" + id +
-                ", sampleType='" + sampleType + '\'' +
-                ", status='" + status + '\'' +
-                ", result='" + result + '\'' +
-                ", lastStatusCheckDate=" + lastStatusCheckDate +
-                '}';
+        return "LabManifestOrder [id=" + id + ", labManifest=" + labManifest + ", order=" + order + ", sampleType="
+                + sampleType + ", payload=" + payload + ", dateSent=" + dateSent + ", status=" + status + ", result="
+                + result + ", resultDate=" + resultDate + ", sampleCollectionDate=" + sampleCollectionDate
+                + ", sampleSeparationDate=" + sampleSeparationDate + ", lastStatusCheckDate=" + lastStatusCheckDate
+                + ", sampleReceivedDate=" + sampleReceivedDate + ", sampleTestedDate=" + sampleTestedDate
+                + ", resultsPulledDate=" + resultsPulledDate + ", resultsDispatchDate=" + resultsDispatchDate
+                + ", uuid=" + uuid + ", orderType=" + orderType + ", batchNumber=" + batchNumber + "]";
     }
+
 }

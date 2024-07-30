@@ -2,7 +2,6 @@ package org.openmrs.module.kenyaemrorderentry.api.db;
 
 import org.openmrs.Cohort;
 import org.openmrs.Order;
-import org.openmrs.module.kenyaemrorderentry.api.search.ManifestSearch;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 import org.openmrs.module.reporting.common.DurationUnit;

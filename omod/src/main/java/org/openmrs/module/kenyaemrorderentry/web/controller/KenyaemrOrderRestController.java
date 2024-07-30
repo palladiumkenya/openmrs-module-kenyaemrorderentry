@@ -1,10 +1,14 @@
 package org.openmrs.module.kenyaemrorderentry.web.controller;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Order;
+import org.openmrs.Patient;
+import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.api.AdministrationService;
+import org.openmrs.api.PersonService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange;
@@ -92,98 +96,83 @@ public class KenyaemrOrderRestController extends BaseRestController {
     @RequestMapping(method = RequestMethod.GET, value = "/validorders") // gets all visit forms for a patient
     @ResponseBody
     public Object getValidOrdersForManifest(HttpServletRequest request, @RequestParam("manifestUuid") String manifestUuid) {
-        Set<SimpleObject> activeVlOrdersNotInManifest = new HashSet<SimpleObject>();
-        Set<SimpleObject> activeEidOrdersNotInManifest = new HashSet<SimpleObject>();
-        Set<SimpleObject> activeFluOrdersNotInManifest = new HashSet<SimpleObject>();
-
+        Set<SimpleObject> activeOrdersNotInManifest = new HashSet<SimpleObject>();
         LabManifest labManifest = Context.getService(KenyaemrOrdersService.class).getLabManifestByUUID(manifestUuid);
+        PersonService personService = Context.getPersonService();
 
         // Is DOD
         AdministrationService administrationService = Context.getAdministrationService();
         final String isKDoD = (administrationService.getGlobalProperty("kenyaemr.isKDoD"));
 
-        List<LabManifestOrder> allOrdersForManifest = Context.getService(KenyaemrOrdersService.class).getLabManifestOrderByManifest(labManifest);
         PatientIdentifierType pat = Utils.getUniquePatientNumberIdentifierType();
         PatientIdentifierType kat = Utils.getKDODIdentifierType();
         PatientIdentifierType hei = Utils.getHeiNumberIdentifierType();
         LabOrderDataExchange labOrderDataExchange = new LabOrderDataExchange();
         Integer manifestTypeCode = labManifest.getManifestType();
-        String manifestType = "";
+        
         if (manifestTypeCode == LabManifest.EID_TYPE) {
-            manifestType = "EID";
-            activeEidOrdersNotInManifest = labOrderDataExchange.getActiveEidOrdersNotInManifest(null, labManifest.getStartDate(), labManifest.getEndDate());
+            activeOrdersNotInManifest = labOrderDataExchange.getActiveEidOrdersNotInManifest(null, labManifest.getStartDate(), labManifest.getEndDate());
         } else if (manifestTypeCode == LabManifest.VL_TYPE) {
-            manifestType = "Viral load";
-            activeVlOrdersNotInManifest = labOrderDataExchange.getActiveViralLoadOrdersNotInManifest(null, labManifest.getStartDate(), labManifest.getEndDate());
+            activeOrdersNotInManifest = labOrderDataExchange.getActiveViralLoadOrdersNotInManifest(null, labManifest.getStartDate(), labManifest.getEndDate());
         } else if (manifestTypeCode == LabManifest.FLU_TYPE) {
-            manifestType = "FLU";
-            activeFluOrdersNotInManifest = labOrderDataExchange.getActiveFluOrdersNotInManifest(null, labManifest.getStartDate(), labManifest.getEndDate());
+            activeOrdersNotInManifest = labOrderDataExchange.getActiveFluOrdersNotInManifest(null, labManifest.getStartDate(), labManifest.getEndDate());
         }
 
-        //Temporary fix to remove special chars from lab results
-        List<LabManifestOrder> ordersForManifest = new ArrayList<LabManifestOrder>();
-        for(LabManifestOrder m : allOrdersForManifest) {
-            if(m != null) {
-                try {
-                    String result = m.getResult();
-                    if(result != null) {
-                        result = result.replaceAll("[^a-zA-Z0-9]"," ");
-                        result = result.trim();
-                        m.setResult(result);
-                    }
-                } catch(Exception ex) {}
-                ordersForManifest.add(m);
+        // orders
+        List<SimpleObject> Orders = new ArrayList<SimpleObject>();
+        for(SimpleObject load : activeOrdersNotInManifest){
+            SimpleObject so = new SimpleObject();
+            Order order = (Order) load.get("order");
+            so.put("orderId", order.getId());
+            so.put("orderUuid", order.getUuid());
+            Patient patient = order.getPatient();
+
+            // Patient identifiers
+            so.put("patientId", patient.getId());
+            so.put("patientUuid", patient.getUuid());
+
+            // Patient name
+            StringBuilder fullName = new StringBuilder();
+            String middleName = personService.getPerson(patient.getId()).getMiddleName() != null ? personService
+                .getPerson(patient.getId()).getMiddleName().toUpperCase() : "";
+            String lastName = personService.getPerson(patient.getId()).getFamilyName().toUpperCase();
+            String firstName = personService.getPerson(patient.getId()).getGivenName().toUpperCase();
+            if(firstName != null && !firstName.isEmpty()) {
+                fullName.append(firstName);
             }
-        }
+            if(middleName != null && !middleName.isEmpty()) {
+                fullName.append(" " + middleName);
+            }
+            if(lastName != null && !lastName.isEmpty()) {
+                fullName.append(" " + lastName);
+            }
+            so.put("patientName", fullName.toString());
 
-        // For javascript processing
+            //Patient ccc/kdod
+            String ccc = "";
+            if(isKDoD.trim().equalsIgnoreCase("true")) {
+                PatientIdentifier kdodNumber = patient.getPatientIdentifier(kat);
+                ccc = (kdodNumber == null || StringUtils.isBlank(kdodNumber.getIdentifier())) ? "" : kdodNumber.getIdentifier();
+            } else {
+                if(patient.getAge() > 2) {
+                    PatientIdentifier cccNumber = patient.getPatientIdentifier(pat);
+                    ccc = (cccNumber == null || StringUtils.isBlank(cccNumber.getIdentifier())) ? "" : cccNumber.getIdentifier();
+                } else {
+                    PatientIdentifier heiNumber = patient.getPatientIdentifier(hei);
+                    ccc = (heiNumber == null || StringUtils.isBlank(heiNumber.getIdentifier())) ? "" : heiNumber.getIdentifier();
+                }
+            }
+            so.put("cccKdod", ccc);
 
-        // VL orders
-        List<SimpleObject> VLOrders = new ArrayList<SimpleObject>();
-        for(SimpleObject load : activeVlOrdersNotInManifest){
-            SimpleObject so = new SimpleObject();
-            Order order = (Order) load.get("order");
-            so.put("orderId", order.getId());
-            VLOrders.add(so);
-        }
-
-        // EID orders
-        List<SimpleObject> EIDOrders = new ArrayList<SimpleObject>();
-        for(SimpleObject load : activeEidOrdersNotInManifest){
-            SimpleObject so = new SimpleObject();
-            Order order = (Order) load.get("order");
-            so.put("orderId", order.getId());
-            EIDOrders.add(so);
-        }
-
-        // FLU orders
-        List<SimpleObject> FLUOrders = new ArrayList<SimpleObject>();
-        for(SimpleObject load : activeFluOrdersNotInManifest){
-            SimpleObject so = new SimpleObject();
-            Order order = (Order) load.get("order");
-            so.put("orderId", order.getId());
-            FLUOrders.add(so);
-        }
-
-        // Manifest orders
-        List<SimpleObject> manifestOrders = new ArrayList<SimpleObject>();
-        for(LabManifestOrder order : ordersForManifest){
-            SimpleObject so = new SimpleObject();
-            so.put("orderId", order.getId());
-            manifestOrders.add(so);
+            so.put("dateRequested", Utils.getSimpleDateFormat("dd-MM-yyyy").format(order.getDateCreated()));
+            so.put("payload", "");
+            so.put("hasProblem", load.get("hasProblem"));
+            Orders.add(so);
         }
 
         SimpleObject model = new SimpleObject();
-        model.put("eligibleVlOrders", activeVlOrdersNotInManifest );
-        model.put("eligibleEidOrders", activeEidOrdersNotInManifest );
-        model.put("eligibleFLUOrders", activeFluOrdersNotInManifest );
-        model.put("VLOrders", VLOrders ); // to json?
-        model.put("EIDOrders", EIDOrders ); // to json?
-        model.put("FLUOrders", FLUOrders ); // to json?
-        model.put("manifestType", manifestType);
-        model.put("manifest", labManifest);
-        model.put("manifestOrders", ordersForManifest);
-        model.put("allManifestOrders", manifestOrders); // to json?
+
+        model.put("Orders", Orders );
 
         model.put("cccNumberType", "");
         model.put("heiNumberType", "");

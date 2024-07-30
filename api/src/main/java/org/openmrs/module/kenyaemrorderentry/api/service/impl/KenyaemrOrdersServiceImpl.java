@@ -1,31 +1,23 @@
 package org.openmrs.module.kenyaemrorderentry.api.service.impl;
 
+import java.util.Date;
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.Criteria;
 import org.openmrs.Cohort;
-import org.openmrs.OpenmrsObject;
 import org.openmrs.Order;
+import org.openmrs.api.context.Context;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.kenyaemrorderentry.api.db.hibernate.HibernateKenyaemrOrdersDAO;
-import org.openmrs.module.kenyaemrorderentry.api.search.Action;
-import org.openmrs.module.kenyaemrorderentry.api.search.ManifestSearch;
-import org.openmrs.module.kenyaemrorderentry.api.search.PagingInfo;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 import org.openmrs.module.reporting.common.DurationUnit;
 import org.openmrs.ui.framework.SimpleObject;
-import org.springframework.transaction.annotation.Transactional;
-
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.openmrs.api.context.Context;
-
-import java.util.Date;
-import java.util.List;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
 public class KenyaemrOrdersServiceImpl extends BaseOpenmrsService implements KenyaemrOrdersService {
