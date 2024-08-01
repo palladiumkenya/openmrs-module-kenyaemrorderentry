@@ -24,6 +24,7 @@ import org.openmrs.module.webservices.rest.web.resource.api.PageableResult;
 import org.openmrs.module.webservices.rest.web.resource.impl.DataDelegatingCrudResource;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging;
+import org.openmrs.module.webservices.rest.web.response.GenericRestException;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 import org.openmrs.ui.framework.SimpleObject;
@@ -55,7 +56,6 @@ public class LabManifestOrderResource extends DataDelegatingCrudResource<LabMani
 
     @Override
     public LabManifestOrder save(LabManifestOrder labManifestOrder) {
-        System.out.println("Saving a new manifest order: " + labManifestOrder.toString());
         // Generate the payload
         LabManifest manifest = labManifestOrder.getLabManifest();
         Order order = labManifestOrder.getOrder();
@@ -71,9 +71,9 @@ public class LabManifestOrderResource extends DataDelegatingCrudResource<LabMani
         } else if (LabOrderDataExchange.getSystemType() == ModuleConstants.EDARP_SYSTEM) {
             payloadGenerator = new EdarpSystemWebRequest();
         }
-
+        
         if (payloadGenerator == null) {
-            throw new ResourceDoesNotSupportOperationException("An error occured while adding sample to manifest: could not create payload generator: check system type");
+            throw new GenericRestException("An error occured while adding sample to manifest: could not create payload generator: check system type");
         }
 
         payloadGenerator.setManifestType(manifest.getManifestType());
@@ -85,7 +85,7 @@ public class LabManifestOrderResource extends DataDelegatingCrudResource<LabMani
 
             return Context.getService(KenyaemrOrdersService.class).saveLabManifestOrder(labManifestOrder);
         } else {
-            throw new ResourceDoesNotSupportOperationException("An error occured while adding sample to manifest: could not create payload");
+            throw new GenericRestException("An error occured while adding sample to manifest: could not create payload");
         }
     }
 

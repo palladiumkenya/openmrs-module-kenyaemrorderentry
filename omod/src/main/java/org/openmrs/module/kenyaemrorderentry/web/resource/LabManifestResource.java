@@ -49,7 +49,6 @@ public class LabManifestResource extends DataDelegatingCrudResource<LabManifest>
 
     @Override
     public LabManifest save(LabManifest labManifest) {
-        System.out.println("Saving a new manifest: " + labManifest.toString());
         if (labManifest.getLabManifestOrders() != null) {
             for (LabManifestOrder order : labManifest.getLabManifestOrders()) {
                 order.setLabManifest(labManifest); // Set the reference to the parent LabManifest
