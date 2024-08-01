@@ -203,7 +203,6 @@ public class KenyaemrOrderRestController extends BaseRestController {
 
     /**
      * Print the specimen label given a lab manifest order
-     * To test use: curl -u admin:Admin123 -o specimen-label.pdf http://127.0.0.1:8080/openmrs/ws/rest/v1/kemrorder/printspecimenlabel?manifestOrderUuid=e50b861d-b7ce-49c1-91b7-4876de3abdf9
      * @param request
      * @param manifestOrderUuid - The manifest order uuid
      * @return
@@ -226,11 +225,7 @@ public class KenyaemrOrderRestController extends BaseRestController {
         if (generatedSpecimenLabel != null) {
             try {
                 InputStream inputStream = new FileInputStream(generatedSpecimenLabel);
-                // response.setContentType(MediaType.APPLICATION_PDF);
                 response.setContentType("application/pdf");
-                // To open PDF in browser
-                // response.addHeader(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=" + generatedSpecimenLabel.getName());
-                // To download PDF
                 response.addHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + generatedSpecimenLabel.getName());
                 int bytes = IOUtils.copy(inputStream, response.getOutputStream());
                 response.setContentLength(bytes);
@@ -250,7 +245,6 @@ public class KenyaemrOrderRestController extends BaseRestController {
 
     /**
      * Print the manifest given a lab manifest uuid
-     * To test use: curl -u admin:Admin123 -o specimen-label.pdf http://127.0.0.1:8080/openmrs/ws/rest/v1/kemrorder/printmanifest?manifestUuid=e50b861d-b7ce-49c1-91b7-4876de3abdf9
      * @param request
      * @param manifestUuid - The manifest uuid
      * @return
@@ -285,10 +279,7 @@ public class KenyaemrOrderRestController extends BaseRestController {
         if (generatedManifest != null) {
             try {
                 InputStream is = new FileInputStream(generatedManifest);
-                // response.setContentType(MediaType.APPLICATION_PDF);
                 response.setContentType("application/pdf");
-                // To open PDF in browser
-                // To download PDF
                 response.addHeader("content-disposition", "inline;filename=" + generatedManifest.getName());
                 int bytes = IOUtils.copy(is, response.getOutputStream());
                 response.setContentLength(bytes);
@@ -308,7 +299,6 @@ public class KenyaemrOrderRestController extends BaseRestController {
 
     /**
      * Print the manifest LOG given a lab manifest uuid
-     * To test use: curl -u admin:Admin123 -o specimen-label.pdf http://127.0.0.1:8080/openmrs/ws/rest/v1/kemrorder/printmanifestlog?manifestUuid=e50b861d-b7ce-49c1-91b7-4876de3abdf9
      * @param request
      * @param manifestUuid - The manifest uuid
      * @return
