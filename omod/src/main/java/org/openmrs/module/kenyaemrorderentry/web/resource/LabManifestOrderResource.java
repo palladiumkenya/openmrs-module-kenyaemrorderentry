@@ -3,6 +3,7 @@ package org.openmrs.module.kenyaemrorderentry.web.resource;
 import java.util.Date;
 
 import org.openmrs.Order;
+import org.openmrs.annotation.Authorized;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemrorderentry.ModuleConstants;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
@@ -37,6 +38,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 @CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS})
 @Resource(name = RestConstants.VERSION_1 +  "/labmanifestorder", supportedClass = LabManifestOrder.class, supportedOpenmrsVersions = {"2.0.*", "2.1.*", "2.2.*", "2.0 - 2.*"})
+@Authorized
 public class LabManifestOrderResource extends DataDelegatingCrudResource<LabManifestOrder> {
 
     @Override
