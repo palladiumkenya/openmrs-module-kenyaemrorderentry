@@ -9,6 +9,7 @@ import org.openmrs.Order;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
+import org.openmrs.annotation.Authorized;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.PersonService;
 import org.openmrs.api.context.Context;
@@ -20,6 +21,7 @@ import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
+import org.openmrs.module.kenyaemrorderentry.metadata.KenyaemrorderentryAdminSecurityMetadata;
 import org.openmrs.module.kenyaemrorderentry.util.Utils;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.v1_0.controller.BaseRestController;
@@ -45,11 +47,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.web.bind.annotation.CrossOrigin;
+
 /**
  * The main controller that exposes additional end points for order entry
  */
 @Controller
 @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/kemrorder")
+@Authorized
 public class KenyaemrOrderRestController extends BaseRestController {
     protected final Log log = LogFactory.getLog(getClass());
 
@@ -58,6 +63,7 @@ public class KenyaemrOrderRestController extends BaseRestController {
      * @param request
      * @return
      */
+    @CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS})
     @RequestMapping(method = RequestMethod.POST, value = "/labresults") 
     @ResponseBody
     public Object processIncomingViralLoadResults(HttpServletRequest request) {
@@ -82,6 +88,7 @@ public class KenyaemrOrderRestController extends BaseRestController {
      * @param request
      * @return
      */
+    @CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS})
     @RequestMapping(method = RequestMethod.POST, value = "/flulabresults") 
     @ResponseBody
     public Object processIncomingFLUResults(HttpServletRequest request) {
@@ -107,6 +114,7 @@ public class KenyaemrOrderRestController extends BaseRestController {
      * @param manifestUuid - The manifest uuid
      * @return
      */
+    @CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS})
     @RequestMapping(method = RequestMethod.GET, value = "/validorders")
     @ResponseBody
     public Object getValidOrdersForManifest(HttpServletRequest request, @RequestParam("manifestUuid") String manifestUuid) {
@@ -207,6 +215,7 @@ public class KenyaemrOrderRestController extends BaseRestController {
      * @param manifestOrderUuid - The manifest order uuid
      * @return
      */
+    @CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS})
     @RequestMapping(method = RequestMethod.GET, value = "/printspecimenlabel")
     @ResponseBody
     public Object printSpecimenLabel(HttpServletRequest request, HttpServletResponse response, @RequestParam("manifestOrderUuid") String manifestOrderUuid) {
@@ -240,7 +249,7 @@ public class KenyaemrOrderRestController extends BaseRestController {
             return new ResponseEntity<String>("Lab Manifest: The returned file was null: ", HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        return(response);
+        return(null);
     }
 
     /**
@@ -249,6 +258,7 @@ public class KenyaemrOrderRestController extends BaseRestController {
      * @param manifestUuid - The manifest uuid
      * @return
      */
+    @CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS})
     @RequestMapping(method = RequestMethod.GET, value = "/printmanifest")
     @ResponseBody
     public Object printManifest(HttpServletRequest request, HttpServletResponse response, @RequestParam("manifestUuid") String manifestUuid) {
@@ -294,7 +304,7 @@ public class KenyaemrOrderRestController extends BaseRestController {
             return new ResponseEntity<String>("Lab Manifest: The returned file was null", HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        return(response);
+        return(null);
     }
 
     /**
@@ -303,6 +313,7 @@ public class KenyaemrOrderRestController extends BaseRestController {
      * @param manifestUuid - The manifest uuid
      * @return
      */
+    @CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS})
     @RequestMapping(method = RequestMethod.GET, value = "/printmanifestlog")
     @ResponseBody
     public Object printManifestLog(HttpServletRequest request, HttpServletResponse response, @RequestParam("manifestUuid") String manifestUuid) {
@@ -340,7 +351,73 @@ public class KenyaemrOrderRestController extends BaseRestController {
             return new ResponseEntity<String>("Lab Manifest: The returned file was null", HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        return(response);
+        return(null);
+    }
+
+    /**
+     * Gets the metrics for lab manifests
+     * @param request - the request
+     * @return
+     */
+    @CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS})
+    @RequestMapping(method = RequestMethod.GET, value = "/manifestmetrics")
+    @ResponseBody
+    public Object getManifestMerics(HttpServletRequest request) {
+        KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
+        SimpleObject model = new SimpleObject();
+
+        // Drafts
+        Long drafts = kenyaemrOrdersService.countTotalDraftManifests();
+        model.put("manifestsDraft", drafts);
+
+        // On Hold
+        Long onHold = kenyaemrOrdersService.countTotalManifestsOnHold();
+        model.put("manifestsOnHold", onHold);
+
+        // Ready to send
+        Long readyToSend = kenyaemrOrdersService.countTotalReadyToSendManifests();
+        model.put("manifestsReadyToSend", readyToSend);
+
+        // Sending
+        Long sending = kenyaemrOrdersService.countTotalManifestsOnSending();
+        model.put("manifestsSending", sending);
+
+        // Submitted
+        Long submitted = kenyaemrOrdersService.countTotalSubmittedManifests();
+        model.put("manifestsSubmitted", submitted);
+
+        // Incomplete with Errors
+        Long incompleteWithErrors = kenyaemrOrdersService.countTotalManifestsIncompleteWithErrors();
+        model.put("manifestsIncompleteWithErrors", incompleteWithErrors);
+
+        // Total Errors on incomplete manifests
+        Long errorsOnIncomplete = kenyaemrOrdersService.countTotalErrorsOnIncompleteManifests();
+        model.put("errorsOnIncomplete", errorsOnIncomplete);
+
+        // Incomplete
+        Long incomplete = kenyaemrOrdersService.countTotalIncompleteManifests();
+        model.put("manifestsIncomplete", incomplete);
+        
+        // Complete with Errors
+        Long completeWithErrors = kenyaemrOrdersService.countTotalManifestsCompleteWithErrors();
+        model.put("manifestsCompleteWithErrors", completeWithErrors);
+
+        // Total Errors on complete manifests
+        Long errorsOnComplete = kenyaemrOrdersService.countTotalErrorsOnCompleteManifests();
+        model.put("errorsOnComplete", errorsOnComplete);
+
+        // Complete
+        Long complete = kenyaemrOrdersService.countTotalCompleteManifests();
+        model.put("manifestsComplete", complete);
+
+        // Graph
+        List<SimpleObject> summaryGraph = kenyaemrOrdersService.getLabManifestSummaryGraphSQL();
+        model.put("summaryGraph", summaryGraph);
+
+        // Settings
+        model.put("userHasSettingsEditRole", (Context.getAuthenticatedUser().containsRole(KenyaemrorderentryAdminSecurityMetadata._Role.API_ROLE_EDIT_SETTINGS) || Context.getAuthenticatedUser().isSuperUser()));
+
+        return(model);
     }
 
     /**

@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
+import org.openmrs.annotation.Authorized;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 @CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS})
 @Resource(name = RestConstants.VERSION_1 +  "/labmanifest", supportedClass = LabManifest.class, supportedOpenmrsVersions = {"2.0.*", "2.1.*", "2.2.*", "2.0 - 2.*"})
+@Authorized
 public class LabManifestResource extends DataDelegatingCrudResource<LabManifest> {
 
     @Override
