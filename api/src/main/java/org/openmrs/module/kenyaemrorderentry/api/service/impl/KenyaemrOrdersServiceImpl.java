@@ -448,8 +448,8 @@ public class KenyaemrOrdersServiceImpl extends BaseOpenmrsService implements Ken
     }
 
 	@Override
-	public List<LabManifest> getLabManifests(String uuid, String status, String type, Date createdOnOrAfterDate, Date createdOnOrBeforeDate) {
-        return dao.getLabManifests(uuid, status, type, createdOnOrAfterDate, createdOnOrBeforeDate);
+	public List<LabManifest> getLabManifests(String uuid, String status, String type, String withErrors, Date createdOnOrAfterDate, Date createdOnOrBeforeDate) {
+        return dao.getLabManifests(uuid, status, type, withErrors, createdOnOrAfterDate, createdOnOrBeforeDate);
 	}
 
 }

@@ -109,6 +109,6 @@ public interface KenyaemrOrdersDAO {
 
     void reprocessLabManifest(Integer manifestId);
 
-    List<LabManifest> getLabManifests(String uuid, String status, String type, Date createdOnOrAfterDate, Date createdOnOrBeforeDate);
+    List<LabManifest> getLabManifests(String uuid, String status, String type, String withErrors, Date createdOnOrAfterDate, Date createdOnOrBeforeDate);
     //End of Patient Contact dimensions methods
 }

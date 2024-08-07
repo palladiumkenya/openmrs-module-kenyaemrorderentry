@@ -162,6 +162,7 @@ public class LabManifestResource extends DataDelegatingCrudResource<LabManifest>
 		String uuid = context.getRequest().getParameter("uuid");
 		String status = context.getRequest().getParameter("status");
         String type = context.getRequest().getParameter("type");
+        String withErrors = context.getRequest().getParameter("withErrors");
 		String createdOnOrBeforeDateStr = context.getRequest().getParameter("createdOnOrBefore");
 		String createdOnOrAfterDateStr = context.getRequest().getParameter("createdOnOrAfter");
 
@@ -170,7 +171,7 @@ public class LabManifestResource extends DataDelegatingCrudResource<LabManifest>
 
 		KenyaemrOrdersService service = Context.getService(KenyaemrOrdersService.class);
 
-		List<LabManifest> result = service.getLabManifests(uuid, status, type, createdOnOrAfterDate, createdOnOrBeforeDate);
+		List<LabManifest> result = service.getLabManifests(uuid, status, type, withErrors, createdOnOrAfterDate, createdOnOrBeforeDate);
 		return new AlreadyPaged<LabManifest>(context, result, false);
 	}
 
