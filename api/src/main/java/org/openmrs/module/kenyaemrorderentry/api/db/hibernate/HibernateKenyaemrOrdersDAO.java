@@ -12,6 +12,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Join;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,6 +26,7 @@ import org.hibernate.criterion.Restrictions;
 import org.hibernate.exception.DataException;
 import org.openmrs.Cohort;
 import org.openmrs.Order;
+import org.openmrs.Patient;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.db.DAOException;
 import org.openmrs.module.kenyaemrorderentry.api.db.KenyaemrOrdersDAO;
@@ -833,8 +835,8 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
     }
 
     @Override
-	public List<LabManifest> getLabManifests(String uuid, String status, String type, Date createdOnOrAfterDate, Date createdOnOrBeforeDate) {
-		System.err.println("Searching for manifests using: " + uuid + " : " + status + " : " + type + " : " + createdOnOrAfterDate + " : " + createdOnOrBeforeDate + " : ");
+	public List<LabManifest> getLabManifests(String uuid, String status, String type, String withErrors, Date createdOnOrAfterDate, Date createdOnOrBeforeDate) {
+		System.err.println("Searching for manifests using: " + uuid + " : " + status + " : " + type  + " : " + withErrors + " : " + createdOnOrAfterDate + " : " + createdOnOrBeforeDate + " : ");
 
         Session session = this.sessionFactory.getCurrentSession();
         CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
@@ -860,6 +862,41 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
             predicate = criteriaBuilder.and(predicate, criteriaBuilder.equal(root.get("type"), type));
         }
 
+        // withErrors
+        if(withErrors != null && !withErrors.isEmpty()) {
+            System.out.println("Got with errors query");
+            // status
+            if(status != null && !status.isEmpty()) {
+                String realStatus = status.trim().toLowerCase();
+                System.out.println("status is: " + realStatus);
+                if(realStatus.startsWith("complete") || realStatus.startsWith("incomplete")) {
+                    if(withErrors.trim().equalsIgnoreCase("true")) {
+                        System.out.println("withErrors is true");
+                        // Join LabManifest with LabManifestOrder
+                        Join<LabManifest, LabManifestOrder> orderJoin = root.join("labManifestOrders");
+                        // Create conditions
+                        Predicate completePredicate = criteriaBuilder.equal(orderJoin.get("status"), "Complete");
+                        Predicate pendingPredicate = criteriaBuilder.equal(orderJoin.get("status"), "Pending");
+                        Predicate sentPredicate = criteriaBuilder.equal(orderJoin.get("status"), "Sent");
+                        // Combine the conditions using OR
+                        Predicate noErrorCondition = criteriaBuilder.or(completePredicate, pendingPredicate, sentPredicate);
+                        predicate = criteriaBuilder.and(predicate, criteriaBuilder.not(noErrorCondition));
+                    } else if(withErrors.trim().equalsIgnoreCase("false")) {
+                        System.out.println("withErrors is false");
+                        // Join LabManifest with LabManifestOrder
+                        Join<LabManifest, LabManifestOrder> orderJoin = root.join("labManifestOrders");
+                        // Create conditions
+                        Predicate completePredicate = criteriaBuilder.equal(orderJoin.get("status"), "Complete");
+                        Predicate pendingPredicate = criteriaBuilder.equal(orderJoin.get("status"), "Pending");
+                        Predicate sentPredicate = criteriaBuilder.equal(orderJoin.get("status"), "Sent");
+                        // Combine the conditions using OR
+                        Predicate noErrorCondition = criteriaBuilder.or(completePredicate, pendingPredicate, sentPredicate);
+                        predicate = criteriaBuilder.and(predicate, noErrorCondition);
+                    }
+                }
+            }
+        }
+
         // createdOnOrAfterDate
         if(createdOnOrAfterDate != null) {
             Path<Date> datePath = root.get("dateCreated");
@@ -874,7 +911,13 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
             predicate = criteriaBuilder.and(predicate, criteriaBuilder.lessThanOrEqualTo(datePath, createdOnOrBeforeDate));
         }
 
-        criteriaQuery.where(predicate);
+        // criteriaQuery.where(predicate);
+        criteriaQuery.where(predicate).distinct(true);
+
+        // Print the generated SQL query
+        Query query = session.createQuery(criteriaQuery);
+        String sqlQuery = query.unwrap(org.hibernate.query.Query.class).getQueryString();
+        System.out.println("Generated SQL Query: " + sqlQuery);
 
         List<LabManifest> results = session.createQuery(criteriaQuery).getResultList();
 
