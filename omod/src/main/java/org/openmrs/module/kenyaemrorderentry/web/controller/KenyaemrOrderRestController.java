@@ -189,6 +189,7 @@ public class KenyaemrOrderRestController extends BaseRestController {
             so.put("dateRequested", Utils.getSimpleDateFormat("dd-MM-yyyy").format(order.getDateCreated()));
             so.put("payload", "test");
             so.put("hasProblem", load.get("hasProblem"));
+            so.put("problemMessage", load.get("problemMessage"));
             Orders.add(so);
         }
 
