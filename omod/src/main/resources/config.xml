@@ -35,7 +35,11 @@
 
     <!-- Module Activator -->
 	<activator>${project.parent.groupId}.${project.parent.artifactId}.KenyaEMROrderEntryActivator</activator>
-	
+
+	<advice>
+		<point>org.openmrs.api.OrderService</point>
+		<class>${project.parent.groupId}.${project.parent.artifactId}.advice.LimsIntegration</class>
+	</advice>
 	
 	<!-- Maps hibernate file's, if present -->
 	<mappingFiles>
@@ -370,6 +374,38 @@
 			Last execution for vl result pull request
 		</description>
 	</globalProperty>-->
+
+	<globalProperty>
+		<property>lims_server_url</property>
+		<defaultValue></defaultValue>
+		<description>
+			The URL for pushing lab requests to the LIMS server
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>lims_result_url</property>
+		<defaultValue></defaultValue>
+		<description>
+			The URL for fetching LIMS lab result
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>lims_server_api_token</property>
+		<defaultValue></defaultValue>
+		<description>
+			API token to authenticate communication to the LIMS lab system API
+		</description>
+	</globalProperty>
+	
+	<globalProperty>
+		<property>enable_lims_integration</property>
+		<defaultValue>false</defaultValue>
+		<description>
+			Enable (true) or Disable (false) LIMS Integration functionality
+		</description>
+	</globalProperty>
 
 </module>
 
