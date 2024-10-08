@@ -19,6 +19,7 @@ import org.openmrs.module.kenyaemrorderentry.api.itext.PrintSpecimenLabel;
 import org.openmrs.module.kenyaemrorderentry.api.itext.ViralLoadLabManifestReport;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange;
+import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabwareFacilityWideResultsMapper;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 import org.openmrs.module.kenyaemrorderentry.metadata.KenyaemrorderentryAdminSecurityMetadata;
@@ -108,6 +109,25 @@ public class KenyaemrOrderRestController extends BaseRestController {
         return  "The request could not be interpreted by the internal flu result end point";
     }
 
+    @CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS})
+    @RequestMapping(method = RequestMethod.POST, value = "/limsfacilitywideresults")
+    @ResponseBody
+    public Object processLimsFacilityWideResults(HttpServletRequest request) {
+        String requestBody = null;
+        try {
+            requestBody = Utils.fetchRequestBody(request.getReader());
+        } catch (IOException e) {
+            e.printStackTrace();
+            String msg = e.getMessage();
+            return "Error extracting request body" + msg;
+        }
+
+        if (requestBody != null) {
+            LabwareFacilityWideResultsMapper labOrderDataExchange = new LabwareFacilityWideResultsMapper();
+            return labOrderDataExchange.processResultsFromLims(requestBody);
+        }
+        return  "The request could not be interpreted in KenyaEMR";
+    }
     /**
      * Gets a list of valid orders for a given manifest (manifest type)
      * @param request
