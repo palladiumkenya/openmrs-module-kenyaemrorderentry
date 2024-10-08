@@ -1,5 +1,6 @@
 package org.openmrs.module.kenyaemrorderentry.labDataExchange;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -11,6 +12,7 @@ import org.openmrs.Encounter;
 import org.openmrs.EncounterType;
 import org.openmrs.Obs;
 import org.openmrs.Order;
+import org.openmrs.api.AdministrationService;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.OrderService;
@@ -61,38 +63,26 @@ public class LabwareFacilityWideResultsMapper {
      * }
      * @return
      */
-    public ObjectNode readLabTestMappingFile(){
-        //TODO: read the mapping configuration file into a json object
-        return null;
+    public ObjectNode readLabTestMappingConfiguration(){
+        AdministrationService administrationService = Context.getAdministrationService();
+        String limsConfiguration = (administrationService.getGlobalProperty("kenyaemrorderentry.facilitywidelims.mapping"));
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode testConfiguration = null;
+        try {
+            testConfiguration = (ObjectNode) mapper.readTree(limsConfiguration);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return testConfiguration;
     }
 
     /**
      * Processes results from LIMS
      * @param resultPayload
-     * Sample payload from labware:
-     * {
-     * "data": [
-     * {
-     * "testNumber": 2,
-     * "labRequestId": "8",
-     * "patientId": "111111111",
-     * "testName": "Random blood sugar",
-     * "labTestId": "2",
-     * "resultName": "test",
-     * "resultValue": "12",
-     * "resultNumber": 383783,
-     * "isRejected": null,
-     * "isRecalled": null,
-     * "refRanges":"2-10",
-     * "units":"UI/L",
-     * "interpretation":"H",
-     * "verifiedById": "ENJUKI"
-     * }]
-     * }
      * @return
      */
     public String processResultsFromLims(String resultPayload) {
-
         JsonElement rootNode = JsonParser.parseString(resultPayload);
         JsonObject resultsObj = null;
         String statusMsg;
@@ -112,22 +102,23 @@ public class LabwareFacilityWideResultsMapper {
         if (resultsObj != null) {
             Map<String,String> resultMap = new HashMap<>();
             JsonArray resultArray = resultsObj.get("data").getAsJsonArray();
+            Integer orderId = null;
             for (int i = 0; i < resultArray.size(); i++) {
                 try {
                     JsonObject o = resultArray.get(i).getAsJsonObject();
-                    Integer orderId = o.get("labRequestId").getAsInt();
+                    orderId = o.get("labRequestId").getAsInt();
                     String testName = !o.isJsonNull() && !o.get("resultName").isJsonNull() ? o.get("resultName").getAsString() : "";
                     String result = !o.isJsonNull() && !o.get("resultValue").isJsonNull() ? o.get("resultValue").getAsString() : "";
                     if (StringUtils.isNotBlank(testName) && StringUtils.isNotBlank(result)) {
                         resultMap.put(testName, result);
                     }
-                    // update results and complete the order
-                    mapLimsResultsInEmr(orderId, resultMap);
                 } catch (Exception ex) {
                     System.err.println("Lab Results Get Results: Unable to update order with results: " + ex.getMessage());
                     ex.printStackTrace();
                 }
             }
+            // update results and complete the order
+            mapLimsResultsInEmr(orderId, resultMap);
         }
         System.out.println("Lab Results Get Results: LIMS results pulled and updated successfully in the database");
         return "LIMS results pulled and updated successfully in the database";
@@ -144,7 +135,6 @@ public class LabwareFacilityWideResultsMapper {
      */
     public void mapLimsResultsInEmr(Integer orderId, Map<String,String> limsResult) {
         if (limsResult == null || limsResult.isEmpty()) {return;}
-
         EncounterType labEncounterType = Context.getEncounterService().getEncounterTypeByUuid(LAB_ENCOUNTER_TYPE_UUID);
         EncounterService encounterService = Context.getEncounterService();
         ConceptService conceptService = Context.getConceptService();
@@ -152,11 +142,13 @@ public class LabwareFacilityWideResultsMapper {
 
         Order order = Context.getOrderService().getOrder(orderId);
         Concept orderConcept = order.getConcept();
+
         if (orderConcept != null) {
 
-            ObjectNode mapping = readLabTestMappingFile();
+            ObjectNode mapping = readLabTestMappingConfiguration();
             // Get mapping for the test concept
             ObjectNode testConceptMapping = (ObjectNode) mapping.get(orderConcept.getUuid());
+            System.out.println("test concept mapping: " + testConceptMapping);
 
             // setup lab result encounter
             Encounter enc = new Encounter();
@@ -190,19 +182,20 @@ public class LabwareFacilityWideResultsMapper {
              */
             if (orderConcept.isSet() && orderConcept.getSetMembers().size() > 0) {
                 ObjectNode resultSet = (ObjectNode) testConceptMapping.get(LAB_TEST_RESULT_SET_PROPERTY);
-
                 // loop through the results and create an obs group
                 for (Map.Entry<String, String> entry : limsResult.entrySet()) {
                     limsTestName = entry.getKey();
                     limsTestResult = entry.getValue();
 
-                    if (StringUtils.isNotBlank(limsTestResult) || StringUtils.isNotBlank(limsTestName)) {
+                    if (StringUtils.isBlank(limsTestResult) || StringUtils.isBlank(limsTestName)) {
+                        System.err.println("LIMS results: system encountered NULL test or result. Terminating now");
                         return;
                     }
                     String memberConceptUuid = resultSet.get(limsTestName).asText();
-                    Concept memberObsConcept = conceptService.getConcept(memberConceptUuid);
+                    Concept memberObsConcept = conceptService.getConceptByUuid(memberConceptUuid);
                     Obs memberObs = constructObs(order);
                     if (memberObsConcept != null) {
+                        memberObs.setConcept(memberObsConcept);
                         if (memberObsConcept.getDatatype().isNumeric() || memberObsConcept.getDatatype().isText()) {
                             setObsValue(memberObs, memberObsConcept, limsTestResult);
                         } else if (memberObsConcept.getDatatype().isCoded()) {
@@ -214,12 +207,14 @@ public class LabwareFacilityWideResultsMapper {
                     o.addGroupMember(memberObs);
                 }
 
-            } else { // this is for a simple test.
+            } else { // this is for a non-set test.
                 for (Map.Entry<String, String> entry : limsResult.entrySet()) {
                     limsTestName = entry.getKey();
                     limsTestResult = entry.getValue();
                 }
-                if (StringUtils.isNotBlank(limsTestResult) || StringUtils.isNotBlank(limsTestName)) {
+
+                if (StringUtils.isBlank(limsTestResult) || StringUtils.isBlank(limsTestName)) {
+                    System.err.println("LIMS results: system encountered NULL test or result. Terminating now");
                     return;
                 }
 
@@ -248,8 +243,9 @@ public class LabwareFacilityWideResultsMapper {
                 encounterService.saveEncounter(enc);
                 orderService.discontinueOrder(order, "Results received", new Date(), order.getOrderer(), order.getEncounter());
             } catch (Exception e) {
-                System.out.println("Facility Lims Results update: An error was encountered while updating results for " + order.getConcept().getName().getName());
+                System.out.println("Facility Lims Results update: An error was encountered while updating results for " + order.getConcept().getUuid());
                 e.printStackTrace();
+                //TODO: we should return an appropriate message and status code
             }
         }
     }
