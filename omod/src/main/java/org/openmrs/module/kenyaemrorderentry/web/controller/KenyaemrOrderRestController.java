@@ -112,21 +112,21 @@ public class KenyaemrOrderRestController extends BaseRestController {
     @CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS})
     @RequestMapping(method = RequestMethod.POST, value = "/limsfacilitywideresults")
     @ResponseBody
-    public Object processLimsFacilityWideResults(HttpServletRequest request) {
+    public ResponseEntity<String> processLimsFacilityWideResults(HttpServletRequest request) {
         String requestBody = null;
         try {
             requestBody = Utils.fetchRequestBody(request.getReader());
         } catch (IOException e) {
             e.printStackTrace();
             String msg = e.getMessage();
-            return "Error extracting request body" + msg;
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error extracting request body" + msg);
         }
 
         if (requestBody != null) {
             LabwareFacilityWideResultsMapper labOrderDataExchange = new LabwareFacilityWideResultsMapper();
             return labOrderDataExchange.processResultsFromLims(requestBody);
         }
-        return  "The request could not be interpreted in KenyaEMR";
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The request could not be interpreted in KenyaEMR");
     }
     /**
      * Gets a list of valid orders for a given manifest (manifest type)
