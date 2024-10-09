@@ -17,6 +17,8 @@ import org.openmrs.api.ConceptService;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.OrderService;
 import org.openmrs.api.context.Context;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -27,7 +29,6 @@ import java.util.Map;
  * TODO: abstract the key methods into a parent class and have various lab systems implement the specifics
  */
 public class LabwareFacilityWideResultsMapper {
-    public static final String LAB_TEST_NAME_PROPERTY = "testName";
     public static final String LAB_TEST_RESULT_SET_PROPERTY = "result";
     String LAB_ENCOUNTER_TYPE_UUID = "e1406e88-e9a9-11e8-9f32-f2801f1b9fd1";
 
@@ -82,21 +83,18 @@ public class LabwareFacilityWideResultsMapper {
      * @param resultPayload
      * @return
      */
-    public String processResultsFromLims(String resultPayload) {
+    public ResponseEntity<String> processResultsFromLims(String resultPayload) {
         JsonElement rootNode = JsonParser.parseString(resultPayload);
         JsonObject resultsObj = null;
-        String statusMsg;
         try {
             if (rootNode.isJsonObject()) {
                 resultsObj = rootNode.getAsJsonObject();
             } else {
-                System.out.println("Lab Results Get Results: The payload could not be understood. An object is expected!:::: ");
-                statusMsg = "Lab Results Get Results: The payload could not be understood. An object is expected!";
-                return statusMsg;
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The payload could not be understood. An object is expected!");
             }
         } catch (Exception e) {
-            System.err.println("Lab Results Get Results: An error occured: " + e.getMessage());
             e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("An error occured: " + e.getMessage());
         }
 
         if (resultsObj != null) {
@@ -113,15 +111,16 @@ public class LabwareFacilityWideResultsMapper {
                         resultMap.put(testName, result);
                     }
                 } catch (Exception ex) {
-                    System.err.println("Lab Results Get Results: Unable to update order with results: " + ex.getMessage());
                     ex.printStackTrace();
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The system could not extract the test results from LIMS details: " + ex.getMessage());
+
                 }
             }
             // update results and complete the order
-            mapLimsResultsInEmr(orderId, resultMap);
+            return mapLimsResultsInEmr(orderId, resultMap);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The system could not extract the test results from LIMS details");
         }
-        System.out.println("Lab Results Get Results: LIMS results pulled and updated successfully in the database");
-        return "LIMS results pulled and updated successfully in the database";
     }
 
 
@@ -133,8 +132,10 @@ public class LabwareFacilityWideResultsMapper {
      * For lab sets i.e. complete blood count, the map entry is a test and the value
      * Results for lab sets are handled as grouped observations with a reference to the parent order.
      */
-    public void mapLimsResultsInEmr(Integer orderId, Map<String,String> limsResult) {
-        if (limsResult == null || limsResult.isEmpty()) {return;}
+    public ResponseEntity<String> mapLimsResultsInEmr(Integer orderId, Map<String,String> limsResult) {
+        if (limsResult == null || limsResult.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The system encountered empty results from LIMS");
+        }
         EncounterType labEncounterType = Context.getEncounterService().getEncounterTypeByUuid(LAB_ENCOUNTER_TYPE_UUID);
         EncounterService encounterService = Context.getEncounterService();
         ConceptService conceptService = Context.getConceptService();
@@ -146,9 +147,14 @@ public class LabwareFacilityWideResultsMapper {
         if (orderConcept != null) {
 
             ObjectNode mapping = readLabTestMappingConfiguration();
+            if (mapping == null) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("LIMS-EMR mapping configuration is missing or invalid!");
+            }
             // Get mapping for the test concept
             ObjectNode testConceptMapping = (ObjectNode) mapping.get(orderConcept.getUuid());
-            System.out.println("test concept mapping: " + testConceptMapping);
+            if (testConceptMapping == null) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("LIMS lab test configuration doesn't support result mapping for test " + orderConcept.getUuid());
+            }
 
             // setup lab result encounter
             Encounter enc = new Encounter();
@@ -188,8 +194,7 @@ public class LabwareFacilityWideResultsMapper {
                     limsTestResult = entry.getValue();
 
                     if (StringUtils.isBlank(limsTestResult) || StringUtils.isBlank(limsTestName)) {
-                        System.err.println("LIMS results: system encountered NULL test or result. Terminating now");
-                        return;
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("The system extracted NULL test name or results from LIMS data for lab set " + orderConcept.getUuid());
                     }
                     String memberConceptUuid = resultSet.get(limsTestName).asText();
                     Concept memberObsConcept = conceptService.getConceptByUuid(memberConceptUuid);
@@ -214,8 +219,7 @@ public class LabwareFacilityWideResultsMapper {
                 }
 
                 if (StringUtils.isBlank(limsTestResult) || StringUtils.isBlank(limsTestName)) {
-                    System.err.println("LIMS results: system encountered NULL test or result. Terminating now");
-                    return;
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("The system extracted NULL test name or results from LIMS data for lab test " + orderConcept.getUuid());
                 }
 
                 if (orderConcept.getDatatype().isNumeric() || orderConcept.getDatatype().isText()) {
@@ -241,15 +245,23 @@ public class LabwareFacilityWideResultsMapper {
             try {
                 enc.addObs(o);
                 encounterService.saveEncounter(enc);
-                orderService.discontinueOrder(order, "Results received", new Date(), order.getOrderer(), order.getEncounter());
+                orderService.discontinueOrder(order, "Results received", new Date(), order.getOrderer(), enc);
+                return ResponseEntity.status(HttpStatus.OK).body("Lab results updated successfully");
+
             } catch (Exception e) {
-                System.out.println("Facility Lims Results update: An error was encountered while updating results for " + order.getConcept().getUuid());
-                e.printStackTrace();
-                //TODO: we should return an appropriate message and status code
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error was encountered while updating results for " + order.getConcept().getUuid() + ". Error: " + e.getMessage());
             }
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Could not find concept for test " + order.getConcept().getUuid());
         }
     }
 
+    /**
+     * Set numeric or text obs values
+     * @param obs
+     * @param concept
+     * @param obsValue
+     */
     private void setObsValue(Obs obs, Concept concept, String obsValue) {
         if (concept.isNumeric()) {
             obs.setValueNumeric(Double.valueOf(obsValue));
@@ -258,15 +270,26 @@ public class LabwareFacilityWideResultsMapper {
         }
     }
 
+    /**
+     * Set coded answer
+     * @param obs
+     * @param concept
+     * @param obsValue
+     */
     private void setObsValue(Obs obs, Concept concept, Concept obsValue) {
         if (concept.getDatatype().isCoded()) {
             obs.setValueCoded(obsValue);
         }
     }
 
+    /**
+     * Creates an obs stub from order details
+     * @param order
+     * @return
+     */
     private Obs constructObs(Order order){
         Obs o = new Obs();
-        o.setDateCreated(order.getDateCreated());
+        o.setDateCreated(new Date());
         o.setCreator(Context.getUserService().getUser(1));
         o.setObsDatetime(order.getDateActivated());
         o.setPerson(order.getPatient());
