@@ -403,7 +403,7 @@
 		<property>kenyaemrorderentry.facilitywidelims_enable_integration</property>
 		<defaultValue>false</defaultValue>
 		<description>
-			Enable (true) or Disable (false) LIMS Facility WideIntegration functionality
+			Enable (true) or Disable (false) LIMS Facility Wide Integration functionality
 		</description>
 	</globalProperty>
 
