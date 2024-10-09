@@ -363,13 +363,13 @@
 		</description>
 	</globalProperty>
 
-	<!--<globalProperty>
-		<property>kemrorder.vl_server_last_execution_time</property>
+	<globalProperty>
+		<property>kenyaemrorderentry.facilitywidelims.mapping</property>
 		<defaultValue></defaultValue>
 		<description>
-			Last execution for vl result pull request
+			Mapping between EMR and LIMS for e-sharing of tests and results
 		</description>
-	</globalProperty>-->
+	</globalProperty>
 
 </module>
 
