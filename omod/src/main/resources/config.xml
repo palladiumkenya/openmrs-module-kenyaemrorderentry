@@ -376,7 +376,7 @@
 	</globalProperty>
 
 	<globalProperty>
-		<property>lims_server_url</property>
+		<property>kenyaemrorderentry.facilitywidelims_server_url</property>
 		<defaultValue></defaultValue>
 		<description>
 			The URL for pushing lab requests to the LIMS server
@@ -384,7 +384,7 @@
 	</globalProperty>
 
 	<globalProperty>
-		<property>lims_result_url</property>
+		<property>kenyaemrorderentry.facilitywidelims_result_url</property>
 		<defaultValue></defaultValue>
 		<description>
 			The URL for fetching LIMS lab result
@@ -392,7 +392,7 @@
 	</globalProperty>
 
 	<globalProperty>
-		<property>lims_server_api_token</property>
+		<property>kenyaemrorderentry.facilitywidelims_server_api_token</property>
 		<defaultValue></defaultValue>
 		<description>
 			API token to authenticate communication to the LIMS lab system API
@@ -400,10 +400,10 @@
 	</globalProperty>
 	
 	<globalProperty>
-		<property>enable_lims_integration</property>
+		<property>kenyaemrorderentry.facilitywidelims_enable_integration</property>
 		<defaultValue>false</defaultValue>
 		<description>
-			Enable (true) or Disable (false) LIMS Integration functionality
+			Enable (true) or Disable (false) LIMS Facility WideIntegration functionality
 		</description>
 	</globalProperty>
 

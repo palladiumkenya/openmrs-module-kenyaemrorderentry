@@ -31,10 +31,10 @@ public class ModuleConstants {
     public static final String GP_EDARP_FLU_LAB_SERVER_REQUEST_URL = "edarp_flu_server_url";
     public static final String GP_EDARP_FLU_LAB_SERVER_RESULT_URL = "edarp_flu_server_result_url";
        //LIMS
-	public static final String GP_ENABLE_LIMS_INTEGRATION = "enable_lims_integration";
-	public static final String GP_LIMS_LAB_SERVER_REQUEST_URL = "lims_server_url";
-	public static final String GP_LIMS_LAB_SERVER_RESULT_URL = "lims_result_url";
-	public static final String GP_LIMS_LAB_SERVER_API_TOKEN = "lims_server_api_token";
+	public static final String GP_ENABLE_LIMS_INTEGRATION = "kenyaemrorderentry.facilitywidelims_enable_integration";
+	public static final String GP_LIMS_LAB_SERVER_REQUEST_URL = "kenyaemrorderentry.facilitywidelims_server_url";
+	public static final String GP_LIMS_LAB_SERVER_RESULT_URL = "kenyaemrorderentry.facilitywidelims_result_url";
+	public static final String GP_LIMS_LAB_SERVER_API_TOKEN = "kenyaemrorderentry.facilitywidelims_server_api_token";
 
 
     public static final String GP_MANIFEST_LAST_PROCESSED = "kemrorder.last_processed_manifest";// used when fetching results from the server
