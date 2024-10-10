@@ -55,12 +55,12 @@ public class labsUtils {
 	 */
 	static String limsLabTestIdCodesConverter(Concept key) {
 		Map<Concept, String> labTestsIdCodes = new HashMap<Concept, String>();
-		labTestsIdCodes.put(conceptService.getConcept(645), "596");
+		labTestsIdCodes.put(conceptService.getConcept(161500), "596");
 		labTestsIdCodes.put(conceptService.getConcept(848), "609");
-		labTestsIdCodes.put(conceptService.getConcept(785), "2230");		
+		labTestsIdCodes.put(conceptService.getConcept(785), "3748");		
 		labTestsIdCodes.put(conceptService.getConcept(300), "513");
 		labTestsIdCodes.put(conceptService.getConcept(161478), "607");
-		labTestsIdCodes.put(conceptService.getConcept(1297), "1803");
+		labTestsIdCodes.put(conceptService.getConcept(161154), "1803");
 		labTestsIdCodes.put(conceptService.getConcept(166038), "1165");
 		labTestsIdCodes.put(conceptService.getConcept(730), "589");
 		labTestsIdCodes.put(conceptService.getConcept(790), "595");
@@ -69,7 +69,7 @@ public class labsUtils {
 		labTestsIdCodes.put(conceptService.getConcept(159607), "624");
 		labTestsIdCodes.put(conceptService.getConcept(855), "619");
 		labTestsIdCodes.put(conceptService.getConcept(160912), "1957");
-		labTestsIdCodes.put(conceptService.getConcept(169047), "3845");
+		labTestsIdCodes.put(conceptService.getConcept(1019), "3845");
 		labTestsIdCodes.put(conceptService.getConcept(159829), "2235");
 		labTestsIdCodes.put(conceptService.getConcept(163620), "1860");
 		labTestsIdCodes.put(conceptService.getConcept(21), "1625");
@@ -96,6 +96,14 @@ public class labsUtils {
 		labTestsIdCodes.put(conceptService.getConcept(790), "1551");
 		labTestsIdCodes.put(conceptService.getConcept(163699), "2202");
 		labTestsIdCodes.put(conceptService.getConcept(655), "642");
+		labTestsIdCodes.put(conceptService.getConcept(163680), "1583");
+		labTestsIdCodes.put(conceptService.getConcept(1133), "613");
+		labTestsIdCodes.put(conceptService.getConcept(161504), "588");
+		labTestsIdCodes.put(conceptService.getConcept(160922), "2237");
+		labTestsIdCodes.put(conceptService.getConcept(161454), "638");
+		labTestsIdCodes.put(conceptService.getConcept(167207), "634");
+		labTestsIdCodes.put(conceptService.getConcept(161453), "644");
+		labTestsIdCodes.put(conceptService.getConcept(159607), "1236");
 		
 		return labTestsIdCodes.get(key);
 	}
