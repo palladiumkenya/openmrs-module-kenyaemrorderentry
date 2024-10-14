@@ -11,12 +11,17 @@ package org.openmrs.module.kenyaemrorderentry.labDataExchange;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import org.openmrs.Concept;
+import org.openmrs.Order;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
+import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
+import org.openmrs.module.kenyaemrorderentry.util.Utils;
+import org.openmrs.ui.framework.SimpleObject;
+import org.openmrs.util.PrivilegeConstants;
 
 import java.text.SimpleDateFormat;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class labsUtils {
 	static ConceptService conceptService = Context.getConceptService();
@@ -48,6 +53,32 @@ public class labsUtils {
 		final JsonNodeFactory factory = JsonNodeFactory.instance;
 		return factory;
 	}
+	/**
+	 * Returns a list of active lab orders IDs
+	 *	
+	 * @return
+	 */
+	public static List<Integer> getOrderIdsForActiveOrders() {		
+		Context.addProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
+		List<Integer> activeLabs = new ArrayList<Integer>();
+		String sql = "select o.order_id from orders o\t\n" +
+			"           inner join order_type ot on ot.order_type_id = o.order_type_id and ot.uuid = '52a447d3-a64a-11e3-9aeb-50e549534c5e'\n" +
+			"where o.order_action='NEW' and o.date_stopped is null and o.voided=0 ";
+		
+		System.out.println("LIMS checking Active orders: Now executing SQL: " + sql);
+		List<List<Object>> activeOrders = Context.getAdministrationService().executeSQL(sql, true);
+		if (!activeOrders.isEmpty()) {
+			for (List<Object> res : activeOrders) {
+				Integer orderId = (Integer) res.get(0);
+				activeLabs.add(orderId);
+			}
+		}
+		Context.removeProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
+		System.out.println("Active Labs For LIMS: " + activeOrders.size());
+		return activeLabs;
+	}
+
+
 	/**
 	 * Mappings for Lab Test Codes and concepts
 	 *
