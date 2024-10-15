@@ -384,4 +384,29 @@
         </addColumn>
     </changeSet>
 
+	<!--Adding scheduled task to pull lab results from LIMS system-->
+	<changeSet id="kenyaemr_order_entry_pull_lims_results" author="pwangoo">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="0">
+				SELECT COUNT(*) FROM scheduler_task_config
+				WHERE schedulable_class = 'org.openmrs.module.kenyaemrorderentry.task.PullLimsFacilityWideLabResultsTask'
+				  And name = 'Pull Lab Results from LIMS'
+			</sqlCheck>
+		</preConditions>
+		<comment>Inserting processor for pulling lims lab results into 'schedule_task_config' table</comment>
+		<insert tableName="scheduler_task_config">
+			<column name="name" value="Pull LIMS Facility Wide Lab results" />
+			<column name="description" value="Pull Lab Results from LIMs lab system" />
+			<column name="schedulable_class" value="org.openmrs.module.kenyaemrorderentry.task.PullLimsFacilityWideLabResultsTask" />
+			<column name="start_time_pattern" value="MM/dd/yyyy HH:mm:ss" />
+			<column name="start_time" valueDate="2024-10-14T08:59:59" />
+			<column name="repeat_interval" value="1800" />
+			<column name="date_created" valueDate="CURRENT_TIMESTAMP" />
+			<column name="created_by" value="1" />
+			<column name="start_on_startup" value="0" />
+			<column name="started" value="0" />
+			<column name="uuid" value="69f82c72-43ac-46f0-ac35-8d9b71599700" />
+		</insert>
+	</changeSet>
+
 </databaseChangeLog>
