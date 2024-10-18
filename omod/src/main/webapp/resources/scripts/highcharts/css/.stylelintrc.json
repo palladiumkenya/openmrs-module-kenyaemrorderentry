@@ -1,6 +1,0 @@
-{
-    "extends": "../.stylelintrc.json",
-    "rules": {
-        "color-hex-length": "long"
-    }
-}
