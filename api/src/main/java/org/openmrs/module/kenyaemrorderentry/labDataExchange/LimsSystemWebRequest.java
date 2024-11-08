@@ -9,35 +9,56 @@
  */
 package org.openmrs.module.kenyaemrorderentry.labDataExchange;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.openmrs.*;
 import org.openmrs.api.DiagnosisService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemrorderentry.ModuleConstants;
+import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
+import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
+import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
+import org.openmrs.module.kenyaemrorderentry.task.ProcessViralLoadResults;
 import org.openmrs.module.kenyaemrorderentry.task.PushLabRequestsTask;
 import org.openmrs.module.kenyaemrorderentry.util.Utils;
 import org.openmrs.module.reporting.common.Age;
 import org.openmrs.util.PrivilegeConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URI;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.openmrs.module.kenyaemrorderentry.labDataExchange.LabwareFacilityWideResultsMapper.readLabTestMappingConfiguration;
 
 
 public class LimsSystemWebRequest {
 
 	private static final Logger log = LoggerFactory.getLogger(PushLabRequestsTask.class);
-
+	public static final String LAB_TEST_CODE_PROPERTY = "testCode";
 
 	/**
 	 * Generates the order payload used to post to Lims server	 *
@@ -105,9 +126,25 @@ public class LimsSystemWebRequest {
 		dateRequestReceived = sd.format(order.getDateCreated());
 		RequestedByName = order.getCreator().getGivenName() != null ? order.getCreator().getGivenName() : "";
 		LabRequestId = order.getOrderId().toString();
-		LabTestId = labsUtils.limsLabTestIdCodesConverter(order.getConcept());
-		testName = order.getConcept().getName().getName();
+		// Get mapping for the test concept
+		ObjectNode mapping = readLabTestMappingConfiguration();
+		if (mapping == null) {
+			System.out.println("LIMS-EMR mapping configuration is missing or invalid!");
+		}
+		System.out.println("Starting concept mapping for orders ==>");
+		System.out.println("Order Concept UUID for orders==> " + order.getConcept().getUuid());
+		ObjectNode testConceptMapping = (ObjectNode) mapping.get(order.getConcept().getUuid());
+		System.out.println("Concept map for orders ==>" + testConceptMapping);
+		if (testConceptMapping == null) {
+			System.out.println("Mapping for order with concept does not exists ==>" + order.getConcept().getId());
+		}
 
+		System.out.println("Mapping exists ==>");
+		// assign LabTestId as test code from mapper
+		LabTestId = testConceptMapping.get(LAB_TEST_CODE_PROPERTY).asText();
+		System.out.println("TEST CODE ==> " + LabTestId);
+
+		testName = order.getConcept().getName().getName();
 		Context.removeProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
 
 		//Create LIMS order payload
@@ -176,7 +213,7 @@ public class LimsSystemWebRequest {
 			//Set the API media type in http content-type header
 			postRequest.addHeader("content-type", "application/json");
 
-			// If using Bearer Key
+			// If using api-key
 			postRequest.setHeader("x-api-key", API_KEY);
 			//Set the request post body
 			String payload = params;
@@ -218,6 +255,94 @@ public class LimsSystemWebRequest {
 		}
 
 		return (false);
+	}
+
+	public static void pullFacilityWideLimsLabResult(List<Integer> orderIds) throws IOException {
+		String serverUrl = "";
+		String API_KEY = "";
+		GlobalProperty gpLIMsServerPushUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LIMS_LAB_SERVER_RESULT_URL);
+		GlobalProperty gpLIMsApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LIMS_LAB_SERVER_API_TOKEN);
+		serverUrl = gpLIMsServerPushUrl.getPropertyValue().trim();
+		API_KEY = gpLIMsApiToken.getPropertyValue().trim();
+		SSLConnectionSocketFactory sslsf = null;
+		GlobalProperty gpSslVerification = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_SSL_VERIFICATION_ENABLED);
+
+		if (gpSslVerification != null) {
+			String sslVerificationEnabled = gpSslVerification.getPropertyValue();
+			if (StringUtils.isNotBlank(sslVerificationEnabled)) {
+				if (sslVerificationEnabled.equals("true")) {
+					sslsf = Utils.sslConnectionSocketFactoryDefault();
+				} else {
+					sslsf = Utils.sslConnectionSocketFactoryWithDisabledSSLVerification();
+				}
+			}
+		}
+
+		CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
+
+		for (Integer order : orderIds) {
+			try {
+
+				URIBuilder builder = new URIBuilder(serverUrl);
+				String currentOrder = order.toString();
+
+				builder.addParameter("LabRequestId", currentOrder);
+				URI uri = builder.build();
+				System.out.println("Get Lims Results URL: " + uri);
+
+				HttpGet httpget = new HttpGet(uri);
+
+				//Set the API media type in http content-type header
+				// If using api-key
+				httpget.addHeader("content-type", "application/json");
+				httpget.addHeader("x-api-key", API_KEY);
+
+				CloseableHttpResponse response = httpClient.execute(httpget);
+				System.out.println("Get Lims Results GET Request: " + httpget);
+
+				final int statusCode = response.getStatusLine().getStatusCode();
+				if (statusCode == 200 || statusCode == 201) {
+					System.out.println("Get Lims Results: REST Call Success");
+
+					String jsonString = null;
+					HttpEntity entity = response.getEntity();
+					if (entity != null) {
+						BufferedReader rd = new BufferedReader(new InputStreamReader(entity.getContent()));
+
+						try {
+							jsonString = rd.lines().collect(Collectors.joining()).toString();
+							System.out.println("Lims Lab Results Get: Request JSON -> " + jsonString);
+						} finally {
+							rd.close();
+						}
+					}
+					JSONParser parser = new JSONParser();
+					JSONObject responseObject = (JSONObject) parser.parse(jsonString);
+
+					if (responseObject != null && !responseObject.isEmpty()) {
+						// Update Lims results order
+						LabwareFacilityWideResultsMapper.processResultsFromLims(jsonString);
+					}
+					System.out.println("Lims Results Get: Successfully executed the task that pulls lab requests");
+					log.info("Lims Results Get: Successfully executed the task that pulls lab requests");
+					System.out.println("Lims Results Get: Successfully Done");
+				} else {
+					System.err.println("Get Lims Lab Results Failed with HTTP error code : " + statusCode);
+				}
+			} catch (Exception e) {
+				System.err.println("Get Lims Lab Results Error: " + e.getMessage());
+				e.printStackTrace();
+			}
+			// Delay loop
+			try {
+				//Delay for 5 seconds
+				Thread.sleep(5000);
+			} catch (Exception ie) {
+				Thread.currentThread().interrupt();
+			}
+		}
+		// finally
+		httpClient.close();
 	}
 
 }

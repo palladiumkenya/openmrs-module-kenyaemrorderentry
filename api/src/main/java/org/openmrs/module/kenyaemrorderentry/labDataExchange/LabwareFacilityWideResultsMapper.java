@@ -30,7 +30,7 @@ import java.util.Map;
  */
 public class LabwareFacilityWideResultsMapper {
     public static final String LAB_TEST_RESULT_SET_PROPERTY = "result";
-    String LAB_ENCOUNTER_TYPE_UUID = "e1406e88-e9a9-11e8-9f32-f2801f1b9fd1";
+	public static String LAB_ENCOUNTER_TYPE_UUID = "e1406e88-e9a9-11e8-9f32-f2801f1b9fd1";
 
     public LabwareFacilityWideResultsMapper() {
     }
@@ -64,7 +64,7 @@ public class LabwareFacilityWideResultsMapper {
      * }
      * @return
      */
-    public ObjectNode readLabTestMappingConfiguration(){
+    public static ObjectNode readLabTestMappingConfiguration(){
         AdministrationService administrationService = Context.getAdministrationService();
         String limsConfiguration = (administrationService.getGlobalProperty("kenyaemrorderentry.facilitywidelims.mapping"));
         ObjectMapper mapper = new ObjectMapper();
@@ -83,12 +83,14 @@ public class LabwareFacilityWideResultsMapper {
      * @param resultPayload
      * @return
      */
-    public ResponseEntity<String> processResultsFromLims(String resultPayload) {
+    public static ResponseEntity<String> processResultsFromLims(String resultPayload) {
+		System.out.println("Start Processing results from LIMs" + resultPayload);
         JsonElement rootNode = JsonParser.parseString(resultPayload);
         JsonObject resultsObj = null;
         try {
             if (rootNode.isJsonObject()) {
                 resultsObj = rootNode.getAsJsonObject();
+				System.out.println("Result object" + resultPayload);
             } else {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The payload could not be understood. An object is expected!");
             }
@@ -100,15 +102,18 @@ public class LabwareFacilityWideResultsMapper {
         if (resultsObj != null) {
             Map<String,String> resultMap = new HashMap<>();
             JsonArray resultArray = resultsObj.get("data").getAsJsonArray();
+			System.out.println("Data Array" + resultArray);
             Integer orderId = null;
             for (int i = 0; i < resultArray.size(); i++) {
                 try {
                     JsonObject o = resultArray.get(i).getAsJsonObject();
                     orderId = o.get("labRequestId").getAsInt();
+					System.out.println("Lab request ID " + orderId);
                     String testName = !o.isJsonNull() && !o.get("resultName").isJsonNull() ? o.get("resultName").getAsString() : "";
                     String result = !o.isJsonNull() && !o.get("resultValue").isJsonNull() ? o.get("resultValue").getAsString() : "";
                     if (StringUtils.isNotBlank(testName) && StringUtils.isNotBlank(result)) {
                         resultMap.put(testName, result);
+						System.out.println("Result Map" + resultMap);
                     }
                 } catch (Exception ex) {
                     ex.printStackTrace();
@@ -117,6 +122,7 @@ public class LabwareFacilityWideResultsMapper {
                 }
             }
             // update results and complete the order
+			System.out.println("Map" + resultMap + "OrderID " +orderId);
             return mapLimsResultsInEmr(orderId, resultMap);
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The system could not extract the test results from LIMS details");
@@ -132,7 +138,9 @@ public class LabwareFacilityWideResultsMapper {
      * For lab sets i.e. complete blood count, the map entry is a test and the value
      * Results for lab sets are handled as grouped observations with a reference to the parent order.
      */
-    public ResponseEntity<String> mapLimsResultsInEmr(Integer orderId, Map<String,String> limsResult) {
+    public static ResponseEntity<String> mapLimsResultsInEmr(Integer orderId, Map<String,String> limsResult) {
+		System.out.println("Inside mapper");
+		System.out.println("Inside mapper" + limsResult);
         if (limsResult == null || limsResult.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The system encountered empty results from LIMS");
         }
@@ -145,17 +153,22 @@ public class LabwareFacilityWideResultsMapper {
         Concept orderConcept = order.getConcept();
 
         if (orderConcept != null) {
-
+			System.out.println("Order Concept" + orderConcept);
             ObjectNode mapping = readLabTestMappingConfiguration();
             if (mapping == null) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("LIMS-EMR mapping configuration is missing or invalid!");
             }
             // Get mapping for the test concept
+			System.out.println("Starting concept mapping ==>");
+			System.out.println("Order Concept UUID==> " + orderConcept.getUuid());
             ObjectNode testConceptMapping = (ObjectNode) mapping.get(orderConcept.getUuid());
+			System.out.println("Concept map ==>"+testConceptMapping);
             if (testConceptMapping == null) {
+				System.out.println("Concept mapping ==> "+testConceptMapping);
+				System.out.println("Mapping does not exists ==>");
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("LIMS lab test configuration doesn't support result mapping for test " + orderConcept.getUuid());
             }
-
+			System.out.println("Mapping exists ==>");
             // setup lab result encounter
             Encounter enc = new Encounter();
             enc.setEncounterType(labEncounterType);
@@ -187,33 +200,45 @@ public class LabwareFacilityWideResultsMapper {
              * "WBC": 123, "RDW": 679, "someQualitativeTest":"Positive"
              */
             if (orderConcept.isSet() && orderConcept.getSetMembers().size() > 0) {
+				System.out.println("Test is a set ==>");
                 ObjectNode resultSet = (ObjectNode) testConceptMapping.get(LAB_TEST_RESULT_SET_PROPERTY);
                 // loop through the results and create an obs group
                 for (Map.Entry<String, String> entry : limsResult.entrySet()) {
                     limsTestName = entry.getKey();
                     limsTestResult = entry.getValue();
 
+					System.out.println("Test Name ==>"+limsTestName);
+					System.out.println("Test Result ==>"+limsTestResult);
+
                     if (StringUtils.isBlank(limsTestResult) || StringUtils.isBlank(limsTestName)) {
                         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("The system extracted NULL test name or results from LIMS data for lab set " + orderConcept.getUuid());
                     }
-                    String memberConceptUuid = resultSet.get(limsTestName).asText();
-                    Concept memberObsConcept = conceptService.getConceptByUuid(memberConceptUuid);
-                    Obs memberObs = constructObs(order);
-                    if (memberObsConcept != null) {
-                        memberObs.setConcept(memberObsConcept);
-                        if (memberObsConcept.getDatatype().isNumeric() || memberObsConcept.getDatatype().isText()) {
-                            setObsValue(memberObs, memberObsConcept, limsTestResult);
-                        } else if (memberObsConcept.getDatatype().isCoded()) {
-                            String memberTestConceptUuid = resultSet.get(limsTestName).asText();
-                            Concept codedAnswer = Context.getConceptService().getConceptByUuid(memberTestConceptUuid);
-                            setObsValue(memberObs, memberObsConcept, codedAnswer);
-                        }
-                    }
-                    o.addGroupMember(memberObs);
+					if(resultSet.get(limsTestName) != null) {
+						String memberConceptUuid = resultSet.get(limsTestName).asText();
+						Concept memberObsConcept = conceptService.getConceptByUuid(memberConceptUuid);
+						System.out.println("Member Name ==>" + memberConceptUuid);
+						System.out.println("Member Result ==>" + memberObsConcept);
+						Obs memberObs = constructObs(order);
+						if (memberObsConcept != null) {
+							System.out.println("Setting conceptMembers ==>" + memberObsConcept);
+							memberObs.setConcept(memberObsConcept);
+							if (memberObsConcept.getDatatype().isNumeric() || memberObsConcept.getDatatype().isText()) {
+								System.out.println("Member concept is Numeric or Text ==>");
+								setObsValue(memberObs, memberObsConcept, limsTestResult);
+							} else if (memberObsConcept.getDatatype().isCoded()) {
+								System.out.println("Member concept is Coded ==>");
+								String memberTestConceptUuid = resultSet.get(limsTestName).asText();
+								Concept codedAnswer = Context.getConceptService().getConceptByUuid(memberTestConceptUuid);
+								setObsValue(memberObs, memberObsConcept, codedAnswer);
+							}
+						}
+						o.addGroupMember(memberObs);
+					}
                 }
 
             } else { // this is for a non-set test.
                 for (Map.Entry<String, String> entry : limsResult.entrySet()) {
+					System.out.println("Is non set ==>");
                     limsTestName = entry.getKey();
                     limsTestResult = entry.getValue();
                 }
@@ -223,6 +248,7 @@ public class LabwareFacilityWideResultsMapper {
                 }
 
                 if (orderConcept.getDatatype().isNumeric() || orderConcept.getDatatype().isText()) {
+					System.out.println("Setting obs value for Numeric or text==>");
                     setObsValue(o, orderConcept, limsTestResult);
                 } else if (orderConcept.getDatatype().isCoded()) {
                     /*
@@ -236,6 +262,7 @@ public class LabwareFacilityWideResultsMapper {
                     }
                     We expect results in the form of "Malaria Smear":"Positive"
                     */
+					System.out.println("Setting obs value for Coded==>");
                     ObjectNode resultSet = (ObjectNode) testConceptMapping.get(LAB_TEST_RESULT_SET_PROPERTY);
                     String codedAnswerConceptUuid = resultSet.get(limsTestResult).asText();
                     Concept codedAnswer = Context.getConceptService().getConceptByUuid(codedAnswerConceptUuid);
@@ -243,9 +270,11 @@ public class LabwareFacilityWideResultsMapper {
                 }
             }
             try {
+				System.out.println("Saving encounter");
                 enc.addObs(o);
                 encounterService.saveEncounter(enc);
-                orderService.discontinueOrder(order, "Results received", new Date(), order.getOrderer(), enc);
+                orderService.discontinueOrder(order, "Results received", new Date(), order.getOrderer(), enc);				
+				order.setFulfillerStatus(Order.FulfillerStatus.COMPLETED);
                 return ResponseEntity.status(HttpStatus.OK).body("Lab results updated successfully");
 
             } catch (Exception e) {
@@ -262,7 +291,7 @@ public class LabwareFacilityWideResultsMapper {
      * @param concept
      * @param obsValue
      */
-    private void setObsValue(Obs obs, Concept concept, String obsValue) {
+    private static void setObsValue(Obs obs, Concept concept, String obsValue) {
         if (concept.isNumeric()) {
             obs.setValueNumeric(Double.valueOf(obsValue));
         } else if (concept.getDatatype().isText()) {
@@ -276,7 +305,7 @@ public class LabwareFacilityWideResultsMapper {
      * @param concept
      * @param obsValue
      */
-    private void setObsValue(Obs obs, Concept concept, Concept obsValue) {
+    private static void setObsValue(Obs obs, Concept concept, Concept obsValue) {
         if (concept.getDatatype().isCoded()) {
             obs.setValueCoded(obsValue);
         }
@@ -287,7 +316,7 @@ public class LabwareFacilityWideResultsMapper {
      * @param order
      * @return
      */
-    private Obs constructObs(Order order){
+    private static Obs constructObs(Order order){
         Obs o = new Obs();
         o.setDateCreated(new Date());
         o.setCreator(Context.getUserService().getUser(1));

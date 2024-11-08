@@ -11,12 +11,17 @@ package org.openmrs.module.kenyaemrorderentry.labDataExchange;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import org.openmrs.Concept;
+import org.openmrs.Order;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
+import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
+import org.openmrs.module.kenyaemrorderentry.util.Utils;
+import org.openmrs.ui.framework.SimpleObject;
+import org.openmrs.util.PrivilegeConstants;
 
 import java.text.SimpleDateFormat;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class labsUtils {
 	static ConceptService conceptService = Context.getConceptService();
@@ -49,55 +54,27 @@ public class labsUtils {
 		return factory;
 	}
 	/**
-	 * Mappings for Lab Test Codes and concepts
-	 *
+	 * Returns a list of active lab orders IDs
+	 *	
 	 * @return
 	 */
-	static String limsLabTestIdCodesConverter(Concept key) {
-		Map<Concept, String> labTestsIdCodes = new HashMap<Concept, String>();
-		labTestsIdCodes.put(conceptService.getConcept(645), "596");
-		labTestsIdCodes.put(conceptService.getConcept(848), "609");
-		labTestsIdCodes.put(conceptService.getConcept(785), "2230");		
-		labTestsIdCodes.put(conceptService.getConcept(300), "513");
-		labTestsIdCodes.put(conceptService.getConcept(161478), "607");
-		labTestsIdCodes.put(conceptService.getConcept(1297), "1803");
-		labTestsIdCodes.put(conceptService.getConcept(166038), "1165");
-		labTestsIdCodes.put(conceptService.getConcept(730), "589");
-		labTestsIdCodes.put(conceptService.getConcept(790), "595");
-		labTestsIdCodes.put(conceptService.getConcept(161233), "865");
-		labTestsIdCodes.put(conceptService.getConcept(159647), "683");
-		labTestsIdCodes.put(conceptService.getConcept(159607), "624");
-		labTestsIdCodes.put(conceptService.getConcept(855), "619");
-		labTestsIdCodes.put(conceptService.getConcept(160912), "1957");
-		labTestsIdCodes.put(conceptService.getConcept(169047), "3845");
-		labTestsIdCodes.put(conceptService.getConcept(159829), "2235");
-		labTestsIdCodes.put(conceptService.getConcept(163620), "1860");
-		labTestsIdCodes.put(conceptService.getConcept(21), "1625");
-		labTestsIdCodes.put(conceptService.getConcept(159644), "3059");
-		labTestsIdCodes.put(conceptService.getConcept(159430), "587");
-		labTestsIdCodes.put(conceptService.getConcept(167810), "944");
-		labTestsIdCodes.put(conceptService.getConcept(163722), "585");
-		labTestsIdCodes.put(conceptService.getConcept(165552), "515");
-		labTestsIdCodes.put(conceptService.getConcept(159606), "625");
-		labTestsIdCodes.put(conceptService.getConcept(654), "1620");
-		labTestsIdCodes.put(conceptService.getConcept(1006), "684");
-		labTestsIdCodes.put(conceptService.getConcept(159362), "629");
-		labTestsIdCodes.put(conceptService.getConcept(163594), "615");
-		labTestsIdCodes.put(conceptService.getConcept(1000071), "1188");
-		labTestsIdCodes.put(conceptService.getConcept(45), "1394");
-		labTestsIdCodes.put(conceptService.getConcept(161154), "658");
-		labTestsIdCodes.put(conceptService.getConcept(160916), "1889");
-		labTestsIdCodes.put(conceptService.getConcept(1000443), "511");
-		labTestsIdCodes.put(conceptService.getConcept(161470), "606");
-		labTestsIdCodes.put(conceptService.getConcept(161467), "630");
-		labTestsIdCodes.put(conceptService.getConcept(160225), "622");
-		labTestsIdCodes.put(conceptService.getConcept(1000451), "3764");
-		labTestsIdCodes.put(conceptService.getConcept(161503), "3889");
-		labTestsIdCodes.put(conceptService.getConcept(790), "1551");
-		labTestsIdCodes.put(conceptService.getConcept(163699), "2202");
-		labTestsIdCodes.put(conceptService.getConcept(655), "642");
+	public static List<Integer> getOrderIdsForActiveOrders(String fetchDate) {		
+		Context.addProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
+		List<Integer> activeLabs = new ArrayList<Integer>();
+		String sql = "select o.order_id from orders o\t\n" +
+			"           inner join order_type ot on ot.order_type_id = o.order_type_id and ot.uuid = '52a447d3-a64a-11e3-9aeb-50e549534c5e'\n" +
+			"where o.order_action='NEW' and o.concept_id not in (856,5497) and o.date_stopped is null and o.voided=0 and o.date_created >= '" + fetchDate + "' ";
 		
-		return labTestsIdCodes.get(key);
+		System.out.println("LIMS checking Active orders: Now executing SQL: " + sql);
+		List<List<Object>> activeOrders = Context.getAdministrationService().executeSQL(sql, true);
+		if (!activeOrders.isEmpty()) {
+			for (List<Object> res : activeOrders) {
+				Integer orderId = (Integer) res.get(0);
+				activeLabs.add(orderId);
+			}
+		}
+		Context.removeProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
+		System.out.println("Active Labs For LIMS: " + activeOrders.size());
+		return activeLabs;
 	}
-
 }
