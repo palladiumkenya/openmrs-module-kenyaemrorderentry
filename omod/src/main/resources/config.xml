@@ -406,6 +406,14 @@
 			Enable (true) or Disable (false) LIMS Facility Wide Integration functionality
 		</description>
 	</globalProperty>
+	
+	<globalProperty>
+		<property>kenyaemrorderentry.facilitywidelims.lastFetchDateAndTime</property>
+		<defaultValue>20241030120000</defaultValue>
+		<description>
+			The last date and time that the last fetch was done for lims results push task
+		</description>
+	</globalProperty>
 
 </module>
 

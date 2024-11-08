@@ -15,10 +15,12 @@ import org.openmrs.module.kenyaemrorderentry.labDataExchange.*;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 import org.openmrs.scheduler.tasks.AbstractTask;
+import org.openmrs.util.OpenmrsUtil;
 
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -38,15 +40,27 @@ public class PullLimsFacilityWideLabResultsTask extends AbstractTask {
 	 */
 	public void execute() {
 		System.out.println("Get Lims Lab Results: PULL TASK Starting");
-		Context.openSession();
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+		SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		// Fetch the last date of fetch
+		String fetchDate = null;
+		GlobalProperty globalPropertyObject = Context.getAdministrationService().getGlobalPropertyObject("kenyaemrorderentry.facilitywidelims.lastFetchDateAndTime");
 
+		try {
+			String ts = globalPropertyObject.getValue().toString();
+			fetchDate = sd.format(formatter.parse(ts));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		Context.openSession();
+		System.out.println("Fetch Date ==>" + fetchDate);
 		String limsIntegrationEnabled = "";
 		GlobalProperty enableLimsIntegration = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_ENABLE_LIMS_INTEGRATION);
 		limsIntegrationEnabled = enableLimsIntegration.getPropertyValue().trim();
 		if (limsIntegrationEnabled.equals("false")) {
 			return;
 		} else {
-			List<Integer> activeTestOrders = labsUtils.getOrderIdsForActiveOrders();
+			List<Integer> activeTestOrders = labsUtils.getOrderIdsForActiveOrders(fetchDate);
 			System.out.println("List size of active test orders: " + activeTestOrders.size());
 			if (activeTestOrders.size() > 0) {
 				try {
@@ -72,6 +86,14 @@ public class PullLimsFacilityWideLabResultsTask extends AbstractTask {
 					}
 				}
 			}
+			//Set next fetch date start time
+			Date nextProcessingDate = new Date();
+			nextProcessingDate.setTime(System.currentTimeMillis());
+			Date startOfDayMidnight = new Date(nextProcessingDate.getTime() - (1000 * 60 * 60 * 24));
+			Date midnightDateTime = OpenmrsUtil.getLastMomentOfDay(startOfDayMidnight);
+
+			globalPropertyObject.setPropertyValue(formatter.format(midnightDateTime));
+			Context.getAdministrationService().saveGlobalProperty(globalPropertyObject);
 		}
 	}
 
