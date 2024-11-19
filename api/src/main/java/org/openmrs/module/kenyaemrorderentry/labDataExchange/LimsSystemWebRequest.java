@@ -137,6 +137,7 @@ public class LimsSystemWebRequest {
 		System.out.println("Concept map for orders ==>" + testConceptMapping);
 		if (testConceptMapping == null) {
 			System.out.println("Mapping for order with concept does not exists ==>" + order.getConcept().getId());
+			// return null;
 		}
 
 		System.out.println("Mapping exists ==>");
@@ -242,7 +243,6 @@ public class LimsSystemWebRequest {
 				log.info("LIMs Lab Request POST: Successfully pushed a lab test");
 
 				Context.flushSession();
-
 				System.out.println("Labware Lab Results POST: Push Successfull");
 				return (true);
 			}

@@ -24,14 +24,15 @@ import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.exception.DataException;
+import org.hibernate.transform.Transformers;
 import org.openmrs.Cohort;
 import org.openmrs.Order;
-import org.openmrs.Patient;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.db.DAOException;
 import org.openmrs.module.kenyaemrorderentry.api.db.KenyaemrOrdersDAO;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
+import org.openmrs.module.kenyaemrorderentry.queue.LimsQueue;
 import org.openmrs.module.kenyaemrorderentry.util.Utils;
 import org.openmrs.module.reporting.common.DurationUnit;
 import org.openmrs.ui.framework.SimpleObject;
@@ -923,5 +924,49 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
 
         return(results);
 	}
+
+    @Override
+    public List<LimsQueue> getLimsQueueEntriesByStatus(String status, Date createdOnOrAfterDate, Date createdOnOrBeforeDate, boolean filterOrdersOnly) {
+        Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LimsQueue.class);
+        if (filterOrdersOnly) {
+            criteria.setProjection(Projections.projectionList()
+                            .add(Projections.property("order"), "order"))
+                    .setResultTransformer(Transformers.aliasToBean(LimsQueue.class));
+        }
+        criteria.add(Restrictions.eq("status", status));
+        criteria.add(Restrictions.eq("voided", false));
+        criteria.add(Restrictions.or(Restrictions.isNull("dateLastChecked"), Restrictions.le("dateLastChecked", createdOnOrAfterDate)));
+        criteria.addOrder(org.hibernate.criterion.Order.asc("id"));
+        criteria.setMaxResults(100);
+
+        return criteria.list();
+    }
+
+    public List<LimsQueue> getLimsQueueOrdersByStatus(String status, Date createdOnOrAfterDate, Date createdOnOrBeforeDate) {
+        /*Criteria cr = session.createCriteria(User.class)
+    .setProjection(Projections.projectionList()
+      .add(Projections.property("id"), "id")
+      .add(Projections.property("Name"), "Name"))
+    .setResultTransformer(Transformers.aliasToBean(User.class));
+
+  List<User> list = cr.list();*/
+        Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LimsQueue.class);
+        criteria.setProjection(Projections.projectionList()
+                .add(Projections.property("order"), "order"))
+                .setResultTransformer(Transformers.aliasToBean(LimsQueue.class));
+        criteria.add(Restrictions.eq("status", status));
+        criteria.add(Restrictions.eq("voided", false));
+        criteria.add(Restrictions.or(Restrictions.isNull("dateLastChecked"), Restrictions.le("dateLastChecked", createdOnOrAfterDate)));
+        criteria.addOrder(org.hibernate.criterion.Order.asc("id"));
+        criteria.setMaxResults(100);
+
+        return criteria.list();
+    }
+    @Override
+    public LimsQueue saveLimsQueue(LimsQueue limsQueue) throws DAOException {
+        System.err.println("Saving the limsQueue");
+        sessionFactory.getCurrentSession().saveOrUpdate(limsQueue);
+        return limsQueue;
+    }
 
 }

@@ -45,6 +45,7 @@
 	<mappingFiles>
 		LabManifest.hbm.xml
 		LabManifestOrder.hbm.xml
+		LimsQueue.hbm.xml
 	</mappingFiles>
 
 	<!-- Internationalization -->

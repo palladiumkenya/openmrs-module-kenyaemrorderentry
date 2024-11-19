@@ -13,6 +13,7 @@ import org.openmrs.module.kenyaemrorderentry.api.db.hibernate.HibernateKenyaemrO
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
+import org.openmrs.module.kenyaemrorderentry.queue.LimsQueue;
 import org.openmrs.module.reporting.common.DurationUnit;
 import org.openmrs.ui.framework.SimpleObject;
 import org.springframework.cache.CacheManager;
@@ -85,6 +86,11 @@ public class KenyaemrOrdersServiceImpl extends BaseOpenmrsService implements Ken
 
         // Save or update manifest
         return dao.saveLabOrderManifest(labManifest);
+    }
+
+    @Override
+    public LimsQueue saveLimsQueue(LimsQueue limsQueue) {
+        return dao.saveLimsQueue(limsQueue);
     }
 
     @Override
@@ -451,5 +457,10 @@ public class KenyaemrOrdersServiceImpl extends BaseOpenmrsService implements Ken
 	public List<LabManifest> getLabManifests(String uuid, String status, String type, String withErrors, Date createdOnOrAfterDate, Date createdOnOrBeforeDate) {
         return dao.getLabManifests(uuid, status, type, withErrors, createdOnOrAfterDate, createdOnOrBeforeDate);
 	}
+
+    @Override
+    public List<LimsQueue> getLimsQueueEntriesByStatus(String status, Date createdOnOrAfterDate, Date createdOnOrBeforeDate, boolean filterOrdersOnly) {
+        return dao.getLimsQueueEntriesByStatus(status, createdOnOrAfterDate, createdOnOrBeforeDate, filterOrdersOnly);
+    }
 
 }

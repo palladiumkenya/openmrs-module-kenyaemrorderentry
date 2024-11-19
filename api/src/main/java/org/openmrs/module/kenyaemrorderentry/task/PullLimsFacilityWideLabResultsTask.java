@@ -1,19 +1,13 @@
 package org.openmrs.module.kenyaemrorderentry.task;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 import org.openmrs.GlobalProperty;
-import org.openmrs.Order;
-import org.openmrs.OrderType;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemrorderentry.ModuleConstants;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.*;
-import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
-import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
+import org.openmrs.module.kenyaemrorderentry.queue.LimsQueue;
 import org.openmrs.scheduler.tasks.AbstractTask;
 import org.openmrs.util.OpenmrsUtil;
 
@@ -22,7 +16,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -60,9 +53,24 @@ public class PullLimsFacilityWideLabResultsTask extends AbstractTask {
 		if (limsIntegrationEnabled.equals("false")) {
 			return;
 		} else {
-			List<Integer> activeTestOrders = labsUtils.getOrderIdsForActiveOrders(fetchDate);
+			Date currentDate = new Date();
+			currentDate.setTime(System.currentTimeMillis());
+			Date startOfDayMidnight = new Date(currentDate.getTime() - (1000 * 60 * 60 * 24));
+			Date midnightDateTime = OpenmrsUtil.getLastMomentOfDay(startOfDayMidnight);
+
+			KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
+			List<LimsQueue> ordersWithPendingResultsFromQueue = kenyaemrOrdersService.getLimsQueueEntriesByStatus("SUBMITTED", midnightDateTime, null, false);
+			List<Integer> activeTestOrders = new ArrayList<>();
 			System.out.println("List size of active test orders: " + activeTestOrders.size());
-			if (activeTestOrders.size() > 0) {
+			if (ordersWithPendingResultsFromQueue.size() > 0) {
+
+				for (LimsQueue queueEntry : ordersWithPendingResultsFromQueue) {
+					activeTestOrders.add(queueEntry.getOrder().getOrderId());
+				}
+				if (activeTestOrders.size() < 1) {
+					System.out.println("No orders with pending results from LIMS was found!");
+					return;
+				}
 				try {
 					URLConnection connection = new URL(url).openConnection();
 					connection.connect();
@@ -87,13 +95,13 @@ public class PullLimsFacilityWideLabResultsTask extends AbstractTask {
 				}
 			}
 			//Set next fetch date start time
-			Date nextProcessingDate = new Date();
+			/*Date nextProcessingDate = new Date();
 			nextProcessingDate.setTime(System.currentTimeMillis());
 			Date startOfDayMidnight = new Date(nextProcessingDate.getTime() - (1000 * 60 * 60 * 24));
 			Date midnightDateTime = OpenmrsUtil.getLastMomentOfDay(startOfDayMidnight);
 
 			globalPropertyObject.setPropertyValue(formatter.format(midnightDateTime));
-			Context.getAdministrationService().saveGlobalProperty(globalPropertyObject);
+			Context.getAdministrationService().saveGlobalProperty(globalPropertyObject);*/
 		}
 	}
 
