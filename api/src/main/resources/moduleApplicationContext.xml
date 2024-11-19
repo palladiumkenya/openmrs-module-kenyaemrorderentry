@@ -38,13 +38,4 @@
 	</bean>
 	<!-- Add here beans related to the API context -->
 
-	<bean id="kenyaemr.app.labmanifest" factory-bean="kenyacore.appFactoryBean" factory-method="createInstance">
-		<constructor-arg value="kenyaemr.labmanifest" />
-		<constructor-arg value="Lab Manifest" />
-		<constructor-arg value="kenyaemrorderentry/orders/labOrdersManifestHome.page" />
-		<constructor-arg value="kenyaemrorderentry:lab_request.png" />
-		<constructor-arg value="356" />
-	</bean>
-
-	
 </beans>
