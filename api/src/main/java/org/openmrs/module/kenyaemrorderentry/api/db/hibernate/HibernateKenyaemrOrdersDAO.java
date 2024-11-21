@@ -33,6 +33,7 @@ import org.openmrs.module.kenyaemrorderentry.api.db.KenyaemrOrdersDAO;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 import org.openmrs.module.kenyaemrorderentry.queue.LimsQueue;
+import org.openmrs.module.kenyaemrorderentry.queue.LimsQueueStatus;
 import org.openmrs.module.kenyaemrorderentry.util.Utils;
 import org.openmrs.module.reporting.common.DurationUnit;
 import org.openmrs.ui.framework.SimpleObject;
@@ -926,7 +927,7 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
 	}
 
     @Override
-    public List<LimsQueue> getLimsQueueEntriesByStatus(String status, Date createdOnOrAfterDate, Date createdOnOrBeforeDate, boolean filterOrdersOnly) {
+    public List<LimsQueue> getLimsQueueEntriesByStatus(LimsQueueStatus status, Date createdOnOrAfterDate, Date createdOnOrBeforeDate, boolean filterOrdersOnly) {
         Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LimsQueue.class);
         if (filterOrdersOnly) {
             criteria.setProjection(Projections.projectionList()

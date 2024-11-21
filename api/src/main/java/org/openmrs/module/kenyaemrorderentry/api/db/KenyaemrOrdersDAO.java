@@ -5,6 +5,7 @@ import org.openmrs.Order;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 import org.openmrs.module.kenyaemrorderentry.queue.LimsQueue;
+import org.openmrs.module.kenyaemrorderentry.queue.LimsQueueStatus;
 import org.openmrs.module.reporting.common.DurationUnit;
 import org.openmrs.ui.framework.SimpleObject;
 
@@ -112,7 +113,7 @@ public interface KenyaemrOrdersDAO {
 
     List<LabManifest> getLabManifests(String uuid, String status, String type, String withErrors, Date createdOnOrAfterDate, Date createdOnOrBeforeDate);
 
-    List<LimsQueue> getLimsQueueEntriesByStatus(String status, Date createdOnOrAfterDate, Date createdOnOrBeforeDate, boolean filterOrdersOnly);
+    List<LimsQueue> getLimsQueueEntriesByStatus(LimsQueueStatus status, Date createdOnOrAfterDate, Date createdOnOrBeforeDate, boolean filterOrdersOnly);
 
     LimsQueue saveLimsQueue(LimsQueue limsQueue);
     //End of Patient Contact dimensions methods

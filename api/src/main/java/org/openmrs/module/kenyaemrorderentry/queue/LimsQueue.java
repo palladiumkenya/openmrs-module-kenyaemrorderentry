@@ -15,7 +15,7 @@ public class LimsQueue extends BaseOpenmrsData implements Serializable {
     private Order order;
     private String payload;
     private Date dateSent;
-    private String status;
+    private LimsQueueStatus status;
     private Date dateLastChecked;
     private String uuid;
 
@@ -23,7 +23,7 @@ public class LimsQueue extends BaseOpenmrsData implements Serializable {
         prePersist();
     }
 
-    public LimsQueue(Order order, String payload, Date dateSent, String status, String uuid) {
+    public LimsQueue(Order order, String payload, Date dateSent, LimsQueueStatus status, String uuid) {
         this.order = order;
         this.payload = payload;
         this.dateSent = dateSent;
@@ -63,11 +63,11 @@ public class LimsQueue extends BaseOpenmrsData implements Serializable {
         this.dateSent = dateSent;
     }
 
-    public String getStatus() {
+    public LimsQueueStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(LimsQueueStatus status) {
         this.status = status;
     }
 
