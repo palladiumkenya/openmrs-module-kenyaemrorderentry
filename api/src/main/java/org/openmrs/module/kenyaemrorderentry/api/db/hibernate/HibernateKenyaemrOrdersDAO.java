@@ -970,4 +970,14 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
         return limsQueue;
     }
 
+    @Override
+    public LimsQueue getLimsQueueByOrder(Order order) {
+        Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(LimsQueue.class);
+        criteria.add(Restrictions.eq("order", order));
+        if (criteria.list().size() > 0) {
+            return (LimsQueue) criteria.list().get(0);
+        }
+        return null;
+    }
+
 }

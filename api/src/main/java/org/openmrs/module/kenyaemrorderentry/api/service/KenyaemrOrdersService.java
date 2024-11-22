@@ -17,6 +17,7 @@ public interface KenyaemrOrdersService extends OpenmrsService {
     void reprocessLabManifest(Integer manifestId);
     LabManifest saveLabOrderManifest(LabManifest labManifest);
     LimsQueue saveLimsQueue(LimsQueue limsQueue);
+    LimsQueue getLimsQueueByOrder(Order order);
     Long getLastManifestID();
     List<LabManifest> getLabOrderManifest();
     List<LabManifest> getLabOrderManifest(String status);

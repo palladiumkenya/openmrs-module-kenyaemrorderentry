@@ -95,6 +95,11 @@ public class KenyaemrOrdersServiceImpl extends BaseOpenmrsService implements Ken
     }
 
     @Override
+    public LimsQueue getLimsQueueByOrder(Order order) {
+        return dao.getLimsQueueByOrder(order);
+    }
+
+    @Override
     public Long getLastManifestID() {
         return dao.getLastManifestID();
     }
