@@ -20,9 +20,12 @@ import org.openmrs.module.kenyaemrorderentry.api.itext.ViralLoadLabManifestRepor
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabwareFacilityWideResultsMapper;
+import org.openmrs.module.kenyaemrorderentry.labDataExchange.LimsSystemWebRequest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 import org.openmrs.module.kenyaemrorderentry.metadata.KenyaemrorderentryAdminSecurityMetadata;
+import org.openmrs.module.kenyaemrorderentry.queue.LimsQueue;
+import org.openmrs.module.kenyaemrorderentry.queue.LimsQueueStatus;
 import org.openmrs.module.kenyaemrorderentry.util.Utils;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.v1_0.controller.BaseRestController;
@@ -44,6 +47,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -437,6 +441,35 @@ public class KenyaemrOrderRestController extends BaseRestController {
         // Settings
         model.put("userHasSettingsEditRole", (Context.getAuthenticatedUser().containsRole(KenyaemrorderentryAdminSecurityMetadata._Role.API_ROLE_EDIT_SETTINGS) || Context.getAuthenticatedUser().isSuperUser()));
 
+        return(model);
+    }
+
+    @CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS})
+    @RequestMapping(method = RequestMethod.GET, value = "/sendteststolims")
+    @ResponseBody
+    public Object sendQueuedLabTestsToLims(HttpServletRequest request) {
+        KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
+        SimpleObject model = new SimpleObject();
+
+        List<LimsQueue> queuedLabTests = kenyaemrOrdersService.getLimsQueueEntriesByStatus(LimsQueueStatus.QUEUED, null, null, false);
+
+        if (queuedLabTests.isEmpty()) {
+            model.put("response", "There are no tests to send to LIMS");
+            return model;
+        }
+        int counter = 0;
+        for (LimsQueue limsQueue : queuedLabTests) {
+            try {
+                LimsSystemWebRequest.postLabOrderRequestToLims(limsQueue.getPayload());
+                limsQueue.setStatus(LimsQueueStatus.SUBMITTED);
+                limsQueue.setDateLastChecked(new Date());
+                kenyaemrOrdersService.saveLimsQueue(limsQueue);
+                counter++;
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+        }
+        model.put("numberOfSubmittedTests", counter);
         return(model);
     }
 
