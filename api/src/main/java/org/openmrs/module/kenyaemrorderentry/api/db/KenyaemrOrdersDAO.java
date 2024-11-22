@@ -116,5 +116,6 @@ public interface KenyaemrOrdersDAO {
     List<LimsQueue> getLimsQueueEntriesByStatus(LimsQueueStatus status, Date createdOnOrAfterDate, Date createdOnOrBeforeDate, boolean filterOrdersOnly);
 
     LimsQueue saveLimsQueue(LimsQueue limsQueue);
+    LimsQueue getLimsQueueByOrder(Order order);
     //End of Patient Contact dimensions methods
 }
