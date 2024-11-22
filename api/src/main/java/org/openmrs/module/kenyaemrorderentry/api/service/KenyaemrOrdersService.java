@@ -8,12 +8,15 @@ import org.openmrs.Order;
 import org.openmrs.api.OpenmrsService;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
+import org.openmrs.module.kenyaemrorderentry.queue.LimsQueue;
+import org.openmrs.module.kenyaemrorderentry.queue.LimsQueueStatus;
 import org.openmrs.module.reporting.common.DurationUnit;
 import org.openmrs.ui.framework.SimpleObject;
 
 public interface KenyaemrOrdersService extends OpenmrsService {
     void reprocessLabManifest(Integer manifestId);
     LabManifest saveLabOrderManifest(LabManifest labManifest);
+    LimsQueue saveLimsQueue(LimsQueue limsQueue);
     Long getLastManifestID();
     List<LabManifest> getLabOrderManifest();
     List<LabManifest> getLabOrderManifest(String status);
@@ -32,6 +35,7 @@ public interface KenyaemrOrdersService extends OpenmrsService {
     void voidLabOrderManifest(Integer id);
 
     List<LabManifest> getLabManifests(String uuid, String status, String type, String withErrors, Date createdOnOrAfterDate, Date createdOnOrBeforeDate);
+    List<LimsQueue> getLimsQueueEntriesByStatus(LimsQueueStatus status, Date createdOnOrAfterDate, Date createdOnOrBeforeDate, boolean filterOrdersOnly);
 
     //Methods for manifest orders
     LabManifestOrder saveLabManifestOrder(LabManifestOrder labManifestOrder);

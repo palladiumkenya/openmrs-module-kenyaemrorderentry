@@ -384,6 +384,83 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="kenyaemr_order_entry_lims_queue_202411070103" author="aojwang">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="kenyaemr_order_entry_lims_queue"/>
+            </not>
+        </preConditions>
+        <comment>
+            Create table for lims queue
+        </comment>
+        <createTable tableName="kenyaemr_order_entry_lims_queue">
+            <column name="id" autoIncrement="true" type="int">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="order_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="payload" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_sent" type="datetime">
+                <constraints nullable="true"/>
+            </column>
+            <column name="status" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="last_result_check_date" type="date">
+                <constraints nullable="true"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueBoolean="false" name="voided" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_voided" type="datetime"/>
+            <column name="voided_reason" type="varchar(255)"/>
+            <column name="uuid" type="char(38)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="kenyaemr_order_entry_lims_queue" baseColumnNames="order_id"
+                                 constraintName="lims_queue_order_reference"
+                                 referencedTableName="orders" referencedColumnNames="order_id"
+                                 deferrable="false" initiallyDeferred="false"/>
+    </changeSet>
+
+    <changeSet author="aojwang" id="kenyaemr_order_entry_lims_queue_202411070104">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="kenyaemr_order_entry_lims_queue"/>
+            <not>
+                <indexExists indexName="kenyaemr_orderentry_last_result_check_index"/>
+            </not>
+        </preConditions>
+        <comment>
+            Adds an index for result last check from lims
+        </comment>
+        <createIndex indexName="kenyaemr_orderentry_last_result_check_index" tableName="kenyaemr_order_entry_lims_queue">
+            <column name="last_result_check_date"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet author="aojwang" id="kenyaemr_order_entry_lims_queue_202411080104">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="kenyaemr_order_entry_lims_queue"/>
+            <not>
+                <indexExists indexName="kenyaemr_orderentry_lims_queue_status_index"/>
+            </not>
+        </preConditions>
+        <comment>
+            Adds an index for lims queue status
+        </comment>
+        <createIndex indexName="kenyaemr_orderentry_lims_queue_status_index" tableName="kenyaemr_order_entry_lims_queue">
+            <column name="status"/>
+        </createIndex>
+    </changeSet>
 	<!--Adding scheduled task to pull lab results from LIMS system-->
 	<changeSet id="kenyaemr_order_entry_pull_lims_results" author="pwangoo">
 		<preConditions onFail="MARK_RAN">

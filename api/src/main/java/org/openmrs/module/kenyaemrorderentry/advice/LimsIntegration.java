@@ -17,13 +17,17 @@ import org.openmrs.Order;
 import org.openmrs.TestOrder;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemrorderentry.ModuleConstants;
+import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LimsSystemWebRequest;
+import org.openmrs.module.kenyaemrorderentry.queue.LimsQueue;
+import org.openmrs.module.kenyaemrorderentry.queue.LimsQueueStatus;
 import org.springframework.aop.AfterReturningAdvice;
 
 import java.lang.reflect.Method;
+import java.util.Date;
 
 /**
- * Automates the process of generating LIMS lab order payload on saving a lab order
+ * Automates the process of generating payload for LIMS-EMR data exchange
  */
 public class LimsIntegration implements AfterReturningAdvice {
 
@@ -34,9 +38,9 @@ public class LimsIntegration implements AfterReturningAdvice {
 		String limsIntegrationEnabled = "";
 		GlobalProperty enableLimsIntegration = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_ENABLE_LIMS_INTEGRATION);
 		limsIntegrationEnabled = enableLimsIntegration.getPropertyValue().trim();
-		if (limsIntegrationEnabled.equals("false")) {
+		if (limsIntegrationEnabled.equalsIgnoreCase("false")) {
 			return;
-		} else if (limsIntegrationEnabled.equals("true")) {
+		} else if (limsIntegrationEnabled.equalsIgnoreCase("true")) {
 			try {
 				// Extract the Order object from the arguments
 				if (method.getName().equals("saveOrder") && args.length > 0 && args[0] instanceof Order) {
@@ -45,24 +49,37 @@ public class LimsIntegration implements AfterReturningAdvice {
 					if (order == null) {
 						return;
 					}
-					// Exclude discontinuation orders as well
-					if (order.getAction().equals(Order.Action.DISCONTINUE)
-						|| order.getAction().equals(Order.Action.REVISE)
-						|| order.getAction().equals(Order.Action.RENEW)) {
-						return;
-					}
+
 					if (order instanceof TestOrder) {
-						LimsSystemWebRequest limsSystemWebRequest = new LimsSystemWebRequest();
-						JSONObject params = limsSystemWebRequest.generateLIMSpostPayload(order);						
-						if (!params.isEmpty()) {
-							try {
-								Boolean results = LimsSystemWebRequest.postLabOrderRequestToLims(params.toJSONString());
-							} catch (Exception e) {
-								System.out.println(e.getMessage());
-							}
+						// Exclude discontinuation orders as well
+						if (order.getAction().equals(Order.Action.DISCONTINUE)
+								|| order.getAction().equals(Order.Action.REVISE)
+								|| order.getAction().equals(Order.Action.RENEW)) {
+							return;
 						}
 
+						LimsSystemWebRequest limsSystemWebRequest = new LimsSystemWebRequest();
+						JSONObject limsPayload = limsSystemWebRequest.generateLIMSpostPayload(order);
 
+						if (!limsPayload.isEmpty()) {
+						KenyaemrOrdersService service = Context.getService(KenyaemrOrdersService.class);
+						LimsQueue limsQueue = new LimsQueue();
+						limsQueue.setDateSent(new Date());
+						limsQueue.setOrder(order);
+						limsQueue.setPayload(limsPayload.toJSONString());
+
+							try {
+								LimsSystemWebRequest.postLabOrderRequestToLims(limsPayload.toJSONString());
+								limsQueue.setStatus(LimsQueueStatus.SUBMITTED);
+								service.saveLimsQueue(limsQueue);
+							} catch (Exception e) {
+								limsQueue.setStatus(LimsQueueStatus.QUEUED);
+								service.saveLimsQueue(limsQueue);
+								System.out.println(e.getMessage());
+							}
+						} else {
+							System.err.println("LIMS-EMR integration: Could not generate the payload for LIMS data exchange");
+						}
 					}
 				}
 			} catch (Exception e) {

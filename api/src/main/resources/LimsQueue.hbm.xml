@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd" >
+
+<hibernate-mapping package="org.openmrs.module.kenyaemrorderentry.manifest">
+
+    <class name="org.openmrs.module.kenyaemrorderentry.queue.LimsQueue"
+           table="kenyaemr_order_entry_lims_queue">
+        <id name="id" type="int" column="id" unsaved-value="0">
+            <generator class="native" />
+        </id>
+        <discriminator column="id" insert="false" />
+        <property name="uuid" type="java.lang.String" column="uuid" length="38" unique="true" />
+        <many-to-one name="order" class ="org.openmrs.Order" column = "order_id" />
+        <property name="payload" type ="java.lang.String" column ="payload" length="65535"/>
+        <property name="dateSent" type="java.util.Date" column="date_sent" length="19"/>
+        <property name="status" column="status" not-null="true">
+            <type name="org.hibernate.type.EnumType">
+                <param name="enumClass">org.openmrs.module.kenyaemrorderentry.queue.LimsQueueStatus</param>
+                <param name="type">12</param>
+            </type>
+        </property>
+        <property name="dateLastChecked" type="java.util.Date" column="last_result_check_date" length="19"/>
+        <property name="dateCreated" type="java.util.Date" column="date_created" not-null="true" length="19" />
+        <property name="voided" type="java.lang.Boolean" column="voided" length="1"/>
+        <property name="dateVoided" type ="java.util.Date" column ="date_voided" length="19"/>
+        <property name="voidReason" type="java.lang.String" column="voided_reason" length="255"/>
+    </class>
+
+</hibernate-mapping>
