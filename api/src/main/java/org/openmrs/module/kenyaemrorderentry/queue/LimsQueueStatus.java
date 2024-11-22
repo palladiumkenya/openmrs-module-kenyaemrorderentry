@@ -4,7 +4,7 @@ public enum LimsQueueStatus {
     QUEUED ("QUEUED"),
     SUBMITTED ("SUBMITTED"),
     ERROR ("ERROR"),
-    UPDATED_RESULTS ("UPDATED_RESULTS");
+    COMPLETED ("COMPLETED");
     private final String name;
 
     LimsQueueStatus(String name) {

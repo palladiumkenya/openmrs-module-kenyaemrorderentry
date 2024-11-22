@@ -17,6 +17,9 @@ import org.openmrs.api.ConceptService;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.OrderService;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
+import org.openmrs.module.kenyaemrorderentry.queue.LimsQueue;
+import org.openmrs.module.kenyaemrorderentry.queue.LimsQueueStatus;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -275,6 +278,16 @@ public class LabwareFacilityWideResultsMapper {
                 encounterService.saveEncounter(enc);
                 orderService.discontinueOrder(order, "Results received", new Date(), order.getOrderer(), enc);				
 				order.setFulfillerStatus(Order.FulfillerStatus.COMPLETED);
+                orderService.saveOrder(order, null);
+
+                //update lims queue
+                KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
+                LimsQueue limsQueue = kenyaemrOrdersService.getLimsQueueByOrder(order);
+                if (limsQueue != null) {
+                    limsQueue.setStatus(LimsQueueStatus.COMPLETED);
+                    limsQueue.setDateLastChecked(new Date());
+                    kenyaemrOrdersService.saveLimsQueue(limsQueue);
+                }
                 return ResponseEntity.status(HttpStatus.OK).body("Lab results updated successfully");
 
             } catch (Exception e) {
