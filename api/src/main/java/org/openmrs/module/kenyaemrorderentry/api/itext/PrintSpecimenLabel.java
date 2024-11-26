@@ -10,6 +10,7 @@ import com.itextpdf.layout.element.Image;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Text;
 import org.apache.commons.lang.WordUtils;
+import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
@@ -37,6 +38,9 @@ public class PrintSpecimenLabel {
         ).concat(" ").concat(
                 patient.getMiddleName() != null ? order.getOrder().getPatient().getMiddleName() : ""
         );
+        Location orderLocation = order.getOrder().getEncounter().getLocation() != null ? order.getOrder().getEncounter().getLocation() : Utils.getDefaultLocation();// we default to the default location if the order has no location
+        String facilityName = orderLocation.getName();
+
         AdministrationService administrationService = Context.getAdministrationService();
         final String isKDoD = (administrationService.getGlobalProperty("kenyaemr.isKDoD"));
 
@@ -59,19 +63,19 @@ public class PrintSpecimenLabel {
         String patientCCCNumber = patient.getPatientIdentifier(Utils.getUniquePatientNumberIdentifierType()) != null ? patient.getPatientIdentifier(Utils.getUniquePatientNumberIdentifierType()).getIdentifier() : "";
         String patientKDODNumber = patient.getPatientIdentifier(Utils.getKDODIdentifierType()) != null ? patient.getPatientIdentifier(Utils.getKDODIdentifierType()).getIdentifier() : "";
 
-        Text nameLabel = new Text(WordUtils.capitalizeFully(fullName));
-        Text cccNoLabel = new Text("");
+        Text sampleFacilityDetails = new Text(facilityName);
+        Text patientIdentifierLabel = new Text("");
         if(isKDoD.trim().equalsIgnoreCase("true")) {
-            cccNoLabel = new Text(patientKDODNumber);
+            patientIdentifierLabel = new Text(patientKDODNumber);
         } else {
-            cccNoLabel = new Text(patientCCCNumber);
+            patientIdentifierLabel = new Text(patientCCCNumber);
         }
         Text specimenDateLabel = new Text(Utils.getSimpleDateFormat("dd/MM/yyyy").format(order.getOrder().getDateActivated()));
 
         Paragraph paragraph = new Paragraph();
-        paragraph.setFontSize(7);
-        paragraph.add(cccNoLabel).add("\n"); // patient ccc/kdod number
-        paragraph.add(nameLabel).add("\n"); // patient name
+        paragraph.setFontSize(6);
+        paragraph.add(patientIdentifierLabel).add("\n"); // patient ccc/kdod number
+        paragraph.add(sampleFacilityDetails).add("\n"); // sample facility details
         paragraph.add(specimenDateLabel); // sample date
 
         Barcode128 code128 = new Barcode128(pdfDoc);
