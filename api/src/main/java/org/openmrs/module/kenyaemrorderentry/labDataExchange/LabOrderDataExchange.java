@@ -292,7 +292,9 @@ public class LabOrderDataExchange {
                 Order o = orderService.getOrder(orderId);
                 if (o != null) {
                     SimpleObject ret = new SimpleObject();
-                    ret.put("hasProblem", checkIfOrderHasAProblem(o, LabManifest.VL_TYPE));
+                    SimpleObject problems = checkIfOrderHasAProblem(o, LabManifest.VL_TYPE);
+                    ret.put("hasProblem", problems.get("hasProblem"));
+                    ret.put("problemMessage", problems.get("problemMessage"));
                     ret.put("order", o);
                     activeLabs.add(ret);
                 }
@@ -333,7 +335,9 @@ public class LabOrderDataExchange {
                 Order o = orderService.getOrder(orderId);
                 if (o != null) {
                     SimpleObject ret = new SimpleObject();
-                    ret.put("hasProblem", checkIfOrderHasAProblem(o, LabManifest.EID_TYPE));
+                    SimpleObject problems = checkIfOrderHasAProblem(o, LabManifest.EID_TYPE);
+                    ret.put("hasProblem", problems.get("hasProblem"));
+                    ret.put("problemMessage", problems.get("problemMessage"));
                     ret.put("order", o);
                     activeLabs.add(ret);
                 }
@@ -375,7 +379,9 @@ public class LabOrderDataExchange {
                 Order o = orderService.getOrder(orderId);
                 if (o != null) {
                     SimpleObject ret = new SimpleObject();
-                    ret.put("hasProblem", checkIfOrderHasAProblem(o, LabManifest.FLU_TYPE));
+                    SimpleObject problems = checkIfOrderHasAProblem(o, LabManifest.FLU_TYPE);
+                    ret.put("hasProblem", problems.get("hasProblem"));
+                    ret.put("problemMessage", problems.get("problemMessage"));
                     ret.put("order", o);
                     activeLabs.add(ret);
                 }
@@ -393,15 +399,17 @@ public class LabOrderDataExchange {
      * @param order - The lab sample order
      * @return true if there is a problem. false if there is no problem
      */
-    public Boolean checkIfOrderHasAProblem(Order order, int orderType) {
-        Boolean ret = false;
+    public SimpleObject checkIfOrderHasAProblem(Order order, int orderType) {
+        SimpleObject ret = SimpleObject.create("hasProblem", new Boolean(false), "problemMessage", "");
         Patient patient = order.getPatient();
         AdministrationService administrationService = Context.getAdministrationService();
         final String isKDoD = (administrationService.getGlobalProperty("kenyaemr.isKDoD"));
 
         // LAB SYSTEM TYPE MUST BE CONFIGURED
         if (LabOrderDataExchange.getSystemType() == ModuleConstants.NO_SYSTEM_CONFIGURED) {
-            return(true);
+            ret.put("hasProblem", true);
+            ret.put("problemMessage", "There is no system configured e.g LABWARE, CHAI etc");
+            return(ret);
         }
 
         if(orderType == LabManifest.VL_TYPE) {
@@ -412,19 +420,25 @@ public class LabOrderDataExchange {
             if(isKDoD.trim().equalsIgnoreCase("true")) {
                 if (kdodNumber == null || StringUtils.isBlank(kdodNumber.getIdentifier())) {
                     // Patient must have a CCC number or KDOD number
-                    return(true);
+                    ret.put("hasProblem", true);
+                    ret.put("problemMessage", "Patient must have a KDOD number");
+                    return(ret);
                 }
             } else {
                 if (cccNumber == null || StringUtils.isBlank(cccNumber.getIdentifier())) {
                     // Patient must have a CCC number or KDOD number
-                    return(true);
+                    ret.put("hasProblem", true);
+                    ret.put("problemMessage", "Patient must have a CCC number");
+                    return(ret);
                 }
             }
 
             Encounter currentRegimenEncounter = RegimenMappingUtils.getLastEncounterForProgram(patient, "ARV");
             if(currentRegimenEncounter == null) {
                 // Patient must be on a regimen
-                return(true);
+                ret.put("hasProblem", true);
+                ret.put("problemMessage", "Patient must be on a regimen");
+                return(ret);
             }
             SimpleObject regimenDetails = RegimenMappingUtils.buildRegimenChangeObject(currentRegimenEncounter.getObs(), currentRegimenEncounter);
             String regimenName = (String) regimenDetails.get("regimenShortDisplay");
@@ -440,14 +454,18 @@ public class LabOrderDataExchange {
 
             if (StringUtils.isBlank(nascopCode)) {
                 // The current regimen must have a regimen line
-                return(true);
+                ret.put("hasProblem", true);
+                ret.put("problemMessage", "The current regimen must have a regimen line");
+                return(ret);
             }
 
             // Check order reason
             Concept cOrderReason = order.getOrderReason();
             if(cOrderReason == null) {
                 // Order must have order reason
-                return(true);
+                ret.put("hasProblem", true);
+                ret.put("problemMessage", "Order must have order reason");
+                return(ret);
             }
         }
 
@@ -458,21 +476,27 @@ public class LabOrderDataExchange {
             // Check HEI number
             if (heiNumber == null || StringUtils.isBlank(heiNumber.getIdentifier()) || heiDetailsObject == null) {
                 // Patient must have HEI number
-                return(true);
+                ret.put("hasProblem", true);
+                ret.put("problemMessage", "Patient must have HEI number");
+                return(ret);
             }
 
             // Check Mothers Age 
             SimpleObject heiMothersAge = Utils.getHeiMothersAge(patient);
             if(heiMothersAge != null && heiMothersAge.get("mothersAge") == null) {
                 // Child must have a valid mother
-                return(true);
+                ret.put("hasProblem", true);
+                ret.put("problemMessage", "Child must have a valid mother");
+                return(ret);
             }
 
             // Check order reason
             Concept cOrderReason = order.getOrderReason();
             if(cOrderReason == null) {
                 // Order must have order reason
-                return(true);
+                ret.put("hasProblem", true);
+                ret.put("problemMessage", "Order must have order reason");
+                return(ret);
             }
         }
 
