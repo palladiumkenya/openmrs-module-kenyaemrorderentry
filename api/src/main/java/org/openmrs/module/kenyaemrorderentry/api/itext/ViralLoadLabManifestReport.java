@@ -59,21 +59,9 @@ public class ViralLoadLabManifestReport {
         File returnFile = File.createTempFile("labManifest", ".pdf");
         FileOutputStream fos = new FileOutputStream(returnFile);
 
-        //Initialize PDF writer
         PdfWriter writer = new PdfWriter(fos);
-
-
-        //Initialize PDF document
         PdfDocument pdf = new PdfDocument(writer);
-
-        // The default page rotation is set to portrait in the custom event handler.
-        /*PageOrientationsEventHandler eventHandler = new PageOrientationsEventHandler();
-        pdf.addEventHandler(PdfDocumentEvent.START_PAGE, eventHandler);*/
-        //eventHandler.setOrientation(LANDSCAPE);
-
-        // Initialize document
         Document document = new Document(pdf, PageSize.A4.rotate());
-
 
         URL logoUrl = LabManifest.class.getClassLoader().getResource("img/moh.png");
         // Compose Paragraph
@@ -81,14 +69,9 @@ public class ViralLoadLabManifestReport {
         logiImage.scaleToFit(80, 80);
         logiImage.setFixedPosition((PageSize.A4.rotate().getWidth() - logiImage.getImageScaledWidth()) /2, (PageSize.A4.rotate().getHeight() - logiImage.getImageScaledHeight()) - 40);
 
-        //logoSection.add(logiImage);
-
-
         document.add(logiImage);
-        // Create a PdfFont
         PdfFont font = PdfFontFactory.createFont(StandardFonts.TIMES_ROMAN);
         PdfFont courier = PdfFontFactory.createFont(StandardFonts.COURIER_BOLD);
-        // Add a Paragraph
 
         document.add(new Paragraph("\n"));
         document.add(new Paragraph("\n"));
