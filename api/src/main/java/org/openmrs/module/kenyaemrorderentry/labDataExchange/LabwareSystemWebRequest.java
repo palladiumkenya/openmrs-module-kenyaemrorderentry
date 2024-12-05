@@ -227,12 +227,16 @@ public class LabwareSystemWebRequest extends LabWebRequest {
             String serverUrl = "";
             String API_KEY = "";
 
+            System.out.println("Get Labware Lab Results: Manifest ID is: " + manifestToUpdateResults.getId());
+            System.out.println("Get Labware Lab Results: Manifest type is: " + manifestToUpdateResults.getManifestType());
             if(manifestToUpdateResults.getManifestType() == LabManifest.EID_TYPE) {
+                System.out.println("Get Labware Lab Results: Getting EID global properties");
                 GlobalProperty gpEIDServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_EID_LAB_SERVER_RESULT_URL);
                 GlobalProperty gpEIDApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_EID_LAB_SERVER_API_TOKEN);
                 serverUrl = gpEIDServerPullUrl.getPropertyValue().trim();
                 API_KEY = gpEIDApiToken.getPropertyValue().trim();
             } else if(manifestToUpdateResults.getManifestType() == LabManifest.VL_TYPE) {
+                System.out.println("Get Labware Lab Results: Getting VL global properties");
                 GlobalProperty gpVLServerPullUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_VL_LAB_SERVER_RESULT_URL);
                 GlobalProperty gpVLApiToken = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LABWARE_VL_LAB_SERVER_API_TOKEN);
                 serverUrl = gpVLServerPullUrl.getPropertyValue().trim();
@@ -241,7 +245,6 @@ public class LabwareSystemWebRequest extends LabWebRequest {
 
             GlobalProperty gpLastProcessedManifest = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_MANIFEST_LAST_PROCESSED);
             GlobalProperty gpLastProcessedManifestUpdatetime = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_MANIFEST_LAST_UPDATETIME);
-
 
             //Using SSL
             SSLConnectionSocketFactory sslsf = null;
@@ -263,6 +266,7 @@ public class LabwareSystemWebRequest extends LabWebRequest {
             try {
                 String facilityCode = Utils.getDefaultLocationMflCode(Utils.getDefaultLocation());
                 String orderNumbers = StringUtils.join(orderIds, ",");
+                System.out.println("Get Labware Lab Results: Server URL is: " + serverUrl);
                 URIBuilder builder = new URIBuilder(serverUrl);
                 builder.addParameter("mfl_code", facilityCode);
                 builder.addParameter("order_no", orderNumbers);
@@ -290,7 +294,7 @@ public class LabwareSystemWebRequest extends LabWebRequest {
 
                 try {
                     jsonString = rd.lines().collect(Collectors.joining()).toString();
-                    System.out.println("Labware Lab Results Get: Request JSON -> " + jsonString);
+                    System.out.println("Labware Lab Results Get: We got a response JSON : " + jsonString);
                 } finally {
                     rd.close();
                 }

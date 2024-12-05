@@ -193,7 +193,6 @@ public abstract class LabWebRequest {
                 test.put("datecollected", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleCollected));
                 test.put("regimen", "1");
                 test.put("feeding", "yes");
-                test.put("sample_type", "DBS");
                 if(isKDoD.trim().equalsIgnoreCase("true")) {
                     test.put("hei_id", kdod != null ? kdod : "");
                 } else {
