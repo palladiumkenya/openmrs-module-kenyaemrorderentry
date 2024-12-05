@@ -950,37 +950,10 @@ public class LabOrderDataExchange {
                 System.out.println("Lab Results Get Results: Setting Manifest order status to complete");
                 Encounter enc = new Encounter();
                 enc.setEncounterType(labEncounterType);
-                try {
-                    encounterService.saveEncounter(enc);
-                    System.out.println("Encounter Saved 1");
-                } catch(Exception ex) {
-                    System.out.println("Failed to save Encounter: " + ex.getMessage());
-                    ex.printStackTrace();
-                }
                 enc.setEncounterDatetime(orderDiscontinuationDate);
-                try {
-                    encounterService.saveEncounter(enc);
-                    System.out.println("Encounter Saved 2");
-                } catch(Exception ex) {
-                    System.out.println("Failed to save Encounter: " + ex.getMessage());
-                    ex.printStackTrace();
-                }
                 enc.setPatient(od.getPatient());
-                try {
-                    encounterService.saveEncounter(enc);
-                    System.out.println("Encounter Saved 3");
-                } catch(Exception ex) {
-                    System.out.println("Failed to save Encounter: " + ex.getMessage());
-                    ex.printStackTrace();
-                }
                 enc.setCreator(Context.getUserService().getUser(1));
-                try {
-                    encounterService.saveEncounter(enc);
-                    System.out.println("Encounter Saved 4");
-                } catch(Exception ex) {
-                    System.out.println("Failed to save Encounter: " + ex.getMessage());
-                    ex.printStackTrace();
-                }
+                encounterService.saveEncounter(enc);
 
                 // For EID manifest type
                 if (manifestType == LabManifest.EID_TYPE) {
@@ -1012,32 +985,12 @@ public class LabOrderDataExchange {
                     o.setLocation(Utils.getDefaultLocation());
 
                     Obs obs = new Obs();
-                    try {
-                        o.setEncounter(enc);
-                        obs = obsService.saveObs(o, null);
-                        System.out.println("Saved Obs 1: " + obs.getId());
-                    } catch(Exception ex) {
-                        System.out.println("Failed to save Obs 1: " + ex.getMessage());
-                        ex.printStackTrace();
-                        try {
-                            obs = obsService.saveObs(o, null);
-                            System.out.println("Saved Obs 2: " + obs.getId());
-                        } catch(Exception em) {
-                            System.out.println("Failed to save Obs 2: " + em.getMessage());
-                            em.printStackTrace();
-                        }    
-                    }
+                    o.setEncounter(enc);
+                    obs = obsService.saveObs(o, null);
 
                     try {
                         enc.addObs(obs);
-                        // encounterService.saveEncounter(enc);
-                        try {
-                            encounterService.saveEncounter(enc);
-                            System.out.println("Encounter Saved 5");
-                        } catch(Exception ex) {
-                            System.out.println("Failed to save Encounter: " + ex.getMessage());
-                            ex.printStackTrace();
-                        }
+                        encounterService.saveEncounter(enc);
 
                         orderService.discontinueOrder(od, "Results received", orderDiscontinuationDate, od.getOrderer(), od.getEncounter());
 
