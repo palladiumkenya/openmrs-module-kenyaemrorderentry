@@ -11,6 +11,7 @@ import org.openmrs.api.context.Context;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.kenyaemrorderentry.api.db.hibernate.HibernateKenyaemrOrdersDAO;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
+import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 import org.openmrs.module.kenyaemrorderentry.queue.LimsQueue;
@@ -20,6 +21,9 @@ import org.openmrs.ui.framework.SimpleObject;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.transaction.annotation.Transactional;
+import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange;
+import org.openmrs.module.kenyaemrorderentry.ModuleConstants;
+
 
 @Transactional
 public class KenyaemrOrdersServiceImpl extends BaseOpenmrsService implements KenyaemrOrdersService {
@@ -82,6 +86,30 @@ public class KenyaemrOrdersServiceImpl extends BaseOpenmrsService implements Ken
                 } else if(newStatus.equalsIgnoreCase("Complete")) {
                     cacheManager.getCache("countTotalCompleteManifests").clear();
                 }
+            }
+        } catch(Exception ex) {}
+
+        try {
+            Integer manifestId = labManifest.getId();
+            if(manifestId == null) {
+                System.out.println("Manifest ID fix: Saving a new manifest");
+                LabOrderDataExchange labOrderDataExchange = new LabOrderDataExchange();
+                if(LabOrderDataExchange.getSystemType() == ModuleConstants.LABWARE_SYSTEM) {
+                    String mType = "E";
+                    Integer manifestType = labManifest.getManifestType();
+                    if(manifestType == LabManifest.EID_TYPE) {
+                        mType = "E";
+                    } else if(manifestType == LabManifest.VL_TYPE) {
+                        mType = "V";
+                    } else if(manifestType == LabManifest.FLU_TYPE) {
+                        mType = "F";
+                    }
+                    String newManifestIdentifier = labOrderDataExchange.generateUniqueManifestID(mType);
+                    System.out.println("Manifest ID fix: New labware manifest identifier set as: " + newManifestIdentifier);
+                    labManifest.setIdentifier(newManifestIdentifier);
+                }
+            } else {
+                System.out.println("Manifest ID fix: manifest in edit mode. No need for a new identifier");
             }
         } catch(Exception ex) {}
 
