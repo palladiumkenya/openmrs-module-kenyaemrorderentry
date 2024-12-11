@@ -23,6 +23,7 @@ import org.openmrs.TestOrder;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.EncounterService;
+import org.openmrs.api.ObsService;
 import org.openmrs.api.OrderService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyacore.RegimenMappingUtils;
@@ -45,6 +46,7 @@ public class LabOrderDataExchange {
     ConceptService conceptService = Context.getConceptService();
     EncounterService encounterService = Context.getEncounterService();
     OrderService orderService = Context.getOrderService();
+    ObsService obsService = Context.getObsService();
     KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
 
 
@@ -880,9 +882,11 @@ public class LabOrderDataExchange {
      */
     private void updateOrder(Integer orderId, String result, String specimenStatus, String specimenRejectedReason, Date dateSampleReceived, Date dateSampleTested) {
         Order od = orderService.getOrder(orderId);
+        System.out.println("Lab Results Get Results: Getting order for order id: " + orderId + " : Order: " + od);
         LabManifestOrder manifestOrder = kenyaemrOrdersService.getLabManifestOrderByOrderId(od);
 
         System.out.println("Order ID: " + od.getOrderId() + ", manifest order: " + manifestOrder.getId() + ", manifest id: " + manifestOrder.getLabManifest().getId() + ", isActive: " + od.isActive());
+        System.out.println("Lab Results Get Results: Manifest order status is : " + specimenStatus);
 
         Date orderDiscontinuationDate = null;
         if (dateSampleTested != null) {
@@ -896,6 +900,7 @@ public class LabOrderDataExchange {
         if (od != null && od.isActive()) {
             if ((StringUtils.isNotBlank(specimenStatus) && specimenStatus.equals("Rejected")) || (StringUtils.isNotBlank(result) && result.equals("Collect New Sample"))) {
 
+                System.out.println("Lab Results Get Results: Setting Manifest order status to rejected or collect new sample");
                 String discontinuationReason = "";
                 if (StringUtils.isNotBlank(specimenRejectedReason)) {
                     discontinuationReason = specimenRejectedReason;
@@ -942,13 +947,17 @@ public class LabOrderDataExchange {
                 kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
             } else if (StringUtils.isNotBlank(specimenStatus) && specimenStatus.equalsIgnoreCase("Complete") && StringUtils.isNotBlank(result)) {
 
+                System.out.println("Lab Results Get Results: Setting Manifest order status to complete");
                 Encounter enc = new Encounter();
                 enc.setEncounterType(labEncounterType);
                 enc.setEncounterDatetime(orderDiscontinuationDate);
                 enc.setPatient(od.getPatient());
                 enc.setCreator(Context.getUserService().getUser(1));
+                encounterService.saveEncounter(enc);
 
+                // For EID manifest type
                 if (manifestType == LabManifest.EID_TYPE) {
+                    // For EID manifest type
                     Obs o = new Obs();
                     String eidNegative = "Negative";
                     String eidPositive = "Positive";
@@ -957,10 +966,13 @@ public class LabOrderDataExchange {
                     Concept eidPositiveConcept = conceptService.getConcept(703);
                     /*Concept eidIndeterminateConcept = conceptService.getConcept(1138);
                     Concept eidPoorSampleConcept = conceptService.getConcept(1304);*/
+                    System.out.println("Negative concept: " + eidNegativeConcept + " and positive concept: " + eidPositiveConcept);
 
                     if (result.equalsIgnoreCase(eidNegative)) {
+                        System.out.println("Got Negative result");
                         o.setValueCoded(eidNegativeConcept);
                     } else if (result.equalsIgnoreCase(eidPositive)) {
+                        System.out.println("Got Positive result");
                         o.setValueCoded(eidPositiveConcept);
                     }
 
@@ -969,9 +981,15 @@ public class LabOrderDataExchange {
                     o.setObsDatetime(od.getDateActivated());
                     o.setPerson(od.getPatient());
                     o.setOrder(od);
+                    o.setConcept(od.getConcept());
+                    o.setLocation(Utils.getDefaultLocation());
+
+                    Obs obs = new Obs();
+                    o.setEncounter(enc);
+                    obs = obsService.saveObs(o, null);
 
                     try {
-                        enc.addObs(o);
+                        enc.addObs(obs);
                         encounterService.saveEncounter(enc);
 
                         orderService.discontinueOrder(od, "Results received", orderDiscontinuationDate, od.getOrderer(), od.getEncounter());
@@ -991,7 +1009,9 @@ public class LabOrderDataExchange {
                         System.out.println("Lab Results Get Results: An error was encountered while updating orders for EID");
                         e.printStackTrace();
                     }
+                    // End of EID manifest type
                 } else if (manifestType == LabManifest.VL_TYPE) {
+                    // For VL Type Manifests
                     Concept viralLoadConcept = null;
                     String lDLResult = "< LDL copies/ml";
                     String labwarelDLResult = "<LDL";
@@ -1197,10 +1217,26 @@ public class LabOrderDataExchange {
                             kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
                         }
                     }
+                    // End of VL Manifest Type
                 }
 
             } else if (StringUtils.isNotBlank(specimenStatus) && specimenStatus.equalsIgnoreCase("Incomplete")) {
                 // indicate the incomplete status
+                System.out.println("Lab Results Get Results: Setting Manifest order status to incomplete");
+                manifestOrder.setStatus("Incomplete");
+                manifestOrder.setResult("");
+                manifestOrder.setLastStatusCheckDate(new Date());
+                kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
+            } else if (specimenStatus == null || StringUtils.isBlank(specimenStatus)) {
+                // indicate the incomplete status
+                System.out.println("Lab Results Get Results: Setting Manifest order status to incomplete");
+                manifestOrder.setStatus("Incomplete");
+                manifestOrder.setResult("");
+                manifestOrder.setLastStatusCheckDate(new Date());
+                kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
+            } else {
+                // indicate the incomplete status
+                System.out.println("Lab Results Get Results: Setting Manifest order status to incomplete");
                 manifestOrder.setStatus("Incomplete");
                 manifestOrder.setResult("");
                 manifestOrder.setLastStatusCheckDate(new Date());
