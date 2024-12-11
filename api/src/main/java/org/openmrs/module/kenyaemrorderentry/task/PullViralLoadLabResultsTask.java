@@ -190,7 +190,7 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
                         return;
                     }
 
-                    System.out.println("Lab Results Get: Polling results for  " + ordersWithPendingResults.size() + " samples in currently processing manifest with id :" + manifestToUpdateResults.getId());
+                    System.out.println("Lab Results Get: Polling results for  " + ordersWithPendingResults.size() + " samples in currently processing manifest with id : " + manifestToUpdateResults.getId());
                 }
 
                 if (ordersWithPendingResults.size() < 1) { // exit there are no pending samples

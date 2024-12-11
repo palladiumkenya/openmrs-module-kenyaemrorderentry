@@ -886,7 +886,7 @@ public class LabOrderDataExchange {
         LabManifestOrder manifestOrder = kenyaemrOrdersService.getLabManifestOrderByOrderId(od);
 
         System.out.println("Order ID: " + od.getOrderId() + ", manifest order: " + manifestOrder.getId() + ", manifest id: " + manifestOrder.getLabManifest().getId() + ", isActive: " + od.isActive());
-        System.out.println("Lab Results Get Results: Manifest order status is:" + specimenStatus);
+        System.out.println("Lab Results Get Results: Manifest order status is : " + specimenStatus);
 
         Date orderDiscontinuationDate = null;
         if (dateSampleTested != null) {
@@ -1222,21 +1222,21 @@ public class LabOrderDataExchange {
 
             } else if (StringUtils.isNotBlank(specimenStatus) && specimenStatus.equalsIgnoreCase("Incomplete")) {
                 // indicate the incomplete status
-                System.out.println("Lab Results Get Results: Setting Manifest order status to incomplete 1");
+                System.out.println("Lab Results Get Results: Setting Manifest order status to incomplete");
                 manifestOrder.setStatus("Incomplete");
                 manifestOrder.setResult("");
                 manifestOrder.setLastStatusCheckDate(new Date());
                 kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
             } else if (specimenStatus == null || StringUtils.isBlank(specimenStatus)) {
                 // indicate the incomplete status
-                System.out.println("Lab Results Get Results: Setting Manifest order status to incomplete 2");
+                System.out.println("Lab Results Get Results: Setting Manifest order status to incomplete");
                 manifestOrder.setStatus("Incomplete");
                 manifestOrder.setResult("");
                 manifestOrder.setLastStatusCheckDate(new Date());
                 kenyaemrOrdersService.saveLabManifestOrder(manifestOrder);
             } else {
                 // indicate the incomplete status
-                System.out.println("Lab Results Get Results: Setting Manifest order status to incomplete 3");
+                System.out.println("Lab Results Get Results: Setting Manifest order status to incomplete");
                 manifestOrder.setStatus("Incomplete");
                 manifestOrder.setResult("");
                 manifestOrder.setLastStatusCheckDate(new Date());
