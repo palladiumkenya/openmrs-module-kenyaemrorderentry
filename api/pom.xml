@@ -147,6 +147,10 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-text</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.openmrs.module</groupId>
+			<artifactId>kenyaemr.cashier-api</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>

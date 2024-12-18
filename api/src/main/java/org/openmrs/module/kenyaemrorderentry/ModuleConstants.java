@@ -72,5 +72,9 @@ public class ModuleConstants {
     public static final String PULL_SCHEDULER_UUID = "a78ff983-defc-4b90-a8bf-7f7e6b16f5b1";
 
     public static final String PUSH_SCHEDULER_UUID = "67b980ec-dbf3-4662-95da-d9dba9d356d2";
+    public static final String GP_EXPRESS_PAYMENT_METHODS = "kenyaemrorderentry.facilitywidelims.expressPaymentMethods";
+    public static final String VISIT_ATTRIBUTE_PAYMENT_METHOD_UUID = "e6cb0c3b-04b0-4117-9bc6-ce24adbda802";
+
+
 
 }
