@@ -57,6 +57,7 @@
         <apacheHttpClientVersion>4.5.10</apacheHttpClientVersion>
         <itextPdfVersion>7.2.5</itextPdfVersion>
         <gsonVersion>2.8.7</gsonVersion>
+        <cashierVersion>4.2.2-SNAPSHOT</cashierVersion>
         <apacheCommonsVersion>1.3</apacheCommonsVersion>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -500,6 +501,13 @@
                 <groupId>org.openmrs.module</groupId>
                 <artifactId>kenyaui-api</artifactId>
                 <version>${kenyauiVersion}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.openmrs.module</groupId>
+                <artifactId>kenyaemr.cashier-api</artifactId>
+                <version>${cashierVersion}</version>
                 <scope>provided</scope>
             </dependency>
 

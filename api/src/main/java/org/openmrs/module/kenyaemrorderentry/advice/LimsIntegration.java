@@ -19,6 +19,7 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemrorderentry.ModuleConstants;
 import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LimsSystemWebRequest;
+import org.openmrs.module.kenyaemrorderentry.labDataExchange.labsUtils;
 import org.openmrs.module.kenyaemrorderentry.queue.LimsQueue;
 import org.openmrs.module.kenyaemrorderentry.queue.LimsQueueStatus;
 import org.springframework.aop.AfterReturningAdvice;
@@ -31,61 +32,67 @@ import java.util.Date;
  */
 public class LimsIntegration implements AfterReturningAdvice {
 
-	private Log log = LogFactory.getLog(this.getClass());
+    private Log log = LogFactory.getLog(this.getClass());
 
-	@Override
-	public void afterReturning(Object returnValue, Method method, Object[] args, Object target) throws Throwable {
-		String limsIntegrationEnabled = "";
-		GlobalProperty enableLimsIntegration = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_ENABLE_LIMS_INTEGRATION);
-		limsIntegrationEnabled = enableLimsIntegration.getPropertyValue().trim();
-		if (limsIntegrationEnabled.equalsIgnoreCase("false")) {
-			return;
-		} else if (limsIntegrationEnabled.equalsIgnoreCase("true")) {
-			try {
-				// Extract the Order object from the arguments
-				if (method.getName().equals("saveOrder") && args.length > 0 && args[0] instanceof Order) {
-					Order order = (Order) args[0];
+    @Override
+    public void afterReturning(Object returnValue, Method method, Object[] args, Object target) throws Throwable {
+        String limsIntegrationEnabled = "";
+        GlobalProperty enableLimsIntegration = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_ENABLE_LIMS_INTEGRATION);
+        limsIntegrationEnabled = enableLimsIntegration.getPropertyValue().trim();
+        if (limsIntegrationEnabled.equalsIgnoreCase("false")) {
+            return;
+        } else if (limsIntegrationEnabled.equalsIgnoreCase("true")) {
+            try {
+                // Extract the Order object from the arguments
+                if (method.getName().equals("saveOrder") && args.length > 0 && args[0] instanceof Order) {
+                    Order order = (Order) args[0];
 
-					if (order == null) {
-						return;
-					}
+                    if (order == null) {
+                        return;
+                    }
 
-					if (order instanceof TestOrder) {
-						// Exclude discontinuation orders as well
-						if (order.getAction().equals(Order.Action.DISCONTINUE)
-								|| order.getAction().equals(Order.Action.REVISE)
-								|| order.getAction().equals(Order.Action.RENEW)) {
-							return;
-						}
+                    if (order instanceof TestOrder) {
+                        // Exclude discontinuation orders as well
+                        if (order.getAction().equals(Order.Action.DISCONTINUE)
+                                || order.getAction().equals(Order.Action.REVISE)
+                                || order.getAction().equals(Order.Action.RENEW)) {
+                            return;
+                        }
 
-						LimsSystemWebRequest limsSystemWebRequest = new LimsSystemWebRequest();
-						JSONObject limsPayload = limsSystemWebRequest.generateLIMSpostPayload(order);
+                        LimsSystemWebRequest limsSystemWebRequest = new LimsSystemWebRequest();
+                        JSONObject limsPayload = limsSystemWebRequest.generateLIMSpostPayload(order);
 
-						if (!limsPayload.isEmpty()) {
-						KenyaemrOrdersService service = Context.getService(KenyaemrOrdersService.class);
-						LimsQueue limsQueue = new LimsQueue();
-						limsQueue.setDateSent(new Date());
-						limsQueue.setOrder(order);
-						limsQueue.setPayload(limsPayload.toJSONString());
+                        if (!limsPayload.isEmpty()) {
 
-							try {
-								LimsSystemWebRequest.postLabOrderRequestToLims(limsPayload.toJSONString());
-								limsQueue.setStatus(LimsQueueStatus.SUBMITTED);
-								service.saveLimsQueue(limsQueue);
-							} catch (Exception e) {
-								limsQueue.setStatus(LimsQueueStatus.QUEUED);
-								service.saveLimsQueue(limsQueue);
-								System.out.println(e.getMessage());
-							}
-						} else {
-							System.err.println("LIMS-EMR integration: Could not generate the payload for LIMS data exchange");
-						}
-					}
-				}
-			} catch (Exception e) {
-				System.err.println("Error intercepting order before creation: " + e.getMessage());
-				e.printStackTrace();
-			}
-		}
-	}
+                            KenyaemrOrdersService service = Context.getService(KenyaemrOrdersService.class);
+                            LimsQueue limsQueue = new LimsQueue();
+                            limsQueue.setDateSent(new Date());
+                            limsQueue.setOrder(order);
+                            limsQueue.setPayload(limsPayload.toJSONString());
+
+                            try {
+                                if (labsUtils.isOrderForExpressPatient(order)) { // send to LIMS only if order is for express patient
+                                    LimsSystemWebRequest.postLabOrderRequestToLims(limsPayload.toJSONString());
+                                    limsQueue.setStatus(LimsQueueStatus.SUBMITTED);
+                                    service.saveLimsQueue(limsQueue);
+                                } else { // queue for additional billing check before submission
+                                    limsQueue.setStatus(LimsQueueStatus.QUEUED);
+                                    service.saveLimsQueue(limsQueue);
+                                }
+                            } catch (Exception e) {
+                                limsQueue.setStatus(LimsQueueStatus.QUEUED);
+                                service.saveLimsQueue(limsQueue);
+                                System.out.println(e.getMessage());
+                            }
+                        } else {
+                            System.err.println("LIMS-EMR integration: Could not generate the payload for LIMS data exchange");
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                System.err.println("Error intercepting order before creation: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+    }
 }
