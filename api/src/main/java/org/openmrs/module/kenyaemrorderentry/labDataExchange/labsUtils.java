@@ -85,8 +85,8 @@ public class labsUtils {
 	}
 
 	/**
-	 * Checks if an order has a bill, and checks the bill status.
-	 * If bill status is PENDING and method of payment captured during checkin in not express, then the order is not submitted to LIMS
+	 * Checks if an order has a bill, and checks the bill payment status.
+	 * If bill status is PENDING then the order is not submitted to LIMS
 	 * @param order
 	 * @return
 	 */
@@ -96,7 +96,7 @@ public class labsUtils {
 		BillLineItemService billLineItemService = Context.getService(BillLineItemService.class);
 		List<BillLineItem> result = billLineItemService.fetchBillItemByOrder(new BillItemSearch(billItemSearch, false));
 		BillLineItem lineItem = result != null && !result.isEmpty() ? result.get(0) : null;// default to the first item
-		if (lineItem != null && lineItem.getPaymentStatus().equals(BillStatus.PENDING)) {// all other statuses should allow data to move to LIMS
+		if (lineItem != null && lineItem.getPaymentStatus().equals(BillStatus.PENDING)) {// all other statuses should be interpreted as PAID
 			return true;
 		}
 		return false;
@@ -106,7 +106,6 @@ public class labsUtils {
 	 * Checks the express status of a patient based on check-in details.
 	 * Express payment methods should be a configurable global property.
 	 * @should return true if a patient is checked in with an express payment method
-	 * @should return true if an order is marked as emergency
 	 * @should return true if an order's visit is inpatient
 	 * @param order
 	 * @return
