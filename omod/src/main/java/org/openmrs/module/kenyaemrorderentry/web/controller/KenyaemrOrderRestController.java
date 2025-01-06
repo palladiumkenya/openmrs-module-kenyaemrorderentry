@@ -21,6 +21,7 @@ import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabOrderDataExchange;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabwareFacilityWideResultsMapper;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LimsSystemWebRequest;
+import org.openmrs.module.kenyaemrorderentry.labDataExchange.labsUtils;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
 import org.openmrs.module.kenyaemrorderentry.metadata.KenyaemrorderentryAdminSecurityMetadata;
@@ -47,6 +48,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -451,7 +453,10 @@ public class KenyaemrOrderRestController extends BaseRestController {
         KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
         SimpleObject model = new SimpleObject();
 
-        List<LimsQueue> queuedLabTests = kenyaemrOrdersService.getLimsQueueEntriesByStatus(LimsQueueStatus.QUEUED, null, null, false);
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.MINUTE, -2); // upto two minutes ago to ensure billing information (created through AOP) is carefully evaluated
+        Date effectiveDate = cal.getTime();
+        List<LimsQueue> queuedLabTests = kenyaemrOrdersService.getLimsQueueEntriesByStatus(LimsQueueStatus.QUEUED, null, effectiveDate, false);
 
         if (queuedLabTests.isEmpty()) {
             model.put("response", "There are no tests to send to LIMS");
@@ -460,11 +465,13 @@ public class KenyaemrOrderRestController extends BaseRestController {
         int counter = 0;
         for (LimsQueue limsQueue : queuedLabTests) {
             try {
-                LimsSystemWebRequest.postLabOrderRequestToLims(limsQueue.getPayload());
-                limsQueue.setStatus(LimsQueueStatus.SUBMITTED);
-                limsQueue.setDateLastChecked(new Date());
-                kenyaemrOrdersService.saveLimsQueue(limsQueue);
-                counter++;
+                if (labsUtils.isOrderForExpressPatient(limsQueue.getOrder()) || !labsUtils.orderHasUnsettledBill(limsQueue.getOrder())) {
+                    LimsSystemWebRequest.postLabOrderRequestToLims(limsQueue.getPayload());
+                    limsQueue.setStatus(LimsQueueStatus.SUBMITTED);
+                    limsQueue.setDateLastChecked(new Date());
+                    kenyaemrOrdersService.saveLimsQueue(limsQueue);
+                    counter++;
+                }
             } catch (Exception e) {
                 System.out.println(e.getMessage());
             }

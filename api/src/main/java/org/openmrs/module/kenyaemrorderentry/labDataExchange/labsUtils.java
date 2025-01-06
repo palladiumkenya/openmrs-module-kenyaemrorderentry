@@ -10,21 +10,27 @@
 package org.openmrs.module.kenyaemrorderentry.labDataExchange;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import org.openmrs.Concept;
+import org.apache.commons.lang3.StringUtils;
+import org.openmrs.GlobalProperty;
 import org.openmrs.Order;
-import org.openmrs.api.ConceptService;
+import org.openmrs.Visit;
+import org.openmrs.VisitAttribute;
+import org.openmrs.api.VisitService;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.kenyaemrorderentry.api.service.KenyaemrOrdersService;
-import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
-import org.openmrs.module.kenyaemrorderentry.util.Utils;
-import org.openmrs.ui.framework.SimpleObject;
+import org.openmrs.module.kenyaemr.cashier.api.BillLineItemService;
+import org.openmrs.module.kenyaemr.cashier.api.model.BillLineItem;
+import org.openmrs.module.kenyaemr.cashier.api.model.BillStatus;
+import org.openmrs.module.kenyaemr.cashier.api.search.BillItemSearch;
+import org.openmrs.module.kenyaemrorderentry.ModuleConstants;
 import org.openmrs.util.PrivilegeConstants;
 
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class labsUtils {
-	static ConceptService conceptService = Context.getConceptService();
+	public static String INPATIENT = "a73e2ac6-263b-47fc-99fc-e0f2c09fc914";
 	/**
 	 * Format gender
 	 *
@@ -76,5 +82,53 @@ public class labsUtils {
 		Context.removeProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
 		System.out.println("Active Labs For LIMS: " + activeOrders.size());
 		return activeLabs;
+	}
+
+	/**
+	 * Checks if an order has a bill, and checks the bill payment status.
+	 * If bill status is PENDING then the order is not submitted to LIMS
+	 * @param order
+	 * @return
+	 */
+	public static boolean orderHasUnsettledBill(Order order) {
+		BillLineItem billItemSearch = new BillLineItem();
+		billItemSearch.setOrder(order);
+		BillLineItemService billLineItemService = Context.getService(BillLineItemService.class);
+		List<BillLineItem> result = billLineItemService.fetchBillItemByOrder(new BillItemSearch(billItemSearch, false));
+		BillLineItem lineItem = result != null && !result.isEmpty() ? result.get(0) : null;// default to the first item
+		if (lineItem != null && lineItem.getPaymentStatus().equals(BillStatus.PENDING)) {// all other statuses should be interpreted as PAID
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Checks the express status of a patient based on check-in details.
+	 * Express payment methods should be a configurable global property.
+	 * @should return true if a patient is checked in with an express payment method
+	 * @should return true if an order's visit is inpatient
+	 * @param order
+	 * @return
+	 */
+	public static boolean isOrderForExpressPatient(Order order) {
+		Visit activeVisit = order.getEncounter().getVisit();
+		if (activeVisit != null && activeVisit.getVisitType().getUuid().equals(INPATIENT)) {
+			return true;
+		}
+
+		VisitAttribute visitPaymentMethod = activeVisit.getActiveAttributes().stream().filter(attr -> attr.getAttributeType().getUuid().equalsIgnoreCase(ModuleConstants.VISIT_ATTRIBUTE_PAYMENT_METHOD_UUID)).findFirst().orElse(null);
+		GlobalProperty expressPaymentMethodsConfig = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_EXPRESS_PAYMENT_METHODS);
+		String expressPaymentMethodsString = expressPaymentMethodsConfig.getPropertyValue();
+
+		if (visitPaymentMethod != null && !StringUtils.isBlank(expressPaymentMethodsString)) {
+			String [] expressPaymentMethodUuids = expressPaymentMethodsString.split(",");
+			if (expressPaymentMethodUuids.length > 0) {
+				boolean isExpressPatient =  Arrays.stream(expressPaymentMethodUuids).anyMatch(visitPaymentMethod.getValueReference().trim()::equals);
+				if (isExpressPatient) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 }

@@ -46,6 +46,13 @@ labware_eid_server_url				<host>/api/eid-exchange
 labware_eid_server_result_url		<host>/api/eid-exchange
 labware_eid_server_api_token		xyz
 
+Enabling facility-based LIMS integration
+-------------
+Create a scheduled task using the following:
+
+insert into scheduler_task_config(name,description,schedulable_class,start_time,repeat_interval,created_by,start_time_pattern,uuid)
+values ('Facility based LIMS-EMR Integration Task','Facility based LIMS-EMR Integration Task','org.openmrs.module.kenyaemrorderentry.task.FacilityBasedLimsIntegrationTask','2024-12-22 23:59:59',180,1,'MM/dd/yyyy HH:mm:ss',uuid());
+
 Accreditation
 -------------
 * Highcharts graphing library by Highsoft used under Creative Commons Licence 3.0 (http://www.highcharts.com/)

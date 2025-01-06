@@ -31,6 +31,9 @@
 		<require_module version="${kenyacoreVersion}">
 			org.openmrs.module.kenyacore
 		</require_module>
+		<require_module version="${cashierVersion}">
+			org.openmrs.module.kenyaemr.cashier
+		</require_module>
     </require_modules>
 
     <!-- Module Activator -->
@@ -416,5 +419,12 @@
 		</description>
 	</globalProperty>
 
+	<globalProperty>
+		<property>kenyaemrorderentry.facilitywidelims.expressPaymentMethods</property>
+		<defaultValue></defaultValue>
+		<description>
+			A comma separated list of express payment methods' UUID. Example: xxxxx,yyyy,zzzz
+		</description>
+	</globalProperty>
 </module>
 
