@@ -29,6 +29,7 @@ import org.openmrs.Diagnosis;
 import org.openmrs.GlobalProperty;
 import org.openmrs.Order;
 import org.openmrs.Patient;
+import org.openmrs.PatientIdentifierType;
 import org.openmrs.Person;
 import org.openmrs.PersonName;
 import org.openmrs.api.DiagnosisService;
@@ -36,6 +37,7 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemrorderentry.ModuleConstants;
 import org.openmrs.module.kenyaemrorderentry.task.PushLabRequestsTask;
 import org.openmrs.module.kenyaemrorderentry.util.Utils;
+import org.openmrs.module.metadatadeploy.MetadataUtils;
 import org.openmrs.module.reporting.common.Age;
 import org.openmrs.util.PrivilegeConstants;
 import org.slf4j.Logger;
@@ -55,6 +57,7 @@ import static org.openmrs.module.kenyaemrorderentry.labDataExchange.LabwareFacil
 public class LimsSystemWebRequest {
 
     public static final String LAB_TEST_CODE_PROPERTY = "testCode";
+	public static final String OPENMRS_ID = "dfacd928-0370-4315-99d7-6ec1c9f7ae76";
     private static final Logger log = LoggerFactory.getLogger(PushLabRequestsTask.class);
 
     /**
@@ -87,8 +90,10 @@ public class LimsSystemWebRequest {
             System.out.println("LIMS-EMR mapping: Test code not found for the order concept: " + order.getConcept().getId());
             return payload;
         }
+		PatientIdentifierType openmrsIdType = MetadataUtils.existing(PatientIdentifierType.class, OPENMRS_ID);		
         Patient patient = order.getPatient();
         String patientId = patient.getPatientId() != null ? patient.getPatientId().toString() : "";
+        String openmrsId =  patient.getPatientIdentifier(openmrsIdType) != null ? patient.getPatientIdentifier(openmrsIdType).getIdentifier() : "";
         String address = null;
         String ward = null;
         String village = null;
@@ -167,6 +172,7 @@ public class LimsSystemWebRequest {
         payload.put("PatientFirstName", firstName);
         payload.put("PatientGender", gender != null ? labsUtils.formatGender(gender) : null);
         payload.put("PatientId", patientId);
+        payload.put("OpenMrsId", openmrsId);
         payload.put("PatientOtherName", middleName);
         payload.put("PatientPhone", patient.getAttribute("Telephone contact") != null ? patient.getAttribute("Telephone contact").getValue() : "");
         payload.put("PatientStage", "OUTPATIENT");
