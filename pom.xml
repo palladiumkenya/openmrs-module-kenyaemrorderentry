@@ -1,5 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.openmrs.module</groupId>
     <artifactId>kenyaemrorderentry</artifactId>
@@ -26,12 +27,12 @@
         <url>https://github.com/openmrs/openmrs-module-kenyaemrorderentry</url>
     </scm>
 
-	<modules>
-		<module>api</module>
-		<module>omod</module>
-	</modules>
+    <modules>
+        <module>api</module>
+        <module>omod</module>
+    </modules>
 
-	<properties>
+    <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <openMRSVersion>2.6.1</openMRSVersion>
         <logicVersion>0.5.2</logicVersion>
@@ -512,16 +513,16 @@
             </dependency>
 
             <!-- end of kenyaemr-->
-        <dependency>
-            <groupId>org.openmrs.api</groupId>
-            <artifactId>openmrs-api</artifactId>
-        </dependency>
+            <dependency>
+                <groupId>org.openmrs.api</groupId>
+                <artifactId>openmrs-api</artifactId>
+            </dependency>
 
-        <dependency>
-            <groupId>org.openmrs.api</groupId>
-            <artifactId>openmrs-api</artifactId>
-            <classifier>tests</classifier>
-        </dependency>
+            <dependency>
+                <groupId>org.openmrs.api</groupId>
+                <artifactId>openmrs-api</artifactId>
+                <classifier>tests</classifier>
+            </dependency>
 
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
@@ -566,7 +567,8 @@
                 </exclusions>
             </dependency>
 
-            <!--Add dependency for itext pdf-->
+            <!--Add
+            dependency for itext pdf-->
             <!-- always needed -->
             <dependency>
                 <groupId>com.itextpdf</groupId>
@@ -663,43 +665,43 @@
 
         </dependencies>
     </dependencyManagement>
-	<build>
+    <build>
         <resources>
-			<resource>
-				<directory>src/main/resources</directory>
-				<filtering>true</filtering>
-			</resource>
-			<resource>
-				<directory>src/main/unfiltered-resources</directory>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+            <resource>
+                <directory>src/main/unfiltered-resources</directory>
                 <includes>
                     <include>**/*</include>
                 </includes>
-				<filtering>false</filtering>
-			</resource>
-		</resources>
+                <filtering>false</filtering>
+            </resource>
+        </resources>
 
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-compiler-plugin</artifactId>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.13.0</version>
-					<configuration>
-						<target>1.8</target>
-						<source>1.8</source>
+                    <configuration>
+                        <target>1.8</target>
+                        <source>1.8</source>
                         <release>8</release>
-					</configuration>
-				</plugin>
-				<plugin>
-					<groupId>org.openmrs.maven.plugins</groupId>
-					<artifactId>maven-openmrs-plugin</artifactId>
-					<version>1.0.1</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-dependency-plugin</artifactId>
-					<version>2.4</version>
-				</plugin>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.openmrs.maven.plugins</groupId>
+                    <artifactId>maven-openmrs-plugin</artifactId>
+                    <version>1.0.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <version>2.4</version>
+                </plugin>
                 <plugin>
                     <artifactId>maven-release-plugin</artifactId>
                     <version>2.4.2</version>
@@ -713,22 +715,30 @@
                     <artifactId>maven-javadoc-plugin</artifactId>
                     <version>2.9.1</version>
                 </plugin>
-			</plugins>
-		</pluginManagement>
+            </plugins>
+        </pluginManagement>
 
         <plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-			</plugin>
-		</plugins>
-	</build>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 
     <repositories>
         <repository>
             <id>openmrs-repo</id>
             <name>OpenMRS Nexus Repository</name>
             <url>https://mavenrepo.openmrs.org/nexus/content/repositories/public</url>
+        </repository>
+        <repository>
+            <id>mks-repo-snapshots</id>
+            <name>Mekom Solutions Nexus Snapshots</name>
+            <url>https://nexus.mekomsolutions.net/repository/maven-snapshots</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
         </repository>
     </repositories>
 
@@ -743,17 +753,17 @@
         </pluginRepository>
     </pluginRepositories>
 
-	<distributionManagement>
-		<repository>
-			<id>mks-repo</id>
-			<name>Mekom Solutions Nexus Releases</name>
-			<url>https://nexus.mekomsolutions.net/repository/maven-releases</url>
-		</repository>
-		<snapshotRepository>
-			<id>mks-repo-snapshots</id>
-			<name>Mekom Solutions Nexus Snapshots</name>
-			<url>https://nexus.mekomsolutions.net/repository/maven-snapshots</url>
-		</snapshotRepository>
-	</distributionManagement>
+    <distributionManagement>
+        <repository>
+            <id>mks-repo</id>
+            <name>Mekom Solutions Nexus Releases</name>
+            <url>https://nexus.mekomsolutions.net/repository/maven-releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>mks-repo-snapshots</id>
+            <name>Mekom Solutions Nexus Snapshots</name>
+            <url>https://nexus.mekomsolutions.net/repository/maven-snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
 
 </project>
