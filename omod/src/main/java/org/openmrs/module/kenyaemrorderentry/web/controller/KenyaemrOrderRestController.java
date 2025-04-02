@@ -40,6 +40,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -509,9 +514,10 @@ public class KenyaemrOrderRestController extends BaseRestController {
             ex.printStackTrace();
             model.put("status", "error");
             model.put("message", ex.getMessage());
+            return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).body(model.toJson());
         }
 
-        return model.toJson();
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(model.toJson());
     }
 
     /**
