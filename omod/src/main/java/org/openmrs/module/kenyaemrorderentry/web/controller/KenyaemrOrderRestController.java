@@ -134,6 +134,7 @@ public class KenyaemrOrderRestController extends BaseRestController {
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The request could not be interpreted in KenyaEMR");
     }
+
     /**
      * Gets a list of valid orders for a given manifest (manifest type)
      * @param request
@@ -446,6 +447,11 @@ public class KenyaemrOrderRestController extends BaseRestController {
         return(model);
     }
 
+    /**
+     * Gets the queued tests to LIMS
+     * @param request
+     * @return
+     */
     @CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS})
     @RequestMapping(method = RequestMethod.GET, value = "/sendteststolims")
     @ResponseBody
@@ -481,11 +487,39 @@ public class KenyaemrOrderRestController extends BaseRestController {
     }
 
     /**
+     * Sends a manifest back to 'submitted' status
+     * @param request
+     * @param manifestUuid - The manifest uuid
+     * @return
+     */
+    @CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS})
+    @RequestMapping(method = RequestMethod.GET, value = "/requeuemanifest")
+    @ResponseBody
+    @Authorized
+    public Object requeueManifest(HttpServletRequest request, @RequestParam("manifestUuid") String manifestUuid) {
+        SimpleObject model = SimpleObject.create("status", "success");
+
+        try {
+            // We requeue the manifest by changing its status to 'Submitted' and all order items to 'Sent' except those whose status is 'complete' or 'incomplete'
+            KenyaemrOrdersService kenyaemrOrdersService = Context.getService(KenyaemrOrdersService.class);
+            kenyaemrOrdersService.reprocessLabManifest(manifestUuid);
+
+        } catch (Exception ex) {
+            System.err.println("OrderEntry Module: Error: Failed to requeue the manifest: " + ex.getMessage());
+            ex.printStackTrace();
+            model.put("status", "error");
+            model.put("message", ex.getMessage());
+        }
+
+        return model.toJson();
+    }
+
+    /**
      * @see BaseRestController#getNamespace()
      */
 
     @Override
     public String getNamespace() {
-        return "v1/kenyaemrorderentry";
+        return RestConstants.VERSION_1 + "/kemrorder";
     }
 }

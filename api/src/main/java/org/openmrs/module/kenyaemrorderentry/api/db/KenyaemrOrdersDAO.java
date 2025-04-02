@@ -110,6 +110,7 @@ public interface KenyaemrOrdersDAO {
     Long countTotalErrorsOnCompleteManifests();
 
     void reprocessLabManifest(Integer manifestId);
+    void reprocessLabManifest(String manifestUuid);
 
     List<LabManifest> getLabManifests(String uuid, String status, String type, String withErrors, Date createdOnOrAfterDate, Date createdOnOrBeforeDate);
 

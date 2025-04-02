@@ -681,6 +681,29 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
         }
     }
 
+    /**
+     * This puts the manifest in the submitted state allowing the system to check for results from remote again
+     * It also changes the status of the manifest samples in error to "Sent"
+     * 
+     * @param manifestUuid - The manifest uuid
+     */
+    @Override
+    public void reprocessLabManifest(String manifestUuid) {
+        LabManifest labManifest = getLabManifestByUUID(manifestUuid);
+        labManifest.setStatus("Submitted");
+        saveLabOrderManifest(labManifest);
+        //get all orders in manifest
+        List<LabManifestOrder> ordersList = getLabManifestOrderByManifest(labManifest);
+        for (LabManifestOrder labManifestOrder : ordersList) {
+            // Modify the order in case the status is in error
+            String status = labManifestOrder.getStatus();
+            if(!status.trim().equalsIgnoreCase("Complete") && !status.trim().equalsIgnoreCase("Incomplete")) {
+                labManifestOrder.setStatus("Sent");
+                saveLabManifestOrder(labManifestOrder);
+            }
+        }
+    }
+
     // Start cached data for summary form
 
     @Override

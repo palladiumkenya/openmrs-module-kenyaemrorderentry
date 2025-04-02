@@ -15,6 +15,7 @@ import org.openmrs.ui.framework.SimpleObject;
 
 public interface KenyaemrOrdersService extends OpenmrsService {
     void reprocessLabManifest(Integer manifestId);
+    void reprocessLabManifest(String manifestUuid);
     LabManifest saveLabOrderManifest(LabManifest labManifest);
     LimsQueue saveLimsQueue(LimsQueue limsQueue);
     LimsQueue getLimsQueueByOrder(Order order);
