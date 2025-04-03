@@ -379,6 +379,12 @@ public class KenyaemrOrdersServiceImpl extends BaseOpenmrsService implements Ken
         dao.reprocessLabManifest(manifestId);
     }
 
+    @Override
+    @Transactional(readOnly = false)
+    public void reprocessLabManifest(String manifestUuid) {
+        dao.reprocessLabManifest(manifestUuid);
+    }
+
     // Start cached methods for the summary page
 
     @Override
