@@ -72,6 +72,12 @@ public class HeiLabManifestReport {
 		return null;
 	}
 
+    /**
+     * Generate the HEI manifest report
+     * @param dest
+     * @return
+     * @throws IOException
+     */
     public File generateReport(String dest) throws IOException {
 
         File returnFile = File.createTempFile("labManifest", ".pdf");
@@ -183,7 +189,7 @@ public class HeiLabManifestReport {
 
         document.add(manifestMetadata);
 
-        Table table = new Table(15); // 15 columns for the report details
+        Table table = new Table(10); // 10 columns for the report details
         table.setWidth(UnitValue.createPercentValue(100));
         table.setFont(font);
 
@@ -198,11 +204,21 @@ public class HeiLabManifestReport {
         return returnFile;
 
     }
-    private Table addHeaderRow(Table table) {
 
+    /**
+     * Adding the header row
+     * @param table
+     * @return
+     */
+    private Table addHeaderRow(Table table) {
+        // Adding 10 columns
+        // Col 1 - Date of sample collection
         table.addHeaderCell(new Paragraph("Date of Sample \ncollection").setBold().setTextAlignment(TextAlignment.CENTER));
+
+        // Col 2 - Infant Name
         table.addHeaderCell(new Paragraph("Infant Name").setBold());
 
+        // Col 3 - HEI Id number
         Paragraph cccNumberCol = new Paragraph();
         Text cccNoText = new Text("HEI ID Number \n").setBold();
         Text cccNoDetail1 = new Text("(MFL-YYYY-NNNN)").setItalic().setFontSize(8);
@@ -210,8 +226,10 @@ public class HeiLabManifestReport {
         cccNumberCol.add(cccNoDetail1);
         table.addHeaderCell(cccNumberCol);
   
+        // Col 4 - PCR sample code
         table.addHeaderCell(new Paragraph("PCR sample \n(code)").setBold().setTextAlignment(TextAlignment.CENTER));
 
+        // Col 5 - Date of birth
         Paragraph dobCol = new Paragraph();
         Text dobText = new Text("Date of Birth \n").setBold();
         Text dobDetails = new Text("(dd/mm/yyy)").setItalic().setFontSize(8).setBold();
@@ -219,23 +237,30 @@ public class HeiLabManifestReport {
         dobCol.add(dobDetails);
         table.addHeaderCell(dobCol);
 
+        // Col 6 - Sex
         table.addHeaderCell(new Paragraph("Sex (M/F)").setBold());
-
-        table.addHeaderCell(new Paragraph("Entry Point \n(code)").setBold().setTextAlignment(TextAlignment.CENTER));
         
+        // Col 7 - Infant Prophylaxis
         table.addHeaderCell(new Paragraph("Infant Prophylaxis \n(code)").setBold().setTextAlignment(TextAlignment.CENTER));
-        table.addHeaderCell(new Paragraph("Infant Feeding \n(code)").setBold().setTextAlignment(TextAlignment.CENTER));
-        table.addHeaderCell(new Paragraph("Infant HEI / KDOD No").setBold().setTextAlignment(TextAlignment.CENTER));
         
-        // For the Mother
-        table.addHeaderCell(new Paragraph("Mothers \nAge").setBold().setTextAlignment(TextAlignment.CENTER));
-        table.addHeaderCell(new Paragraph("Mothers \nCCC Number").setBold().setTextAlignment(TextAlignment.CENTER));
-        table.addHeaderCell(new Paragraph("Mothers \nPMTCT Regimen \n(code)").setBold().setTextAlignment(TextAlignment.CENTER));
-        table.addHeaderCell(new Paragraph("Mothers \nVL result \nwithin last \n6 months").setBold().setTextAlignment(TextAlignment.CENTER));
+        // Col 8 - Infant NUPI/CCC No
+        table.addHeaderCell(new Paragraph("Infant NUPI / CCC No").setBold().setTextAlignment(TextAlignment.CENTER));
+        
+        // Col 9 - Mothers NUPI\nCCC Number
+        table.addHeaderCell(new Paragraph("Mothers NUPI\nCCC Number").setBold().setTextAlignment(TextAlignment.CENTER));
 
+        // Col 10 - Code for rejection
+        table.addHeaderCell(new Paragraph("Code for rejection").setBold().setTextAlignment(TextAlignment.CENTER));
+        
         return table;
     }
 
+    /**
+     * Loop through the orders in the manifest
+     * @param manifest
+     * @param table
+     * @return
+     */
     private Table addManifestSamples(LabManifest manifest, Table table) {
 
         java.util.List<LabManifestOrder> samples = Context.getService(KenyaemrOrdersService.class).getLabManifestOrderByManifest(manifest);
@@ -247,22 +272,27 @@ public class HeiLabManifestReport {
         return table;
     }
 
+    /**
+     * Add table row data
+     * @param sample
+     * @param table
+     */
     private void addManifestRow(LabManifestOrder sample, Table table) {
-
+        // Adding 10 columns
+        
         Patient patient = sample.getOrder().getPatient();
         Order order = sample.getOrder();
         SimpleObject heiDetailsObject = Utils.getHeiDetailsForEidPostObject(patient, order);
         String mothersCCC = Utils.getMothersUniquePatientNumber(patient);
-        SimpleObject heiMothersAgeObject = Utils.getHeiMothersAge(patient);
 
         // Is DOD
         AdministrationService administrationService = Context.getAdministrationService();
         final String isKDoD = (administrationService.getGlobalProperty("kenyaemr.isKDoD"));
 
-        // Sample Collection Date
+        // Col 1 - Date of sample collection
         table.addCell(new Paragraph(sample.getSampleCollectionDate() != null ? Utils.getSimpleDateFormat("dd/MM/yyyy").format(sample.getSampleCollectionDate()) : "")).setFontSize(10);
 
-        // Child Name
+        // Col 2 - Infant Name
         String fullName = patient.getGivenName().concat(" ").concat(
                 patient.getFamilyName() != null ? sample.getOrder().getPatient().getFamilyName() : ""
         ).concat(" ").concat(
@@ -270,36 +300,26 @@ public class HeiLabManifestReport {
         );
         table.addCell(new Paragraph(WordUtils.capitalizeFully(fullName))).setFontSize(10);
 
-        // HEI Identifier
+        // Col 3 - HEI Id number
         table.addCell(new Paragraph(patient.getPatientIdentifier(Utils.getHeiNumberIdentifierType()).getIdentifier())).setFontSize(10);
 
-        // PCR Sample Code
+        // Col 4 - PCR sample code
         String pcrSampleCode = "";
         pcrSampleCode = heiDetailsObject.get("pcrSampleCodeAnswer") != null ? heiDetailsObject.get("pcrSampleCodeAnswer").toString() : "";
         table.addCell(new Paragraph(pcrSampleCode)).setFontSize(10);
 
-        // Date of Birth
+        // Col 5 - Date of birth
         table.addCell(new Paragraph(Utils.getSimpleDateFormat("dd/MM/yyyy").format(sample.getOrder().getPatient().getBirthdate()))).setFontSize(10);
         
-        // Sex
+        // Col 6 - Sex
         table.addCell(new Paragraph(sample.getOrder().getPatient().getGender())).setFontSize(10);
-
-        // Entry Point
-        String entryPoint = "";
-        entryPoint = heiDetailsObject.get("entryPointAnswer") != null ? heiDetailsObject.get("entryPointAnswer").toString() : "";
-        table.addCell(new Paragraph(entryPoint)).setFontSize(10);
         
-        // Prophylaxis Code
+        // Col 7 - Infant Prophylaxis
         String infantProphylaxisCode = "";
         infantProphylaxisCode = heiDetailsObject.get("prophylaxisAnswer") != null ? heiDetailsObject.get("prophylaxisAnswer").toString() : "";
         table.addCell(new Paragraph(infantProphylaxisCode)).setFontSize(10);
 
-        // Feeding Method
-        String infantFeedingCode = "";
-        infantFeedingCode = heiDetailsObject.get("feedingMethodAnswer") != null ? heiDetailsObject.get("feedingMethodAnswer").toString() : "";
-        table.addCell(new Paragraph(infantFeedingCode)).setFontSize(10);
-
-        // Infant HEI / KDOD
+        // Col 8 - Infant NUPI/CCC No
         String infantUniqueNo = "";
 
         PatientIdentifierType pit;
@@ -314,34 +334,26 @@ public class HeiLabManifestReport {
         }
         table.addCell(new Paragraph(infantUniqueNo)).setFontSize(10);
 
-        // Mothers Age
-        String mothersAge = "";
-        mothersAge = heiMothersAgeObject != null ? heiMothersAgeObject.get("mothersAge").toString() : "";
-        table.addCell(new Paragraph(mothersAge)).setFontSize(10);
-
-        // Mothers CCC
+        // Col 9 - Mothers NUPI\nCCC Number
         mothersCCC = mothersCCC !=null ? mothersCCC : "";
         table.addCell(new Paragraph(mothersCCC)).setFontSize(10);
 
-        // Mothers Regimen
-        String mothersRegimen = "";
-        mothersRegimen = heiDetailsObject.get("mothersRegimenAnswer") != null ? heiDetailsObject.get("mothersRegimenAnswer").toString() : "";
-        table.addCell(new Paragraph(mothersRegimen)).setFontSize(10);
-
-        // Mothers Last VL
-        String mothersLastVL = "";
-        SimpleObject vlObject = Utils.getMothersLastViralLoad(patient);
-        if(vlObject !=null){
-            mothersLastVL = vlObject.get("lastVl") != null ? vlObject.get("lastVl").toString() : "";
-        }
-        table.addCell(new Paragraph(mothersLastVL)).setFontSize(10);
-
+        // Col 10 - Code for rejection
+        table.addCell(new Paragraph("____")).setFontSize(10);
     }
 
+    /**
+     * Get the main manifest
+     * @return the main lab manifest
+     */
     public LabManifest getManifest() {
         return manifest;
     }
 
+    /**
+     * Set the main lab manifest
+     * @param manifest
+     */
     public void setManifest(LabManifest manifest) {
         this.manifest = manifest;
     }
