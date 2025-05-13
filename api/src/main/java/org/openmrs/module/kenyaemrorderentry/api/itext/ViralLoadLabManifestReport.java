@@ -260,7 +260,7 @@ public class ViralLoadLabManifestReport {
             table.addCell(new Paragraph(uniqueNumber)).setFontSize(10);
         }
 
-        //Add Recency and Justification
+        // Add Recency
         String recencyIdentifier = "";
         PatientIdentifier recencyPatientIdentifier = null;
         PatientIdentifierType recencyIdentifierType = Utils.getRecencyIdentifierType();
@@ -271,6 +271,7 @@ public class ViralLoadLabManifestReport {
             }
         }
         table.addCell(new Paragraph(recencyIdentifier)).setFontSize(10);
+        // Add Justification
         table.addCell(new Paragraph(sample.getOrder().getOrderReason() != null ? LabOrderDataExchange.getOrderReasonCode(sample.getOrder().getOrderReason().getUuid()) : "")).setFontSize(10);
 
         table.addCell(new Paragraph(Utils.getSimpleDateFormat("dd/MM/yyyy").format(sample.getOrder().getPatient().getBirthdate()))).setFontSize(10);
