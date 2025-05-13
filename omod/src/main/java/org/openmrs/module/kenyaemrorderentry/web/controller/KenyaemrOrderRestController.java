@@ -165,11 +165,11 @@ public class KenyaemrOrderRestController extends BaseRestController {
         Integer manifestTypeCode = labManifest.getManifestType();
         
         if (manifestTypeCode == LabManifest.EID_TYPE) {
-            activeOrdersNotInManifest = labOrderDataExchange.getActiveEidOrdersNotInManifest(null, labManifest.getStartDate(), labManifest.getEndDate());
+            activeOrdersNotInManifest = labOrderDataExchange.getActiveEidOrdersNotInManifest(manifestTypeCode, labManifest.getStartDate(), labManifest.getEndDate());
         } else if (manifestTypeCode == LabManifest.VL_TYPE) {
-            activeOrdersNotInManifest = labOrderDataExchange.getActiveViralLoadOrdersNotInManifest(null, labManifest.getStartDate(), labManifest.getEndDate());
+            activeOrdersNotInManifest = labOrderDataExchange.getActiveViralLoadOrdersNotInManifest(manifestTypeCode, labManifest.getStartDate(), labManifest.getEndDate());
         } else if (manifestTypeCode == LabManifest.FLU_TYPE) {
-            activeOrdersNotInManifest = labOrderDataExchange.getActiveFluOrdersNotInManifest(null, labManifest.getStartDate(), labManifest.getEndDate());
+            activeOrdersNotInManifest = labOrderDataExchange.getActiveFluOrdersNotInManifest(manifestTypeCode, labManifest.getStartDate(), labManifest.getEndDate());
         }
 
         // orders

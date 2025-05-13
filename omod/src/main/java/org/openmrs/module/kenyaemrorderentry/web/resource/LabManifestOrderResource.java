@@ -66,11 +66,13 @@ public class LabManifestOrderResource extends DataDelegatingCrudResource<LabMani
         String sampleType = labManifestOrder.getSampleType();
         LabWebRequest payloadGenerator = null;
 
-        if (LabOrderDataExchange.getSystemType() == ModuleConstants.CHAI_SYSTEM) {
+        Integer manifestType = manifest.getManifestType();
+
+        if (LabOrderDataExchange.getSystemType(manifestType) == ModuleConstants.CHAI_SYSTEM) {
             payloadGenerator = new ChaiSystemWebRequest();
-        } else if (LabOrderDataExchange.getSystemType() == ModuleConstants.LABWARE_SYSTEM) {
+        } else if (LabOrderDataExchange.getSystemType(manifestType) == ModuleConstants.LABWARE_SYSTEM) {
             payloadGenerator = new LabwareSystemWebRequest();
-        } else if (LabOrderDataExchange.getSystemType() == ModuleConstants.EDARP_SYSTEM) {
+        } else if (LabOrderDataExchange.getSystemType(manifestType) == ModuleConstants.EDARP_SYSTEM) {
             payloadGenerator = new EdarpSystemWebRequest();
         }
         

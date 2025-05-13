@@ -64,13 +64,24 @@ public class LabOrderDataExchange {
 
 
     /**
-     * Give the kind of lab system configured i.e CHAI or LABWARE
+     * Give the kind of lab system configured i.e CHAI, EDARP or LABWARE
      *
      * @return int system type LABWARE_SYSTEM, CHAI_SYSTEM, or EDARP
      */
-    public static int getSystemType() {
+    public static int getSystemType(int manifestType) {
         String systemType = "";
-        GlobalProperty gpLabSystemInUse = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LAB_SYSTEM_IN_USE);
+        String gpLabSystem = "";
+        if(manifestType == LabManifest.VL_TYPE) {
+            gpLabSystem = ModuleConstants.GP_VL_LAB_SYSTEM_IN_USE;
+        } else if(manifestType == LabManifest.EID_TYPE) {
+            gpLabSystem = ModuleConstants.GP_EID_LAB_SYSTEM_IN_USE;
+        } else if(manifestType == LabManifest.FLU_TYPE) {
+            gpLabSystem = ModuleConstants.GP_FLU_LAB_SYSTEM_IN_USE;
+        } else {
+            gpLabSystem = ModuleConstants.GP_LAB_SYSTEM_IN_USE;
+        }
+
+        GlobalProperty gpLabSystemInUse = Context.getAdministrationService().getGlobalPropertyObject(gpLabSystem);
         if (gpLabSystemInUse == null) {
             return ModuleConstants.NO_SYSTEM_CONFIGURED; // return 0 if not set
         } else {
@@ -270,12 +281,12 @@ public class LabOrderDataExchange {
     /**
      * Returns active vl orders which have not been added to any manifest
      *
-     * @param manifestId
+     * @param manifestType
      * @param startDate
      * @param endDate
      * @return
      */
-    public Set<SimpleObject> getActiveViralLoadOrdersNotInManifest(Integer manifestId, Date startDate, Date endDate) {
+    public Set<SimpleObject> getActiveViralLoadOrdersNotInManifest(Integer manifestType, Date startDate, Date endDate) {
         Context.addProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
         Set<SimpleObject> activeLabs = new HashSet<SimpleObject>();
         String sql = "select o.order_id from orders o\n" +
@@ -311,12 +322,12 @@ public class LabOrderDataExchange {
     /**
      * Returns active Eid orders which have not been added to any manifest
      *
-     * @param manifestId
+     * @param manifestType
      * @param startDate
      * @param endDate
      * @return
      */
-    public Set<SimpleObject> getActiveEidOrdersNotInManifest(Integer manifestId, Date startDate, Date endDate) {
+    public Set<SimpleObject> getActiveEidOrdersNotInManifest(Integer manifestType, Date startDate, Date endDate) {
         Context.addProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
         Set<SimpleObject> activeLabs = new HashSet<SimpleObject>();
         String sql = "select o.order_id from orders o\n" +
@@ -350,14 +361,14 @@ public class LabOrderDataExchange {
     }
 
     /**
-     * Returns active vl orders which have not been added to any manifest
+     * Returns active flu orders which have not been added to any manifest
      *
-     * @param manifestId
+     * @param manifestType
      * @param startDate
      * @param endDate
      * @return
      */
-    public Set<SimpleObject> getActiveFluOrdersNotInManifest(Integer manifestId, Date startDate, Date endDate) {
+    public Set<SimpleObject> getActiveFluOrdersNotInManifest(Integer manifestType, Date startDate, Date endDate) {
         Context.addProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
         Set<SimpleObject> activeLabs = new HashSet<SimpleObject>();
         String sql = "select o.order_id from orders o\n" +
@@ -406,7 +417,7 @@ public class LabOrderDataExchange {
         final String isKDoD = (administrationService.getGlobalProperty("kenyaemr.isKDoD"));
 
         // LAB SYSTEM TYPE MUST BE CONFIGURED
-        if (LabOrderDataExchange.getSystemType() == ModuleConstants.NO_SYSTEM_CONFIGURED) {
+        if (LabOrderDataExchange.getSystemType(orderType) == ModuleConstants.NO_SYSTEM_CONFIGURED) {
             return(true);
         }
 
@@ -809,8 +820,10 @@ public class LabOrderDataExchange {
                     String dateSampleTested = "";
                     String batchNumber = "";
                     String specimenRejectedReason = "";
+                    LabManifestOrder mOrder = kenyaemrOrdersService.getLabManifestOrderByOrderId(Context.getOrderService().getOrder(orderId));
+                    Integer manifestType = mOrder.getLabManifest().getManifestType();
 
-                    if (getSystemType() == ModuleConstants.LABWARE_SYSTEM) {
+                    if (getSystemType(manifestType) == ModuleConstants.LABWARE_SYSTEM) {
                         try {
                             JsonObject dateReceivedObject = o.get("date_received").getAsJsonObject();
                             dateSampleReceived = dateReceivedObject.get("date").getAsString().trim();
@@ -821,7 +834,7 @@ public class LabOrderDataExchange {
                             dateSampleTested = dateTestedObject.get("date").getAsString().trim();
                         } catch (Exception ex) {
                         }
-                    } else if (getSystemType() == ModuleConstants.CHAI_SYSTEM) {
+                    } else if (getSystemType(manifestType) == ModuleConstants.CHAI_SYSTEM) {
                         try {
                             dateSampleReceived = o.get("date_received").getAsString().trim();
                         } catch (Exception ex) {
@@ -830,7 +843,7 @@ public class LabOrderDataExchange {
                             dateSampleTested = o.get("date_tested").getAsString().trim();
                         } catch (Exception ex) {
                         }
-                    } else if (getSystemType() == ModuleConstants.EDARP_SYSTEM) {
+                    } else if (getSystemType(manifestType) == ModuleConstants.EDARP_SYSTEM) {
                         try {
                             dateSampleReceived = o.get("date_received").getAsString().trim();
                         } catch (Exception ex) {
@@ -1022,7 +1035,7 @@ public class LabOrderDataExchange {
                     String aboveMillionResult = "> 10,000,000 cp/ml";
                     Obs o = new Obs();
 
-                    if (getSystemType() == ModuleConstants.CHAI_SYSTEM) {
+                    if (getSystemType(manifestType) == ModuleConstants.CHAI_SYSTEM) {
                         if (result.equalsIgnoreCase(lDLResult) || result.equalsIgnoreCase(labwarelDLResult) || result.contains("LDL")) {
                             viralLoadConcept = vlTestConceptQuantitative;
                             o.setValueNumeric(new Double(0));
@@ -1034,7 +1047,7 @@ public class LabOrderDataExchange {
                             Double vlVal = NumberUtils.toDouble(result);
                             o.setValueNumeric(vlVal);
                         }
-                    } else if (getSystemType() == ModuleConstants.LABWARE_SYSTEM) {
+                    } else if (getSystemType(manifestType) == ModuleConstants.LABWARE_SYSTEM) {
                         result = result.toLowerCase().trim(); // convert to lowercase and trim
                         if (result.equalsIgnoreCase(lDLResult) || result.equalsIgnoreCase(labwarelDLResult) || result.contains("LDL")) {
                             viralLoadConcept = vlTestConceptQuantitative;
@@ -1059,7 +1072,7 @@ public class LabOrderDataExchange {
                                 o.setValueNumeric(vlVal);
                             }
                         }
-                    } else if (getSystemType() == ModuleConstants.EDARP_SYSTEM) {
+                    } else if (getSystemType(manifestType) == ModuleConstants.EDARP_SYSTEM) {
                         // System.out.println("Got sample result as: " + result);
                         if (result.equalsIgnoreCase(lDLResult) || result.equalsIgnoreCase(labwarelDLResult) || result.contains("LDL")) {
                             viralLoadConcept = vlTestConceptQuantitative;

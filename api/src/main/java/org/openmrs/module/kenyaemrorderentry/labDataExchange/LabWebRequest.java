@@ -148,7 +148,7 @@ public abstract class LabWebRequest {
                 return test;
             }
 
-            if (LabOrderDataExchange.getSystemType() == ModuleConstants.CHAI_SYSTEM || LabOrderDataExchange.getSystemType() == ModuleConstants.EDARP_SYSTEM) {
+            if (LabOrderDataExchange.getSystemType(manifestType) == ModuleConstants.CHAI_SYSTEM || LabOrderDataExchange.getSystemType(manifestType) == ModuleConstants.EDARP_SYSTEM) {
                 System.out.println("Creating payload for CHAI or EDARP EID");
                 test.put("dob", dob);
                 test.put("sex", patient.getGender().equals("M") ? "1" : patient.getGender().equals("F") ? "2" : "3");
@@ -171,7 +171,7 @@ public abstract class LabWebRequest {
                 test.put("mother_age", (heiMothersAgeObject != null && heiMothersAgeObject.get("mothersAge") != null) ? heiMothersAgeObject.get("mothersAge").toString() : "" );
                 test.put("ccc_no", Utils.getMothersUniquePatientNumber(patient) !=null ? Utils.getMothersUniquePatientNumber(patient) : "");
 
-            } else if (LabOrderDataExchange.getSystemType() == ModuleConstants.LABWARE_SYSTEM) {
+            } else if (LabOrderDataExchange.getSystemType(manifestType) == ModuleConstants.LABWARE_SYSTEM) {
                 System.out.println("Creating payload for labware EID");
                 test.put("sample_type", sampleType);
                 test.put("pat_name", fullName);

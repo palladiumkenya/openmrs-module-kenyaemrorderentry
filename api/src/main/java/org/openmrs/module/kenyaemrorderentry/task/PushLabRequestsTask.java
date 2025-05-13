@@ -47,25 +47,6 @@ public class PushLabRequestsTask extends AbstractTask {
 
                 LabWebRequest labSystemConnectionRequest;
 
-                if (LabOrderDataExchange.getSystemType() == ModuleConstants.CHAI_SYSTEM) {
-                    // System.out.println("Order Entry: Using CHAI System");
-                    labSystemConnectionRequest = new ChaiSystemWebRequest();
-                } else if (LabOrderDataExchange.getSystemType() == ModuleConstants.LABWARE_SYSTEM){
-                    // System.out.println("Order Entry: Using LABWARE System");
-                    labSystemConnectionRequest = new LabwareSystemWebRequest();
-                } else if (LabOrderDataExchange.getSystemType() == ModuleConstants.EDARP_SYSTEM){
-                    // System.out.println("Order Entry: Using EDARP System");
-                    labSystemConnectionRequest = new EdarpSystemWebRequest();
-                } else {
-                    System.out.println("LAB POST: No lab system has been configured. Please configure the global properties");
-                    return;
-                }
-
-//                if (!labSystemConnectionRequest.checkRequirements()) {
-//                    System.out.println("LAB POST: Failed to satisfy requirements for pushing samples. Please configure appropriate global properties for your facility");
-//                    return;
-//                }
-
                 // Get a manifest ready to be sent
                 LabManifest toProcess = null;
                 String manifestStatus = "";
@@ -103,6 +84,22 @@ public class PushLabRequestsTask extends AbstractTask {
                         toProcess.setStatus("Sending");
                         kenyaemrOrdersService.saveLabOrderManifest(toProcess);
                     }
+                }
+
+                int manifestType = toProcess.getManifestType();
+
+                if (LabOrderDataExchange.getSystemType(manifestType) == ModuleConstants.CHAI_SYSTEM) {
+                    // System.out.println("Order Entry: Using CHAI System");
+                    labSystemConnectionRequest = new ChaiSystemWebRequest();
+                } else if (LabOrderDataExchange.getSystemType(manifestType) == ModuleConstants.LABWARE_SYSTEM){
+                    // System.out.println("Order Entry: Using LABWARE System");
+                    labSystemConnectionRequest = new LabwareSystemWebRequest();
+                } else if (LabOrderDataExchange.getSystemType(manifestType) == ModuleConstants.EDARP_SYSTEM){
+                    // System.out.println("Order Entry: Using EDARP System");
+                    labSystemConnectionRequest = new EdarpSystemWebRequest();
+                } else {
+                    System.out.println("LAB POST: No lab system has been configured. Please configure the global properties");
+                    return;
                 }
 
                 boolean checkIfSent = true;

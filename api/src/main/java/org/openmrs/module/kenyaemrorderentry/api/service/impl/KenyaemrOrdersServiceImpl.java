@@ -94,9 +94,10 @@ public class KenyaemrOrdersServiceImpl extends BaseOpenmrsService implements Ken
             if(manifestId == null) {
                 System.out.println("Manifest ID fix: Saving a new manifest");
                 LabOrderDataExchange labOrderDataExchange = new LabOrderDataExchange();
-                if(LabOrderDataExchange.getSystemType() == ModuleConstants.LABWARE_SYSTEM) {
+                Integer manifestType = labManifest.getManifestType();
+                if(LabOrderDataExchange.getSystemType(manifestType) == ModuleConstants.LABWARE_SYSTEM) {
                     String mType = "E";
-                    Integer manifestType = labManifest.getManifestType();
+                    
                     if(manifestType == LabManifest.EID_TYPE) {
                         mType = "E";
                     } else if(manifestType == LabManifest.VL_TYPE) {

@@ -80,10 +80,12 @@ public class LabwareSystemWebRequest extends LabWebRequest {
         String FLUServerPullUrl = gpFLUServerPullUrl.getPropertyValue();
         String FLUApiToken = gpFLUApiToken.getPropertyValue();
 
-        if ((toProcess.getManifestType() == LabManifest.VL_TYPE && (StringUtils.isBlank(VLServerPushUrl) || StringUtils.isBlank(VLServerPullUrl) || StringUtils.isBlank(VLApiToken)))
-                || (toProcess.getManifestType() == LabManifest.EID_TYPE && (StringUtils.isBlank(EIDServerPushUrl) || StringUtils.isBlank(EIDServerPullUrl) || StringUtils.isBlank(EIDApiToken)))
-                || (toProcess.getManifestType() == LabManifest.FLU_TYPE && (StringUtils.isBlank(FLUServerPushUrl) || StringUtils.isBlank(FLUServerPullUrl) || StringUtils.isBlank(FLUApiToken)))
-                || LabOrderDataExchange.getSystemType() == ModuleConstants.NO_SYSTEM_CONFIGURED
+        Integer manifestType = toProcess.getManifestType();
+
+        if ((manifestType == LabManifest.VL_TYPE && (StringUtils.isBlank(VLServerPushUrl) || StringUtils.isBlank(VLServerPullUrl) || StringUtils.isBlank(VLApiToken)))
+                || (manifestType == LabManifest.EID_TYPE && (StringUtils.isBlank(EIDServerPushUrl) || StringUtils.isBlank(EIDServerPullUrl) || StringUtils.isBlank(EIDApiToken)))
+                || (manifestType == LabManifest.FLU_TYPE && (StringUtils.isBlank(FLUServerPushUrl) || StringUtils.isBlank(FLUServerPullUrl) || StringUtils.isBlank(FLUApiToken)))
+                || LabOrderDataExchange.getSystemType(manifestType) == ModuleConstants.NO_SYSTEM_CONFIGURED
         ) {
             System.err.println("Labware Lab Results: Please set credentials for posting lab requests to the labware system");
             return false;
