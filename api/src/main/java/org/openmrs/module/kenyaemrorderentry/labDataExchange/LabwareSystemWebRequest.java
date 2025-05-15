@@ -545,7 +545,6 @@ public class LabwareSystemWebRequest extends LabWebRequest {
         ObjectNode node = baselinePostRequestPayload(order, dateSampleCollected, dateSampleSeparated, sampleType, manifestID);
 
         if (!node.isEmpty()) {
-
             if (getManifestType() == LabManifest.FLU_TYPE) {
                 // Any custom payload for LABWARE FLU
             } else {
@@ -558,15 +557,7 @@ public class LabwareSystemWebRequest extends LabWebRequest {
                 node.put("recency_id", "");
                 node.put("emr_shipment", StringUtils.isNotBlank(manifestID) ? manifestID : "");
                 node.put("date_separated", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleSeparated));
-
-
-                // node.put("mfl_code", Utils.getDefaultLocationMflCode(Utils.getDefaultLocation()));
-                if (order.getPatient().getGender().equals("F")) {
-                    node.put("female_status", "none");
-                }
             }
-
-            // System.out.println("Order Entry: Using LABWARE System payload: " + node.toPrettyString());
         }
 
         return node;
