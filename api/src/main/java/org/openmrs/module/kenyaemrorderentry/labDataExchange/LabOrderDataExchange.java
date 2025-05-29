@@ -165,49 +165,42 @@ public class LabOrderDataExchange {
 
     /**
      * Converter for concept to lab system code (justification)
-     * 1= Routine VL
-     * 2=confirmation of
-     * treatment failure (repeat VL)
-     * 3= Clinical failure
-     * 4= Single drug
-     * substitution
-     * 5=Baseline VL (for infants diagnosed through EID)
-     * 6=Confirmation of persistent low level Viremia (PLLV)
      *
      * @param conceptUuid
      * @return
      */
     public static String getOrderReasonCode(String conceptUuid) {
 
+        System.out.println("Order Entry Module: checking justification code for UUID: " + conceptUuid);
         if (conceptUuid == null)
             return "";
 
         Integer code = null;
-        if (conceptUuid.equals("843AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) { // Confirmation of treatment failure (repeat VL)
+        if (conceptUuid.trim().equalsIgnoreCase("843AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) { // Confirmation of treatment failure (repeat VL)
             code = 2;
-        } else if (conceptUuid.equals("1434AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) { // pregnancy
+        } else if (conceptUuid.trim().equalsIgnoreCase("1434AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) { // pregnancy
             code = 1;
-        } else if (conceptUuid.equals("162080AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) { // baseline VL
+        } else if (conceptUuid.trim().equalsIgnoreCase("162080AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) { // baseline VL
             code = 5;
-        } else if (conceptUuid.equals("1259AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) { // single drug substitution
+        } else if (conceptUuid.trim().equalsIgnoreCase("1259AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) { // single drug substitution
             code = 3;
-        } else if (conceptUuid.equals("159882AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) { // breastfeeding
+        } else if (conceptUuid.trim().equalsIgnoreCase("159882AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) { // breastfeeding
             code = 1;
-        } else if (conceptUuid.equals("163718AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) { // PMTCT NP
+        } else if (conceptUuid.trim().equalsIgnoreCase("163718AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) { // PMTCT NP
             code = 8;
-        } else if (conceptUuid.equals("161236AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) { // routine
+        } else if (conceptUuid.trim().equalsIgnoreCase("161236AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) { // routine
             code = 1;
-        } else if (conceptUuid.equals("160032AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) { // confirmation of persistent low viremia
+        } else if (conceptUuid.trim().equalsIgnoreCase("160032AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) { // confirmation of persistent low viremia
             code = 6;
-        } else if (conceptUuid.equals("163523AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) { // Recency
+        } else if (conceptUuid.trim().equalsIgnoreCase("163523AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) { // Recency
             code = 7;
-        } else if (conceptUuid.equals("f87f344a-62de-45ac-9cc0-b5bed81c289e")) { // PMTCT KP
+        } else if (conceptUuid.trim().equalsIgnoreCase("f87f344a-62de-45ac-9cc0-b5bed81c289e")) { // PMTCT KP
             code = 9;
-        } else if (conceptUuid.equals("bb9780b3-4f44-42fd-9e94-3958d36d106f")) { // 1ST VL
+        } else if (conceptUuid.trim().equalsIgnoreCase("bb9780b3-4f44-42fd-9e94-3958d36d106f")) { // 1ST VL
             code = 10;
-        } else if (conceptUuid.equals("167391AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) { // Follow up
+        } else if (conceptUuid.trim().equalsIgnoreCase("167391AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) { // Follow up
             code = 11;
-        } else if (conceptUuid.equals("e299c5c6-5dc7-4977-9b9a-516252d4d582")) { //  Repeat VL after 3rd EAC
+        } else if (conceptUuid.trim().equalsIgnoreCase("e299c5c6-5dc7-4977-9b9a-516252d4d582")) { //  Repeat VL after 3rd EAC
             code = 12;
         }
 
