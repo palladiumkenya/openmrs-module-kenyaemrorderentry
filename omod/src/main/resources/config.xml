@@ -341,9 +341,33 @@
 
 	<globalProperty>
 		<property>kemrorder.labsystem_identifier</property>
-		<defaultValue></defaultValue>
+		<defaultValue>LABWARE</defaultValue>
 		<description>
 			The name of the lab system in use. Accepted options are CHAI,LABWARE,EDARP. Please note these are case sensitive
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>kemrorder.vl.labsystem_identifier</property>
+		<defaultValue>LABWARE</defaultValue>
+		<description>
+			The name of the VL lab system in use. Accepted options are CHAI,LABWARE,EDARP. Please note these are case sensitive
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>kemrorder.eid.labsystem_identifier</property>
+		<defaultValue>LABWARE</defaultValue>
+		<description>
+			The name of the EID lab system in use. Accepted options are CHAI,LABWARE,EDARP. Please note these are case sensitive
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>kemrorder.flu.labsystem_identifier</property>
+		<defaultValue>LABWARE</defaultValue>
+		<description>
+			The name of the FLU lab system in use. Accepted options are CHAI,LABWARE,EDARP. Please note these are case sensitive
 		</description>
 	</globalProperty>
 

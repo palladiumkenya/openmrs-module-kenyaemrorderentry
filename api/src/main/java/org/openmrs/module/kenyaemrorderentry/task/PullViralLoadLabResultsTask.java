@@ -48,25 +48,6 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
 
                 LabWebRequest labSystemConnectionRequest;
 
-                if (LabOrderDataExchange.getSystemType() == ModuleConstants.CHAI_SYSTEM) {
-                    // System.out.println("Order Entry: Using CHAI System");
-                    labSystemConnectionRequest = new ChaiSystemWebRequest();
-                } else if (LabOrderDataExchange.getSystemType() == ModuleConstants.LABWARE_SYSTEM){
-                    // System.out.println("Order Entry: Using LABWARE System");
-                    labSystemConnectionRequest = new LabwareSystemWebRequest();
-                } else if (LabOrderDataExchange.getSystemType() == ModuleConstants.EDARP_SYSTEM){
-                    // System.out.println("Order Entry: Using EDARP System");
-                    labSystemConnectionRequest = new EdarpSystemWebRequest();
-                } else {
-                    System.out.println("LAB GET: No lab system has been configured. Please configure the global properties");
-                    return;
-                }
-
-//                if (!labSystemConnectionRequest.checkRequirements()) {
-//                    System.out.println("LAB GET: Failed to satisfy requirements for pulling samples. Please configure appropriate global properties for your facility");
-//                    return;
-//                }
-
                 GlobalProperty gpLastProcessedManifest = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_MANIFEST_LAST_PROCESSED);
                 GlobalProperty gpRetryPeriodForIncompleteResults = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_RETRY_PERIOD_FOR_ORDERS_WITH_INCOMPLETE_RESULTS);
                 GlobalProperty gpLabTatForVlResults = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_LAB_TAT_FOR_VL_RESULTS);
@@ -203,6 +184,22 @@ public class PullViralLoadLabResultsTask extends AbstractTask {
                 for (LabManifestOrder manifestOrder : ordersWithPendingResults) {
                     orderIds.add(manifestOrder.getOrder().getOrderId());
                     manifestOrderIds.add(manifestOrder.getId());
+                }
+
+                int manifestType = manifestToUpdateResults.getManifestType();
+
+                if (LabOrderDataExchange.getSystemType(manifestType) == ModuleConstants.CHAI_SYSTEM) {
+                    // System.out.println("Order Entry: Using CHAI System");
+                    labSystemConnectionRequest = new ChaiSystemWebRequest();
+                } else if (LabOrderDataExchange.getSystemType(manifestType) == ModuleConstants.LABWARE_SYSTEM){
+                    // System.out.println("Order Entry: Using LABWARE System");
+                    labSystemConnectionRequest = new LabwareSystemWebRequest();
+                } else if (LabOrderDataExchange.getSystemType(manifestType) == ModuleConstants.EDARP_SYSTEM){
+                    // System.out.println("Order Entry: Using EDARP System");
+                    labSystemConnectionRequest = new EdarpSystemWebRequest();
+                } else {
+                    System.out.println("LAB GET: No lab system has been configured. Please configure the global properties");
+                    return;
                 }
 
                 // Pull Lab Results

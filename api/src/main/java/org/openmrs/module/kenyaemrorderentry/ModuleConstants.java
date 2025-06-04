@@ -45,6 +45,11 @@ public class ModuleConstants {
     public static final String LAB_SYSTEM_DATE_PATTERN = "yyyy-MM-dd";
     public static final String GP_LAB_SYSTEM_IN_USE = "kemrorder.labsystem_identifier";
 
+    // LAB SYSTEM (Different for VL, EID, FLU)
+    public static final String GP_VL_LAB_SYSTEM_IN_USE = "kemrorder.vl.labsystem_identifier";
+    public static final String GP_EID_LAB_SYSTEM_IN_USE = "kemrorder.eid.labsystem_identifier";
+    public static final String GP_FLU_LAB_SYSTEM_IN_USE = "kemrorder.flu.labsystem_identifier";
+
     //EID
     public static final String ENABLE_EID_FUNCTION = "enable_orderentry_manifest_eid_function";
 
@@ -75,6 +80,9 @@ public class ModuleConstants {
     public static final String GP_EXPRESS_PAYMENT_METHODS = "kenyaemrorderentry.facilitywidelims.expressPaymentMethods";
     public static final String VISIT_ATTRIBUTE_PAYMENT_METHOD_UUID = "e6cb0c3b-04b0-4117-9bc6-ce24adbda802";
 
-
-
+    // Manifest Types e.g VL, EID, FLU etc
+    // public static final int NO_MANIFEST_TYPE_CONFIGURED = 0;
+    // public static final int MANIFEST_TYPE_EID = 1;
+    // public static final int MANIFEST_TYPE_VL = 2;
+    // public static final int MANIFEST_TYPE_FLU = 3;
 }

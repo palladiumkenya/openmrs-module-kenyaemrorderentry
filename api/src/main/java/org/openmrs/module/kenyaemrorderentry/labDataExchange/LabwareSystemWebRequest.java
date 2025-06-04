@@ -80,10 +80,12 @@ public class LabwareSystemWebRequest extends LabWebRequest {
         String FLUServerPullUrl = gpFLUServerPullUrl.getPropertyValue();
         String FLUApiToken = gpFLUApiToken.getPropertyValue();
 
-        if ((toProcess.getManifestType() == LabManifest.VL_TYPE && (StringUtils.isBlank(VLServerPushUrl) || StringUtils.isBlank(VLServerPullUrl) || StringUtils.isBlank(VLApiToken)))
-                || (toProcess.getManifestType() == LabManifest.EID_TYPE && (StringUtils.isBlank(EIDServerPushUrl) || StringUtils.isBlank(EIDServerPullUrl) || StringUtils.isBlank(EIDApiToken)))
-                || (toProcess.getManifestType() == LabManifest.FLU_TYPE && (StringUtils.isBlank(FLUServerPushUrl) || StringUtils.isBlank(FLUServerPullUrl) || StringUtils.isBlank(FLUApiToken)))
-                || LabOrderDataExchange.getSystemType() == ModuleConstants.NO_SYSTEM_CONFIGURED
+        Integer manifestType = toProcess.getManifestType();
+
+        if ((manifestType == LabManifest.VL_TYPE && (StringUtils.isBlank(VLServerPushUrl) || StringUtils.isBlank(VLServerPullUrl) || StringUtils.isBlank(VLApiToken)))
+                || (manifestType == LabManifest.EID_TYPE && (StringUtils.isBlank(EIDServerPushUrl) || StringUtils.isBlank(EIDServerPullUrl) || StringUtils.isBlank(EIDApiToken)))
+                || (manifestType == LabManifest.FLU_TYPE && (StringUtils.isBlank(FLUServerPushUrl) || StringUtils.isBlank(FLUServerPullUrl) || StringUtils.isBlank(FLUApiToken)))
+                || LabOrderDataExchange.getSystemType(manifestType) == ModuleConstants.NO_SYSTEM_CONFIGURED
         ) {
             System.err.println("Labware Lab Results: Please set credentials for posting lab requests to the labware system");
             return false;
@@ -543,7 +545,6 @@ public class LabwareSystemWebRequest extends LabWebRequest {
         ObjectNode node = baselinePostRequestPayload(order, dateSampleCollected, dateSampleSeparated, sampleType, manifestID);
 
         if (!node.isEmpty()) {
-
             if (getManifestType() == LabManifest.FLU_TYPE) {
                 // Any custom payload for LABWARE FLU
             } else {
@@ -556,15 +557,7 @@ public class LabwareSystemWebRequest extends LabWebRequest {
                 node.put("recency_id", "");
                 node.put("emr_shipment", StringUtils.isNotBlank(manifestID) ? manifestID : "");
                 node.put("date_separated", Utils.getSimpleDateFormat("yyyy-MM-dd").format(dateSampleSeparated));
-
-
-                // node.put("mfl_code", Utils.getDefaultLocationMflCode(Utils.getDefaultLocation()));
-                if (order.getPatient().getGender().equals("F")) {
-                    node.put("female_status", "none");
-                }
             }
-
-            // System.out.println("Order Entry: Using LABWARE System payload: " + node.toPrettyString());
         }
 
         return node;
