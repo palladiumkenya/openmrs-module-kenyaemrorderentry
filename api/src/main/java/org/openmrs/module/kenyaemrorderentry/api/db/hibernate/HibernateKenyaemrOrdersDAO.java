@@ -27,6 +27,9 @@ import org.hibernate.exception.DataException;
 import org.hibernate.transform.Transformers;
 import org.openmrs.Cohort;
 import org.openmrs.Order;
+import org.openmrs.Patient;
+import org.openmrs.PatientIdentifier;
+import org.openmrs.PersonName;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.db.DAOException;
 import org.openmrs.module.kenyaemrorderentry.api.db.KenyaemrOrdersDAO;
@@ -860,8 +863,8 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
     }
 
     @Override
-	public List<LabManifest> getLabManifests(String uuid, String status, String type, String withErrors, Date createdOnOrAfterDate, Date createdOnOrBeforeDate) {
-		System.err.println("Searching for manifests using: " + uuid + " : " + status + " : " + type  + " : " + withErrors + " : " + createdOnOrAfterDate + " : " + createdOnOrBeforeDate + " : ");
+	public List<LabManifest> getLabManifests(String uuid, String status, String type, String withErrors, String query, Date createdOnOrAfterDate, Date createdOnOrBeforeDate) {
+		System.err.println("Searching for manifests using: " + uuid + " : " + status + " : " + type  + " : " + withErrors + " : " + query + " : " + createdOnOrAfterDate + " : " + createdOnOrBeforeDate + " : ");
 
         Session session = this.sessionFactory.getCurrentSession();
         CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
@@ -922,6 +925,44 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
             }
         }
 
+        // Query
+        if(query != null && !query.isEmpty()) {
+            // Join LabManifest with LabManifestOrder
+            Join<LabManifest, LabManifestOrder> LabManifestOrderJoin = root.join("labManifestOrders");
+
+            // Join: LabManifestOrder -> Order
+            Join<LabManifestOrder, Order> orderJoin = LabManifestOrderJoin.join("order");
+
+            // Join: Order -> Patient
+            Join<Order, Patient> patientJoin = orderJoin.join("patient");
+
+            // Join: Patient -> names
+            Join<Patient, PersonName> nameJoin = patientJoin.join("names");
+
+            // Join: Patient -> identifiers
+            Join<Patient, PatientIdentifier> identifierJoin = patientJoin.join("identifiers");
+
+            // Lowercase search input
+            String searchTerm = query.trim().toLowerCase();
+            searchTerm = "%" + searchTerm +"%";
+
+            // Predicate: match givenName, middleName, or familyName
+            Predicate namePredicate = criteriaBuilder.or(
+                criteriaBuilder.like(criteriaBuilder.lower(nameJoin.get("givenName")), searchTerm),
+                criteriaBuilder.like(criteriaBuilder.lower(nameJoin.get("middleName")), searchTerm),
+                criteriaBuilder.like(criteriaBuilder.lower(nameJoin.get("familyName")), searchTerm)
+            );
+
+            // Predicate: match identifier
+            Predicate identifierPredicate = criteriaBuilder.like(criteriaBuilder.lower(identifierJoin.get("identifier")), searchTerm);
+
+            // Final combined predicate: match either name or identifier
+            Predicate finalPredicate = criteriaBuilder.or(namePredicate, identifierPredicate);
+
+            // Add to final query
+            predicate = criteriaBuilder.and(predicate, finalPredicate);
+        }
+
         // createdOnOrAfterDate
         if(createdOnOrAfterDate != null) {
             Path<Date> datePath = root.get("dateCreated");
@@ -940,8 +981,8 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
         criteriaQuery.where(predicate).distinct(true);
 
         // Print the generated SQL query
-        Query query = session.createQuery(criteriaQuery);
-        String sqlQuery = query.unwrap(org.hibernate.query.Query.class).getQueryString();
+        Query corequery = session.createQuery(criteriaQuery);
+        String sqlQuery = corequery.unwrap(org.hibernate.query.Query.class).getQueryString();
         System.out.println("Generated SQL Query: " + sqlQuery);
 
         List<LabManifest> results = session.createQuery(criteriaQuery).getResultList();
@@ -1001,6 +1042,130 @@ public class HibernateKenyaemrOrdersDAO implements KenyaemrOrdersDAO {
             return (LimsQueue) criteria.list().get(0);
         }
         return null;
+    }
+
+    @Override
+    public List<LabManifestOrder> getLabManifestOrders(String uuid, String manifestuuid, String status, String type, String withError,
+            String query, Date createdOnOrAfterDate, Date createdOnOrBeforeDate) {
+        System.err.println("Searching for manifest orders using: " + uuid + " : " + status + " : " + type  + " : " + withError + " : " + query + " : " + createdOnOrAfterDate + " : " + createdOnOrBeforeDate + " : ");
+
+        Session session = this.sessionFactory.getCurrentSession();
+        CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
+        CriteriaQuery<LabManifestOrder> criteriaQuery = criteriaBuilder.createQuery(LabManifestOrder.class);
+        Root<LabManifestOrder> root = criteriaQuery.from(LabManifestOrder.class);
+
+        // Create predicates for the restrictions
+        Predicate predicate = criteriaBuilder.conjunction();
+
+        // uuid
+        if(uuid != null && !uuid.isEmpty()) {
+            predicate = criteriaBuilder.and(predicate, criteriaBuilder.equal(root.get("uuid"), uuid));           
+        }
+
+        // manifestuuid
+        if(manifestuuid != null && !manifestuuid.isEmpty()) {
+            // Join LabManifestOrder with LabManifest
+            Join<LabManifestOrder, LabManifest> orderJoin = root.join("labManifest");
+            
+            // Add to final query
+            Predicate completePredicate = criteriaBuilder.equal(orderJoin.get("uuid"), manifestuuid);
+            predicate = criteriaBuilder.and(predicate, completePredicate);
+        }
+
+        // status
+        if(status != null && !status.isEmpty()) {
+            predicate = criteriaBuilder.and(predicate, criteriaBuilder.equal(root.get("status"), status));
+        }
+
+        // sample type
+        if(type != null && !type.isEmpty()) {
+            predicate = criteriaBuilder.and(predicate, criteriaBuilder.equal(root.get("sampleType"), type));
+        }
+
+        // withErrors
+        if(withError != null && !withError.isEmpty()) {
+            System.out.println("Got with errors query");
+            if(withError.trim().equalsIgnoreCase("true")) {
+                System.out.println("withError is true");
+                // Create conditions
+                Predicate completePredicate = criteriaBuilder.equal(root.get("status"), "Complete");
+                Predicate pendingPredicate = criteriaBuilder.equal(root.get("status"), "Pending");
+                Predicate sentPredicate = criteriaBuilder.equal(root.get("status"), "Sent");
+                // Combine the conditions using OR
+                Predicate noErrorCondition = criteriaBuilder.or(completePredicate, pendingPredicate, sentPredicate);
+                predicate = criteriaBuilder.and(predicate, criteriaBuilder.not(noErrorCondition));
+            } else if(withError.trim().equalsIgnoreCase("false")) {
+                System.out.println("withError is false");
+                // Create conditions
+                Predicate completePredicate = criteriaBuilder.equal(root.get("status"), "Complete");
+                Predicate pendingPredicate = criteriaBuilder.equal(root.get("status"), "Pending");
+                Predicate sentPredicate = criteriaBuilder.equal(root.get("status"), "Sent");
+                // Combine the conditions using OR
+                Predicate noErrorCondition = criteriaBuilder.or(completePredicate, pendingPredicate, sentPredicate);
+                predicate = criteriaBuilder.and(predicate, noErrorCondition);
+            }
+        }
+
+        // query
+        if(query != null && !query.isEmpty()) {
+            // Join: LabManifestOrder -> Order
+            Join<LabManifestOrder, Order> orderJoin = root.join("order");
+
+            // Join: Order -> Patient
+            Join<Order, Patient> patientJoin = orderJoin.join("patient");
+
+            // Join: Patient -> names
+            Join<Patient, PersonName> nameJoin = patientJoin.join("names");
+
+            // Join: Patient -> identifiers
+            Join<Patient, PatientIdentifier> identifierJoin = patientJoin.join("identifiers");
+
+            // Lowercase search input
+            String searchTerm = query.trim().toLowerCase();
+            searchTerm = "%" + searchTerm +"%";
+
+            // Predicate: match givenName, middleName, or familyName
+            Predicate namePredicate = criteriaBuilder.or(
+                criteriaBuilder.like(criteriaBuilder.lower(nameJoin.get("givenName")), searchTerm),
+                criteriaBuilder.like(criteriaBuilder.lower(nameJoin.get("middleName")), searchTerm),
+                criteriaBuilder.like(criteriaBuilder.lower(nameJoin.get("familyName")), searchTerm)
+            );
+
+            // Predicate: match identifier
+            Predicate identifierPredicate = criteriaBuilder.like(criteriaBuilder.lower(identifierJoin.get("identifier")), searchTerm);
+
+            // Final combined predicate: match either name or identifier
+            Predicate finalPredicate = criteriaBuilder.or(namePredicate, identifierPredicate);
+
+            // Add to final query
+            predicate = criteriaBuilder.and(predicate, finalPredicate);
+        }
+
+        // createdOnOrAfterDate
+        if(createdOnOrAfterDate != null) {
+            Path<Date> datePath = root.get("dateCreated");
+
+            predicate = criteriaBuilder.and(predicate, criteriaBuilder.greaterThanOrEqualTo(datePath, createdOnOrAfterDate));
+        }
+
+        // createdOnOrBeforeDate
+        if(createdOnOrBeforeDate != null) {
+            Path<Date> datePath = root.get("dateCreated");
+
+            predicate = criteriaBuilder.and(predicate, criteriaBuilder.lessThanOrEqualTo(datePath, createdOnOrBeforeDate));
+        }
+
+        // criteriaQuery.where(predicate);
+        criteriaQuery.where(predicate).distinct(true);
+
+        // Print the generated SQL query
+        Query corequery = session.createQuery(criteriaQuery);
+        String sqlQuery = corequery.unwrap(org.hibernate.query.Query.class).getQueryString();
+        System.out.println("Generated SQL Query: " + sqlQuery);
+
+        List<LabManifestOrder> results = session.createQuery(criteriaQuery).getResultList();
+
+        return(results);
     }
 
 }

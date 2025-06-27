@@ -1,7 +1,9 @@
 package org.openmrs.module.kenyaemrorderentry.web.resource;
 
 import java.util.Date;
+import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.openmrs.Order;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.api.context.Context;
@@ -14,6 +16,7 @@ import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabWebRequest;
 import org.openmrs.module.kenyaemrorderentry.labDataExchange.LabwareSystemWebRequest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifest;
 import org.openmrs.module.kenyaemrorderentry.manifest.LabManifestOrder;
+import org.openmrs.module.webservices.rest.web.ConversionUtil;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.annotation.Resource;
@@ -22,6 +25,7 @@ import org.openmrs.module.webservices.rest.web.representation.FullRepresentation
 import org.openmrs.module.webservices.rest.web.representation.RefRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.resource.api.PageableResult;
+import org.openmrs.module.webservices.rest.web.resource.impl.AlreadyPaged;
 import org.openmrs.module.webservices.rest.web.resource.impl.DataDelegatingCrudResource;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging;
@@ -131,7 +135,7 @@ public class LabManifestOrderResource extends DataDelegatingCrudResource<LabMani
             description.addProperty("uuid");
             description.addProperty("id");
             description.addProperty("labManifest", Representation.REF);
-            description.addProperty("order", Representation.REF);
+            description.addProperty("order", Representation.FULL);
             description.addProperty("sampleType");
             description.addProperty("payload");
             description.addProperty("dateSent");
@@ -182,5 +186,29 @@ public class LabManifestOrderResource extends DataDelegatingCrudResource<LabMani
         description.addProperty("status");
         return description;
     }
+
+    /**
+     * Search for manifest orders using uuid, sample status, sample type, with error, date created
+     * The query (q) searches in these fields: patient names, patient identifiers, 
+     */
+    @Override
+	protected AlreadyPaged<LabManifestOrder> doSearch(RequestContext context) {
+		String uuid = context.getRequest().getParameter("uuid");
+        String manifestuuid = context.getRequest().getParameter("manifestuuid");
+		String status = context.getRequest().getParameter("status");
+        String type = context.getRequest().getParameter("type");
+        String withError = context.getRequest().getParameter("withError");
+        String query = context.getParameter("q");
+		String createdOnOrBeforeDateStr = context.getRequest().getParameter("createdOnOrBefore");
+		String createdOnOrAfterDateStr = context.getRequest().getParameter("createdOnOrAfter");       
+
+		Date createdOnOrBeforeDate = StringUtils.isNotBlank(createdOnOrBeforeDateStr) ? (Date) ConversionUtil.convert(createdOnOrBeforeDateStr, Date.class) : null;
+		Date createdOnOrAfterDate = StringUtils.isNotBlank(createdOnOrAfterDateStr) ? (Date) ConversionUtil.convert(createdOnOrAfterDateStr, Date.class) : null;
+
+		KenyaemrOrdersService service = Context.getService(KenyaemrOrdersService.class);
+
+		List<LabManifestOrder> result = service.getLabManifestOrders(uuid, manifestuuid, status, type, withError, query, createdOnOrAfterDate, createdOnOrBeforeDate);
+		return new AlreadyPaged<LabManifestOrder>(context, result, false);
+	}
 
 }

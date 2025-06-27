@@ -495,13 +495,20 @@ public class KenyaemrOrdersServiceImpl extends BaseOpenmrsService implements Ken
     }
 
 	@Override
-	public List<LabManifest> getLabManifests(String uuid, String status, String type, String withErrors, Date createdOnOrAfterDate, Date createdOnOrBeforeDate) {
-        return dao.getLabManifests(uuid, status, type, withErrors, createdOnOrAfterDate, createdOnOrBeforeDate);
+	public List<LabManifest> getLabManifests(String uuid, String status, String type, String withErrors, String query, Date createdOnOrAfterDate, Date createdOnOrBeforeDate) {
+        return dao.getLabManifests(uuid, status, type, withErrors, query, createdOnOrAfterDate, createdOnOrBeforeDate);
 	}
 
     @Override
     public List<LimsQueue> getLimsQueueEntriesByStatus(LimsQueueStatus status, Date createdOnOrAfterDate, Date createdOnOrBeforeDate, boolean filterOrdersOnly) {
         return dao.getLimsQueueEntriesByStatus(status, createdOnOrAfterDate, createdOnOrBeforeDate, filterOrdersOnly);
+    }
+
+    @Override
+    public List<LabManifestOrder> getLabManifestOrders(String uuid, String manifestuuid, String status, String type, String withError,
+            String query, Date createdOnOrAfterDate, Date createdOnOrBeforeDate) {
+        return dao.getLabManifestOrders(uuid, manifestuuid, status, type, withError,
+            query, createdOnOrAfterDate, createdOnOrBeforeDate);
     }
 
 }
