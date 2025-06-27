@@ -36,8 +36,9 @@ public interface KenyaemrOrdersService extends OpenmrsService {
     List<LabManifest> getLabOrderManifestBetweenDates(Date startDate, Date endDate);
     void voidLabOrderManifest(Integer id);
 
-    List<LabManifest> getLabManifests(String uuid, String status, String type, String withErrors, Date createdOnOrAfterDate, Date createdOnOrBeforeDate);
+    List<LabManifest> getLabManifests(String uuid, String status, String type, String withErrors, String query, Date createdOnOrAfterDate, Date createdOnOrBeforeDate);
     List<LimsQueue> getLimsQueueEntriesByStatus(LimsQueueStatus status, Date createdOnOrAfterDate, Date createdOnOrBeforeDate, boolean filterOrdersOnly);
+    List<LabManifestOrder> getLabManifestOrders(String uuid, String manifestuuid, String status, String type, String withError, String query, Date createdOnOrAfterDate, Date createdOnOrBeforeDate);
 
     //Methods for manifest orders
     LabManifestOrder saveLabManifestOrder(LabManifestOrder labManifestOrder);
