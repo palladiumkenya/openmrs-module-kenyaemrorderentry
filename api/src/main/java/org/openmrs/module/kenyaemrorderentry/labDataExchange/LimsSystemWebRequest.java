@@ -76,7 +76,12 @@ public class LimsSystemWebRequest {
             System.out.println("LIMS-EMR mapping configuration is missing or invalid!");
             return payload;
         }
+		System.out.println("Generating Lims Payload: ");
+		System.out.println("Order ID: " + order.getOrderId());
+		System.out.println("Concept ID: " + order.getConcept().getConceptId());
+		System.out.println("Mapping"+mapping);
         ObjectNode testConceptMapping = (ObjectNode) mapping.get(order.getConcept().getUuid());
+		System.out.println("Mapping Concept: "+testConceptMapping);
         if (testConceptMapping == null) {
             System.out.println("LIMS-EMR mapping: No mapping found for order concept: " + order.getConcept().getId());
             return payload;
@@ -86,6 +91,7 @@ public class LimsSystemWebRequest {
 
         // assign labTestId as test code from mapper. We want to fail early if there is no mapping for the order
         labTestId = testConceptMapping.has(LAB_TEST_CODE_PROPERTY)? testConceptMapping.get(LAB_TEST_CODE_PROPERTY).asText() : null;
+		System.out.println("Lab Test ID: "+labTestId);
         if (StringUtils.isBlank(labTestId)) {
             System.out.println("LIMS-EMR mapping: Test code not found for the order concept: " + order.getConcept().getId());
             return payload;

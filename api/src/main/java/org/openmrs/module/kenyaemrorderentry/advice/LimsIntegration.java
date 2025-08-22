@@ -39,6 +39,7 @@ public class LimsIntegration implements AfterReturningAdvice {
         String limsIntegrationEnabled = "";
         GlobalProperty enableLimsIntegration = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_ENABLE_LIMS_INTEGRATION);
         limsIntegrationEnabled = enableLimsIntegration.getPropertyValue().trim();
+		System.out.println("Lims Integration Status: " + limsIntegrationEnabled);
         if (limsIntegrationEnabled.equalsIgnoreCase("false")) {
             return;
         } else if (limsIntegrationEnabled.equalsIgnoreCase("true")) {
@@ -61,9 +62,9 @@ public class LimsIntegration implements AfterReturningAdvice {
 
                         LimsSystemWebRequest limsSystemWebRequest = new LimsSystemWebRequest();
                         JSONObject limsPayload = limsSystemWebRequest.generateLIMSpostPayload(order);
-
+						System.out.println("Generating Lims Payload: ");
                         if (!limsPayload.isEmpty()) {
-
+							System.out.println("Lims Payload: " + limsPayload.toJSONString());
                             KenyaemrOrdersService service = Context.getService(KenyaemrOrdersService.class);
                             LimsQueue limsQueue = new LimsQueue();
                             limsQueue.setDateSent(new Date());
