@@ -485,5 +485,29 @@
 			<column name="uuid" value="69f82c72-43ac-46f0-ac35-8d9b71599700" />
 		</insert>
 	</changeSet>
+	<!--Adding scheduled task to push lab results to LIMS Labware system-->
+	<changeSet id="kenyaemr_order_entry_push_lims_test_202508221250" author="pwangoo">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="0">
+				SELECT COUNT(*) FROM scheduler_task_config
+				WHERE schedulable_class = 'org.openmrs.module.kenyaemrorderentry.task.FacilityBasedLimsIntegrationTask'
+				  And name = 'Push Lab Results to LIMS'
+			</sqlCheck>
+		</preConditions>
+		<comment>Inserting processor for pushing lims lab tests into 'schedule_task_config' table</comment>
+		<insert tableName="scheduler_task_config">
+			<column name="name" value="Push Lab Results to LIMS" />
+			<column name="description" value="Push Lab Results to LIMs lab system" />
+			<column name="schedulable_class" value="org.openmrs.module.kenyaemrorderentry.task.FacilityBasedLimsIntegrationTask" />
+			<column name="start_time_pattern" value="MM/dd/yyyy HH:mm:ss" />
+			<column name="start_time" valueDate="2025-08-22T08:59:59" />
+			<column name="repeat_interval" value="1800" />
+			<column name="date_created" valueDate="CURRENT_TIMESTAMP" />
+			<column name="created_by" value="1" />
+			<column name="start_on_startup" value="0" />
+			<column name="started" value="0" />
+			<column name="uuid" value="4095348b-d158-45e6-b1d2-698437f9f1d6" />
+		</insert>
+	</changeSet>
 
 </databaseChangeLog>
