@@ -98,15 +98,15 @@ public abstract class LabWebRequest {
                     return test;
                 }
             }
+			String regimenLine = "";
+			String regimenName = "";
             Encounter originalRegimenEncounter = RegimenMappingUtils.getFirstEncounterForProgram(patient, "ARV");
             Encounter currentRegimenEncounter = RegimenMappingUtils.getLastEncounterForProgram(patient, "ARV");
-            if (currentRegimenEncounter == null) {
-                return test;
-            }
-
-            SimpleObject regimenDetails = RegimenMappingUtils.buildRegimenChangeObject(currentRegimenEncounter.getObs(), currentRegimenEncounter);
-            String regimenName = (String) regimenDetails.get("regimenShortDisplay");
-            String regimenLine = (String) regimenDetails.get("regimenLine");
+            if (currentRegimenEncounter != null) {
+				SimpleObject regimenDetails = RegimenMappingUtils.buildRegimenChangeObject(currentRegimenEncounter.getObs(), currentRegimenEncounter);
+				regimenName = (String) regimenDetails.get("regimenShortDisplay");
+				regimenLine = (String) regimenDetails.get("regimenLine");
+			}
             String nascopCode = "";
             if (StringUtils.isNotBlank(regimenName )) {
                 nascopCode = RegimenMappingUtils.getDrugNascopCodeByDrugNameAndRegimenLine(regimenName, regimenLine);
@@ -114,10 +114,6 @@ public abstract class LabWebRequest {
 
             if (StringUtils.isBlank(nascopCode) && StringUtils.isNotBlank(regimenLine)) {
                 nascopCode = RegimenMappingUtils.getNonStandardCodeFromRegimenLine(regimenLine);
-            }
-
-            if (StringUtils.isBlank(nascopCode)) {
-                return test;
             }
 
             test.put("dob", dob);
