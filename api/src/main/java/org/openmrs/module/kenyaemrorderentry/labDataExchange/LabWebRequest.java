@@ -63,7 +63,7 @@ public abstract class LabWebRequest {
         Patient patient = o.getPatient();
         ObjectNode test = Utils.getJsonNodeFactory().objectNode();
         String kdod = "";
-
+	    String orderReasonCode = o.getOrderReason() != null ? getOrderReasonCode(o.getOrderReason().getUuid()) : "";
         String dob = patient.getBirthdate() != null ? Utils.getSimpleDateFormat("yyyy-MM-dd").format(patient.getBirthdate()) : "";
         PatientIdentifier cccNumber = patient.getPatientIdentifier(Utils.getUniquePatientNumberIdentifierType());
         if(isKDoD.trim().equalsIgnoreCase("true")) {
@@ -98,15 +98,15 @@ public abstract class LabWebRequest {
                     return test;
                 }
             }
+			String regimenLine = "";
+			String regimenName = "";
             Encounter originalRegimenEncounter = RegimenMappingUtils.getFirstEncounterForProgram(patient, "ARV");
             Encounter currentRegimenEncounter = RegimenMappingUtils.getLastEncounterForProgram(patient, "ARV");
-            if (currentRegimenEncounter == null) {
-                return test;
-            }
-
-            SimpleObject regimenDetails = RegimenMappingUtils.buildRegimenChangeObject(currentRegimenEncounter.getObs(), currentRegimenEncounter);
-            String regimenName = (String) regimenDetails.get("regimenShortDisplay");
-            String regimenLine = (String) regimenDetails.get("regimenLine");
+            if (currentRegimenEncounter != null) {
+				SimpleObject regimenDetails = RegimenMappingUtils.buildRegimenChangeObject(currentRegimenEncounter.getObs(), currentRegimenEncounter);
+				regimenName = (String) regimenDetails.get("regimenShortDisplay");
+				regimenLine = (String) regimenDetails.get("regimenLine");
+			}
             String nascopCode = "";
             if (StringUtils.isNotBlank(regimenName )) {
                 nascopCode = RegimenMappingUtils.getDrugNascopCodeByDrugNameAndRegimenLine(regimenName, regimenLine);
@@ -115,11 +115,14 @@ public abstract class LabWebRequest {
             if (StringUtils.isBlank(nascopCode) && StringUtils.isNotBlank(regimenLine)) {
                 nascopCode = RegimenMappingUtils.getNonStandardCodeFromRegimenLine(regimenLine);
             }
-
-            if (StringUtils.isBlank(nascopCode)) {
-                return test;
-            }
-
+		//For PMTCT NP handle missing variables of ART start date, Regimen and Regimen line - PMTCT Recency testing
+			if(orderReasonCode != null && !orderReasonCode.trim().equalsIgnoreCase("8")) {
+				if(originalRegimenEncounter == null || StringUtils.isBlank(nascopCode) || StringUtils.isBlank(regimenLine)) {
+					System.out.println("Missing regimen  or regimen line in order for : "+ fullName);
+					return test;
+				}
+			} 	
+			
             test.put("dob", dob);
             test.put("sex", patient.getGender().equals("M") ? "1" : patient.getGender().equals("F") ? "2" : "3");
             test.put("order_no", o.getOrderId().toString());
