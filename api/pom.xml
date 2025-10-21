@@ -151,6 +151,15 @@
 			<groupId>org.openmrs.module</groupId>
 			<artifactId>kenyaemr.cashier-api</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.openmrs.api</groupId>
+			<artifactId>openmrs-api</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.googlecode.json-simple</groupId>
+			<artifactId>json-simple</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
